@@ -1,17 +1,15 @@
 {{- $fullName := include "api.fullname" . -}}
-{{- $name := "php" -}}
+{{- $name := "fixtures" -}}
 {{- $data := dict "name" $name "Chart" .Chart "Release" .Release "Values" .Values -}}
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: {{ $fullName }}-{{ $name }}
   labels:
     {{- include "api.labels" $data | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
 spec:
-  replicas: {{ .Values.php.replicaCount }}
-  selector:
-    matchLabels:
-      {{- include "api.selectorLabels" $data | nindent 6 }}
   template:
     metadata:
       labels:
@@ -24,10 +22,13 @@ spec:
       serviceAccountName: {{ include "api.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      restartPolicy: Never
       containers:
         - name: {{ .Chart.Name }}-{{ $name }}
           image: "{{ .Values.php.image.repository }}:{{ .Values.php.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.php.image.pullPolicy }}
+          command: ['/bin/sh', '-c']
+          args: ['composer install --prefer-dist --no-progress --no-suggest --no-interaction && bin/console doctrine:schema:update --force --no-interaction && bin/console hautelook:fixtures:load --no-interaction']
           env:
             - name: TRUSTED_HOSTS
               valueFrom:
@@ -40,10 +41,7 @@ spec:
                   name: {{ $fullName }}
                   key: trusted-proxies
             - name: APP_ENV
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ $fullName }}
-                  key: env
+              value: 'dev'
             - name: APP_DEBUG
               valueFrom:
                 configMapKeyRef:
@@ -108,14 +106,6 @@ spec:
                   key: api-entrypoint-host
             - name: API_ENTRYPOINT_PORT
               value: "443"
-          ports:
-            - containerPort: 9000
-          readinessProbe:
-            tcpSocket:
-              port: 9000
-          livenessProbe:
-            tcpSocket:
-              port: 9000
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

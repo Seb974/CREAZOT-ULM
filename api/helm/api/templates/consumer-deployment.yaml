@@ -1,5 +1,5 @@
 {{- $fullName := include "api.fullname" . -}}
-{{- $name := "php" -}}
+{{- $name := "consumer" -}}
 {{- $data := dict "name" $name "Chart" .Chart "Release" .Release "Values" .Values -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -27,6 +27,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}-{{ $name }}
           image: "{{ .Values.php.image.repository }}:{{ .Values.php.image.tag | default .Chart.AppVersion }}"
+          args: ['bin/console', 'messenger:consume']
           imagePullPolicy: {{ .Values.php.image.pullPolicy }}
           env:
             - name: TRUSTED_HOSTS
@@ -111,11 +112,11 @@ spec:
           ports:
             - containerPort: 9000
           readinessProbe:
-            tcpSocket:
-              port: 9000
+            exec:
+              command: ['ps', 'aux', '|', 'egrep', '"\d+:\d+ php bin/console messenger:consume"']
           livenessProbe:
-            tcpSocket:
-              port: 9000
+            exec:
+              command: ['ps', 'aux', '|', 'egrep', '"\d+:\d+ php bin/console messenger:consume"']
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
