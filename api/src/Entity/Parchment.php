@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * @deprecated create a Book instead
  */
-#[ApiResource(deprecationReason: 'Create a Book instead')]
+// #[ApiResource(deprecationReason: 'Create a Book instead')]
 #[ORM\Entity]
 class Parchment
 {

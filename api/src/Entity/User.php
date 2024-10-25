@@ -28,14 +28,17 @@ use Symfony\Component\Uid\Uuid;
     types: ['https://schema.org/Person'],
     operations: [
         new GetCollection(
-            uriTemplate: '/admin/users{._format}',
-            itemUriTemplate: '/admin/users/{id}{._format}',
+            // uriTemplate: '/admin/users{._format}',
+            // itemUriTemplate: '/admin/users/{id}{._format}',
+            uriTemplate: '/users{._format}',
+            itemUriTemplate: '/users/{id}{._format}',
             security: 'is_granted("OIDC_ADMIN")',
             filters: ['app.filter.user.admin.name'],
             paginationClientItemsPerPage: true
         ),
         new Get(
-            uriTemplate: '/admin/users/{id}{._format}',
+            // uriTemplate: '/admin/users/{id}{._format}',
+            uriTemplate: '/users/{id}{._format}',
             security: 'is_granted("OIDC_ADMIN")'
         ),
         new Get(

@@ -7,8 +7,32 @@
         font-family: Poppins;
     }
 
+    .main-title {
+        color: #EE4222;
+    }
+
+    a.discreet-link {
+        color: black!important;
+    }
+
     a {
         @apply no-underline text-cyan-700;
+        color: #EE4222;
+    }
+
+    footer {
+        position: absolute;
+        bottom: 0;
+        margin-left: 2%!important;
+        margin-right: 2%!important;
+        width: 96%;
+        background-color: #F9FAFB;
+    }
+
+    .form-error-message {
+        font-size: 0.7rem;
+        color: #EE4222;
+        font-style: 'italic';
     }
 }
 

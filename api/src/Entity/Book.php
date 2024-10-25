@@ -39,66 +39,66 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @see https://schema.org/Book
  */
-#[ApiResource(
-    uriTemplate: '/admin/books{._format}',
-    types: ['https://schema.org/Book', 'https://schema.org/Offer'],
-    operations: [
-        new GetCollection(
-            itemUriTemplate: '/admin/books/{id}{._format}',
-            paginationClientItemsPerPage: true
-        ),
-        new Post(
-            processor: BookPersistProcessor::class,
-            itemUriTemplate: '/admin/books/{id}{._format}'
-        ),
-        new Get(
-            uriTemplate: '/admin/books/{id}{._format}'
-        ),
-        // https://github.com/api-platform/admin/issues/370
-        new Put(
-            uriTemplate: '/admin/books/{id}{._format}',
-            processor: BookPersistProcessor::class
-        ),
-        new Delete(
-            uriTemplate: '/admin/books/{id}{._format}',
-            processor: BookRemoveProcessor::class
-        ),
-    ],
-    normalizationContext: [
-        AbstractNormalizer::GROUPS => ['Book:read:admin', 'Enum:read'],
-        AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
-    ],
-    denormalizationContext: [
-        AbstractNormalizer::GROUPS => ['Book:write'],
-    ],
-    collectDenormalizationErrors: true,
-    security: 'is_granted("OIDC_ADMIN")',
-    mercure: [
-        'topics' => [
-            '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/admin/books/{id}{._format}"))',
-            '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/books/{id}{._format}"))',
-        ],
-    ]
-)]
-#[ApiResource(
-    types: ['https://schema.org/Book', 'https://schema.org/Offer'],
-    operations: [
-        new GetCollection(
-            itemUriTemplate: '/books/{id}{._format}'
-        ),
-        new Get(),
-    ],
-    normalizationContext: [
-        AbstractNormalizer::GROUPS => ['Book:read', 'Enum:read'],
-        AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
-    ],
-    mercure: [
-        'topics' => [
-            '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/admin/books/{id}{._format}"))',
-            '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/books/{id}{._format}"))',
-        ],
-    ]
-)]
+// #[ApiResource(
+//     uriTemplate: '/admin/books{._format}',
+//     types: ['https://schema.org/Book', 'https://schema.org/Offer'],
+//     operations: [
+//         new GetCollection(
+//             itemUriTemplate: '/admin/books/{id}{._format}',
+//             paginationClientItemsPerPage: true
+//         ),
+//         new Post(
+//             processor: BookPersistProcessor::class,
+//             itemUriTemplate: '/admin/books/{id}{._format}'
+//         ),
+//         new Get(
+//             uriTemplate: '/admin/books/{id}{._format}'
+//         ),
+//         // https://github.com/api-platform/admin/issues/370
+//         new Put(
+//             uriTemplate: '/admin/books/{id}{._format}',
+//             processor: BookPersistProcessor::class
+//         ),
+//         new Delete(
+//             uriTemplate: '/admin/books/{id}{._format}',
+//             processor: BookRemoveProcessor::class
+//         ),
+//     ],
+//     normalizationContext: [
+//         AbstractNormalizer::GROUPS => ['Book:read:admin', 'Enum:read'],
+//         AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
+//     ],
+//     denormalizationContext: [
+//         AbstractNormalizer::GROUPS => ['Book:write'],
+//     ],
+//     collectDenormalizationErrors: true,
+//     security: 'is_granted("OIDC_ADMIN")',
+//     mercure: [
+//         'topics' => [
+//             '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/admin/books/{id}{._format}"))',
+//             '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/books/{id}{._format}"))',
+//         ],
+//     ]
+// )]
+// #[ApiResource(
+//     types: ['https://schema.org/Book', 'https://schema.org/Offer'],
+//     operations: [
+//         new GetCollection(
+//             itemUriTemplate: '/books/{id}{._format}'
+//         ),
+//         new Get(),
+//     ],
+//     normalizationContext: [
+//         AbstractNormalizer::GROUPS => ['Book:read', 'Enum:read'],
+//         AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
+//     ],
+//     mercure: [
+//         'topics' => [
+//             '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/admin/books/{id}{._format}"))',
+//             '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/books/{id}{._format}"))',
+//         ],
+//     ]
+// )]
 #[ORM\Entity(repositoryClass: BookRepository::class)]
 #[UniqueEntity(fields: ['book'])]
 class Book

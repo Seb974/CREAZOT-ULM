@@ -37,123 +37,123 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @see https://schema.org/Review
  */
-#[ApiResource(
-    types: ['https://schema.org/Review'],
-    order: ['publishedAt' => 'DESC'],
-    operations: [
-        new GetCollection(
-            uriTemplate: '/admin/reviews{._format}',
-            itemUriTemplate: '/admin/reviews/{id}{._format}',
-            filters: [
-                'app.filter.review.admin.user',
-                'app.filter.review.admin.book',
-                'app.filter.review.admin.rating',
-            ],
-            paginationClientItemsPerPage: true
-        ),
-        new Get(
-            uriTemplate: '/admin/reviews/{id}{._format}'
-        ),
-        // https://github.com/api-platform/admin/issues/370
-        new Put(
-            uriTemplate: '/admin/reviews/{id}{._format}',
-            processor: ReviewPersistProcessor::class
-        ),
-        new Delete(
-            uriTemplate: '/admin/reviews/{id}{._format}',
-            processor: ReviewRemoveProcessor::class
-        ),
-    ],
-    normalizationContext: [
-        IriTransformerNormalizer::CONTEXT_KEY => [
-            'book' => '/admin/books/{id}{._format}',
-            'user' => '/admin/users/{id}{._format}',
-        ],
-        AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
-        AbstractNormalizer::GROUPS => ['Review:read', 'Review:read:admin'],
-    ],
-    denormalizationContext: [
-        AbstractNormalizer::GROUPS => ['Review:write', 'Review:write:admin'],
-    ],
-    collectDenormalizationErrors: true,
-    security: 'is_granted("OIDC_ADMIN")',
-    mercure: [
-        'topics' => [
-            '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/admin/reviews/{id}{._format}"))',
-            '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/admin/reviews{._format}"))',
-            '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/books/{bookId}/reviews/{id}{._format}"))',
-            '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/books/{bookId}/reviews{._format}"))',
-        ],
-    ]
-)]
-#[ApiResource(
-    types: ['https://schema.org/Review'],
-    order: ['publishedAt' => 'DESC'],
-    uriTemplate: '/books/{bookId}/reviews{._format}',
-    uriVariables: [
-        'bookId' => new Link(toProperty: 'book', fromClass: Book::class),
-    ],
-    operations: [
-        new GetCollection(
-            itemUriTemplate: '/books/{bookId}/reviews/{id}{._format}',
-            paginationClientItemsPerPage: true
-        ),
-        new NotExposed(
-            uriTemplate: '/books/{bookId}/reviews/{id}{._format}',
-            uriVariables: [
-                'bookId' => new Link(toProperty: 'book', fromClass: Book::class),
-                'id' => new Link(fromClass: Review::class),
-            ]
-        ),
-        new Post(
-            security: 'is_granted("OIDC_USER")',
-            processor: ReviewPersistProcessor::class,
-            provider: CreateProvider::class,
-            itemUriTemplate: '/books/{bookId}/reviews/{id}{._format}',
-            validationContext: [AbstractNormalizer::GROUPS => ['Default', 'Review:create']]
-        ),
-        new Patch(
-            uriTemplate: '/books/{bookId}/reviews/{id}{._format}',
-            uriVariables: [
-                'bookId' => new Link(toProperty: 'book', fromClass: Book::class),
-                'id' => new Link(fromClass: Review::class),
-            ],
-            /** @see OidcTokenPermissionVoter */
-            security: 'is_granted("OIDC_USER", request.getRequestUri())',
-            processor: ReviewPersistProcessor::class
-        ),
-        new Delete(
-            uriTemplate: '/books/{bookId}/reviews/{id}{._format}',
-            uriVariables: [
-                'bookId' => new Link(toProperty: 'book', fromClass: Book::class),
-                'id' => new Link(fromClass: Review::class),
-            ],
-            /** @see OidcTokenPermissionVoter */
-            security: 'is_granted("OIDC_USER", request.getRequestUri())',
-            processor: ReviewRemoveProcessor::class
-        ),
-    ],
-    normalizationContext: [
-        IriTransformerNormalizer::CONTEXT_KEY => [
-            'book' => '/books/{id}{._format}',
-            'user' => '/users/{id}{._format}',
-        ],
-        AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
-        AbstractNormalizer::GROUPS => ['Review:read'],
-    ],
-    denormalizationContext: [
-        AbstractNormalizer::GROUPS => ['Review:write'],
-    ],
-    collectDenormalizationErrors: true,
-    mercure: [
-        'topics' => [
-            '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/admin/reviews/{id}{._format}"))',
-            '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/admin/reviews{._format}"))',
-            '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/books/{bookId}/reviews/{id}{._format}"))',
-            '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/books/{bookId}/reviews{._format}"))',
-        ],
-    ]
-)]
+// #[ApiResource(
+//     types: ['https://schema.org/Review'],
+//     order: ['publishedAt' => 'DESC'],
+//     operations: [
+//         new GetCollection(
+//             uriTemplate: '/admin/reviews{._format}',
+//             itemUriTemplate: '/admin/reviews/{id}{._format}',
+//             filters: [
+//                 'app.filter.review.admin.user',
+//                 'app.filter.review.admin.book',
+//                 'app.filter.review.admin.rating',
+//             ],
+//             paginationClientItemsPerPage: true
+//         ),
+//         new Get(
+//             uriTemplate: '/admin/reviews/{id}{._format}'
+//         ),
+//         // https://github.com/api-platform/admin/issues/370
+//         new Put(
+//             uriTemplate: '/admin/reviews/{id}{._format}',
+//             processor: ReviewPersistProcessor::class
+//         ),
+//         new Delete(
+//             uriTemplate: '/admin/reviews/{id}{._format}',
+//             processor: ReviewRemoveProcessor::class
+//         ),
+//     ],
+//     normalizationContext: [
+//         IriTransformerNormalizer::CONTEXT_KEY => [
+//             'book' => '/admin/books/{id}{._format}',
+//             'user' => '/admin/users/{id}{._format}',
+//         ],
+//         AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
+//         AbstractNormalizer::GROUPS => ['Review:read', 'Review:read:admin'],
+//     ],
+//     denormalizationContext: [
+//         AbstractNormalizer::GROUPS => ['Review:write', 'Review:write:admin'],
+//     ],
+//     collectDenormalizationErrors: true,
+//     security: 'is_granted("OIDC_ADMIN")',
+//     mercure: [
+//         'topics' => [
+//             '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/admin/reviews/{id}{._format}"))',
+//             '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/admin/reviews{._format}"))',
+//             '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/books/{bookId}/reviews/{id}{._format}"))',
+//             '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/books/{bookId}/reviews{._format}"))',
+//         ],
+//     ]
+// )]
+// #[ApiResource(
+//     types: ['https://schema.org/Review'],
+//     order: ['publishedAt' => 'DESC'],
+//     uriTemplate: '/books/{bookId}/reviews{._format}',
+//     uriVariables: [
+//         'bookId' => new Link(toProperty: 'book', fromClass: Book::class),
+//     ],
+//     operations: [
+//         new GetCollection(
+//             itemUriTemplate: '/books/{bookId}/reviews/{id}{._format}',
+//             paginationClientItemsPerPage: true
+//         ),
+//         new NotExposed(
+//             uriTemplate: '/books/{bookId}/reviews/{id}{._format}',
+//             uriVariables: [
+//                 'bookId' => new Link(toProperty: 'book', fromClass: Book::class),
+//                 'id' => new Link(fromClass: Review::class),
+//             ]
+//         ),
+//         new Post(
+//             security: 'is_granted("OIDC_USER")',
+//             processor: ReviewPersistProcessor::class,
+//             provider: CreateProvider::class,
+//             itemUriTemplate: '/books/{bookId}/reviews/{id}{._format}',
+//             validationContext: [AbstractNormalizer::GROUPS => ['Default', 'Review:create']]
+//         ),
+//         new Patch(
+//             uriTemplate: '/books/{bookId}/reviews/{id}{._format}',
+//             uriVariables: [
+//                 'bookId' => new Link(toProperty: 'book', fromClass: Book::class),
+//                 'id' => new Link(fromClass: Review::class),
+//             ],
+//             /** @see OidcTokenPermissionVoter */
+//             security: 'is_granted("OIDC_USER", request.getRequestUri())',
+//             processor: ReviewPersistProcessor::class
+//         ),
+//         new Delete(
+//             uriTemplate: '/books/{bookId}/reviews/{id}{._format}',
+//             uriVariables: [
+//                 'bookId' => new Link(toProperty: 'book', fromClass: Book::class),
+//                 'id' => new Link(fromClass: Review::class),
+//             ],
+//             /** @see OidcTokenPermissionVoter */
+//             security: 'is_granted("OIDC_USER", request.getRequestUri())',
+//             processor: ReviewRemoveProcessor::class
+//         ),
+//     ],
+//     normalizationContext: [
+//         IriTransformerNormalizer::CONTEXT_KEY => [
+//             'book' => '/books/{id}{._format}',
+//             'user' => '/users/{id}{._format}',
+//         ],
+//         AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
+//         AbstractNormalizer::GROUPS => ['Review:read'],
+//     ],
+//     denormalizationContext: [
+//         AbstractNormalizer::GROUPS => ['Review:write'],
+//     ],
+//     collectDenormalizationErrors: true,
+//     mercure: [
+//         'topics' => [
+//             '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/admin/reviews/{id}{._format}"))',
+//             '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/admin/reviews{._format}"))',
+//             '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/books/{bookId}/reviews/{id}{._format}"))',
+//             '@=iri(object, ' . UrlGeneratorInterface::ABS_URL . ', get_operation(object, "/books/{bookId}/reviews{._format}"))',
+//         ],
+//     ]
+// )]
 #[ORM\Entity(repositoryClass: ReviewRepository::class)]
 #[ORM\UniqueConstraint(fields: ['user', 'book'])]
 #[UniqueUserBook(message: 'You have already reviewed this book.', groups: ['Review:create'])]
