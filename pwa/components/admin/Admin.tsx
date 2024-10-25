@@ -9,18 +9,18 @@ import {
   fetchHydra,
   HydraAdmin,
   hydraDataProvider,
-  OpenApiAdmin,
-  ResourceGuesser,
+  // OpenApiAdmin,
+  // ResourceGuesser,
 } from "@api-platform/admin";
 import { parseHydraDocumentation } from "@api-platform/api-doc-parser";
 
 import { type Session } from "../../app/auth";
-import DocContext from "../../components/admin/DocContext";
+// import DocContext from "../../components/admin/DocContext";
 import authProvider from "../../components/admin/authProvider";
 import Layout from "./layout/Layout";
 import { ENTRYPOINT } from "../../config/entrypoint";
-import bookResourceProps from "./book";
-import reviewResourceProps from "./review";
+// import bookResourceProps from "./book";
+// import reviewResourceProps from "./review";
 import i18nProvider from "./i18nProvider";
 
 const apiDocumentationParser = (session: Session) => async () => {
@@ -54,7 +54,7 @@ const AdminAdapter = ({
 }) => {
   // @ts-ignore
   const dataProvider = useRef<DataProvider>();
-  const { docType } = useContext(DocContext);
+  // const { docType } = useContext(DocContext);
 
   dataProvider.current = hydraDataProvider({
     entrypoint: ENTRYPOINT,
@@ -68,7 +68,7 @@ const AdminAdapter = ({
     apiDocumentationParser: apiDocumentationParser(session),
   });
 
-  return docType === "hydra" ? (
+  return (
     <HydraAdmin
       requireAuth
       authProvider={authProvider}
@@ -80,38 +80,52 @@ const AdminAdapter = ({
     >
       {!!children && children}
     </HydraAdmin>
-  ) : (
-    <OpenApiAdmin
-      requireAuth
-      authProvider={authProvider}
-      // @ts-ignore
-      dataProvider={dataProvider.current}
-      entrypoint={window.origin}
-      docEntrypoint={`${window.origin}/docs.json`}
-      i18nProvider={i18nProvider}
-      layout={Layout}
-    >
-      {!!children && children}
-    </OpenApiAdmin>
   );
+
+  // return docType === "hydra" ? (
+  //   <HydraAdmin
+  //     requireAuth
+  //     authProvider={authProvider}
+  //     // @ts-ignore
+  //     dataProvider={dataProvider.current}
+  //     entrypoint={window.origin}
+  //     i18nProvider={i18nProvider}
+  //     layout={Layout}
+  //   >
+  //     {!!children && children}
+  //   </HydraAdmin>
+  // ) : (
+  //   <OpenApiAdmin
+  //     requireAuth
+  //     authProvider={authProvider}
+  //     // @ts-ignore
+  //     dataProvider={dataProvider.current}
+  //     entrypoint={window.origin}
+  //     docEntrypoint={`${window.origin}/docs.json`}
+  //     i18nProvider={i18nProvider}
+  //     layout={Layout}
+  //   >
+  //     {!!children && children}
+  //   </OpenApiAdmin>
+  // );
 };
 
-const store = localStorageStore();
+// const store = localStorageStore();
 
-const AdminWithContext = ({ session }: { session: Session }) => {
-  const [docType, setDocType] = useState(
-    store.getItem<string>("docType", "hydra")
-  );
+// const AdminWithContext = ({ session }: { session: Session }) => {
+//   const [docType, setDocType] = useState(
+//     store.getItem<string>("docType", "hydra")
+//   );
 
-  return (
-    <DocContext.Provider value={{ docType, setDocType }}>
-      <AdminAdapter session={session}>
-        <ResourceGuesser name="admin/books" {...bookResourceProps} />
-        <ResourceGuesser name="admin/reviews" {...reviewResourceProps} />
-      </AdminAdapter>
-    </DocContext.Provider>
-  );
-};
+//   return (
+//     <DocContext.Provider value={{ docType, setDocType }}>
+//       <AdminAdapter session={session}>
+//         <ResourceGuesser name="admin/books" {...bookResourceProps} />
+//         <ResourceGuesser name="admin/reviews" {...reviewResourceProps} />
+//       </AdminAdapter>
+//     </DocContext.Provider>
+//   );
+// };
 
 const AdminWithOIDC = () => {
   // Can't use next-auth/middleware because of https://github.com/nextauthjs/next-auth/discussions/7488
@@ -129,13 +143,16 @@ const AdminWithOIDC = () => {
   }
 
   // @ts-ignore
-  return <AdminWithContext session={session} />;
+  // return <AdminWithContext session={session} />;
+
+  // @ts-ignore
+  return <AdminAdapter session={session} />;
 };
 
 const Admin = () => (
   <>
     <Head>
-      <title>API Platform Admin</title>
+      <title>PLANETAIR 974 Admin</title>
     </Head>
 
     {/*@ts-ignore*/}
