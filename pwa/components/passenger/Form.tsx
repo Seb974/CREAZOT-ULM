@@ -1,20 +1,14 @@
 'use client';
 
-import { CustomerField } from '../../app/lib/definitions';
-import Link from 'next/link';
 import {
-  CheckIcon,
-  ClockIcon,
-  CurrencyDollarIcon,
   UserCircleIcon,
   UserGroupIcon,
   AtSymbolIcon,
-  PhoneIcon,
-  PaperAirplaneIcon
+  PhoneIcon
 } from '@heroicons/react/24/outline';
-import { Button } from '../common/ui/button';
 import { createPassenger } from '../../app/lib/actions';
 import { useFormState } from 'react-dom';
+import SubmitButton from './SubmitButton';
 
 export default function Form() {
 
@@ -22,7 +16,7 @@ export default function Form() {
   const [state, dispatch] = useFormState(createPassenger, initialState);
 
   return (
-    <form action={dispatch}>
+    <form action={dispatch }>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
 
         {/* Lastname */}
@@ -124,16 +118,7 @@ export default function Form() {
 
       </div>
       <div className="mt-6 flex justify-end gap-4">
-        {/* <Link
-          href="/dashboard/invoices"
-          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
-        >
-          Cancel
-        </Link> */}
-        <Button type="submit" className="flex h-10 items-center rounded-lg bg-red-500 px-4 text-sm font-medium text-white transition-colors hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500 active:bg-red-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50">
-            <PaperAirplaneIcon className=" h-[18px] w-[18px] text-white mr-2"/>
-            Envoyer
-        </Button>
+        <SubmitButton />
       </div>
     </form>
   );

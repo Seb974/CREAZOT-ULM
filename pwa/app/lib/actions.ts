@@ -42,7 +42,6 @@ export async function createPassenger(prevState: State, formData: FormData) {
         email: formData.get('email'),
         telephone: formData.get('phone')
     });
-    console.log(validatedFields);
 
     if (!validatedFields.success) {
         return {
@@ -57,8 +56,9 @@ export async function createPassenger(prevState: State, formData: FormData) {
         await post('/passagers', {nom, prenom, email, telephone, date})
         toast.success(`Merci ${prenom}. Bon vol à vous !`, {duration: 3000})
     } catch (error) {
-      const message = error.response.data.violations.length <= 1 ? 'Une erreur bloque la validation.' : 'Des erreurs bloquent la validation.';
-      const errors = error.response.data.violations.reduce((a, v) => ({ ...a, [v.propertyPath]: v.message}), {});
+      const violations = error.response.data.violations || [];
+      const message = violations.length <= 1 ? 'Une erreur bloque la validation.' : 'Des erreurs bloquent la validation.';
+      const errors = violations.reduce((a, v) => ({ ...a, [v.propertyPath]: v.message}), {});
       toast.error(message, {duration: 3000})
       return {message, errors};
     }
