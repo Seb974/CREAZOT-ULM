@@ -37,7 +37,7 @@ export const Header = () => {
               });
             }}>
               Sign out
-            </a>
+            </a>         
           ) || (
             <a href="#" className="font-semibold text-gray-900" role="menuitem" onClick={(e) => {
               e.preventDefault();

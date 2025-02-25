@@ -2,7 +2,7 @@
 
 import Head from "next/head";
 import { useContext, useRef, useState } from "react";
-import { type DataProvider, localStorageStore } from "react-admin";
+import { type DataProvider, localStorageStore, defaultTheme } from "react-admin";
 import { signIn, useSession } from "next-auth/react";
 import SyncLoader from "react-spinners/SyncLoader";
 import {
@@ -10,18 +10,25 @@ import {
   HydraAdmin,
   hydraDataProvider,
   // OpenApiAdmin,
-  // ResourceGuesser,
+  ResourceGuesser,
 } from "@api-platform/admin";
 import { parseHydraDocumentation } from "@api-platform/api-doc-parser";
+import { CustomRoutes } from 'react-admin';
+import { Route } from "react-router-dom";
+
 
 import { type Session } from "../../app/auth";
 // import DocContext from "../../components/admin/DocContext";
 import authProvider from "../../components/admin/authProvider";
 import Layout from "./layout/Layout";
 import { ENTRYPOINT } from "../../config/entrypoint";
-// import bookResourceProps from "./book";
-// import reviewResourceProps from "./review";
+import prestationResourceProps from "./prestation";
+import volResourceProps from "./Vol";
+import reviewResourceProps from "./review";
 import i18nProvider from "./i18nProvider";
+import Dashboard from "../dashboard/components/Dashboard/Dashboard";
+import { BooksList } from "./book/BooksList";
+import { PrestationsList } from "./prestation/PrestationsList";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -42,6 +49,14 @@ const apiDocumentationParser = (session: Session) => async () => {
       response,
       status,
     };
+  }
+};
+
+const myTheme = {
+  ...defaultTheme,
+  palette: {
+      mode: 'light',
+      // secondary: '#EE4244'
   }
 };
 
@@ -76,7 +91,10 @@ const AdminAdapter = ({
       dataProvider={dataProvider.current}
       entrypoint={window.origin}
       i18nProvider={i18nProvider}
+      dashboard={ Dashboard }
+      darkTheme={ null }
       layout={Layout}
+      // theme={ myTheme }
     >
       {!!children && children}
     </HydraAdmin>
@@ -142,11 +160,31 @@ const AdminWithOIDC = () => {
     return;
   }
 
-  // @ts-ignore
+  
+  return (
+    // @ts-ignore
+    <AdminAdapter session={session}>
+      {/* <CustomRoutes>
+          <Route path="/vols" element={<PrestationsList />} />
+      </CustomRoutes> */}
+      <ResourceGuesser name="prestations" {...prestationResourceProps} />
+      <ResourceGuesser name="vols" {...volResourceProps}/>
+      <ResourceGuesser name="passagers"/>
+      <ResourceGuesser name="circuits"/>
+      <ResourceGuesser name="aeronefs"/>
+      <ResourceGuesser name="options"/>
+      <ResourceGuesser name="users"/>
+      <CustomRoutes>
+            <Route path="/books" element={<BooksList />} />
+        </CustomRoutes>
+      {/* <ResourceGuesser name="books" {...bookResourceProps} />
+      <ResourceGuesser name="reviews" {...reviewResourceProps} /> */}
+    </AdminAdapter>
+  );
   // return <AdminWithContext session={session} />;
 
   // @ts-ignore
-  return <AdminAdapter session={session} />;
+  // return <AdminAdapter session={session} />;
 };
 
 const Admin = () => (

@@ -1,0 +1,36 @@
+.rbc-time-slot { 
+    min-height: 30px; 
+}
+
+.rbc-time-view {
+    min-height: 600px; 
+}
+
+.rbc-month-row {
+    min-height: 100px; 
+}
+
+.rbc-month-row {
+    min-height: 100px; 
+}
+
+.rbc-row-bg {
+    min-height: 100px; 
+}
+
+.calendar-container {
+    min-height: 740px;
+}
+
+.custom_row {
+    height: auto;
+}
+
+.rbc-event {
+    width: 33.33%!important;
+}
+
+.rbc-event[style*="width: 50%"] {
+    left: 33.33%!important;
+}
+

@@ -1,5 +1,5 @@
 api_platform:
-    title: API Platform's demo
+    title: Planetair974 - Gestion
     version: 4.0.5
     use_symfony_listeners: true
     description: |
@@ -41,12 +41,96 @@ api_platform:
         authorizationUrl: '%env(OIDC_SERVER_URL)%/protocol/openid-connect/auth'
         scopes:
             openid: (required) Indicates that the application intends to use OIDC to verify the user's identity
+    collection:
+        pagination:
+            enabled_parameter_name: pagination
 
 services:
     _defaults:
         autowire: false
         autoconfigure: false
         public: false
+
+    app.filter.prestation.pilote:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { pilote.firstName: 'iword_start' } ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.prestation.aeronef:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { aeronef.immatriculation: 'ipartial' } ]
+        tags: [ 'api_platform.filter' ]
+    
+    app.filter.prestation.date:
+        parent: 'api_platform.doctrine.orm.date_filter'
+        arguments:
+            $properties: { date: ~ } ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.vol.pilote:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { prestation.pilote.firstName: 'iword_start' } ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.vol.aeronef:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { prestation.aeronef.immatriculation: 'ipartial' } ]
+        tags: [ 'api_platform.filter' ]
+    
+    app.filter.vol.date:
+        parent: 'api_platform.doctrine.orm.date_filter'
+        arguments:
+            $properties: { prestation.date: ~ } ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.vol.circuit:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { circuit.code: 'iexact' } ]
+        tags: [ 'api_platform.filter' ]
+    
+    app.filter.reservation.pilote:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { pilote.firstName: 'iword_start' } ]
+        tags: [ 'api_platform.filter' ]
+    
+    app.filter.reservation.aeronef:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { avion.immatriculation: 'ipartial' } ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.reservation.circuit:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { circuit.code: 'iexact' } ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.reservation.date:
+        parent: 'api_platform.doctrine.orm.date_filter'
+        arguments:
+            $properties: { debut: ~ } ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.reservation.client:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { nom: 'iword_start' } ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.reservation.validated:
+        class: 'App\Doctrine\Orm\Filter\ValidReservationFilter'
+        arguments:
+            $managerRegistry: '@doctrine'
+            $logger: '@logger'
+            $nameConverter: '@?api_platform.name_converter'
+            $properties: { cancel: 'ipartial' } ]
+        tags: [ 'api_platform.filter' ]
 
     app.filter.review.admin.user:
         parent: 'api_platform.doctrine.orm.search_filter'

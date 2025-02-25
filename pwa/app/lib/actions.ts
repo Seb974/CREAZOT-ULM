@@ -1,7 +1,8 @@
 // 'use server';
 
 import { z } from 'zod';
-import { post, API_DOMAIN } from './api';;
+import axios from 'axios';
+import { post, get, API_DOMAIN } from './api';;
 import { RedirectType, redirect } from 'next/navigation';
 import { toast } from 'react-hot-toast';
  
@@ -66,4 +67,20 @@ export async function createPassenger(prevState: State, formData: FormData) {
     redirect(`${API_DOMAIN}`!, RedirectType.replace);
 }
 
+export const getMetarOrTaf = (icao, request = "metar", decoded = false) => {
 
+  const config = { 
+      method: 'get',
+      url: `https://api.checkwx.com/${ request }/${ icao }${ decoded && '/decoded' }`,
+      headers: { 'X-API-Key': '2643ee8e1e864bfb9a13c98b4b' }
+  };
+  return axios(config)
+          .then(function (response) {
+            console.log(JSON.stringify(response.data));
+            return response.data;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+};

@@ -16,7 +16,7 @@ export default function Form() {
   const [state, dispatch] = useFormState(createPassenger, initialState);
 
   return (
-    <form action={dispatch }>
+    <form action={ dispatch }>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
 
         {/* Lastname */}

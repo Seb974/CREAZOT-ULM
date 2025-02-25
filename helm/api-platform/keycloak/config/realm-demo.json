@@ -1,6 +1,6 @@
 {
-  "realm": "demo",
-  "displayName": "API Platform - Demo",
+  "realm": "planetair974",
+  "displayName": "Planetair974 - Gestion",
   "accessCodeLifespan": 1,
   "enabled": true,
   "registrationAllowed": false,
@@ -49,37 +49,20 @@
   },
   "users": [
     {
-      "username": "chuck.norris@example.com",
-      "email": "chuck.norris@example.com",
+      "username": "Sébastien",
+      "email": "m_seb@icloud.com",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Chuck",
-      "lastName": "Norris",
+      "firstName": "Sébastien",
+      "lastName": "Maillot",
       "credentials": [
         {
           "type": "password",
-          "value": "Pa55w0rd"
+          "value": "Soleil01"
         }
       ],
       "realmRoles": [
         "admin"
-      ]
-    },
-    {
-      "username": "john.doe@example.com",
-      "email": "john.doe@example.com",
-      "enabled": true,
-      "emailVerified": true,
-      "firstName": "John",
-      "lastName": "Doe",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "Pa55w0rd"
-        }
-      ],
-      "realmRoles": [
-        "user"
       ]
     }
   ],
@@ -96,7 +79,7 @@
       "id": "6832d039-5543-4e66-afc5-bc5057e8234d",
       "clientId": "api-platform-api",
       "description": "Confidential client to check authorizations (RBAC)",
-      "name": "API Platform API",
+      "name": "Planetair974 Gestion",
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
       "secret": "sEocbxCy7iFS8NzYzWyQ71QgxTDZ9fnU",

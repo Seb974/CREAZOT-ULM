@@ -1,0 +1,80 @@
+"use client";
+
+import React, { useState } from "react";
+import { PilotForm } from "./form/PilotForm";
+import { AircraftForm } from "./form/AircraftForm";
+import { FlightForm } from "./form/FlightForm";
+import { FlightTimeForm } from "./form/FlightTimeForm";
+import {SubmitButton} from "./form/SubmitButton";
+import { useDataProvider } from "react-admin";
+import { getCircuitDuration, getTotalPrice, getRealDuration, getCircuitPrice } from '../../../app/lib/utils';
+
+export const PrestationForm: React.FC = () => {
+
+  const dataProvider = useDataProvider();
+  const [aircrafts, setAircrafts] = useState([]);
+  const [selectedPilot, setSelectedPilot] = useState<string>("");
+  const [selectedAircraft, setSelectedAircraft] = useState<string>("");
+  const [selectedCircuits, setSelectedCircuits] = useState([]);
+  const [selectedFlightTime, setSelectedFlightTime] = useState(0);
+
+  const handleSubmit = async e => {
+      const prestation = {
+        aeronef: selectedAircraft.id,
+        pilote: selectedPilot,
+        date: new Date(),
+        horametreDepart: selectedAircraft.horametre,
+        horametreFin: typeof selectedFlightTime === 'string' ? parseFloat(selectedFlightTime.replace(',','.')) : selectedFlightTime,
+        duree: getRealDuration(selectedFlightTime, selectedAircraft),
+        turnover: getTotalPrice(selectedFlightTime, selectedAircraft, selectedCircuits),
+        vols: selectedCircuits.map(c => {
+            return {
+              circuit: c.circuit.id,
+              quantite: parseInt(c.quantite),
+              duree: c.circuit.prixFixe ? getCircuitDuration(selectedAircraft, c.circuit, c.quantite) : getRealDuration(selectedFlightTime, selectedAircraft),
+              option: c.option.id !== 0 ? c.option.id : null,
+              prix: parseInt(c.quantite) * getCircuitPrice(c.circuit, c.option, selectedFlightTime, selectedAircraft)
+            }
+        })
+      };
+      console.log(prestation);
+      dataProvider.create('prestations', {data: prestation});
+  };
+
+
+  return (
+      <div className="w-full">
+        <div className="rounded-md bg-gray-50 p-4 md:p-6">
+            <PilotForm 
+                selectedPilot={ selectedPilot } 
+                setSelectedPilot={ setSelectedPilot }
+            />
+            <AircraftForm 
+                selectedAircraft={ selectedAircraft }
+                setSelectedAircraft={ setSelectedAircraft }
+                aircrafts={ aircrafts }
+                setAircrafts={ setAircrafts }
+            />
+            <FlightForm
+                selectedCircuits={ selectedCircuits }
+                setSelectedCircuits={ setSelectedCircuits }
+                selectedAircraft={ selectedAircraft }
+                selectedFlightTime={ selectedFlightTime }
+            />
+            <FlightTimeForm
+                aircrafts={ aircrafts }
+                selectedAircraft={ selectedAircraft }
+                selectedCircuits={ selectedCircuits }
+                selectedFlightTime={ selectedFlightTime }
+                setSelectedFlightTime={ setSelectedFlightTime }
+            />
+        </div>
+        <div className="pl-7 py-6 flex justify-start gap-4 bg-gray-50">
+           <SubmitButton
+              selectedCircuits={ selectedCircuits }
+              handleSubmit={ handleSubmit }
+            />
+        </div>
+      </div>
+  );
+}

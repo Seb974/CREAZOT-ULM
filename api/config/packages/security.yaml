@@ -1,5 +1,9 @@
 security:
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+    role_hierarchy:
+        OIDC_USER: [ROLE_USER]
+        OIDC_ADMIN: [OIDC_USER, ROLE_ADMIN]
+
     providers:
         app_user_provider:
             id: 'App\Security\Core\UserProvider'

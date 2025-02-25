@@ -1,6 +1,7 @@
 import { AppBar, UserMenu, TitlePortal } from "react-admin";
 import Logo from "../Logo";
 import Logout from "./Logout";
+import Flight from "./Flight";
 import Image from "next/image";
 import logo from "../../../public/api-platform/logo.png"
 // import DocTypeMenuButton from "./DocTypeMenuButton";
@@ -9,6 +10,7 @@ const CustomAppBar = () => (
   <AppBar
     userMenu={
       <UserMenu>
+        <Flight />
         <Logout />
       </UserMenu>
     }

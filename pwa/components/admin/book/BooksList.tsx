@@ -11,6 +11,7 @@ import {
 import { ShowButton } from "./ShowButton";
 import { RatingField } from "../review/RatingField";
 import { ConditionInput } from "./ConditionInput";
+import MainOriginalContent from "../../../components/common/MainOriginalContent";
 
 const ConditionField = () => {
   const record = useRecordContext();
@@ -29,18 +30,21 @@ const filters = [
 ];
 
 export const BooksList = () => (
-  <List filters={filters} exporter={false} title="Books">
-    <Datagrid>
-      <FieldGuesser source="title" />
-      <FieldGuesser source="author" sortable={false} />
-      <WrapperField label="Condition" sortable={false}>
-        <ConditionField />
-      </WrapperField>
-      <WrapperField label="Rating" sortable={false}>
-        <RatingField />
-      </WrapperField>
-      <ShowButton />
-      <EditButton />
-    </Datagrid>
-  </List>
+  <div>
+    <MainOriginalContent />
+  </div>
+  // <List filters={filters} exporter={false} title="Books">
+  //   <Datagrid>
+  //     <FieldGuesser source="title" />
+  //     <FieldGuesser source="author" sortable={false} />
+  //     <WrapperField label="Condition" sortable={false}>
+  //       <ConditionField />
+  //     </WrapperField>
+  //     <WrapperField label="Rating" sortable={false}>
+  //       <RatingField />
+  //     </WrapperField>
+  //     <ShowButton />
+  //     <EditButton />
+  //   </Datagrid>
+  // </List>
 );

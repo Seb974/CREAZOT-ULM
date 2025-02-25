@@ -5,9 +5,17 @@ services:
       - database
     restart: unless-stopped
     environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: y4qKkbOmvj6RMCHgAVaTH6tVfXYf5zmI
+      POSTGRES_DB: app
+      POSTGRES_VERSION: 16
+      POSTGRES_CHARSET: utf8
+      CADDY_MERCURE_JWT_SECRET: d8b0bhdnQDlbbdM70I0aTBvgrBUe3X
       PWA_UPSTREAM: pwa:3000
       OIDC_UPSTREAM: keycloak:8080
       SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
+      # SERVER_NAME: ${SERVER_NAME:-localhost, caddy:80}
+      # SERVER_NAME: ${SERVER_NAME:-gestion.fraispei.com, gestion.localhost, localhost, caddy:80}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
       TRUSTED_PROXIES: ${TRUSTED_PROXIES:-127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
@@ -16,8 +24,8 @@ services:
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://php/.well-known/mercure}
       MERCURE_PUBLIC_URL: https://${SERVER_NAME:-localhost}/.well-known/mercure
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
-      OIDC_SERVER_URL: ${OIDC_SERVER_URL:-https://localhost/oidc/realms/demo}
-      OIDC_SERVER_URL_INTERNAL: ${OIDC_SERVER_URL_INTERNAL:-http://keycloak:8080/oidc/realms/demo}
+      OIDC_SERVER_URL: ${OIDC_SERVER_URL:-https://localhost/oidc/realms/planetair974}
+      OIDC_SERVER_URL_INTERNAL: ${OIDC_SERVER_URL_INTERNAL:-http://keycloak:8080/oidc/realms/planetair974}
     ports:
       # HTTP
       - target: 80
@@ -35,12 +43,13 @@ services:
   pwa:
     image: ${IMAGES_PREFIX:-}app-pwa
     environment:
+      DEFINED_AUTH_SECRET: pVk4mV6fQnXcyh88RM1wa7ifs5F1RXpJ
       NEXT_PUBLIC_ENTRYPOINT: http://php
       NEXT_PUBLIC_OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-api-platform-pwa}
-      NEXT_PUBLIC_OIDC_SERVER_URL: ${OIDC_SERVER_URL:-https://localhost/oidc/realms/demo}
-      NEXT_PUBLIC_OIDC_SERVER_URL_INTERNAL: ${OIDC_SERVER_URL_INTERNAL:-http://keycloak:8080/oidc/realms/demo}
+      NEXT_PUBLIC_OIDC_SERVER_URL: ${OIDC_SERVER_URL:-https://localhost/oidc/realms/planetair974}
+      NEXT_PUBLIC_OIDC_SERVER_URL_INTERNAL: ${OIDC_SERVER_URL_INTERNAL:-http://keycloak:8080/oidc/realms/planetair974}
       NEXT_PUBLIC_OIDC_AUTHORIZATION_CLIENT_ID: ${OIDC_AUTHORIZATION_CLIENT_ID:-api-platform-api}
-      AUTH_SECRET: ${AUTH_SECRET:-!ChangeThisNextAuthSecret!}
+      AUTH_SECRET: ${DEFINED_AUTH_SECRET:-!ChangeThisNextAuthSecret!}
       AUTH_URL: ${AUTH_URL:-https://localhost/api/auth}
       NEXT_SHARP_PATH: /srv/app/node_modules/sharp
 
@@ -65,6 +74,7 @@ services:
   keycloak-database:
     image: postgres:${KEYCLOAK_POSTGRES_VERSION:-16}-alpine
     environment:
+      KEYCLOAK_POSTGRES_PASSWORD: 1KAOIhLvptiy5Kq8e5ttRyaZHwXNIyD
       POSTGRES_DB: ${KEYCLOAK_POSTGRES_DB:-keycloak}
       # You should definitely change the password in production
       POSTGRES_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD:-!ChangeMe!}
@@ -75,12 +85,14 @@ services:
   keycloak:
     image: app_keycloak
     environment:
+      KEYCLOAK_POSTGRES_PASSWORD: 1KAOIhLvptiy5Kq8e5ttRyaZHwXNIyD
+      KEYCLOAK_ADMINISTRATION_PASSWORD: Aeroprakt22
       KEYCLOAK_DATABASE_HOST: keycloak-database
       KEYCLOAK_DATABASE_NAME: ${KEYCLOAK_POSTGRES_DB:-keycloak}
       KEYCLOAK_DATABASE_USER: ${KEYCLOAK_POSTGRES_USER:-keycloak}
       KEYCLOAK_DATABASE_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD:-!ChangeMe!}
       KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER:-admin}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-!ChangeMe!}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMINISTRATION_PASSWORD:-!ChangeMe!}
       # Must finish with a trailing slash (https://github.com/bitnami/charts/issues/10885#issuecomment-1414279144)
       KEYCLOAK_HTTP_RELATIVE_PATH: /oidc/
       # https://www.keycloak.org/server/hostname

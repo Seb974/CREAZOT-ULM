@@ -1,7 +1,17 @@
 import { AuthProvider } from "react-admin";
+import { jwtDecode } from "jwt-decode";
 import { getSession, signIn, signOut } from "next-auth/react";
 
 import { NEXT_PUBLIC_OIDC_SERVER_URL } from "../../config/keycloak";
+
+// @ts-ignore
+const parseJwt = (token) => {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch (e) {
+    return null;
+  }
+};
 
 const authProvider: AuthProvider = {
   // Nothing to do here, this function will never be called
