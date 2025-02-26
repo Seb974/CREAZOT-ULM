@@ -1,5 +1,6 @@
 import { Layout } from "../common/Layout";
 import { Toaster } from "react-hot-toast";
+import { API_DOMAIN } from "../../app/lib/api";
 
 export default function FormLayout({children}: { children: React.ReactNode }) {
     return (  
@@ -19,19 +20,19 @@ export default function FormLayout({children}: { children: React.ReactNode }) {
                 </span>
                  <ul className="flex flex-wrap items-center mt-3 text-sm font-medium sm:mt-0">      {/* text-gray-500 dark:text-gray-400 */}
                     <li>
-                        <a href="https://localhost/docs" className="hover:underline me-4 md:me-6">API</a>
+                        <a href={`https://${ API_DOMAIN }/docs`} className="hover:underline me-4 md:me-6">API</a>
                     </li>
                     <li>
-                        <a href="https://localhost/.well-known/mercure/ui/" className="hover:underline me-4 md:me-6">Mercure</a>
+                        <a href={`https://${ API_DOMAIN }/.well-known/mercure/ui/`} className="hover:underline me-4 md:me-6">Mercure</a>
                     </li>
                     <li>
                         <a href="https://www.planetair974.fr/contact" className="hover:underline me-4 md:me-6 discreet-link">Contactez-nous</a>
                     </li>
                     <li>
-                        <a href="https://localhost/admin" className="hover:underline me-4 md:me-6 discreet-link">Accès licenciés</a>
+                        <a href={`https://${ API_DOMAIN }/admin`} className="hover:underline me-4 md:me-6 discreet-link">Accès licenciés</a>
                     </li>
                     <li>
-                        <a href="https://localhost/oidc/" className="hover:underline discreet-link">Administration</a>
+                        <a href={`https://${ API_DOMAIN }/oidc/`} className="hover:underline discreet-link">Administration</a>
                     </li>
                 </ul>
                 </div>
