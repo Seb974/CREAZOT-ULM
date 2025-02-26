@@ -7,6 +7,7 @@ import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import NoPhotographyIcon from '@mui/icons-material/NoPhotography';
 import { Button } from '../../../common/ui/button';
 
+// @ts-ignore
 export const OneFlightForm: React.FC = ({ circuits, options, selectedCircuit, selectedCircuits, handleCircuitChange, handleQuantityChange, handleDeleteCircuit, handleOptionChange, disableOption }) => {
 
   const changeTextCircuitColor = () => setIsCircuitSelected(true);

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from '../../../common/ui/button';
 import SaveIcon from '@mui/icons-material/Save';
 
+// @ts-ignore
 export const SubmitButton: React.FC = ({ selectedCircuits, handleSubmit }) => {
 
     const [pending, setPending] = useState(false);

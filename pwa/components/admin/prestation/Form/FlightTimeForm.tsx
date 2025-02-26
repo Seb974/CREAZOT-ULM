@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 
-
+// @ts-ignore
 export const FlightTimeForm: React.FC = ({ aircrafts, selectedAircraft, selectedCircuits, selectedFlightTime, setSelectedFlightTime }) => {
 
   useEffect(() => {

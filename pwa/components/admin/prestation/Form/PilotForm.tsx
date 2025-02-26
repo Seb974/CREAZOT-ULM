@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import BadgeIcon from '@mui/icons-material/Badge';
 import { useDataProvider } from "react-admin";
 
+// @ts-ignore
 export const PilotForm: React.FC = ({ selectedPilot, setSelectedPilot, autoSelect = true}) => {
 
   const dataProvider = useDataProvider();
@@ -11,10 +12,8 @@ export const PilotForm: React.FC = ({ selectedPilot, setSelectedPilot, autoSelec
 
   const [pilots, setPilots] = useState([]);
   const [isPilotSelected, setIsPilotSelected] = useState<boolean>(false);
-  //   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    // setLoading(true);
     dataProvider
         .getList('users', {})
         .then(({ data }) => {
@@ -22,7 +21,6 @@ export const PilotForm: React.FC = ({ selectedPilot, setSelectedPilot, autoSelec
             if (autoSelect)
               setSelectedPilot(data[0]);
         })
-        // .catch(error => setLoading(false))
 
   }, []);
 

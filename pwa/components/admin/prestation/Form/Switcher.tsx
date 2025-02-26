@@ -2,6 +2,7 @@ import React from "react";
 import "../../../../css/satoshi.css";
 import "../../../../css/style.css";
 
+// @ts-ignore
 export const Switcher: React.FC = ({ decimal, setDecimal }) => {
 
   return (

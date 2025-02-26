@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import FlightIcon from '@mui/icons-material/Flight';
 import { useDataProvider } from "react-admin";
 
+// @ts-ignore
 export const AircraftForm: React.FC = ({ selectedAircraft, setSelectedAircraft, aircrafts, setAircrafts, autoSelect = true }) => {
 
   const dataProvider = useDataProvider();

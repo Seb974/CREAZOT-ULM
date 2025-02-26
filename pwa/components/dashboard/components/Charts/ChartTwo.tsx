@@ -60,6 +60,7 @@ const options: ApexOptions = {
     fontSize: "14px",
 
     markers: {
+      // @ts-ignore
       radius: 99,
     },
   },

@@ -31,7 +31,12 @@ export type State = {
       telephone?: string[];
     };
     message?: string | null;
-  }
+}
+
+export type SymfonyError = {
+    response?: string[];
+}
+
  
 const CreatePassenger = FormSchema.omit({ id: true, date: true });
 
@@ -57,11 +62,11 @@ export async function createPassenger(prevState: State, formData: FormData) {
         await post('/passagers', {nom, prenom, email, telephone, date})
         toast.success(`Merci ${prenom}. Bon vol à vous !`, {duration: 3000})
     } catch (error) {
-      const violations = error.response.data.violations || [];
-      const message = violations.length <= 1 ? 'Une erreur bloque la validation.' : 'Des erreurs bloquent la validation.';
-      const errors = violations.reduce((a, v) => ({ ...a, [v.propertyPath]: v.message}), {});
-      toast.error(message, {duration: 3000})
-      return {message, errors};
+        const violations = error.response.data.violations || [];
+        const message = violations.length <= 1 ? 'Une erreur bloque la validation.' : 'Des erreurs bloquent la validation.';
+        const errors = violations.reduce((a, v) => ({ ...a, [v.propertyPath]: v.message}), {});
+        toast.error(message, {duration: 3000})
+        return {message, errors};
     }
 
     redirect(`${API_DOMAIN}`!, RedirectType.replace);

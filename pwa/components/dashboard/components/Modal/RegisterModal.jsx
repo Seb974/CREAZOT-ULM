@@ -5,7 +5,7 @@ import AddIcon from '@mui/icons-material/Add';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DoneIcon from '@mui/icons-material/Done';
-import { CircuitForm } from "../../../admin/prestation/form/CircuitForm";
+import { CircuitForm } from "../../../admin/prestation/Form/CircuitForm";
 import { getRandomColor, isDefined } from "../../../../app/lib/utils";
 import { PlusForm } from "../../../admin/prestation/Form/PlusForm";
 

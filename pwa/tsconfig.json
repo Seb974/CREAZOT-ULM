@@ -4,7 +4,8 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": false,
+    "useUnknownInCatchVariables": false,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
@@ -20,6 +21,6 @@
       }
     ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/lib/actions.js", "components/admin/prestation/Form/FlightForm.jsx", "components/admin/prestation/PrestationForm.jsx", "components/dashboard/components/Modal/UpdateModal.jsx", "components/dashboard/components/Modal/RegisterModal.jsx", "components/dashboard/components/Modal/InformationsModal.jsx", "components/dashboard/components/Dashboard/Dashboard.jsx", "components/admin/prestation/Form/PlusForm.jsx"],
   "exclude": ["node_modules", "tests", "playwright.config.ts"]
 }

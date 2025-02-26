@@ -6,11 +6,11 @@ import DoneIcon from '@mui/icons-material/Done';
 import ClearIcon from '@mui/icons-material/Clear';
 import zIndex from "@mui/material/styles/zIndex";
 
-export const PlusForm: React.FC = ({ consumer, setConsumer }) => {
+export const PlusForm = ({ consumer, setConsumer }) => {
 
   const changeTextColor = () => setIsStatusSelected(true);
 
-  const [isStatusSelected, setIsStatusSelected] = useState<boolean>(false);
+  const [isStatusSelected, setIsStatusSelected] = useState(false);
 
   return (
       <div className="space-y-4" style={{ zIndex: 3000 }}>

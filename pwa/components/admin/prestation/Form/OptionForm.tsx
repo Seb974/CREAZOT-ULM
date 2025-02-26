@@ -5,6 +5,7 @@ import { useDataProvider } from "react-admin";
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import NoPhotographyIcon from '@mui/icons-material/NoPhotography';
 
+// @ts-ignore
 export const OptionForm: React.FC = ({ selectedOption, setSelectedOption, isUpdate = false, reservation = null}) => {
 
   const dataProvider = useDataProvider();

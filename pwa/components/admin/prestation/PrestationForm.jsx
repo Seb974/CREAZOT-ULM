@@ -1,20 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
-import { PilotForm } from "./form/PilotForm";
-import { AircraftForm } from "./form/AircraftForm";
-import { FlightForm } from "./form/FlightForm";
-import { FlightTimeForm } from "./form/FlightTimeForm";
-import {SubmitButton} from "./form/SubmitButton";
+import { PilotForm } from "./Form/PilotForm";
+import { AircraftForm } from "./Form/AircraftForm";
+import { FlightForm } from "./Form/FlightForm";
+import { FlightTimeForm } from "./Form/FlightTimeForm";
+import {SubmitButton} from "./Form/SubmitButton";
 import { useDataProvider } from "react-admin";
 import { getCircuitDuration, getTotalPrice, getRealDuration, getCircuitPrice } from '../../../app/lib/utils';
 
-export const PrestationForm: React.FC = () => {
+export const PrestationForm = () => {
 
   const dataProvider = useDataProvider();
   const [aircrafts, setAircrafts] = useState([]);
-  const [selectedPilot, setSelectedPilot] = useState<string>("");
-  const [selectedAircraft, setSelectedAircraft] = useState<string>("");
+  const [selectedPilot, setSelectedPilot] = useState("");
+  const [selectedAircraft, setSelectedAircraft] = useState("");
   const [selectedCircuits, setSelectedCircuits] = useState([]);
   const [selectedFlightTime, setSelectedFlightTime] = useState(0);
 
@@ -37,7 +37,6 @@ export const PrestationForm: React.FC = () => {
             }
         })
       };
-      console.log(prestation);
       dataProvider.create('prestations', {data: prestation});
   };
 

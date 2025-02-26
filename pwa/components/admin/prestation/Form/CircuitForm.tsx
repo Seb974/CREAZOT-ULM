@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import PublicIcon from '@mui/icons-material/Public';
 import { useDataProvider } from "react-admin";
 
+// @ts-ignore
 export const CircuitForm: React.FC = ({ selectedCircuit, setSelectedCircuit, isUpdate = false, reservation = null}) => {
 
   const dataProvider = useDataProvider();

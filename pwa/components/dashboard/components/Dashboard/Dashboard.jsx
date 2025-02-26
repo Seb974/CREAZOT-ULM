@@ -10,7 +10,7 @@ import { InformationsModal } from "../Modal/InformationsModal";
 import { UpdateModal } from "../Modal/UpdateModal";
 import { cameras } from "../../../../app/lib/cameras";
 
-const Dashboard: React.FC = () => {
+const Dashboard = () => {
 
   const now = new Date();
   const min = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0);

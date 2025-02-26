@@ -3,10 +3,10 @@ import { useDataProvider } from "react-admin";
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DoneIcon from '@mui/icons-material/Done';
-import { PilotForm } from "../../../admin/prestation/form/PilotForm";
-import { CircuitForm } from "../../../admin/prestation/form/CircuitForm";
-import { AircraftForm } from "../../../admin/prestation/form/AircraftForm";
-import { OptionForm } from "../../../admin/prestation/form/OptionForm";
+import { PilotForm } from "../../../admin/prestation/Form/PilotForm";
+import { CircuitForm } from "../../../admin/prestation/Form/CircuitForm";
+import { AircraftForm } from "../../../admin/prestation/Form/AircraftForm";
+import { OptionForm } from "../../../admin/prestation/Form/OptionForm";
 import { isDefined } from "../../../../app/lib/utils";
 import { PlusForm } from "../../../admin/prestation/Form/PlusForm";
 

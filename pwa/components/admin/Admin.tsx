@@ -23,7 +23,7 @@ import authProvider from "../../components/admin/authProvider";
 import Layout from "./layout/Layout";
 import { ENTRYPOINT } from "../../config/entrypoint";
 import prestationResourceProps from "./prestation";
-import volResourceProps from "./Vol";
+import volResourceProps from "./vol/";
 import reviewResourceProps from "./review";
 import i18nProvider from "./i18nProvider";
 import Dashboard from "../dashboard/components/Dashboard/Dashboard";

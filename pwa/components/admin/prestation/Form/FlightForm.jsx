@@ -7,15 +7,15 @@ import { Button } from '../../../common/ui/button';
 import AddIcon from '@mui/icons-material/Add';
 import { getCircuitPrice } from '../../../../app/lib/utils';
 
-export const FlightForm: React.FC = ({ selectedCircuits, setSelectedCircuits, selectedAircraft, selectedFlightTime }) => {
+export const FlightForm = ({ selectedCircuits, setSelectedCircuits, selectedAircraft, selectedFlightTime }) => {
 
   const defaultOption = {id: 0, prix: 0};
   const dataProvider = useDataProvider();
 
   const [circuits, setCircuits] = useState([]);
   const [options, setOptions] = useState([]);
-  const [disableOption, setDisableOption] = useState<boolean>(false);
-  const [disableAdd, setDisableAdd] = useState<boolean>(false);
+  const [disableOption, setDisableOption] = useState(false);
+  const [disableAdd, setDisableAdd] = useState(false);
   
   useEffect(() => {
     getCircuits();
