@@ -120,4 +120,18 @@ class User implements UserInterface
 
         return trim(\sprintf('%s %s', $this->firstName, $this->lastName));
     }
+
+    public function setId(Uuid $id): self
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    public function setRoles(array $roles): self
+    {  
+        $this->roles = $roles;
+
+        return $this;
+    }
 }

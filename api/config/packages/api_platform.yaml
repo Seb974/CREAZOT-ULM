@@ -54,73 +54,73 @@ services:
     app.filter.prestation.pilote:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:
-            $properties: { pilote.firstName: 'iword_start' } ]
+            $properties: { pilote.firstName: 'iword_start' } # ]
         tags: [ 'api_platform.filter' ]
 
     app.filter.prestation.aeronef:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:
-            $properties: { aeronef.immatriculation: 'ipartial' } ]
+            $properties: { aeronef.immatriculation: 'ipartial' } # ]
         tags: [ 'api_platform.filter' ]
     
     app.filter.prestation.date:
         parent: 'api_platform.doctrine.orm.date_filter'
         arguments:
-            $properties: { date: ~ } ]
+            $properties: { date: ~ } # ]
         tags: [ 'api_platform.filter' ]
 
     app.filter.vol.pilote:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:
-            $properties: { prestation.pilote.firstName: 'iword_start' } ]
+            $properties: { prestation.pilote.firstName: 'iword_start' } # ]
         tags: [ 'api_platform.filter' ]
 
     app.filter.vol.aeronef:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:
-            $properties: { prestation.aeronef.immatriculation: 'ipartial' } ]
+            $properties: { prestation.aeronef.immatriculation: 'ipartial' } # ]
         tags: [ 'api_platform.filter' ]
     
     app.filter.vol.date:
         parent: 'api_platform.doctrine.orm.date_filter'
         arguments:
-            $properties: { prestation.date: ~ } ]
+            $properties: { prestation.date: ~ } # ]
         tags: [ 'api_platform.filter' ]
 
     app.filter.vol.circuit:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:
-            $properties: { circuit.code: 'iexact' } ]
+            $properties: { circuit.code: 'iexact' } # ]
         tags: [ 'api_platform.filter' ]
     
     app.filter.reservation.pilote:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:
-            $properties: { pilote.firstName: 'iword_start' } ]
+            $properties: { pilote.firstName: 'iword_start' } # ]
         tags: [ 'api_platform.filter' ]
     
     app.filter.reservation.aeronef:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:
-            $properties: { avion.immatriculation: 'ipartial' } ]
+            $properties: { avion.immatriculation: 'ipartial' } # ]
         tags: [ 'api_platform.filter' ]
 
     app.filter.reservation.circuit:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:
-            $properties: { circuit.code: 'iexact' } ]
+            $properties: { circuit.code: 'iexact' } # ]
         tags: [ 'api_platform.filter' ]
 
     app.filter.reservation.date:
         parent: 'api_platform.doctrine.orm.date_filter'
         arguments:
-            $properties: { debut: ~ } ]
+            $properties: { debut: ~ } # ]
         tags: [ 'api_platform.filter' ]
 
     app.filter.reservation.client:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:
-            $properties: { nom: 'iword_start' } ]
+            $properties: { nom: 'iword_start' } # ]
         tags: [ 'api_platform.filter' ]
 
     app.filter.reservation.validated:
@@ -129,25 +129,25 @@ services:
             $managerRegistry: '@doctrine'
             $logger: '@logger'
             $nameConverter: '@?api_platform.name_converter'
-            $properties: { cancel: 'ipartial' } ]
+            $properties: { cancel: 'ipartial' } # ]
         tags: [ 'api_platform.filter' ]
 
     app.filter.review.admin.user:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:
-            $properties: { user: 'exact' } ]
+            $properties: { user: 'exact' } # ]
         tags: [ 'api_platform.filter' ]
 
     app.filter.review.admin.book:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:
-            $properties: { book: 'exact' } ]
+            $properties: { book: 'exact' } # ]
         tags: [ 'api_platform.filter' ]
 
     app.filter.review.admin.rating:
         parent: 'api_platform.doctrine.orm.numeric_filter'
         arguments:
-            $properties: { rating: ~ } ]
+            $properties: { rating: ~ } # ]
         tags: [ 'api_platform.filter' ]
 
     # "name" is not a property, it's only a method "getName"
@@ -158,5 +158,5 @@ services:
             $managerRegistry: '@doctrine'
             $logger: '@logger'
             $nameConverter: '@?api_platform.name_converter'
-            $properties: { name: 'ipartial' } ]
+            $properties: { name: 'ipartial' } # ]
         tags: [ 'api_platform.filter' ]

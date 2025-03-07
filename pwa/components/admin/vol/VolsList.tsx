@@ -20,15 +20,15 @@ import {
   DateInput,
 } from "react-admin";
 
-import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+// import { useRouter } from "next/navigation";
+// import { useMutation } from "@tanstack/react-query";
 import { useMercure } from "../../../utils/mercure";
 import { type Vol } from "../../../types/Vol";
 import { type PagedCollection } from "../../../types/collection";
-import { ShowButton } from "./ShowButton";
-import { RatingField } from "../review/RatingField";
-import { ConditionInput } from "./ConditionInput";
-import { type FiltersProps, buildUriFromFilters } from "../../../utils/book";
+// import { ShowButton } from "./ShowButton";
+// import { RatingField } from "../../../../archives/components/admin/review/RatingField";
+// import { ConditionInput } from "./ConditionInput";
+// import { type FiltersProps, buildUriFromFilters } from "../../utils/book";
 
 export interface Props {
   data: PagedCollection<Vol> | null;

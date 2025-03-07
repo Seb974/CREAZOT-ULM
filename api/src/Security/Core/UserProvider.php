@@ -45,17 +45,25 @@ final readonly class UserProvider implements AttributesBasedUserProviderInterfac
         $user = $this->repository->findOneBy(['email' => $identifier]) ?: new User();
         $user->email = $identifier;
 
-        if (!isset($attributes['given_name'])) {
-            throw new UnsupportedUserException('Property "given_name" is missing in token attributes.');
+        if (!isset($attributes['preferred_username'])) {
+            throw new UnsupportedUserException('Property "preferred_username" is missing in token attributes.');
         }
-        $user->firstName = $attributes['given_name'];
+        $user->firstName = $attributes['preferred_username'];
 
         if (!isset($attributes['family_name'])) {
             throw new UnsupportedUserException('Property "family_name" is missing in token attributes.');
         }
         $user->lastName = $attributes['family_name'];
 
-        $this->repository->save($user);
+        if (!isset($attributes['realm_access'])) {
+            throw new UnsupportedUserException('Property "realm_access" is missing in token attributes.');
+        // } else if (array_key_exists('realm_access', $attributes) && array_key_exists('roles', $attributes['realm_access'])) {
+        } else if (isset($attributes['realm_access']['roles'])) {
+            $roles = in_array('admin', $attributes['realm_access']['roles']) ? ['ROLE_USER', 'OIDC_USER', 'ROLE_ADMIN', 'OIDC_ADMIN'] : ['ROLE_USER', 'OIDC_USER'];
+            $user->setRoles($roles);
+        }
+        
+        $this->repository->save($user, true);
 
         return $user;
     }
