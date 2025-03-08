@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import PublicIcon from '@mui/icons-material/Public';
 import { useDataProvider } from "react-admin";
+import { isDefined } from "../../../../app/lib/utils";
 
 // @ts-ignore
 export const CircuitForm: React.FC = ({ selectedCircuit, setSelectedCircuit, isUpdate = false, reservation = null}) => {
@@ -40,7 +41,7 @@ export const CircuitForm: React.FC = ({ selectedCircuit, setSelectedCircuit, isU
             <PublicIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/>
 
             <select
-              value={ selectedCircuit['@id'] }
+              value={ isDefined(selectedCircuit) && isDefined(selectedCircuit['@id']) ? selectedCircuit['@id'] : 0 }
               onChange={(e) => {
                 const newCircuit = circuits.find(c => c['@id'] === e.target.value);
                 setSelectedCircuit(newCircuit);

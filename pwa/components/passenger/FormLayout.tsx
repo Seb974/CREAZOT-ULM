@@ -1,3 +1,5 @@
+"use client";
+
 import { Layout } from "../common/Layout";
 import { Toaster } from "react-hot-toast";
 
@@ -28,10 +30,10 @@ export default function FormLayout({children}: { children: React.ReactNode }) {
                         <a href="https://www.planetair974.fr/contact" className="hover:underline me-4 md:me-6 discreet-link">Contactez-nous</a>
                     </li>
                     <li>
-                        <a href={`${window.origin}/admin`} className="hover:underline me-4 md:me-6 discreet-link">Accès licenciés</a>
+                        <a href={`https://private.planetair974.com/admin`} className="hover:underline me-4 md:me-6 discreet-link">Accès licenciés</a>
                     </li>
                     <li>
-                        <a href={`${window.origin}/oidc/`} className="hover:underline discreet-link">Administration</a>
+                        <a href={`https://private.planetair974.com/oidc/`} className="hover:underline discreet-link">Administration</a>
                     </li>
                 </ul>
                 </div>
