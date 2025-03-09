@@ -35,7 +35,7 @@ return (
         <div className="w-full mt-6">
             <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark h-full">
               <a onClick={ onMetarClick } href="https://metar-taf.com/fr/FMEP" id="metartaf-KiVSEp48" style={{fontSize: "18px", fontWeight:500, color:"#000", width:"100%", height:"278px", display:"block"}}>METAR Aéroport de Pierrefonds</a>
-              <script async defer crossorigin="anonymous" src="https://metar-taf.com/fr/embed-js/FMEP?layout=landscape&qnh=hPa&rh=dp&target=KiVSEp48"></script>
+              <script async defer crossOrigin="anonymous" src="https://metar-taf.com/fr/embed-js/FMEP?layout=landscape&qnh=hPa&rh=dp&target=KiVSEp48"></script>
             </div>
         </div>
         <MetarView />
