@@ -1,6 +1,5 @@
 import { type Item } from "./item";
-import { type Thumbnails } from "./Thumbnails";
-
+import { Nature } from "./nature";
 export class Circuit implements Item {
   public "@id"?: string;
 
@@ -11,7 +10,8 @@ export class Circuit implements Item {
     public cout?: number,
     public duree?: number,
     _id?: string,
-    public id?: string
+    public id?: string,
+    public nature?: Nature
   ) {
     this["@id"] = _id;
   }

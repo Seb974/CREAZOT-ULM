@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useDataProvider } from "react-admin";
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import NoPhotographyIcon from '@mui/icons-material/NoPhotography';
+import { isDefined } from "../../../../app/lib/utils";
 
 // @ts-ignore
 export const OptionForm: React.FC = ({ selectedOption, setSelectedOption, isUpdate = false, reservation = null}) => {
@@ -44,7 +45,7 @@ export const OptionForm: React.FC = ({ selectedOption, setSelectedOption, isUpda
                 <AddAPhotoIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/>
             }
             <select
-              value={selectedOption['@id'] || ""}
+              value={ isDefined(selectedOption) && isDefined(selectedOption['@id']) ? selectedOption['@id'] : ""}
               onChange={(e) => {
                 const newOptions = e.target.value !== "" ? options.find(o => o['@id'] === e.target.value) : "";
                 setSelectedOption(newOptions);

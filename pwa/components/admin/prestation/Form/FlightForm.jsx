@@ -5,7 +5,7 @@ import { useDataProvider } from "react-admin";
 import { OneFlightForm } from "./OneFlightForm";
 import { Button } from '../../../common/ui/button';
 import AddIcon from '@mui/icons-material/Add';
-import { getCircuitPrice } from '../../../../app/lib/utils';
+import { getCircuitPrice, isDefined } from '../../../../app/lib/utils';
 
 export const FlightForm = ({ selectedCircuits, setSelectedCircuits, selectedAircraft, selectedFlightTime }) => {
 
@@ -38,7 +38,10 @@ export const FlightForm = ({ selectedCircuits, setSelectedCircuits, selectedAirc
         .getList('circuits', {})
         .then(({ data }) => {
             setCircuits(data);
-            setSelectedCircuits([{ ident: new Date().valueOf(), circuit: data[0], quantite: 1, details: data[0].nom, duree: data[0].duree, option: defaultOption, prix: getCircuitPrice(data[0], defaultOption, selectedFlightTime, selectedAircraft) }])
+            if (data.length > 0)
+                setSelectedCircuits([{ ident: new Date().valueOf(), circuit: data[0], quantite: 1, details: data[0].nom, duree: data[0].duree, option: defaultOption, prix: getCircuitPrice(data[0], defaultOption, selectedFlightTime, selectedAircraft) }])
+            else
+                setDisableAdd(true);
     });
   };
 

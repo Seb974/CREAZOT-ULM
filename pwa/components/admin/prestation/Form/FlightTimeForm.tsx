@@ -6,7 +6,6 @@ import React, { useEffect } from "react";
 export const FlightTimeForm: React.FC = ({ aircrafts, selectedAircraft, selectedCircuits, selectedFlightTime, setSelectedFlightTime }) => {
 
   useEffect(() => {
-    // const currentAircraft = aircrafts.find(c => c.id === selectedAircraft);
     if (selectedAircraft !== null && selectedAircraft !== undefined) { 
       if (selectedCircuits.find(c => !c.circuit.prixFixe) === undefined) {
         const newFlightTime = selectedAircraft.decimal ? 

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import BadgeIcon from '@mui/icons-material/Badge';
 import { useDataProvider } from "react-admin";
+import { isDefined } from "../../../../app/lib/utils";
 
 // @ts-ignore
 export const PilotForm: React.FC = ({ selectedPilot, setSelectedPilot, autoSelect = true}) => {
@@ -34,7 +35,7 @@ export const PilotForm: React.FC = ({ selectedPilot, setSelectedPilot, autoSelec
             <BadgeIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/>
 
             <select
-              value={ selectedPilot['@id'] || "" }
+              value={ isDefined(selectedPilot) && isDefined(selectedPilot['@id']) ? selectedPilot['@id'] : "" }
               onChange={(e) => {
                 const newPilot = e.target.value !== "" ? pilots.find(p => p['@id'] === e.target.value) : "";
                 setSelectedPilot(newPilot);

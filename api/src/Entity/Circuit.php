@@ -77,6 +77,10 @@ class Circuit
     #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?\DateTimeInterface $duree = null;
 
+    #[ORM\ManyToOne(targetEntity: Nature::class)]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
+    private ?Nature $nature = null;
+
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?bool $prixFixe = null;
@@ -146,6 +150,18 @@ class Circuit
     public function setDuree(?\DateTimeInterface $duree): static
     {
         $this->duree = $duree;
+
+        return $this;
+    }
+
+    public function getNature(): ?Nature
+    {
+        return $this->nature;
+    }
+
+    public function setNature(?Nature $nature): static
+    {
+        $this->nature = $nature;
 
         return $this;
     }

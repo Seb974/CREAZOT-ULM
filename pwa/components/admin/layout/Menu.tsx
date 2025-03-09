@@ -40,11 +40,11 @@ const CustomMenu = () => {
         primaryText="Circuits"
         leftIcon={<PublicIcon />}
       />
-      <Menu.Item
+      {/* <Menu.Item
         to="/options"
         primaryText="Options"
         leftIcon={<AddAPhotoIcon />}
-      />
+      /> */}
       <Menu.Item
         to="/users"
         primaryText="Pilotes"

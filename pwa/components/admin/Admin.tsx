@@ -1,34 +1,28 @@
 "use client";
 
 import Head from "next/head";
-import { useContext, useRef, useState } from "react";
-import { type DataProvider, localStorageStore, defaultTheme } from "react-admin";
+import { useRef } from "react";
+import { type DataProvider, defaultTheme } from "react-admin";
 import { signIn, useSession } from "next-auth/react";
 import SyncLoader from "react-spinners/SyncLoader";
 import {
   fetchHydra,
   HydraAdmin,
   hydraDataProvider,
-  // OpenApiAdmin,
   ResourceGuesser,
 } from "@api-platform/admin";
 import { parseHydraDocumentation } from "@api-platform/api-doc-parser";
 import { CustomRoutes } from 'react-admin';
 import { Route } from "react-router-dom";
-
-
 import { type Session } from "../../app/auth";
-// import DocContext from "../../components/admin/DocContext";
 import authProvider from "../../components/admin/authProvider";
 import Layout from "./layout/Layout";
 import { ENTRYPOINT } from "../../config/entrypoint";
 import prestationResourceProps from "./prestation";
+import circuitResourceProps from "./circuit";
 import volResourceProps from "./vol/";
-import reviewResourceProps from "./review";
 import i18nProvider from "./i18nProvider";
 import Dashboard from "../dashboard/components/Dashboard/Dashboard";
-import { BooksList } from "./book/BooksList";
-import { PrestationsList } from "./prestation/PrestationsList";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -56,7 +50,6 @@ const myTheme = {
   ...defaultTheme,
   palette: {
       mode: 'light',
-      // secondary: '#EE4244'
   }
 };
 
@@ -69,7 +62,6 @@ const AdminAdapter = ({
 }) => {
   // @ts-ignore
   const dataProvider = useRef<DataProvider>();
-  // const { docType } = useContext(DocContext);
 
   dataProvider.current = hydraDataProvider({
     entrypoint: ENTRYPOINT,
@@ -99,51 +91,7 @@ const AdminAdapter = ({
       {!!children && children}
     </HydraAdmin>
   );
-
-  // return docType === "hydra" ? (
-  //   <HydraAdmin
-  //     requireAuth
-  //     authProvider={authProvider}
-  //     // @ts-ignore
-  //     dataProvider={dataProvider.current}
-  //     entrypoint={window.origin}
-  //     i18nProvider={i18nProvider}
-  //     layout={Layout}
-  //   >
-  //     {!!children && children}
-  //   </HydraAdmin>
-  // ) : (
-  //   <OpenApiAdmin
-  //     requireAuth
-  //     authProvider={authProvider}
-  //     // @ts-ignore
-  //     dataProvider={dataProvider.current}
-  //     entrypoint={window.origin}
-  //     docEntrypoint={`${window.origin}/docs.json`}
-  //     i18nProvider={i18nProvider}
-  //     layout={Layout}
-  //   >
-  //     {!!children && children}
-  //   </OpenApiAdmin>
-  // );
 };
-
-// const store = localStorageStore();
-
-// const AdminWithContext = ({ session }: { session: Session }) => {
-//   const [docType, setDocType] = useState(
-//     store.getItem<string>("docType", "hydra")
-//   );
-
-//   return (
-//     <DocContext.Provider value={{ docType, setDocType }}>
-//       <AdminAdapter session={session}>
-//         <ResourceGuesser name="admin/books" {...bookResourceProps} />
-//         <ResourceGuesser name="admin/reviews" {...reviewResourceProps} />
-//       </AdminAdapter>
-//     </DocContext.Provider>
-//   );
-// };
 
 const AdminWithOIDC = () => {
   // Can't use next-auth/middleware because of https://github.com/nextauthjs/next-auth/discussions/7488
@@ -170,21 +118,13 @@ const AdminWithOIDC = () => {
       <ResourceGuesser name="prestations" {...prestationResourceProps} />
       <ResourceGuesser name="vols" {...volResourceProps}/>
       <ResourceGuesser name="passagers"/>
-      <ResourceGuesser name="circuits"/>
+      <ResourceGuesser name="circuits" {...circuitResourceProps}/>
       <ResourceGuesser name="aeronefs"/>
       <ResourceGuesser name="options"/>
+      <ResourceGuesser name="natures"/>
       <ResourceGuesser name="users"/>
-      <CustomRoutes>
-            <Route path="/books" element={<BooksList />} />
-        </CustomRoutes>
-      {/* <ResourceGuesser name="books" {...bookResourceProps} />
-      <ResourceGuesser name="reviews" {...reviewResourceProps} /> */}
     </AdminAdapter>
   );
-  // return <AdminWithContext session={session} />;
-
-  // @ts-ignore
-  // return <AdminAdapter session={session} />;
 };
 
 const Admin = () => (
