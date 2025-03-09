@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-
 const ENV = (!process.env.NEXT_PUBLIC_NODE_ENV || process.env.NEXT_PUBLIC_NODE_ENV === "development") ? "development" : "production" ;
-export const API_DOMAIN = ENV === "development" ? process.env.NEXT_PUBLIC_DEV_API_DOMAIN : process.env.NEXT_PUBLIC_PROD_API_DOMAIN;
+// export const API_DOMAIN = ENV === "development" ? process.env.NEXT_PUBLIC_DEV_API_DOMAIN : process.env.NEXT_PUBLIC_PROD_API_DOMAIN;
+export const API_DOMAIN = window.origin;
 
 export async function get(route: string) {
     return axios.get(API_DOMAIN + route);
