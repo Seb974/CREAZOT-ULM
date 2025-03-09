@@ -69,7 +69,7 @@ export async function createPassenger(prevState: State, formData: FormData) {
         return {message, errors};
     }
 
-    redirect(`${API_DOMAIN}`!, RedirectType.replace);
+    redirect(`https://www.planetair974.fr`!, RedirectType.replace);
 }
 
 export const getMetarOrTaf = (icao, request = "metar", decoded = false) => {

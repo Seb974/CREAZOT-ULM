@@ -2,12 +2,12 @@ import { useFormStatus } from 'react-dom';
 import { Button } from '../common/ui/button';
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
 
-export default function SubmitButton() {
+export default function SubmitButton({ isDisabled = false }) {
 
     const { pending } = useFormStatus();
   
     return (
-        <Button type="submit" className="flex h-10 items-center rounded-lg bg-red-500 px-4 text-sm font-medium text-white transition-colors hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500 active:bg-red-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50" aria-disabled={pending}>
+        <Button type="submit" className="flex h-10 items-center rounded-lg bg-red-500 px-4 text-sm font-medium text-white transition-colors hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500 active:bg-red-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50" aria-disabled={ pending || isDisabled }>
         {pending ? 
             <div role="status">
               <svg aria-hidden="true" className="inline w-6 h-6 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
