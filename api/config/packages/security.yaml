@@ -43,15 +43,15 @@ when@prod: &prod
 
 when@dev: *prod
 
-when@test:
-    security:
-        firewalls:
-            main:
-                access_token:
-                    token_handler:
-                        oidc:
-                            claim: 'email'
-                            audience: '%env(OIDC_AUD)%'
-                            issuers: [ '%env(OIDC_SERVER_URL)%' ]
-                            algorithm: 'ES256'
-                            keyset: '{"keys":[%env(OIDC_JWK)%]}'
+# when@test:
+#     security:
+#         firewalls:
+#             main:
+#                 access_token:
+#                     token_handler:
+#                         oidc:
+#                             claim: 'email'
+#                             audience: '%env(OIDC_AUD)%'
+#                             issuers: [ '%env(OIDC_SERVER_URL)%' ]
+#                             algorithm: 'ES256'
+#                             keyset: '{"keys":[%env(OIDC_JWK)%]}'

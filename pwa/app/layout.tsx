@@ -19,7 +19,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <SessionProvider session={session}>
+        <SessionProvider session={session} basePath='/api/auth'>
           <Providers>
             <Layout>
               {children}

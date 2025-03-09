@@ -7,29 +7,36 @@ services:
       target: frankenphp_prod
     environment:
       APP_ENV: prod
-      APP_SECRET: ${APP_SECRET}
-      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
-      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
-
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: y4qKkbOmvj6RMCHgAVaTH6tVfXYf5zmI
+      APP_SECRET_ID: Gt2cYITO0xV4yl6qS0q8SxZK2eXY8zAu
+      APP_SECRET: ${APP_SECRET_ID:-Gt2cYITO0xV4yl6qS0q8SxZK2eXY8zAu}
+      CADDY_MERCURE_JWT_SECRET: d8b0bhdnQDlbbdM70I0aTBvgrBUe3X
+      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-d8b0bhdnQDlbbdM70I0aTBvgrBUe3X}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-d8b0bhdnQDlbbdM70I0aTBvgrBUe3X}
+      DATABASE_URL: postgresql://app:y4qKkbOmvj6RMCHgAVaTH6tVfXYf5zmI@database:5432/app?serverVersion=16&charset=utf8
   pwa:
     image: ${PWA_DOCKER_IMAGE}
     build:
       context: ./pwa
       target: prod
       args:
-        AUTH_SECRET: ${AUTH_SECRET}
+        AUTH_SECRET: ${AUTH_SECRET:-pVk4mV6fQnXcyh88RM1wa7ifs5F1RXpJ}
         # https://nextjs.org/docs/app/building-your-application/configuring/environment-variables#bundling-environment-variables-for-the-browser
-        NEXT_PUBLIC_OIDC_SERVER_URL: ${NEXT_PUBLIC_OIDC_SERVER_URL}
+        NEXT_PUBLIC_OIDC_SERVER_URL: ${NEXT_PUBLIC_OIDC_SERVER_URL:-https://private.planetair974.com/oidc/realms/planetair974}
     environment:
-      AUTH_SECRET: ${AUTH_SECRET}
+      DEFINED_AUTH_SECRET: pVk4mV6fQnXcyh88RM1wa7ifs5F1RXpJ
+      AUTH_SECRET: ${DEFINED_AUTH_SECRET:-pVk4mV6fQnXcyh88RM1wa7ifs5F1RXpJ}
+      NEXT_PUBLIC_OIDC_SERVER_URL: ${OIDC_SERVER_URL:-https://private.planetair974.com/oidc/realms/planetair974}
 
   database:
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-y4qKkbOmvj6RMCHgAVaTH6tVfXYf5zmI}
 
   keycloak-database:
     environment:
-      POSTGRES_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-1KAOIhLvptiy5Kq8e5ttRyaZHwXNIyD}
 
   keycloak:
     image: ${KEYCLOAK_DOCKER_IMAGE}
@@ -38,4 +45,5 @@ services:
       target: keycloak
     environment:
       KEYCLOAK_PRODUCTION: "true"
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KEYCLOAK_ADMINISTRATION_PASSWORD: Aeroprakt22
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMINISTRATION_PASSWORD:-Aeroprakt22}

@@ -41,7 +41,7 @@ export const CircuitForm: React.FC = ({ selectedCircuit, setSelectedCircuit, isU
             <PublicIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/>
 
             <select
-              value={ isDefined(selectedCircuit) && isDefined(selectedCircuit)['@id']? selectedCircuit['@id'] : 0 }
+              value={ isDefined(selectedCircuit) && isDefined(selectedCircuit['@id']) ? selectedCircuit['@id'] : 0 }
               onChange={(e) => {
                 const newCircuit = circuits.find(c => c['@id'] === e.target.value);
                 setSelectedCircuit(newCircuit);
