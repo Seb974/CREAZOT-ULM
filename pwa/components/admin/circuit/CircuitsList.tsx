@@ -24,7 +24,6 @@ export interface Props {
 
 const ListActions = () => (
   <TopToolbar>
-      <FilterButton/> 
       <CreateButton/>
       <ExportButton/>
   </TopToolbar>
