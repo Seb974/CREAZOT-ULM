@@ -1,7 +1,7 @@
 import { EditGuesser, type EditGuesserProps } from "@api-platform/admin";
 import { TopToolbar } from "react-admin";
 
-import { BookForm } from "./CircuitForm";
+import { BookForm } from "./BookForm";
 import { ShowButton } from "./ShowButton";
 
 // @ts-ignore
