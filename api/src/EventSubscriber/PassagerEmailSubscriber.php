@@ -38,9 +38,9 @@ final class PassagerEmailSubscriber implements EventSubscriberInterface
         }
 
         $message = (new TemplatedEmail())
-            ->from('sebastien.maillot@gmx.fr')
+            ->from('contact@planetair974.com')
             ->to($passager->getEmail())
-            ->subject('Planetair974 : Photos & vidéos')
+            ->subject('Photos & vidéos')
             ->htmlTemplate('emails/link.html.twig')
             ->context([
                 'user' => $passager->getPrenom(),

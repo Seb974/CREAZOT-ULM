@@ -37,3 +37,7 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# Files containing hark link to domain name
+/app/lib/api.ts
+/components/passenger/FormLayout.tsx
