@@ -5,4 +5,7 @@
 ###> Compose/Prod Compose with env secret vars ###
 /compose.yaml
 /compose.*.yaml
+/compoz.prod.yaml
+/compoze.(dev).yaml
+/compoze.(prod).yaml
 ###< Compose/Prod Compose with env secret vars ###
