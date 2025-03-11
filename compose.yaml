@@ -14,17 +14,17 @@ services:
       CADDY_MERCURE_JWT_SECRET: d8b0bhdnQDlbbdM70I0aTBvgrBUe3X
       PWA_UPSTREAM: pwa:3000
       OIDC_UPSTREAM: keycloak:8080
-      APP_NAME: private.planetair974.com
-      SERVER_NAME: ${APP_NAME:-private.planetair974.com, localhost}, php:80
+      APP_NAME: admin.planetair974.re
+      SERVER_NAME: ${APP_NAME:-admin.planetair974.re, localhost}, php:80
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-d8b0bhdnQDlbbdM70I0aTBvgrBUe3X}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-d8b0bhdnQDlbbdM70I0aTBvgrBUe3X}
       TRUSTED_PROXIES: ${TRUSTED_PROXIES:-127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
-      TRUSTED_HOSTS: ^${SERVER_NAME:-private\.planetair974\.com|localhost|keycloak}|keycloak|php$$
+      TRUSTED_HOSTS: ^${SERVER_NAME:-private\.planetair974\.re|localhost|keycloak}|keycloak|php$$
       DATABASE_URL: postgresql://app:y4qKkbOmvj6RMCHgAVaTH6tVfXYf5zmI@database:5432/app?serverVersion=16&charset=utf8
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://php/.well-known/mercure}
-      MERCURE_PUBLIC_URL: https://${SERVER_NAME:-private.planetair974.com}/.well-known/mercure
+      MERCURE_PUBLIC_URL: https://${SERVER_NAME:-admin.planetair974.re}/.well-known/mercure
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-d8b0bhdnQDlbbdM70I0aTBvgrBUe3X}
-      OIDC_SERVER_URL: ${OIDC_SERVER_URL:-https://private.planetair974.com/oidc/realms/planetair974}
+      OIDC_SERVER_URL: ${OIDC_SERVER_URL:-https://admin.planetair974.re/oidc/realms/planetair974}
       OIDC_SERVER_URL_INTERNAL: ${OIDC_SERVER_URL_INTERNAL:-http://keycloak:8080/oidc/realms/planetair974}
     ports:
       # HTTP
@@ -46,11 +46,11 @@ services:
       DEFINED_AUTH_SECRET: pVk4mV6fQnXcyh88RM1wa7ifs5F1RXpJ
       NEXT_PUBLIC_ENTRYPOINT: http://php
       NEXT_PUBLIC_OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-api-platform-pwa}
-      NEXT_PUBLIC_OIDC_SERVER_URL: ${OIDC_SERVER_URL:-https://private.planetair974.com/oidc/realms/planetair974}
+      NEXT_PUBLIC_OIDC_SERVER_URL: ${OIDC_SERVER_URL:-https://admin.planetair974.re/oidc/realms/planetair974}
       NEXT_PUBLIC_OIDC_SERVER_URL_INTERNAL: ${OIDC_SERVER_URL_INTERNAL:-http://keycloak:8080/oidc/realms/planetair974}
       NEXT_PUBLIC_OIDC_AUTHORIZATION_CLIENT_ID: ${OIDC_AUTHORIZATION_CLIENT_ID:-api-platform-api}
       AUTH_SECRET: ${DEFINED_AUTH_SECRET:-pVk4mV6fQnXcyh88RM1wa7ifs5F1RXpJ}
-      NEXTAUTH_URL: ${AUTH_URL:-https://private.planetair974.com} # /api/auth
+      NEXTAUTH_URL: ${AUTH_URL:-https://admin.planetair974.re} # /api/auth
       AUTH_TRUST_HOST: "true"
       NEXT_SHARP_PATH: /srv/app/node_modules/sharp
 
@@ -97,8 +97,8 @@ services:
       # Must finish with a trailing slash (https://github.com/bitnami/charts/issues/10885#issuecomment-1414279144)
       KEYCLOAK_HTTP_RELATIVE_PATH: /oidc/
       # https://www.keycloak.org/server/hostname
-      KC_HOSTNAME_URL: https://${SERVER_NAME:-private.planetair974.com}/oidc/
-      KC_HOSTNAME_ADMIN_URL: https://${SERVER_NAME:-private.planetair974.com}/oidc/
+      KC_HOSTNAME_URL: https://${SERVER_NAME:-admin.planetair974.re}/oidc/
+      KC_HOSTNAME_ADMIN_URL: https://${SERVER_NAME:-admin.planetair974.re}/oidc/
       # https://www.keycloak.org/server/features
       KC_FEATURES: "scripts"
     depends_on:

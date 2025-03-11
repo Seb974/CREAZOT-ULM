@@ -24,11 +24,11 @@ services:
       args:
         AUTH_SECRET: ${AUTH_SECRET:-pVk4mV6fQnXcyh88RM1wa7ifs5F1RXpJ}
         # https://nextjs.org/docs/app/building-your-application/configuring/environment-variables#bundling-environment-variables-for-the-browser
-        NEXT_PUBLIC_OIDC_SERVER_URL: ${NEXT_PUBLIC_OIDC_SERVER_URL:-https://private.planetair974.com/oidc/realms/planetair974}
+        NEXT_PUBLIC_OIDC_SERVER_URL: ${NEXT_PUBLIC_OIDC_SERVER_URL:-https://admin.planetair974.re/oidc/realms/planetair974}
     environment:
       DEFINED_AUTH_SECRET: pVk4mV6fQnXcyh88RM1wa7ifs5F1RXpJ
       AUTH_SECRET: ${DEFINED_AUTH_SECRET:-pVk4mV6fQnXcyh88RM1wa7ifs5F1RXpJ}
-      NEXT_PUBLIC_OIDC_SERVER_URL: ${OIDC_SERVER_URL:-https://private.planetair974.com/oidc/realms/planetair974}
+      NEXT_PUBLIC_OIDC_SERVER_URL: ${OIDC_SERVER_URL:-https://admin.planetair974.re/oidc/realms/planetair974}
 
   database:
     environment:
