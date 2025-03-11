@@ -12,7 +12,7 @@ export const Header = () => {
   const pathname = usePathname();
   const { data: session, status } = useSession();
 
-  if (pathname === "/" || pathname.match(/^\/admin/)) return <></>;
+  if (pathname === "/" || pathname.match(/^\/admin/) || pathname.match(/^\/thanks/)) return <></>;
 
   return (
     <header className="bg-neutral-100 sticky top-0 z-10">
