@@ -89,10 +89,10 @@ export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
           <>
             <List resource="vols" actions={ null }>
               <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false}>
-                <NumberField source="quantite" label="Quantité"/>
+                <NumberField source="quantite" label="Nombre de vol(s)"/>
                 <TextField source="circuit.code" label="Circuit"/>
                 <TextField source="circuit.nature.code" label="Nature"/>
-                <TextField source="option.nom" label="Option" sortable={ true }/>
+                <TextField source="option.nom" label="Option"/>
               </Datagrid>
             </List>
             <TextField source="pilote.firstName" label="Pilote"/>
