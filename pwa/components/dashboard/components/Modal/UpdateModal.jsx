@@ -21,7 +21,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
     const [selectedCircuit, setSelectedCircuit] = useState("");
     const [selectedOption, setSelectedOption] = useState("");
     const [selectedAircraft, setSelectedAircraft] = useState("");
-    const [consumer, setConsumer] = useState({nom:"", telephone: "", quantite: 1, statut: "VALIDATED", remarques: ""});
+    const [consumer, setConsumer] = useState({nom:"", telephone: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false});
 
     useEffect(() => {
         if (toUpdate !== null) {
@@ -32,7 +32,8 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
             setConsumer({
                 ...toUpdate, 
                 statut: isDefined(toUpdate.statut) ? toUpdate.statut : "VALIDATED",
-                remarques: isDefined(toUpdate.remarques) ? toUpdate.remarques : ""
+                remarques: isDefined(toUpdate.remarques) ? toUpdate.remarques : "",
+                report: isDefined(toUpdate.report) ? toUpdate.report : false,
              });
         } else {
             reinitializeData();
@@ -72,7 +73,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
         setSelectedPilot("");
         setSelectedOption("");
         setSelectedAircraft("");
-        setConsumer({nom:"", telephone: "", quantite:1, statut: "VALIDATED", remarques: ""});
+        setConsumer({nom:"", telephone: "", quantite:1, statut: "VALIDATED", remarques: "", report: false});
         setPlus(false);
     };
 

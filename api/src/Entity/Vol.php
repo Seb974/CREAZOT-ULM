@@ -50,6 +50,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     denormalizationContext: [
         AbstractNormalizer::GROUPS => ['Vol:write'],
     ],
+    order: ['prestation.date' => 'DESC'],
     collectDenormalizationErrors: true,
     security: 'is_granted("OIDC_USER")',
     mercure: true

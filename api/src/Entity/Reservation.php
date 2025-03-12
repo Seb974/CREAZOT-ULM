@@ -128,6 +128,10 @@ class Reservation
     #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
     private ?string $remarques = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
+    private ?bool $report = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -285,6 +289,18 @@ class Reservation
     public function setRemarques(?string $remarques): static
     {
         $this->remarques = $remarques;
+
+        return $this;
+    }
+
+    public function isReport(): ?bool
+    {
+        return $this->report;
+    }
+
+    public function setReport(?bool $report): static
+    {
+        $this->report = $report;
 
         return $this;
     }

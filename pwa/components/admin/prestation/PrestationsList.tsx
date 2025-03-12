@@ -8,48 +8,26 @@ import {
   List,
   TextField,
   EditButton,
-  WrapperField,
   CreateButton,
-  DatagridConfigurable,
   ExportButton,
   FilterButton,
-  SelectColumnsButton,
   TopToolbar,
-  SearchInput,
   DateField,
   NumberField,
   DateInput,
   ShowButton,
-  ReferenceField,
+  ArrayField,
+  FunctionField,
 } from "react-admin";
 
-// import { useRouter } from "next/navigation";
-// import { useMutation } from "@tanstack/react-query";
-import { useMercure } from "../../../utils/mercure";
 import { type Prestation } from "../../../types/Prestation";
 import { type PagedCollection } from "../../../types/collection";
-// import { ShowButton } from "./ShowButton";
-// import { RatingField } from "../../../../archives/components/admin/review/RatingField";
-// import { ConditionInput } from "./ConditionInput";
-// import { type FiltersProps, buildUriFromFilters } from "../../../utils/book";
 
 export interface Props {
   data: PagedCollection<Prestation> | null;
   hubURL: string | null;
   page: number;
 }
-
-const getPagePath = (page: number): string => `/prestations?page=${page}`;
-
-const ConditionField = () => {
-  const record = useRecordContext();
-  if (!record || !record.condition) return null;
-  return (
-    <span>
-      {record.condition.replace(/https:\/\/schema\.org\/(.+)Condition$/, "$1")}
-    </span>
-  );
-};
 
 const ListActions = () => (
   <TopToolbar>
@@ -58,8 +36,6 @@ const ListActions = () => (
       <ExportButton/>
   </TopToolbar>
 );
-
-const ListExpandActions = () =>  <TopToolbar></TopToolbar>
 
 const filters = [
   <TextInput source="aeronef.immatriculation" key="Aeronef" label="Aéronef"/>,
@@ -70,46 +46,43 @@ const filters = [
 
 export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
-  const collection = useMercure(data, hubURL);
-  // const router = useRouter();
-
-  // const filtersMutation = useMutation({
-  //   mutationFn: async (filters: FiltersProps) => {
-  //     router.push(buildUriFromFilters("/books", filters));
-  //   },
-  //   onError: (error) => {
-  //     console.error(error);
-  //   },
-  // });
-
+  const VolsExpansion = () => {
+    const record = useRecordContext();
+    return (
+      <>
+        <ArrayField source="vols">
+            <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}} className="text-xs italic">
+                <NumberField source="quantite" label="Nb vol(s)"/>
+                <FunctionField
+                  source="circuit"
+                  render={record => <p>{record.circuit.code} - <span className="text-xs italic">{record.circuit.nom}</span></p>}
+                />
+                <FunctionField
+                  source="nature"
+                  render={record => <p>{record.circuit.nature.code} - <span className="text-xs italic">{record.circuit.nature.label}</span></p>}
+                />
+                <TextField source="option.nom" label="Option"/>
+            </Datagrid>
+        </ArrayField>
+        
+      </>
+    );
+  };
 
   return (
-    <List resource="prestations" actions={<ListActions/>} filters={ filters }>   {/* filter={{ authorId }} */} 
-        <Datagrid expand={
-          <>
-            <List resource="vols" actions={ null }>
-              <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false}>
-                <NumberField source="quantite" label="Nombre de vol(s)"/>
-                <TextField source="circuit.code" label="Circuit"/>
-                <TextField source="circuit.nature.code" label="Nature"/>
-                <TextField source="option.nom" label="Option"/>
-              </Datagrid>
-            </List>
-            <TextField source="pilote.firstName" label="Pilote"/>
-          </>
-          }
-        >
+    <List resource="prestations" actions={<ListActions/>} filters={ filters }>
+        <Datagrid expand={ <VolsExpansion/> } sx={{ '& .RaDatagrid-expandedPanel': {backgroundColor: '#ededed'}, '& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
             <TextField source="aeronef.immatriculation" label="Aéronef" sortable={ true }/>
             <DateField source="date" sortable={ true }/>
             <TextField source="pilote.firstName" label="Pilote" sortable={ true }/>
             <NumberField source="horametreDepart"/>
             <NumberField source="duree" label="Durée"/>
             <NumberField source="horametreFin"/>
+            <TextField source="remarques" label="Remarques"/>
             <>
                 <ShowButton />
                 <EditButton />
             </>
-
         </Datagrid>
     </List>
   );

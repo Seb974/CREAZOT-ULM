@@ -54,7 +54,7 @@ export const FlightTimeForm: React.FC = ({ aircrafts, selectedAircraft, selected
                       name="horametre"
                       placeholder="Horamètre"
                       className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                      value={ selectedFlightTime }
+                      value={ selectedFlightTime || 0 }
                       onChange={ e => HandleChange(e) }
                     />
                 </div>

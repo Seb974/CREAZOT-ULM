@@ -57,9 +57,10 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
     denormalizationContext: [
         AbstractNormalizer::GROUPS => ['Prestation:write'],
     ],
+    order: ['date' => 'DESC'],
     collectDenormalizationErrors: true,
     security: 'is_granted("OIDC_USER")',
-    mercure: true
+    mercure: true,
 )]
 #[ApiFilter(DateFilter::class, properties: ['date'])]
 class Prestation
@@ -104,6 +105,10 @@ class Prestation
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['Prestation:write', 'Prestation:read'])]
     private ?float $turnover = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(groups: ['Prestation:write', 'Prestation:read'])]
+    private ?string $remarques = null;
 
     public function __construct()
     {
@@ -225,6 +230,18 @@ class Prestation
     public function setTurnover(?float $turnover): static
     {
         $this->turnover = $turnover;
+
+        return $this;
+    }
+
+    public function getRemarques(): ?string
+    {
+        return $this->remarques;
+    }
+
+    public function setRemarques(?string $remarques): static
+    {
+        $this->remarques = $remarques;
 
         return $this;
     }

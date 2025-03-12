@@ -16,7 +16,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     const dateOptions = { year: 'numeric', month: 'long', day: 'numeric'};
     const [selectedCircuit, setSelectedCircuit] = useState("");
     const [plus, setPlus] = useState(false);
-    const [consumer, setConsumer] = useState({nom:"", telephone: "", quantite: 1, statut: "VALIDATED", remarques: ""});
+    const [consumer, setConsumer] = useState({nom:"", telephone: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false});
 
     const onConsumerChange = e => setConsumer({...consumer, [e.target.name]: e.target.value});
 
@@ -63,7 +63,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     };
 
     const reinitializeData = () => {
-        setConsumer({nom:"", telephone: "", quantite: 1, statut: "VALIDATED", remarques: ""});
+        setConsumer({nom:"", telephone: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false});
         setPlus(false);
         setVisible(false);
     };

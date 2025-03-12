@@ -52,12 +52,12 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
     }
   }
 
-  const getTitle = ({ circuit, nom, pilote, avion, telephone, option, statut }) => {
+  const getTitle = ({ circuit, nom, pilote, avion, telephone, option, statut, report }) => {
     if (view == Views.DAY)
       return (
         <>
           <b className="text-sm">
-            { isDefined(statut) && statut === "WAITING" &&  <HourglassTopIcon className="text-xs mr-2"/> }{`${ circuit.code }` }
+            { isDefined(statut) && statut === "WAITING" &&  <HourglassTopIcon className="text-xs mr-2"/> }{`${ circuit.code }` }{ report && <span className="text-xs italic font-normal">{"  (REPORT)"}</span> }
           </b><i className="text-xs">{`${ isDefined(option) ? " + " + option.nom  : "" }` }</i>
           <br/>
           <b className="text-xs">{`${ nom }` }</b> <span className="text-xs"><i>{`${ telephone }` }</i></span>
@@ -105,7 +105,12 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
         dataProvider
           .update('reservations', {id: updatedReservation.id, data: updatedReservation})
           .then(({ data }) => {
-            setReservations(reservations.map(r => r['@id'] === data['@id'] ? data : r));
+            console.log(reservations);
+            console.log(data);
+            const initialReservations = isDefined(reservations.find(r => r['@id'] === data['@id'])) ? reservations : [...reservations, data];
+            const newReservations = initialReservations.map(r => r['@id'] === data['@id'] ? data : r);
+            console.log(newReservations);
+            setReservations(newReservations);
           })
           .catch(error => console.log(error));
 },
@@ -119,14 +124,14 @@ const getFormattedUpdate = (event, start, end) => {
       option: isDefined(option) ? option['@id'] : null,
       pilote: isDefined(pilote) ? pilote['@id'] : null,
       avion: isDefined(avion) ? avion['@id'] : null,
+      report: event.report ? true : (new Date(event.debut) < new Date(start)),
       debut: new Date(start), 
-      fin: new Date(end) 
+      fin: new Date(end)
   }
 };
     
 const eventStyleGetter = (event, start, end, isSelected) => {
   const { color } = event;
-  console.log()
   return {
       style: {
           backgroundColor : color,

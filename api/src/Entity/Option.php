@@ -53,15 +53,15 @@ class Option
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Reservation:read'])]
+    #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 60, nullable: true)]
-    #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Reservation:read'])]
+    #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Reservation:read'])]
+    #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?float $prix = null;
 
     public function getId(): ?int

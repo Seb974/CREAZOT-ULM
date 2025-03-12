@@ -1,4 +1,4 @@
-import { Show, SimpleShowLayout, TextField, DateField, NumberField, List, Datagrid, WrapperField, ReferenceManyField } from 'react-admin';
+import { Show, SimpleShowLayout, TextField, DateField, NumberField, List, Datagrid, WrapperField, ReferenceManyField, ArrayField, FunctionField } from 'react-admin';
 
 export const PrestationShow = () => (
     <Show>
@@ -9,16 +9,21 @@ export const PrestationShow = () => (
             <NumberField source="horametreDepart" label="Horamètre de départ"/>
             <NumberField source="duree" label="Temps de vol"/>
             <NumberField source="horametreFin" label="Horamètre de fin"/>
-            <ReferenceManyField reference="vols" target="vol" label="Vols">
-              <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false}>
+            <ArrayField source="vols">
+                <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}} className="text-xs italic">
                     <NumberField source="quantite" label="Nb vol(s)"/>
-                    <TextField source="circuit.code" label="Circuit"/>
-                    <TextField source="circuit.nom" label=" "/>
-                    <TextField source="circuit.nature.code" label="Nature"/>
-                    <TextField source="circuit.nature.label" label=" "/>
+                    <FunctionField
+                    source="circuit"
+                    render={record => <p>{record.circuit.code} - <span className="text-xs italic">{record.circuit.nom}</span></p>}
+                    />
+                    <FunctionField
+                    source="nature"
+                    render={record => <p>{record.circuit.nature.code} - <span className="text-xs italic">{record.circuit.nature.label}</span></p>}
+                    />
                     <TextField source="option.nom" label="Option"/>
-              </Datagrid>
-            </ReferenceManyField>
+                </Datagrid>
+            </ArrayField>
+            <TextField source="remarques" label="Remarques"/>
             <NumberField source="turnover" label="C.A." options={{ style: 'currency', currency: 'EUR' }}/>
         </SimpleShowLayout>
     </Show>

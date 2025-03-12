@@ -13,7 +13,9 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PassagerRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    order: ['date' => 'DESC']
+)]
 #[ApiFilter(DateFilter::class, properties: ['date'])]
 class Passager
 {

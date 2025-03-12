@@ -123,6 +123,7 @@ const AdminWithOIDC = () => {
       <ResourceGuesser name="options"/>
       <ResourceGuesser name="natures"/>
       <ResourceGuesser name="users"/>
+      <ResourceGuesser name="reservations"/>
     </AdminAdapter>
   );
 };
@@ -130,7 +131,7 @@ const AdminWithOIDC = () => {
 const Admin = () => (
   <>
     <Head>
-      <title>PLANETAIR 974 Admin</title>
+      <title>PLANETAIR974 - Administration</title>
     </Head>
 
     {/*@ts-ignore*/}

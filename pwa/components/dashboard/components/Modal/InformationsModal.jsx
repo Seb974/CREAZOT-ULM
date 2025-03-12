@@ -68,6 +68,7 @@ export const InformationsModal = ({ selectedReservation, setSelectedReservation,
                             <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
                                 M ou Mme <b>{ selectedReservation.nom }</b> { isDefined(selectedReservation.nom) && isDefined(selectedReservation.telephone) && selectedReservation.telephone !== "" ? "-" : "" } { isDefined(selectedReservation.telephone) ? <a href={ `tel:${ selectedReservation.telephone }`} className="underline text-cyan-500">{ selectedReservation.telephone }</a> : <></> }<br/>
                                 { selectedReservation.quantite }x { selectedReservation.circuit.nom }. { getStatusInformation() }
+                                { selectedReservation.report && <span className="text-xs italic font-normal">{"Vol reporté"}</span>}
                                 { isDefined(selectedReservation.option) ?  <><i>{ selectedReservation.option.nom }</i><br/></>  : <></> }
                                 { getResourceInformations() }
                             </p>

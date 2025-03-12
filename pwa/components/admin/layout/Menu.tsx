@@ -9,6 +9,7 @@ import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import AirlinesIcon from '@mui/icons-material/Airlines';
 import PublicIcon from '@mui/icons-material/Public';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
+import EventIcon from '@mui/icons-material/Event';
 
 const CustomMenu = () => {
 

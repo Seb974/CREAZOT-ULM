@@ -42,7 +42,7 @@ export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
   return (
     <List resource="vols" actions={<ListActions/>} filters={ filters }> 
-        <Datagrid>
+        <Datagrid  sx={{'& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
             <DateField source="prestation.date" label="Date" sortable={ true }/>
             <TextField source="prestation.aeronef.immatriculation" label="Aéronef" sortable={ true }/>
             <TextField source="prestation.pilote.firstName" label="Pilote" sortable={ true }/>
