@@ -34,3 +34,6 @@
     left: 33.33%!important;
 }
 
+.rbc-current-time-indicator {
+    display: none;
+}

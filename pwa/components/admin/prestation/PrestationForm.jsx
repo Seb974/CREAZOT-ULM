@@ -7,7 +7,7 @@ import { FlightForm } from "./Form/FlightForm";
 import { FlightTimeForm } from "./Form/FlightTimeForm";
 import {SubmitButton} from "./Form/SubmitButton";
 import { useDataProvider } from "react-admin";
-import { getCircuitDuration, getTotalPrice, getRealDuration, getCircuitPrice } from '../../../app/lib/utils';
+import { getCircuitDuration, getTotalPrice, getRealDuration, getCircuitPrice, isDefined } from '../../../app/lib/utils';
 
 export const PrestationForm = () => {
 
@@ -18,10 +18,12 @@ export const PrestationForm = () => {
   const [selectedCircuits, setSelectedCircuits] = useState([]);
   const [selectedFlightTime, setSelectedFlightTime] = useState(0);
 
+  const isObject = obj => Object.prototype.toString.call(obj) === '[object Object]';
+
   const handleSubmit = async e => {
       const prestation = {
         aeronef: selectedAircraft.id,
-        pilote: selectedPilot,
+        pilote: isDefined(selectedPilot) && isObject(selectedPilot) ? (selectedPilot['@id'] || selectedPilot.id) : selectedPilot,
         date: new Date(),
         horametreDepart: selectedAircraft.horametre,
         horametreFin: typeof selectedFlightTime === 'string' ? parseFloat(selectedFlightTime.replace(',','.')) : selectedFlightTime,

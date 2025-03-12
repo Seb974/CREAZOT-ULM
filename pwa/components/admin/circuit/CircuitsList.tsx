@@ -40,8 +40,10 @@ export const CircuitsList: NextPage<Props> = ({ data, hubURL, page }) => {
             <TextField source="nature.code" label="Nature" sortable={ true }/>
             <DateField source="duree" label="Durée" sortable={ false } showTime showDate={false}/>
             <NumberField source="prix" options={{ style: 'currency', currency: 'EUR' }} label="Prix"/>
-            <ShowButton/>
-            <EditButton />
+            <>
+                <ShowButton />
+                <EditButton />
+            </>
         </Datagrid>
     </List>
   );

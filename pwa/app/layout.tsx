@@ -11,7 +11,7 @@ import { Providers } from "./providers";
 import { auth } from "./auth";
 
 export const metadata: Metadata = {
-  title: 'Welcome to API Platform!',
+  title: 'Planetair974 - Administration',
 }
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const session = await auth();

@@ -63,7 +63,7 @@ const filters = [
   <TextInput source="prestation.pilote.firstName" key="Pilote" label="Pilote" />,
   <TextInput source="circuit.code" key="Circuit" label="Circuit" />,
   <DateInput source="prestation.date[after]"  key="DateMin" label="Date Min"/>,
-  <DateInput source="prestationdate[before]"  key="DateMax" label="Date Max"/>,
+  <DateInput source="prestation.date[before]"  key="DateMax" label="Date Max"/>,
 ];
 
 export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
@@ -85,6 +85,7 @@ export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
             <DateField source="prestation.date" label="Date" sortable={ true }/>
             <NumberField source="quantite"/>
             <TextField source="circuit.code" label="Circuit" sortable={ true }/>
+            <TextField source="circuit.nature.code" label="Nature" sortable={ true }/>
             <TextField source="prestation.pilote.firstName" label="Pilote" sortable={ true }/>
             <TextField source="option.nom" label="Option" sortable={ true }/>
             <NumberField source="prix" label="C.A."/>

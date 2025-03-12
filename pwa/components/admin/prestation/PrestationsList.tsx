@@ -19,6 +19,8 @@ import {
   DateField,
   NumberField,
   DateInput,
+  ShowButton,
+  ReferenceField,
 } from "react-admin";
 
 // import { useRouter } from "next/navigation";
@@ -57,6 +59,8 @@ const ListActions = () => (
   </TopToolbar>
 );
 
+const ListExpandActions = () =>  <TopToolbar></TopToolbar>
+
 const filters = [
   <TextInput source="aeronef.immatriculation" key="Aeronef" label="Aéronef"/>,
   <TextInput source="pilote.firstName" key="Pilote" label="Pilote" />,
@@ -81,14 +85,30 @@ export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
   return (
     <List resource="prestations" actions={<ListActions/>} filters={ filters }>   {/* filter={{ authorId }} */} 
-        <Datagrid>
+        <Datagrid expand={
+          <>
+            <List resource="vols" actions={ null }>
+              <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false}>
+                <NumberField source="quantite" label="Quantité"/>
+                <TextField source="circuit.code" label="Circuit"/>
+                <TextField source="circuit.nature.code" label="Nature"/>
+                <TextField source="option.nom" label="Option" sortable={ true }/>
+              </Datagrid>
+            </List>
+            <TextField source="pilote.firstName" label="Pilote"/>
+          </>
+          }
+        >
             <TextField source="aeronef.immatriculation" label="Aéronef" sortable={ true }/>
             <DateField source="date" sortable={ true }/>
             <TextField source="pilote.firstName" label="Pilote" sortable={ true }/>
             <NumberField source="horametreDepart"/>
             <NumberField source="duree" label="Durée"/>
             <NumberField source="horametreFin"/>
-
+            <>
+                <ShowButton />
+                <EditButton />
+            </>
 
         </Datagrid>
     </List>
