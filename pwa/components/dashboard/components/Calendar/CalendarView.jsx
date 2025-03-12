@@ -105,11 +105,8 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
         dataProvider
           .update('reservations', {id: updatedReservation.id, data: updatedReservation})
           .then(({ data }) => {
-            console.log(reservations);
-            console.log(data);
             const initialReservations = isDefined(reservations.find(r => r['@id'] === data['@id'])) ? reservations : [...reservations, data];
             const newReservations = initialReservations.map(r => r['@id'] === data['@id'] ? data : r);
-            console.log(newReservations);
             setReservations(newReservations);
           })
           .catch(error => console.log(error));
