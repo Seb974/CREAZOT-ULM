@@ -53,7 +53,7 @@ export const PlusForm = ({ consumer, setConsumer }) => {
               </option>
             </select>
 
-            <span className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
+            {/* <span className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
               <svg
                 width="24"
                 height="24"
@@ -70,7 +70,7 @@ export const PlusForm = ({ consumer, setConsumer }) => {
                   ></path>
                 </g>
               </svg>
-            </span>
+            </span> */}
           </div>
         </div>
         <div>

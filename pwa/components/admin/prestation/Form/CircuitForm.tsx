@@ -57,7 +57,7 @@ export const CircuitForm: React.FC = ({ selectedCircuit, setSelectedCircuit, isU
               { circuits.map(circuit => <option key={ circuit.id } value={ circuit['@id'] } className="text-body dark:text-bodydark">{ circuit.code }</option>)}
             </select>
 
-            <span className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
+            {/* <span className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
               <svg
                 width="24"
                 height="24"
@@ -74,7 +74,7 @@ export const CircuitForm: React.FC = ({ selectedCircuit, setSelectedCircuit, isU
                   ></path>
                 </g>
               </svg>
-            </span>
+            </span> */}
           </div>
         </div>
   );

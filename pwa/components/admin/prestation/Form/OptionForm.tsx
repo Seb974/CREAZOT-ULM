@@ -61,7 +61,7 @@ export const OptionForm: React.FC = ({ selectedOption, setSelectedOption, isUpda
               { options.map(option => <option key={ option.id } value={ option['@id'] } className="text-body dark:text-bodydark">{ option.nom }</option>)}
             </select>
 
-            <span className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
+            {/* <span className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
               <svg
                 width="24"
                 height="24"
@@ -78,7 +78,7 @@ export const OptionForm: React.FC = ({ selectedOption, setSelectedOption, isUpda
                   ></path>
                 </g>
               </svg>
-            </span>
+            </span> */}
           </div>
         </div>
   );

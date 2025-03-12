@@ -102,7 +102,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                                         id="nom"
                                         value={ consumer.nom }
                                         onChange={ onConsumerChange }
-                                        className=" border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
+                                        className=" border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
                                         placeholder="Nom"
                                         required
                                     />
@@ -115,7 +115,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                                         id="telephone"
                                         value={ consumer.telephone }
                                         onChange={ onConsumerChange }
-                                        className=" border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
+                                        className=" border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
                                         placeholder="N° de téléphone" 
                                         required
                                     />

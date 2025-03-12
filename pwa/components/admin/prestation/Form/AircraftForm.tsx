@@ -51,7 +51,7 @@ export const AircraftForm: React.FC = ({ selectedAircraft, setSelectedAircraft, 
               { aircrafts.map(aircraft => <option key={ aircraft.id } value={ aircraft['@id'] } className="text-body dark:text-bodydark">{ aircraft.immatriculation }</option>)}
             </select>
 
-            <span className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
+            {/* <span className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
               <svg
                 width="24"
                 height="24"
@@ -68,7 +68,7 @@ export const AircraftForm: React.FC = ({ selectedAircraft, setSelectedAircraft, 
                   ></path>
                 </g>
               </svg>
-            </span>
+            </span> */}
           </div>
         </div>
   );

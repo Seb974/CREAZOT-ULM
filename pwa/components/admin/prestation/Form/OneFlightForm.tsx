@@ -48,7 +48,7 @@ export const OneFlightForm: React.FC = ({ circuits, options, selectedCircuit, se
                   }
                 </select>
 
-                <span className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
+                {/* <span className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
                   <svg
                     width="24"
                     height="24"
@@ -65,7 +65,7 @@ export const OneFlightForm: React.FC = ({ circuits, options, selectedCircuit, se
                       ></path>
                     </g>
                   </svg>
-                </span>
+                </span> */}
               </div>
               <div className="relative z-20 bg-white dark:bg-form-input w-3/12">
                   { selectedCircuit.option.id === 0 ? 
@@ -97,7 +97,7 @@ export const OneFlightForm: React.FC = ({ circuits, options, selectedCircuit, se
                       })
                     }
                   </select>
-                  <span className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
+                  {/* <span className="absolute right-4 top-1/2 z-10 -translate-y-1/2">
                     <svg
                       width="24"
                       height="24"
@@ -114,7 +114,8 @@ export const OneFlightForm: React.FC = ({ circuits, options, selectedCircuit, se
                         ></path>
                       </g>
                     </svg>
-                  </span>
+                  </span> */}
+                  
                     {/* <input
                       type="number"
                       name="prix"
