@@ -3,7 +3,7 @@
 namespace App\EventSubscriber;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
-use App\Entity\Prestation;
+use App\Entity\Entretien;
 use App\Repository\AeronefRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -14,7 +14,7 @@ use Symfony\Component\Mime\Email;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 
-final class PrestationCreateSubscriber implements EventSubscriberInterface
+final class EntretienCreateSubscriber implements EventSubscriberInterface
 {
 
     public function __construct()
@@ -23,20 +23,21 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            KernelEvents::VIEW => ['updateHorametre', EventPriorities::PRE_WRITE],
+            KernelEvents::VIEW => ['updateHorametres', EventPriorities::PRE_WRITE],
         ];
     }
 
-    public function updateHorametre(ViewEvent $event): void
+    public function updateHorametres(ViewEvent $event): void
     {   
-        $prestation = $event->getControllerResult();
+        $entretien = $event->getControllerResult();
         $method = $event->getRequest()->getMethod();
 
-        if (!$prestation instanceof Prestation || Request::METHOD_POST !== $method) {
+        if (!$entretien instanceof Entretien || Request::METHOD_POST !== $method) {
             return;
         }
 
-        $aeronef = $prestation->getAeronef();
-        $aeronef->setHorametre($prestation->getHorametreFin());
+        $aeronef = $entretien->getAeronef();
+        $entretien->setHorametreIntervention($aeronef->getHorametre());
+        $aeronef->setEntretien($entretien->getHorametreNextIntervention());
     }
 }

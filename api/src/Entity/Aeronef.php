@@ -54,23 +54,23 @@ class Aeronef
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Reservation:read'])]
+    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 6, nullable: true)]
-    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Reservation:read'])]
+    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read'])]
     private ?string $immatriculation = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read',])]
+    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Entretien:read'])]
     private ?float $horametre = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read'])]
+    #[Groups(groups: ['Aeronef:write', 'Entretien:write', 'Aeronef:read', 'Prestation:read', 'Entretien:read'])]
     private ?float $entretien = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read'])]
+    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Entretien:read'])]
     private ?bool $decimal = null;
 
     public function getId(): ?int
