@@ -1,10 +1,14 @@
 import React from "react";
 import { useDataProvider } from "react-admin";
 import { isDefined } from "../../../../app/lib/utils";
+import { useSession } from "next-auth/react";
 
 export const InformationsModal = ({ selectedReservation, setSelectedReservation, reservations, setReservations, toUpdate, setToUpdate }) => {
 
+    const session = useSession();
     const dataProvider = useDataProvider();
+
+    const user = session.data.user;
     const timeOptions = { hour: "2-digit", minute: "2-digit" };
     const dateOptions = { year: 'numeric', month: 'numeric', day: 'numeric'};
 
@@ -81,10 +85,14 @@ export const InformationsModal = ({ selectedReservation, setSelectedReservation,
                         </div>
                     </div>
                     <div className="flex justify-between items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-                        <button onClick={ e => onUpdate() } data-modal-hide="default-modal" type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <button onClick={ e => onUpdate() } data-modal-hide="default-modal" type="button" className="text-white bg-blue-700 disabled:bg-blue-800 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 dark:disabled:ring-blue-800"
+                                disabled={!isDefined(session) || !isDefined(user) || !isDefined(user.roles.find(r => r === "admin"))}
+                        >
                             Modifier
                         </button>
-                        <button onClick={ e => onDelete() } data-modal-hide="default-modal" type="button" className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-red rounded-lg border border-red-200 hover:bg-red-100 hover:text-white-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-red-700">
+                        <button onClick={ e => onDelete() } data-modal-hide="default-modal" type="button" className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-red rounded-lg border border-red-200 disabled:bg-red-100 disabled:text-white-700 hover:bg-red-100 hover:text-white-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-red-700  dark:disabled:text-white dark:disabled:bg-red-700"
+                                disabled={!isDefined(session) || !isDefined(user) || !isDefined(user.roles.find(r => r === "admin"))}
+                            >
                             Supprimer
                         </button>
                     </div>

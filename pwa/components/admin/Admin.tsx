@@ -23,6 +23,10 @@ import circuitResourceProps from "./circuit";
 import volResourceProps from "./vol/";
 import i18nProvider from "./i18nProvider";
 import Dashboard from "../dashboard/components/Dashboard/Dashboard";
+import entretienResourceProps from "./entretien";
+import aeronefResourceProps from "./aeronef";
+import passagerResourceProps from "./passager";
+import userResourceProps from "./user";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -117,12 +121,13 @@ const AdminWithOIDC = () => {
       </CustomRoutes> */}
       <ResourceGuesser name="prestations" {...prestationResourceProps} />
       <ResourceGuesser name="vols" {...volResourceProps}/>
-      <ResourceGuesser name="passagers"/>
+      <ResourceGuesser name="passagers" {...passagerResourceProps}/>
       <ResourceGuesser name="circuits" {...circuitResourceProps}/>
-      <ResourceGuesser name="aeronefs"/>
+      <ResourceGuesser name="aeronefs" {...aeronefResourceProps}/>
       <ResourceGuesser name="options"/>
       <ResourceGuesser name="natures"/>
-      <ResourceGuesser name="users"/>
+      <ResourceGuesser name="entretiens" {...entretienResourceProps}/>
+      <ResourceGuesser name="users" {...userResourceProps}/>
       <ResourceGuesser name="reservations"/>
     </AdminAdapter>
   );

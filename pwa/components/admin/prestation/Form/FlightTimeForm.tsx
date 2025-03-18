@@ -24,8 +24,8 @@ export const FlightTimeForm: React.FC = ({ aircrafts, selectedAircraft, selected
 
   const getCircuitTimeInMinutes = (sum, time, qte) => {
       const currentTimeHours = new Date(time).getHours() + Number((new Date(time).getMinutes()).toFixed(2)) / 60;
-      const sumTimeHours =  Math.floor(sum) + Number((sum - Math.floor(sum)).toFixed(2)) / 60;
-      const totalHours = currentTimeHours * qte + sumTimeHours;
+      const sumTimeHours =  Math.floor(sum) + Number((sum - Math.floor(sum)).toFixed(2)) / 60 * 100;
+      const totalHours = currentTimeHours * qte + sumTimeHours;  
       return Number((Math.floor(totalHours) + Number((totalHours - Math.floor(totalHours)).toFixed(2)) * 60 / 100).toFixed(2));
   };
 

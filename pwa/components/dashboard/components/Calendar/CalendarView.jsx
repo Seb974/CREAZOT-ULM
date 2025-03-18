@@ -8,6 +8,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import "../../../../css/calendar.css";
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import { getRandomColor, isDefined } from "../../../../app/lib/utils";
+import { useSession } from 'next-auth/react';
 
 const DOW = 1;
 const DragAndDropCalendar = withDragAndDrop(Calendar);
@@ -19,7 +20,9 @@ const localizer = momentLocalizer (moment);
 export const CalendarView = ({ events, setEvents, selection, setSelection, slot, setSlot, visible, setVisible, reservations, setReservations }) => {
 
   const now = new Date();
+  const session = useSession();
   const dataProvider = useDataProvider();
+  const user = session.data.user;
   const min = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0);
   const max = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30);
   const defaultDates = useState({start: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0), end: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 0) });
@@ -181,11 +184,13 @@ const onEventClick = (event) => {
 };
 
 const onSelecting = useCallback((slotInfo) => {
-  setSlot({
-    start: new Date(slotInfo.start),
-    end: new Date(slotInfo.end)
-  })
-  setVisible(true);
+  if (isDefined(session) && isDefined(user) && user.roles.find(r => r === "admin")) {
+    setSlot({
+      start: new Date(slotInfo.start),
+      end: new Date(slotInfo.end)
+    })
+    setVisible(true);
+  }
 }, []);
 
     return (

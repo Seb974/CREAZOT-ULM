@@ -47,18 +47,13 @@ export const PrestationForm = () => {
         remarques
       };
       try {
-        await dataProvider.create('prestations', {data: prestation});
-        toast.success(`Les vols ont bien été enregistrés.`, {duration: 1000});
-        setTimeout(() => { 
-          // redirect('list', 'prestations');
-          redirect('/');
-        }, 1200)
-        
+          await dataProvider.create('prestations', {data: prestation});
+          toast.success(`Les vols ont bien été enregistrés.`, {duration: 1000});
       } catch (error) {
-              toast.error('Une erreur bloque l\'enregistrement des vols.', {duration: 3000});
-              console.log(error);
-              return error;
-          }
+          toast.error('Une erreur bloque l\'enregistrement des vols.', {duration: 3000});
+          console.log(error);
+          return error;
+      }
   };
 
 

@@ -70,8 +70,22 @@ class Aeronef
     private ?float $entretien = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Entretien:read'])]
+    private ?float $seuilAlerte = null;
+
+    #[ORM\Column(nullable: true)]
     #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Entretien:read'])]
     private ?bool $decimal = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Entretien:read'])]
+    private ?bool $alerteEnvoyee = null;
+
+    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read'])]
+    public function getName(): ?string
+    {
+        return $this->immatriculation;
+    }
 
     public function getId(): ?int
     {
@@ -122,6 +136,30 @@ class Aeronef
     public function setDecimal(?bool $decimal): static
     {
         $this->decimal = $decimal;
+
+        return $this;
+    }
+
+    public function getSeuilAlerte(): ?float
+    {
+        return $this->seuilAlerte;
+    }
+
+    public function setSeuilAlerte(?float $seuilAlerte): static
+    {
+        $this->seuilAlerte = $seuilAlerte;
+
+        return $this;
+    }
+
+    public function isAlerteEnvoyee(): ?bool
+    {
+        return $this->alerteEnvoyee;
+    }
+
+    public function setAlerteEnvoyee(?bool $alerteEnvoyee): static
+    {
+        $this->alerteEnvoyee = $alerteEnvoyee;
 
         return $this;
     }

@@ -3,6 +3,7 @@ import NextAuth, { type Session as DefaultSession, type User } from "next-auth";
 import KeycloakProvider from "next-auth/providers/keycloak";
 
 import { NEXT_PUBLIC_OIDC_CLIENT_ID, NEXT_PUBLIC_OIDC_SERVER_URL, NEXT_PUBLIC_OIDC_SERVER_URL_INTERNAL } from "../config/keycloak";
+import { isDefined, isDefinedAndNotVoid } from "./lib/utils";
 
 export interface Session extends DefaultSession {
   error?: "RefreshAccessTokenError"
@@ -25,6 +26,8 @@ interface Account {
   expires_in: number
   refresh_token: string
 }
+
+const decode = token => decodeURIComponent(atob(token.split('.')[1].replace('-', '+').replace('_', '/')).split('').map(c => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`).join(''));
 
 export const { handlers: { GET, POST }, auth } = NextAuth({
   callbacks: {
@@ -85,9 +88,13 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
     async session({ session, token }: { session: Session, token: JWT }): Promise<Session> {
       // Save the access token in the Session for API calls
       if (token) {
+        const decodedToken = JSON.parse(decode(token.accessToken));
+        // const roles = isDefined(decodedToken) && isDefinedAndNotVoid(decodedToken["realm_access"]) && isDefinedAndNotVoid(decodedToken["realm_access"]["roles"]) && isDefined(decodedToken["realm_access"]["roles"].find("admin")) ? 'admin' : 'user';
         session.accessToken = token.accessToken;
         session.idToken = token.idToken;
         session.error = token.error;
+        // @ts-ignore
+        session.user = {...session.user, roles: decodedToken["realm_access"]["roles"]};
       }
 
       return session;

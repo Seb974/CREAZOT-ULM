@@ -39,5 +39,6 @@ final class EntretienCreateSubscriber implements EventSubscriberInterface
         $aeronef = $entretien->getAeronef();
         $entretien->setHorametreIntervention($aeronef->getHorametre());
         $aeronef->setEntretien($entretien->getHorametreNextIntervention());
+        $aeronef->setAlerteEnvoyee(false);
     }
 }
