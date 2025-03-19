@@ -13,6 +13,18 @@ export const PrestationShow = () => {
     const session = useSession();
     const user = session.data.user;
 
+    const getFormattedDuration = ({ aeronef, duree }) => {
+        const hours = Math.trunc(duree);
+        const minutes = aeronef.decimal ? Math.round((duree - Math.trunc(duree)) * 60) : Math.round((duree - Math.trunc(duree)) * 100);
+        return `${ hours }:${ minutes < 10 ? '0' : '' }${ minutes }`;
+    }
+    
+    const getFormattedHorametre = (prestation, horametre) => {
+    const hours = Math.trunc(prestation[horametre]);
+    const minutes = Math.round((prestation[horametre] - Math.trunc(prestation[horametre])) * (prestation.aeronef.decimal ? 10 : 100));
+    return `${ hours }${prestation.aeronef.decimal ? ',' : ':'}${ !prestation.aeronef.decimal && minutes < 10 ? '0' : '' }${ minutes }`;
+    }
+
     return (
         // @ts-ignore
         <Show actions={isDefined(session) && isDefined(user) && user.roles.find(r => r === "admin") ? <ListActions/> : null} >
@@ -20,9 +32,24 @@ export const PrestationShow = () => {
                 <DateField source="date" label="Date"/>
                 <TextField source="aeronef.immatriculation" label="Aéronef"/>
                 <TextField source="pilote.firstName" label="Pilote"/>
-                <NumberField source="horametreDepart" label="Horamètre de départ" options={{ style: 'unit', unit: 'hour' }}/>
-                <NumberField source="duree" label="Temps de vol" options={{ style: 'unit', unit: 'hour' }}/>
-                <NumberField source="horametreFin" label="Horamètre de fin" options={{ style: 'unit', unit: 'hour' }}/>
+                <FunctionField
+                    source="horametreDepart"
+                    label="Horamètre au Départ"
+                    render={record => getFormattedHorametre(record, "horametreDepart")}
+                    textAlign="right"
+                />
+                <FunctionField
+                    source="duree"
+                    label="Durée"
+                    render={record => getFormattedDuration(record)}
+                    textAlign="right"
+                />
+                <FunctionField
+                    source="horametreFin"
+                    label="Horamètre à l'arrivée"
+                    render={record => getFormattedHorametre(record, "horametreFin")}
+                    textAlign="right"
+                />
                 <ArrayField source="vols">
                     <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}} className="text-xs italic">
                         <NumberField source="quantite" label="Nb vol(s)"/>

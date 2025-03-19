@@ -160,3 +160,15 @@ services:
             $nameConverter: '@?api_platform.name_converter'
             $properties: { name: 'ipartial' } # ]
         tags: [ 'api_platform.filter' ]
+
+    app.filter.user.email:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { email: 'exact' } # ]
+        tags: [ 'api_platform.filter' ]
+    
+    app.filter.vol.pilote.email:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { prestation.pilote.email: 'exact' } # ]
+        tags: [ 'api_platform.filter' ]

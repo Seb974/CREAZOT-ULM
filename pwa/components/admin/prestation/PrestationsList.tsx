@@ -4,7 +4,6 @@ import { FieldGuesser } from "@api-platform/admin";
 import {
   TextInput,
   Datagrid,
-  useRecordContext,
   List,
   TextField,
   EditButton,
@@ -51,6 +50,18 @@ export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
   const session = useSession();
   const user = session.data.user;
 
+  const getFormattedDuration = ({ aeronef, duree }) => {
+    const hours = Math.trunc(duree);
+    const minutes = aeronef.decimal ? Math.round((duree - Math.trunc(duree)) * 60) : Math.round((duree - Math.trunc(duree)) * 100);
+    return `${ hours }:${ minutes < 10 ? '0' : '' }${ minutes }`;
+  }
+
+  const getFormattedHorametre = (prestation, horametre) => {
+    const hours = Math.trunc(prestation[horametre]);
+    const minutes = Math.round((prestation[horametre] - Math.trunc(prestation[horametre])) * (prestation.aeronef.decimal ? 10 : 100));
+    return `${ hours }${prestation.aeronef.decimal ? ',' : ':'}${ !prestation.aeronef.decimal && minutes < 10 ? '0' : '' }${ minutes }`;
+  }
+
   const VolsExpansion = () => (
     <>
       <ArrayField source="vols">
@@ -83,9 +94,24 @@ export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
             <DateField source="date" sortable={ true }/>
             <TextField source="aeronef.immatriculation" label="Aéronef" sortable={ true }/>
             <TextField source="pilote.firstName" label="Pilote" sortable={ true }/>
-            <NumberField source="horametreDepart" options={{ style: 'unit', unit: 'hour' }}/>
-            <NumberField source="duree" label="Durée" options={{ style: 'unit', unit: 'hour' }}/>
-            <NumberField source="horametreFin" options={{ style: 'unit', unit: 'hour' }}/>
+            <FunctionField
+                source="horametreDepart"
+                label="Horamètre au Départ"
+                render={record => getFormattedHorametre(record, "horametreDepart")}
+                textAlign="right"
+            />
+            <FunctionField
+                source="duree"
+                label="Durée"
+                render={record => getFormattedDuration(record)}
+                textAlign="right"
+            />
+            <FunctionField
+                source="horametreFin"
+                label="Horamètre à l'arrivée"
+                render={record => getFormattedHorametre(record, "horametreFin")}
+                textAlign="right"
+            />
             <TextField source="remarques" label="Remarques"/>
             {/* @ts-ignore */}
             { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&

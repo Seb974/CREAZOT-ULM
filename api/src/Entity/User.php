@@ -31,7 +31,10 @@ use Symfony\Component\Uid\Uuid;
             uriTemplate: '/users{._format}',
             itemUriTemplate: '/users/{id}{._format}',
             security: 'is_granted("OIDC_USER")',
-            filters: ['app.filter.user.admin.name'],
+            filters: [
+                'app.filter.user.admin.name',
+                'app.filter.user.email'
+            ],
             paginationClientItemsPerPage: true
         ),
         new Get(
@@ -67,6 +70,7 @@ class User implements UserInterface
      * @see https://schema.org/email
      */
     #[ORM\Column(unique: true)]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read'])]
     public ?string $email = null;
 
     /**

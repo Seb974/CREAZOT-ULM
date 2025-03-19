@@ -27,7 +27,8 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
                 'app.filter.vol.pilote',
                 'app.filter.vol.aeronef',
                 'app.filter.vol.date',
-                'app.filter.vol.circuit'
+                'app.filter.vol.circuit',
+                'app.filter.vol.pilote.email'
             ],
         ),
         new Post(
@@ -86,6 +87,28 @@ class Vol
     #[ORM\ManyToOne]
     #[Groups(groups: ['Vol:write', 'Prestation:write', 'Vol:read', 'Prestation:read'])]
     private ?Option $option = null;
+
+    #[Groups(groups: ['Vol:write', 'Prestation:write', 'Vol:read', 'Prestation:read'])]
+    public function getCout(): float
+    {
+        if ($this->circuit->isPrixFixe())
+            return $this->circuit->getCout() * $this->quantite;
+        else {
+            $aeronef = $this->prestation->getAeronef();
+            if ($aeronef->isDecimal()) {
+                $decimalResult = $this->duree * $this->circuit->getCout() * $this->quantite;
+                dump($decimalResult);
+                return $decimalResult;
+            } else {
+                $duree = floor($this->duree) + ($this->duree - floor($this->duree)) / 60 * 100;
+                dump($duree);
+                $localeResult = $duree * $this->circuit->getCout() * $this->quantite;
+                dump($localeResult);
+                return $localeResult;
+            }
+        }
+            
+    }
 
     public function getId(): ?int
     {

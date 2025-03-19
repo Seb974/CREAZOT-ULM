@@ -28,11 +28,11 @@ const CustomMenu = () => {
         primaryText="Carnets de vols"
         leftIcon={<AirplaneTicketIcon />}
       />
-      {/* <Menu.Item
+      <Menu.Item
         to="/vols"
         primaryText="Vols"
         leftIcon={<FlightTakeoffIcon />}
-      /> */}
+      />
       <Menu.Item
         to="/passagers"
         primaryText="Passagers"
