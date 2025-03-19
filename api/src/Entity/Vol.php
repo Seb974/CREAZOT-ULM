@@ -97,13 +97,10 @@ class Vol
             $aeronef = $this->prestation->getAeronef();
             if ($aeronef->isDecimal()) {
                 $decimalResult = $this->duree * $this->circuit->getCout() * $this->quantite;
-                dump($decimalResult);
                 return $decimalResult;
             } else {
                 $duree = floor($this->duree) + ($this->duree - floor($this->duree)) / 60 * 100;
-                dump($duree);
                 $localeResult = $duree * $this->circuit->getCout() * $this->quantite;
-                dump($localeResult);
                 return $localeResult;
             }
         }
