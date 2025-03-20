@@ -64,6 +64,12 @@ class Option
     #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?float $prix = null;
 
+    #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
+    public function getName(): ?string
+    {
+        return $this->nom;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

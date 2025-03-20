@@ -13,9 +13,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
-// use ApiPlatform\Core\Annotation\ApiFilter;
 use Symfony\Component\Serializer\Annotation\Groups;
-// use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 
@@ -57,11 +55,11 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     denormalizationContext: [
         AbstractNormalizer::GROUPS => ['Reservation:write'],
     ],
+    order: ['debut' => 'DESC'],
     collectDenormalizationErrors: true,
-    // security: 'is_granted("OIDC_USER")',
+    security: 'is_granted("OIDC_USER")',
     mercure: true
 )]
-// #[ApiFilter(DateFilter::class, properties: ['debut', 'fin'])]
 class Reservation
 {
     #[ORM\Id]

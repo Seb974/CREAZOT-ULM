@@ -27,6 +27,7 @@ import entretienResourceProps from "./entretien";
 import aeronefResourceProps from "./aeronef";
 import passagerResourceProps from "./passager";
 import userResourceProps from "./user";
+import reservationResourceProps from "./reservation";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -128,7 +129,7 @@ const AdminWithOIDC = () => {
       <ResourceGuesser name="natures"/>
       <ResourceGuesser name="entretiens" {...entretienResourceProps}/>
       <ResourceGuesser name="users" {...userResourceProps}/>
-      <ResourceGuesser name="reservations"/>
+      <ResourceGuesser name="reservations" {...reservationResourceProps}/>
     </AdminAdapter>
   );
 };

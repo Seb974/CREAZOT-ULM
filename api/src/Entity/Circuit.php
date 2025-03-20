@@ -89,6 +89,12 @@ class Circuit
     #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?bool $avecOptions = null;
 
+    #[Groups(groups: ['Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
+    public function getName(): ?string
+    {
+        return $this->code;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
