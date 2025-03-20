@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { useDataProvider } from "react-admin";
-import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
-import AddIcon from '@mui/icons-material/Add';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DoneIcon from '@mui/icons-material/Done';
@@ -16,7 +14,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     const dateOptions = { year: 'numeric', month: 'long', day: 'numeric'};
     const [selectedCircuit, setSelectedCircuit] = useState("");
     const [plus, setPlus] = useState(false);
-    const [consumer, setConsumer] = useState({nom:"", telephone: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false});
+    const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false});
 
     const onConsumerChange = e => setConsumer({...consumer, [e.target.name]: e.target.value});
 
@@ -63,7 +61,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     };
 
     const reinitializeData = () => {
-        setConsumer({nom:"", telephone: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false});
+        setConsumer({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false});
         setPlus(false);
         setVisible(false);
     };
@@ -102,7 +100,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                                         id="nom"
                                         value={ consumer.nom }
                                         onChange={ onConsumerChange }
-                                        className=" border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
+                                        className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
                                         placeholder="Nom"
                                         required
                                     />
@@ -115,7 +113,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                                         id="telephone"
                                         value={ consumer.telephone }
                                         onChange={ onConsumerChange }
-                                        className=" border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
+                                        className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
                                         placeholder="N° de téléphone" 
                                         required
                                     />
@@ -150,9 +148,6 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                                     <><DoneIcon className="mr-2"/>{ "Réserver" }</>
                                 </button>
                             </div>
-                            {/* <button onClick={ onSubmit } className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                Réserver
-                            </button> */}
                         </form>
                     </div>
                 </div>
