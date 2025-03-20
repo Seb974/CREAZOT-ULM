@@ -115,7 +115,7 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
           })
           .catch(error => console.log(error));
 },
-[setEvents]);
+[setEvents, reservations, setReservations]);
 
 const getFormattedUpdate = (event, start, end) => {
   const { circuit, option, pilote, avion } = event;

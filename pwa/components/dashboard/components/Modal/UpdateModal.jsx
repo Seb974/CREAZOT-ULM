@@ -66,8 +66,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
         const updatedReservation = await dataProvider.update('reservations', {id: reservation.id, data: reservation});
         const updatedReservations = reservations
                                         .map(r => r['@id'] === updatedReservation.data['@id'] ? updatedReservation.data : r)
-                                        .filter(r => isDefined(r.statut) && !r.statut.includes("CANCEL"))
-                                        // .filter(r => !isDefined(r.statut) || !r.statut.includes("CANCEL"));
+                                        .filter(r => isDefined(r.statut) && !r.statut.includes("CANCEL"));
         setReservations(updatedReservations);
         reinitializeData();
         setToUpdate(null);
