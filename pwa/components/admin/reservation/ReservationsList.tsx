@@ -7,7 +7,6 @@ import {
   ExportButton,
   TopToolbar,
   DateField,
-  NumberField,
   EditButton,
   ShowButton,
   TextInput,
@@ -15,9 +14,7 @@ import {
   FilterButton,
   FunctionField,
   BooleanField,
-  useCreate,
 } from "react-admin";
-import { useMercure } from "../../../utils/mercure";
 import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
 
@@ -36,14 +33,22 @@ const ListActions = () => (
 );
 
 const filters = [
-  <TextInput source="avion.immatriculation" key="Aeronef" label="Aéronef"/>,
-  <TextInput source="pilote.firstName" key="Pilote" label="Pilote" />,
-  <TextInput source="circuit.code" key="Circuit" label="Circuit" />,
-  <DateInput source="debut[after]"  key="DateMin" label="Date Min"/>,
+  <TextInput source="nom" key="Passager" label="Passager"/>,
   <DateInput source="debut[before]"  key="DateMax" label="Date Max"/>,
+  <DateInput source="debut[after]"  key="DateMin" label="Date Min"/>,
+  <TextInput source="circuit.code" key="Circuit" label="Circuit" />,
+  
 ];
 
 export const ReservationsList: NextPage<Props> = ({ data, hubURL, page }) => {
+
+  const status = [
+    {id: "VALIDATED", name: "Validé"},
+    {id: "WAITING", name: "En attente de confirmation"},
+    {id: "WHEATER_CANCEL", name:"Annulation météo"},
+    {id: "PASSENGER_CANCEL", name: "Annulation client"},
+    {id: "INTERN_CANCEL", name: "Annulation interne"}
+  ];
 
   return (
     <List resource="reservations" actions={<ListActions/>} filters={ filters }>
@@ -52,15 +57,13 @@ export const ReservationsList: NextPage<Props> = ({ data, hubURL, page }) => {
             <DateField source="debut" label="Heure" showTime showDate={false}/>
             <TextField source="nom" label="Passager" sortable={ true }/>
             <TextField source="telephone" label="Téléphone" />
-            <FunctionField
-                source="circuit.code"
-                label="Circuit"
-                render={record => <>{record.quantite}<span className="text-xs italic">{'x'}</span> { record.circuit.code }</> }
-                textAlign="right"
-            />
+            <TextField source="circuit.code" label="Circuit" />
             <TextField source="option.nom" label="Option"/>
-            {/* <TextField source="pilote.firstName" label="Pilote" sortable={ true }/>
-            <TextField source="avion.immatriculation" label="Aéronef" sortable={ true }/> */}
+            <FunctionField
+                source="statut"
+                label="Statut"
+                render={record => <>{ (status.find(s => s.id === record.statut).name )}</> }
+            />
             <BooleanField source="report" label="Report"/>
 
             

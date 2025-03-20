@@ -55,7 +55,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     denormalizationContext: [
         AbstractNormalizer::GROUPS => ['Reservation:write'],
     ],
-    order: ['debut' => 'DESC'],
+    order: ['debut' => 'DESC', 'id' => 'ASC'],
     collectDenormalizationErrors: true,
     security: 'is_granted("OIDC_USER")',
     mercure: true
@@ -129,6 +129,10 @@ class Reservation
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
     private ?bool $report = null;
+
+    #[ORM\Column(length: 180, nullable: true)]
+    #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
+    private ?string $email = null;
 
     public function getId(): ?int
     {
@@ -299,6 +303,18 @@ class Reservation
     public function setReport(?bool $report): static
     {
         $this->report = $report;
+
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(?string $email): static
+    {
+        $this->email = $email;
 
         return $this;
     }

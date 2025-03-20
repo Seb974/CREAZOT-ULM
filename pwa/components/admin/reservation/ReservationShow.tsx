@@ -23,6 +23,7 @@ export const ReservationShow = () => {
                 <DateField source="debut" label="Heure" showTime showDate={false}/>
                 <TextField source="nom" label="Passager" sortable={ true }/>
                 <TextField source="telephone" label="Téléphone" />
+                <TextField source="email" label="Adresse email" />
                 <FunctionField
                     source="circuit.code"
                     label="Circuit"

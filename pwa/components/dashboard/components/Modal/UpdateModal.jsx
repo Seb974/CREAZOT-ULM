@@ -21,7 +21,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
     const [selectedCircuit, setSelectedCircuit] = useState("");
     const [selectedOption, setSelectedOption] = useState("");
     const [selectedAircraft, setSelectedAircraft] = useState("");
-    const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false});
+    const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, debut: new Date((new Date()).setHours(8, 0, 0))});
 
     useEffect(() => {
         if (toUpdate !== null) {
@@ -35,6 +35,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                 email: isDefined(toUpdate.email) ? toUpdate.email : "",
                 remarques: isDefined(toUpdate.remarques) ? toUpdate.remarques : "",
                 report: isDefined(toUpdate.report) ? toUpdate.report : false,
+                debut: isDefined(toUpdate.debut) ? new Date(toUpdate.debut) : new Date((new Date()).setHours(8, 0, 0)),
              });
         } else {
             reinitializeData();
@@ -52,29 +53,42 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
 
     const onSubmit = async e => {
         e.preventDefault();
-        const prix = consumer.quantite * selectedCircuit.prix + (selectedOption.prix || 0);
+        const prix = selectedCircuit.prix + (selectedOption.prix || 0);
         const reservation = {
             ...consumer,
             circuit: selectedCircuit['@id'],
             option: selectedOption !== "" ? selectedOption['@id'] : null,
             pilote: selectedPilot !== "" ? selectedPilot['@id'] : null,
             avion: selectedAircraft !== "" ? selectedAircraft['@id'] : null,
+            fin: getEndTime(consumer.debut, selectedCircuit),
             prix
         }
         const updatedReservation = await dataProvider.update('reservations', {id: reservation.id, data: reservation});
         const updatedReservations = reservations
                                         .map(r => r['@id'] === updatedReservation.data['@id'] ? updatedReservation.data : r)
-                                        .filter(r => !isDefined(r.statut) || !r.statut.includes("CANCEL"));
+                                        .filter(r => isDefined(r.statut) && !r.statut.includes("CANCEL"))
+                                        // .filter(r => !isDefined(r.statut) || !r.statut.includes("CANCEL"));
         setReservations(updatedReservations);
         reinitializeData();
         setToUpdate(null);
+    };
+
+    const getEndTime = (start, circuit) => {
+        const duree = new Date(circuit.duree);
+        return new Date(
+            start.getFullYear(),
+            start.getMonth(),
+            start.getDate(),
+            start.getHours() + duree.getHours(),
+            start.getMinutes() + duree.getMinutes()
+        );
     };
 
     const reinitializeData = () => {
         setSelectedPilot("");
         setSelectedOption("");
         setSelectedAircraft("");
-        setConsumer({nom:"", telephone: "", email: "", quantite:1, statut: "VALIDATED", remarques: "", report: false});
+        setConsumer({nom:"", telephone: "", email: "", quantite:1, statut: "VALIDATED", remarques: "", report: false, debut: new Date((new Date()).setHours(8, 0, 0))});
         setPlus(false);
     };
 

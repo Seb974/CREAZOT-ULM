@@ -1,9 +1,12 @@
 "use client";
 
+import 'flatpickr/dist/themes/material_red.css';
 import React, { useState } from "react";
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import DoneIcon from '@mui/icons-material/Done';
 import ClearIcon from '@mui/icons-material/Clear';
+import Flatpickr from 'react-flatpickr';
+import { French } from "flatpickr/dist/l10n/fr.js";
 
 export const PlusForm = ({ consumer, setConsumer }) => {
 
@@ -13,8 +16,31 @@ export const PlusForm = ({ consumer, setConsumer }) => {
 
   const toggleReport = e => setConsumer({...consumer, report: !consumer.report});
 
+  const onDateChange = datetime => setConsumer({...consumer, debut: new Date(datetime[0])});
+
   return (
       <div className="space-y-4" style={{ zIndex: 3000 }}>
+        <div>
+        <label htmlFor="debut" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date et heure de décollage</label>
+          <Flatpickr
+              name="debut"
+              value={ consumer.debut }
+              onChange={ onDateChange }
+              className="form-control form-control-sm border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+              options={{
+                  enableTime: true,
+                  time_24hr: true,
+                  dateFormat: "d/m/Y - H:i",
+                  mode: "single",
+                  minDate: 'today',
+                  minTime:"06:00",
+                  maxTime:"18:00",
+                  locale: French,
+                  static: true
+              }}
+              style={{ height: "35px" }}
+          />
+        </div>
         <div>
             <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Adresse email</label>
             <input 
@@ -47,7 +73,6 @@ export const PlusForm = ({ consumer, setConsumer }) => {
           <label className="mb-3 block text-sm font-medium text-black dark:text-white">
             Statut
           </label>
-
           <div className="relative z-20 bg-white dark:bg-form-input">
             { consumer.statut === "VALIDATED" ? 
                 <DoneIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80 text-green-500"/> :

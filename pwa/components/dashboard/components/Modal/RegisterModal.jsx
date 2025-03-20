@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDataProvider } from "react-admin";
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -14,7 +14,15 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     const dateOptions = { year: 'numeric', month: 'long', day: 'numeric'};
     const [selectedCircuit, setSelectedCircuit] = useState("");
     const [plus, setPlus] = useState(false);
-    const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false});
+    const [isUpToDate, setIsUpToDate] = useState(false);
+    const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, debut: new Date(slot.start)});
+
+    useEffect(() => {
+        if (visible && !isUpToDate) {
+            setConsumer({...consumer, debut: new Date(slot.start)});
+            setIsUpToDate(true);
+        }
+    }, [slot.start]);
 
     const onConsumerChange = e => setConsumer({...consumer, [e.target.name]: e.target.value});
 
@@ -28,14 +36,13 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     const onSubmit = async e => {
         e.preventDefault();
         let newReservations = [];
-        const endTime = getEndTime(slot.start, selectedCircuit);
+        const endTime = getEndTime(consumer.debut, selectedCircuit);
         const quantite = parseInt(consumer.quantite);
-        const prix = quantite * selectedCircuit.prix;
+        const prix = selectedCircuit.prix;
         const reservation = {
             ...consumer,
             quantite,
             circuit: selectedCircuit.id,
-            debut: slot.start,
             fin: endTime,
             prix,
             color: getRandomColor()
@@ -61,9 +68,10 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     };
 
     const reinitializeData = () => {
-        setConsumer({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false});
+        setConsumer({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, debut: new Date((new Date()).setHours(8, 0, 0))});
         setPlus(false);
         setVisible(false);
+        setIsUpToDate(false);
     };
 
     const onBackClick = (e) => {
@@ -79,7 +87,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                         
                         <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                                Le { slot.start.toLocaleDateString('fr-FR', dateOptions) } à { slot.start.toLocaleTimeString('fr-FR', timeOptions) }
+                                Le { (new Date(consumer.debut)).toLocaleDateString('fr-FR', dateOptions) } à { (new Date(consumer.debut)).toLocaleTimeString('fr-FR', timeOptions) }
                             </h3>
                             <button onClick={ e => onClose() } type="button" className="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="authentication-modal">
                                 <svg className="w-3 h-3" aria-hidden={ !visible } xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">

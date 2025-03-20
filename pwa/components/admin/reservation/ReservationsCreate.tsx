@@ -74,7 +74,8 @@ export const ReservationsCreate = () => {
       <SimpleForm onSubmit={ onSubmit }>    {/* noValidate */}
         <DateTimeInput source="debut" defaultValue={ new Date((new Date()).setHours(7,0,0)) } label="Décollage" validate={required()}/>
         <TextInput source="nom" label="Nom & prénom du passager" validate={required()}/>   {/* validate={required()} */}
-        <TextInput source="telephone" label="N° de téléphone"validate={required()}/>
+        <TextInput source="telephone" label="N° de téléphone" validate={required()}/>
+        <TextInput source="email" label="Adresse email"/>
         <NumberInput source="quantite" label="Nombre de passager(s)" defaultValue={ 1 } validate={required()}/>
         <ReferenceInput reference="circuits" source="circuit" label="Circuit"/>
         <SelectInput source="statut" choices={ status } defaultValue={ status[0].id } validate={required()}/>

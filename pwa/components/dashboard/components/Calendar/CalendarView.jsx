@@ -49,9 +49,10 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
       reservations.map((d, i, array) => {
         color = i > 0 && (array[i].nom === array[i-1].nom && array[i].quantite === array[i-1].quantite ? color : getRandomColor())
         const newEvent = {...d, title: getTitle(d), start: new Date(d.debut), end: new Date(d.fin), color: isDefined(d.color) ? d.color : getRandomColor() };
-          newEvents = [...newEvents, newEvent]
+        newEvents = [...newEvents, newEvent];
       });
-      setEvents(newEvents);
+      const filteredEvents = newEvents.filter(e => isDefined(e.statut) && !e.statut.includes("CANCEL"));
+      setEvents(filteredEvents);
     }
   }
 
