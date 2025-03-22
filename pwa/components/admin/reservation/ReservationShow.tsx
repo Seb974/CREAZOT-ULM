@@ -41,6 +41,7 @@ export const ReservationShow = () => {
                     render={record =>  getStatusLabel(record) }
                     textAlign="right"
                 />
+                <TextField source="color" label="Code couleur"/>
                 <BooleanField source="report" label="Report"/>
             </SimpleShowLayout>
         </Show>

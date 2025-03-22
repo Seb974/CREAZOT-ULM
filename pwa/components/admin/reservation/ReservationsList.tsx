@@ -14,9 +14,12 @@ import {
   FilterButton,
   FunctionField,
   BooleanField,
+  useRecordContext,
 } from "react-admin";
 import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
+import { isDefined } from "../../../app/lib/utils";
+import { TextFieldProps } from "@mui/material";
 
 export interface Props {
   data: PagedCollection<Circuit> | null;
@@ -37,8 +40,21 @@ const filters = [
   <DateInput source="debut[before]"  key="DateMax" label="Date Max"/>,
   <DateInput source="debut[after]"  key="DateMin" label="Date Min"/>,
   <TextInput source="circuit.code" key="Circuit" label="Circuit" />,
-  
 ];
+
+const ColoredTextField = (props: TextFieldProps) => {
+  const record = useRecordContext();
+  return (
+      <TextField
+          source="nom"
+          // @ts-ignore
+          label="Passager"
+          sortable={ true }
+          sx={{ color: isDefined(record.color) ? record.color : 'black' }}
+          {...props}
+      />
+  );
+};
 
 export const ReservationsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
@@ -55,7 +71,7 @@ export const ReservationsList: NextPage<Props> = ({ data, hubURL, page }) => {
         <Datagrid sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
             <DateField source="debut" label="Date" sortable={ true } />
             <DateField source="debut" label="Heure" showTime showDate={false}/>
-            <TextField source="nom" label="Passager" sortable={ true }/>
+            <ColoredTextField />
             <TextField source="telephone" label="Téléphone" />
             <TextField source="circuit.code" label="Circuit" />
             <TextField source="option.nom" label="Option"/>

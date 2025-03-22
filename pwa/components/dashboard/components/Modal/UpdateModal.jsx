@@ -7,7 +7,7 @@ import { PilotForm } from "../../../admin/prestation/Form/PilotForm";
 import { CircuitForm } from "../../../admin/prestation/Form/CircuitForm";
 import { AircraftForm } from "../../../admin/prestation/Form/AircraftForm";
 import { OptionForm } from "../../../admin/prestation/Form/OptionForm";
-import { isDefined } from "../../../../app/lib/utils";
+import { getRandomColor, isDefined } from "../../../../app/lib/utils";
 import { PlusForm } from "../../../admin/prestation/Form/PlusForm";
 
 export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservations }) => {
@@ -21,7 +21,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
     const [selectedCircuit, setSelectedCircuit] = useState("");
     const [selectedOption, setSelectedOption] = useState("");
     const [selectedAircraft, setSelectedAircraft] = useState("");
-    const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, debut: new Date((new Date()).setHours(8, 0, 0))});
+    const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, debut: new Date((new Date()).setHours(8, 0, 0)), color: getRandomColor()});
 
     useEffect(() => {
         if (toUpdate !== null) {
@@ -87,7 +87,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
         setSelectedPilot("");
         setSelectedOption("");
         setSelectedAircraft("");
-        setConsumer({nom:"", telephone: "", email: "", quantite:1, statut: "VALIDATED", remarques: "", report: false, debut: new Date((new Date()).setHours(8, 0, 0))});
+        setConsumer({nom:"", telephone: "", email: "", quantite:1, statut: "VALIDATED", remarques: "", report: false, debut: new Date((new Date()).setHours(8, 0, 0)), color: getRandomColor()});
         setPlus(false);
     };
 

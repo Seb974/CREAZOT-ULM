@@ -1,6 +1,5 @@
 
 import { type NextPage } from "next";
-import { FieldGuesser } from "@api-platform/admin";
 import {
   TextInput,
   Datagrid,
@@ -69,11 +68,11 @@ export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
               <NumberField source="quantite" label="Nb vol(s)"/>
               <FunctionField
                 source="circuit"
-                render={record => <p>{record.circuit.code} - <span className="text-xs italic">{record.circuit.nom}</span></p>}
+                render={record => isDefined(record.circuit) && <p>{record.circuit.code} - <span className="text-xs italic">{record.circuit.nom}</span></p>}
               />
               <FunctionField
                 source="nature"
-                render={record => <p>{record.circuit.nature.code} - <span className="text-xs italic">{record.circuit.nature.label}</span></p>}
+                render={record => isDefined(record.circuit) && isDefined(record.circuit.nature) && <p>{record.circuit.nature.code} - <span className="text-xs italic">{record.circuit.nature.label}</span></p>}
               />
               <TextField source="option.nom" label="Option"/>
           </Datagrid>

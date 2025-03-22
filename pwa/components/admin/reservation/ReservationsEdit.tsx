@@ -78,6 +78,7 @@ export const ReservationsEdit = () => {
           <ReferenceInput reference="users" source="pilote.@id" label="Pilote" />
           <ReferenceInput reference="aeronefs" source="avion.@id" label="Aéronef" />
           <SelectInput source="statut" choices={ status} />
+          <TextInput source="color" label="Code couleur"/>
           <TextInput source="remarques" label="Remarques" multiline/>
           <BooleanInput source="report" label="Report"/>
       </SimpleForm>

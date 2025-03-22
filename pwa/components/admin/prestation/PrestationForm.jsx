@@ -1,5 +1,6 @@
 "use client";
 
+import 'flatpickr/dist/themes/material_red.css';
 import React, { useState } from "react";
 import { PilotForm } from "./Form/PilotForm";
 import { AircraftForm } from "./Form/AircraftForm";
@@ -8,14 +9,14 @@ import { FlightTimeForm } from "./Form/FlightTimeForm";
 import {SubmitButton} from "./Form/SubmitButton";
 import { useDataProvider } from "react-admin";
 import { toast } from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
-import { useRedirect } from 'react-admin';
+import Flatpickr from 'react-flatpickr';
+import { French } from "flatpickr/dist/l10n/fr.js";
 import { getCircuitDuration, getTotalPrice, getRealDuration, getCircuitPrice, isDefined } from '../../../app/lib/utils';
 
 export const PrestationForm = () => {
 
-  const redirect = useRedirect();
   const dataProvider = useDataProvider();
+  const [date, setDate] = useState(new Date());
   const [aircrafts, setAircrafts] = useState([]);
   const [selectedPilot, setSelectedPilot] = useState("");
   const [selectedAircraft, setSelectedAircraft] = useState("");
@@ -30,7 +31,6 @@ export const PrestationForm = () => {
       const prestation = {
         aeronef: selectedAircraft.id,
         pilote: isDefined(selectedPilot) && isObject(selectedPilot) ? (selectedPilot['@id'] || selectedPilot.id) : selectedPilot,
-        date: new Date(),
         horametreDepart: selectedAircraft.horametre,
         horametreFin: typeof selectedFlightTime === 'string' ? parseFloat(selectedFlightTime.replace(',','.')) : selectedFlightTime,
         duree: getRealDuration(selectedFlightTime, selectedAircraft),
@@ -44,6 +44,7 @@ export const PrestationForm = () => {
               prix: parseInt(c.quantite) * getCircuitPrice(c.circuit, c.option, selectedFlightTime, selectedAircraft)
             }
         }),
+        date,
         remarques
       };
       try {
@@ -56,10 +57,26 @@ export const PrestationForm = () => {
       }
   };
 
-
   return (
       <div className="w-full">
         <div className="rounded-md bg-gray-50 p-4 md:p-6">
+            <div className="mb-4">
+                <label htmlFor="debut" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date</label>
+                <Flatpickr
+                    name="debut"
+                    value={ date }
+                    onChange={ datetime => setDate(new Date(datetime[0])) }
+                    className="form-control form-control-sm border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                    options={{
+                        enableTime: false,
+                        dateFormat: "d/m/Y",
+                        mode: "single",
+                        locale: French,
+                        static: true
+                    }}
+                    // style={{ height: "35px" }}
+                />
+            </div>
             <PilotForm 
                 selectedPilot={ selectedPilot } 
                 setSelectedPilot={ setSelectedPilot }

@@ -7,6 +7,7 @@ import DoneIcon from '@mui/icons-material/Done';
 import ClearIcon from '@mui/icons-material/Clear';
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
+import { getRandomColor, isDefined } from '../../../../app/lib/utils';
 
 export const PlusForm = ({ consumer, setConsumer }) => {
 
@@ -18,10 +19,15 @@ export const PlusForm = ({ consumer, setConsumer }) => {
 
   const onDateChange = datetime => setConsumer({...consumer, debut: new Date(datetime[0])});
 
+  const onChangeColor = e => {
+    e.preventDefault();
+    setConsumer({...consumer, color: getRandomColor()});
+  };
+
   return (
       <div className="space-y-4" style={{ zIndex: 3000 }}>
         <div>
-        <label htmlFor="debut" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date et heure de décollage</label>
+          <label htmlFor="debut" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date et heure de décollage</label>
           <Flatpickr
               name="debut"
               value={ consumer.debut }
@@ -32,7 +38,7 @@ export const PlusForm = ({ consumer, setConsumer }) => {
                   time_24hr: true,
                   dateFormat: "d/m/Y - H:i",
                   mode: "single",
-                  minDate: 'today',
+                  minDate: new Date(consumer.debut) < new Date((new Date).setHours(6, 0, 0)) ? new Date(consumer.debut) : new Date((new Date).setHours(6, 0, 0)),
                   minTime:"06:00",
                   maxTime:"18:00",
                   locale: French,
@@ -108,14 +114,24 @@ export const PlusForm = ({ consumer, setConsumer }) => {
             </select>
           </div>
         </div>
-        <div className="mt-6">
-          <label className="inline-flex items-center me-5 cursor-pointer mt-4">
-              <input type="checkbox" value="" className="sr-only peer" checked={ consumer.report } onChange={ toggleReport }/>
-              <div className="relative w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500 dark:peer-checked:bg-orange-500"></div>
-              <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Vol reporté</span>
-          </label>
+        <div className="mt-6 flex justify-between items-center">
+          <div>
+            <label className="inline-flex items-center me-5 cursor-pointer mt-4">
+                <input type="checkbox" value="" className="sr-only peer" checked={ consumer.report } onChange={ toggleReport }/>
+                <div className="relative w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500 dark:peer-checked:bg-orange-500"></div>
+                <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Vol reporté</span>
+            </label>
+          </div>
+          <div>
+            {/* { isDefined(consumer.color) &&  */}
+              <button onClick={ onChangeColor } className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                  <span className="flex justify-between items-center"><div className="border-solid rounded-lg mr-2" style={{ height: "20px", width: "40px", backgroundColor: consumer.color }}></div>{ "Changer" }</span>
+              </button>
+            {/* } */}
+          </div>
         </div>
       </div>
   );
+  // text-white 
 }
 

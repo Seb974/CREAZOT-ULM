@@ -5,7 +5,7 @@ import { useDataProvider } from "react-admin";
 import { OneFlightForm } from "./OneFlightForm";
 import { Button } from '../../../common/ui/button';
 import AddIcon from '@mui/icons-material/Add';
-import { getCircuitPrice, isDefined } from '../../../../app/lib/utils';
+import { getCircuitPrice } from '../../../../app/lib/utils';
 
 export const FlightForm = ({ selectedCircuits, setSelectedCircuits, selectedAircraft, selectedFlightTime }) => {
 

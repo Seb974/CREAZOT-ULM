@@ -57,7 +57,7 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
     denormalizationContext: [
         AbstractNormalizer::GROUPS => ['Prestation:write'],
     ],
-    order: ['date' => 'DESC'],
+    order: ['horametreDepart' => 'DESC', 'date' => 'DESC'],
     collectDenormalizationErrors: true,
     security: 'is_granted("OIDC_USER")',
     mercure: true,

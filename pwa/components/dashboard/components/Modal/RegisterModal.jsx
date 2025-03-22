@@ -15,7 +15,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     const [selectedCircuit, setSelectedCircuit] = useState("");
     const [plus, setPlus] = useState(false);
     const [isUpToDate, setIsUpToDate] = useState(false);
-    const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, debut: new Date(slot.start)});
+    const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, debut: new Date(slot.start), color: getRandomColor()});
 
     useEffect(() => {
         if (visible && !isUpToDate) {
@@ -45,7 +45,6 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
             circuit: selectedCircuit.id,
             fin: endTime,
             prix,
-            color: getRandomColor()
         }
         for (let i = 0; i < quantite; i++) {
             const newReservation = await dataProvider.create('reservations', {data: reservation});
@@ -68,7 +67,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     };
 
     const reinitializeData = () => {
-        setConsumer({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, debut: new Date((new Date()).setHours(8, 0, 0))});
+        setConsumer({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, debut: new Date((new Date()).setHours(8, 0, 0)), color: getRandomColor()});
         setPlus(false);
         setVisible(false);
         setIsUpToDate(false);
