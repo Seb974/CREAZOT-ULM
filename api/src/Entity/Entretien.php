@@ -48,6 +48,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
         AbstractNormalizer::GROUPS => ['Entretien:write'],
     ],
     collectDenormalizationErrors: true,
+    order: ['date' => 'DESC'],
     security: 'is_granted("OIDC_USER")',
     mercure: true
 )]

@@ -1,18 +1,15 @@
 import { 
-  DateTimeInput, 
   ReferenceInput, 
   SimpleForm, 
   TextInput,
   NumberInput,
-  BooleanInput,
-  SelectInput,
   DateInput,
   ReferenceArrayInput
 } from "react-admin";
 import { Create } from "react-admin";
 
 export const EntretiensCreate = () => (
-<Create>
+<Create redirect="list">
   <SimpleForm>
     <DateInput source="date" defaultValue={ new Date() } label="Date"/>
     <ReferenceInput reference="aeronefs" source="aeronef" label="Aéronef" />
