@@ -28,6 +28,7 @@ import aeronefResourceProps from "./aeronef";
 import passagerResourceProps from "./passager";
 import userResourceProps from "./user";
 import reservationResourceProps from "./reservation";
+import { toast } from 'react-hot-toast';
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -142,6 +143,7 @@ const Admin = () => (
 
     {/*@ts-ignore*/}
     <AdminWithOIDC />
+
   </>
 );
 

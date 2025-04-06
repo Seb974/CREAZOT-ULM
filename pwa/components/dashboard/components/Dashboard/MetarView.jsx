@@ -27,7 +27,7 @@ export const MetarView = () => {
     }, []);
 
     return (
-        <div className="w-full mt-6">
+        <div className="hidden md:block w-full mt-6 ">
             <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark h-full">
                 <h3><b>METARs</b></h3>
                 { isDefined(metarFMEP) && metarFMEP !== "" &&

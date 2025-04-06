@@ -6,6 +6,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\EntretienRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\Delete;
@@ -77,6 +79,18 @@ class Entretien
     #[Groups(groups: ['Entretien:write', 'Entretien:read'])]
     private ?float $horametreNextIntervention = null;
 
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\ManyToMany(targetEntity: User::class)]
+    #[Groups(groups: ['Entretien:write', 'Entretien:read'])]
+    private Collection $intervenants;
+
+    public function __construct()
+    {
+        $this->intervenants = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -138,6 +152,30 @@ class Entretien
     public function setHorametreNextIntervention(?float $horametreNextIntervention): static
     {
         $this->horametreNextIntervention = $horametreNextIntervention;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getIntervenants(): Collection
+    {
+        return $this->intervenants;
+    }
+
+    public function addIntervenant(User $intervenant): static
+    {
+        if (!$this->intervenants->contains($intervenant)) {
+            $this->intervenants->add($intervenant);
+        }
+
+        return $this;
+    }
+
+    public function removeIntervenant(User $intervenant): static
+    {
+        $this->intervenants->removeElement($intervenant);
 
         return $this;
     }

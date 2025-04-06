@@ -11,10 +11,13 @@ import { useDataProvider } from "react-admin";
 import { toast } from 'react-hot-toast';
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
+import { useRedirect } from 'react-admin';
+import { API_DOMAIN } from '../../../app/lib/api';
 import { getCircuitDuration, getTotalPrice, getRealDuration, getCircuitPrice, isDefined } from '../../../app/lib/utils';
 
 export const PrestationForm = () => {
 
+  const redirect = useRedirect();
   const dataProvider = useDataProvider();
   const [date, setDate] = useState(new Date());
   const [aircrafts, setAircrafts] = useState([]);
@@ -50,6 +53,7 @@ export const PrestationForm = () => {
       try {
           await dataProvider.create('prestations', {data: prestation});
           toast.success(`Les vols ont bien été enregistrés.`, {duration: 1000});
+          redirect(`${ API_DOMAIN }/admin`)
       } catch (error) {
           toast.error('Une erreur bloque l\'enregistrement des vols.', {duration: 3000});
           console.log(error);
@@ -72,7 +76,8 @@ export const PrestationForm = () => {
                         dateFormat: "d/m/Y",
                         mode: "single",
                         locale: French,
-                        static: true
+                        static: true,
+                        disableMobile: "true"
                     }}
                     // style={{ height: "35px" }}
                 />

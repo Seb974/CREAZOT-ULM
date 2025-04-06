@@ -1,16 +1,17 @@
-import { Show, SimpleShowLayout, TextField, DateField, NumberField, BooleanField } from 'react-admin';
+import { Show, SimpleShowLayout, TextField, DateField, NumberField, BooleanField, ArrayField, Datagrid } from 'react-admin';
 
 export const EntretienShow = () => (
     <Show>
         <SimpleShowLayout>
-            <TextField source="nom" />
-            <TextField source="code" />
-            <NumberField source="prix" options={{ style: 'currency', currency: 'EUR' }}/>
-            <NumberField source="cout" label="Coût pilote" options={{ style: 'currency', currency: 'EUR' }}/>
-            <DateField source="duree" label="Durée" showTime showDate={false}/>
-            <TextField source="nature.label" label="Nature de la prestation"/>
-            <BooleanField source="prixFixe" label="Prix indépendant de la durée"/>
-            <BooleanField source="avecOptions" label="Options disponibles"/>
+            <DateField source="date" label="Date"/>
+            <TextField source="aeronef.immatriculation" />
+            <TextField source="intervention" />
+            <ArrayField source="intervenants">
+                <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {display: "none"}}} className="text-xs italic">
+                    <TextField source="name" label=""/>
+                </Datagrid>
+            </ArrayField>
+            <NumberField source="horametreNextIntervention" options={{ style: 'unit', unit: 'hour' }} label="Prochaine intervention"/>
         </SimpleShowLayout>
     </Show>
 )

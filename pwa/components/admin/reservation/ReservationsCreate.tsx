@@ -79,7 +79,7 @@ export const ReservationsCreate = () => {
         <NumberInput source="quantite" label="Nombre de passager(s)" defaultValue={ 1 } validate={required()}/>
         <ReferenceInput reference="circuits" source="circuit" label="Circuit"/>
         <SelectInput source="statut" choices={ status } defaultValue={ status[0].id } validate={required()}/>
-        <TextInput source="remarques" label="Remarques" multiline/>
+        <TextInput source="remarques" label="Remarques" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
       </SimpleForm>
     </Create>
   ) ;

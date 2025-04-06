@@ -79,7 +79,7 @@ export const ReservationsEdit = () => {
           <ReferenceInput reference="aeronefs" source="avion.@id" label="Aéronef" />
           <SelectInput source="statut" choices={ status} />
           <TextInput source="color" label="Code couleur"/>
-          <TextInput source="remarques" label="Remarques" multiline/>
+          <TextInput source="remarques" label="Remarques" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
           <BooleanInput source="report" label="Report"/>
       </SimpleForm>
   </Edit>

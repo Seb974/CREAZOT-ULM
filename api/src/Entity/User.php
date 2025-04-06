@@ -70,14 +70,14 @@ class User implements UserInterface
      * @see https://schema.org/email
      */
     #[ORM\Column(unique: true)]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read'])]
     public ?string $email = null;
 
     /**
      * @see https://schema.org/givenName
      */
     #[ApiProperty(types: ['https://schema.org/givenName'])]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read'])]
     #[ORM\Column]
     public ?string $firstName = null;
 
@@ -85,7 +85,7 @@ class User implements UserInterface
      * @see https://schema.org/familyName
      */
     #[ApiProperty(types: ['https://schema.org/familyName'])]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read'])]
     #[ORM\Column]
     public ?string $lastName = null;
 
@@ -115,7 +115,7 @@ class User implements UserInterface
      * @see https://schema.org/name
      */
     #[ApiProperty(iris: ['https://schema.org/name'])]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read' ])]
     public function getName(): ?string
     {
         if (!$this->firstName && !$this->lastName) {
