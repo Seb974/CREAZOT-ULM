@@ -53,8 +53,8 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                 position: isDefined(toUpdate.position) ? toUpdate.position : "-",
                 debut: isDefined(toUpdate.debut) ? new Date(toUpdate.debut) : new Date((new Date()).setHours(8, 0, 0)),
                 cadeau: isDefined(toUpdate.cadeau) ? toUpdate.cadeau : defaultCadeau,
-             });
-             getValidCadeaux(toUpdate)
+            });
+            getValidCadeaux(toUpdate)
         } else {
             reinitializeData();
         }
@@ -68,10 +68,13 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
 
     const getValidCadeaux = (consumer) => {
         try {
-            dataProvider
-                .getList('cadeaux', {filter: { valid: isDefined(consumer.cadeau) && consumer.cadeau['@id'] !== defaultCadeau['@id'] ? consumer.cadeau : 'null' }})
-                .then(({ data }) => setValidCadeaux([...data, defaultCadeau]));
+            if (isDefined(consumer)) {
+                dataProvider
+                    .getList('cadeaux', {filter: { valid: isDefined(consumer.cadeau) && consumer.cadeau['@id'] !== defaultCadeau['@id'] ? consumer.cadeau : 'null' }})
+                    .then(({ data }) => setValidCadeaux([...data, defaultCadeau]));
+            }
         } catch (e) {
+            console.log(consumer);
             console.log(e);
         }
     };

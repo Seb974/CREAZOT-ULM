@@ -15,6 +15,7 @@ import {
   BooleanField,
   FilterButton
 } from "react-admin";
+import DownloadGiftButton from "./DownloadGiftButton";
 import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
 
@@ -43,12 +44,13 @@ export const CadeauxList: NextPage<Props> = ({ data, hubURL, page }) => {
 
   return (
     <List resource="cadeaux" actions={<ListActions/>} filters={ filters } title="Bons cadeaux">
-        <Datagrid>
+        <Datagrid rowClick={ false} >
             <TextField source="code" label="N° de bon"/>
             <TextField source="beneficiaire" label="Bénéficiaire" sortable={ true }/>
             <TextField source="offreur" label="Personne offrante" sortable={ true }/>
             <DateField source="fin" label="Date d'expiration" sortable={ true } />
             <BooleanField source="used" label="utilisé" textAlign="center"/>
+            <DownloadGiftButton/>
             <p className="text-right">
                 <ShowButton />
                 <EditButton />

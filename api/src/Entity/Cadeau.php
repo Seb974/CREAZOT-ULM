@@ -110,6 +110,14 @@ class Cadeau
     #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
     private Collection $origine;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    private ?string $email = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    private ?string $message = null;
+
     public function __construct()
     {
         $this->origine = new ArrayCollection();
@@ -254,6 +262,30 @@ class Cadeau
     public function removeOrigine(Origine $origine): static
     {
         $this->origine->removeElement($origine);
+
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(?string $email): static
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    public function getMessage(): ?string
+    {
+        return $this->message;
+    }
+
+    public function setMessage(?string $message): static
+    {
+        $this->message = $message;
 
         return $this;
     }

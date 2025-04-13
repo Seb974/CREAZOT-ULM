@@ -6,6 +6,7 @@ export const CadeauShow = () => (
             <TextField source="code" label="N° de bon"/>
             <TextField source="beneficiaire" label="Bénéficiaire"/>
             <TextField source="offreur" label="Personne offrante"/>
+            <TextField source="email" label="Adresse email de la personne offrante"/>
             <FunctionField
                     source="circuit.code"
                     label="Circuit"
@@ -19,6 +20,7 @@ export const CadeauShow = () => (
                     </Datagrid>
                 </ArrayField>
             <DateField source="fin" label="Date d'expiration"/>
+            <TextField source="message" />
             <BooleanField source="used" label="utilisé"/>
         </SimpleShowLayout>
     </Show>

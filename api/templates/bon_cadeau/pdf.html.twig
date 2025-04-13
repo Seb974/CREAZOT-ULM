@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Bon Cadeau</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            position: relative;
+            padding: 40px;
+        }
+
+        .overlay {
+            background-color: rgba(255, 255, 255, 0.88);
+            padding: 40px;
+            padding-top: 10px;
+            margin: 60px auto;
+            width: 80%;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+            background-image: url('{{ absolute_url(asset("images/Plane.png")) }}');
+            background-repeat: no-repeat;
+            background-position: top center;
+            background-size: auto;
+            background-attachment: fixed;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .info {
+            margin-top: 30px;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .info a {
+            color: #2980b9;
+            text-decoration: none;
+        }
+
+        .code {
+            font-size: 20px;
+            text-align: center;
+            margin: 30px 0;
+            padding: 15px;
+            border: 2px dashed #2c3e50;
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay">
+        <h1>PLANETAIR 974</h1>
+        <h2>Bon Cadeau pour un Circuit {{ cadeau.circuit.nom }} {{ cadeau.option is not null ? 'avec ' ~ cadeau.option.nom : '' }}</h2>
+
+        <p>
+            Offert à : <strong>{{ cadeau.beneficiaire }}</strong><br/>
+            De la part de : <strong>{{ cadeau.offreur }}</strong><br/>
+            Date de validité : <strong>{{ cadeau.fin|date('d/m/Y') }}</strong>
+        </p>
+
+        <p>
+            {{ cadeau.message|nl2br }}
+        </p>
+
+        <div class="code">
+            Code à présenter : <strong>{{ cadeau.code|upper }}</strong>
+        </div>
+
+        <div class="info">
+            PLANETAIR974<br/>
+            ULM - ÎLE DE LA RÉUNION<br/>
+            TEL: +262 (0)6 92 61 92 04<br/>
+            <a href="mailto:planetair974@gmail.com">planetair974@gmail.com</a><br/>
+            <a href="https://www.planetair974.fr">www.planetair974.fr</a>
+        </div>
+    </div>
+</body>
+</html>

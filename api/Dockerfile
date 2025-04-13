@@ -38,6 +38,7 @@ RUN set -eux; \
 		intl \
 		opcache \
 		zip \
+		gd \
 	;
 
 ###> recipes ###

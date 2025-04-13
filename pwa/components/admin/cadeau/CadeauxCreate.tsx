@@ -75,6 +75,7 @@ export const CadeauxCreate = () => {
       <SimpleForm onSubmit={ onSubmit }>
         <TextInput source="beneficiaire" label="Nom du bénéficiaire" validate={required()}/>
         <TextInput source="offreur" label="Nom de la personne offrante" validate={required()}/>
+        <TextInput source="email" label="Adresse email de la personne offrante" validate={required()}/>
         <ReferenceInput reference="circuits" source="circuit" label="Circuit"/>
         <ReferenceInput reference="options" source="option" label="Option" />
         <ArrayInput source="origine" label="Origine de l'appel">
@@ -84,6 +85,7 @@ export const CadeauxCreate = () => {
           </ArrayInput>
         <TextInput source="paymentId" label="N° du paiement"/>
         <DateInput source="fin" defaultValue={ new Date(today.getFullYear() + 1, today.getMonth(), today.getDate() + 1) } label="Date d'expiration"/>
+        <TextInput source="message" label="Message" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
       </SimpleForm>
     </Create>
   );

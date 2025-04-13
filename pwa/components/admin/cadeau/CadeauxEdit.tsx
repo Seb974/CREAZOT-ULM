@@ -58,6 +58,7 @@ const getMaxDiscountFromOrigin = origines =>  origines.map(o => o.discount).redu
         <TextInput source="code" label="N° du bon cadeau" disabled/>
         <TextInput source="beneficiaire" label="Nom du bénéficiaire" />
         <TextInput source="offreur" label="Nom de la personne offrante" />
+        <TextInput source="email" label="Adresse email de la personne offrante"/>
         <ReferenceInput reference="circuits" source="circuit.@id" label="Circuit"/>
         <ReferenceInput reference="options" source="option.@id" label="Option" />
         <ArrayInput source="origine" label="Origine de l'appel">
@@ -67,6 +68,7 @@ const getMaxDiscountFromOrigin = origines =>  origines.map(o => o.discount).redu
           </ArrayInput>
         <TextInput source="paymentId" label="N° du paiement"/>
         <DateInput source="fin" label="Date d'expiration"/>
+        <TextInput source="message" label="Message" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
         <BooleanInput source="used" label="Bon déjà utilisé"/>
       </SimpleForm>
   </Edit>
