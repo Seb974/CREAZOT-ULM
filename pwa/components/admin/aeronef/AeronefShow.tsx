@@ -7,7 +7,11 @@ export const AeronefShow = () => {
 
     const getRemainingTime = record => record.decimal ? getRemainingDecimalTime(record) : getRemainingLocaleTime(record);
 
+    const getRemainingMotorTime = record => record.decimal ? getRemainingDecimalTime({entretien: record.changementMoteur, horametre: record.horametre, seuilAlerte: record.seuilAlerteChangementMoteur}) : getRemainingMotorLocaleTime(record);
+
     const getRemainingLocaleTime = ({entretien, horametre, seuilAlerte}) => getRemainingDecimalTime({entretien : getDecimalTimeFromLocale(entretien), horametre: getDecimalTimeFromLocale(horametre), seuilAlerte});
+
+    const getRemainingMotorLocaleTime = ({changementMoteur, horametre, seuilAlerteChangementMoteur}) => getRemainingDecimalTime({entretien : getDecimalTimeFromLocale(changementMoteur), horametre: getDecimalTimeFromLocale(horametre), seuilAlerte: seuilAlerteChangementMoteur});
 
     const getRemainingDecimalTime = ({entretien, horametre, seuilAlerte}) => {
         const alerte = isDefined(seuilAlerte) ? seuilAlerte : 10;
@@ -33,8 +37,15 @@ export const AeronefShow = () => {
                     source="entretien"
                     label="Temps de vol avant le prochain entretien"
                     render={ record => <>{ getRemainingTime(record) }</> }
+                />
+                <FunctionField
+                    source="changementMoteur"
+                    label="Temps de vol avant le prochain Changement moteur"
+                    render={ record => <>{ getRemainingMotorTime(record) }</> }
                 />   
-                <NumberField source="seuilAlerte" options={{ style: 'unit', unit: 'hour' }} label="Alerte avant entretien"/>
+                <NumberField source="seuilAlerte" options={{ style: 'unit', unit: 'hour' }} label="Seuil d'alerte (en h) avant entretien"/>
+                <NumberField source="seuilAlerteChangementMoteur" options={{ style: 'unit', unit: 'hour' }} label="Seuil d'alerte (en h) avant changement du moteur"/>
+                <TextField source="codeBalise" label="Code Microtrak"/>
                 <BooleanField source="decimal" label="Horamètre décimal"/>
             </SimpleShowLayout>
         </Show>

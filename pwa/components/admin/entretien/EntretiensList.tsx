@@ -2,7 +2,9 @@ import { type NextPage } from "next";
 import {
   Datagrid,
   List,
+  TextInput,
   TextField,
+  BooleanInput,
   CreateButton,
   ExportButton,
   TopToolbar,
@@ -10,6 +12,8 @@ import {
   NumberField,
   EditButton,
   ShowButton,
+  BooleanField,
+  FilterButton
 } from "react-admin";
 import { useMercure } from "../../../utils/mercure";
 import { type Circuit } from "../../../types/Circuit";
@@ -23,10 +27,16 @@ export interface Props {
 
 const ListActions = () => (
   <TopToolbar>
+      <FilterButton/> 
       <CreateButton/>
       <ExportButton/>
   </TopToolbar>
 );
+
+const filters = [
+  <TextInput source="aeronef.immatriculation" key="Aeronef" label="Aéronef"/>,
+  <BooleanInput source="changementMoteur" key="changementMoteur" label="Changement moteur"/>,
+];
 
 export const EntretiensList: NextPage<Props> = ({ data, hubURL, page }) => {
 
@@ -35,12 +45,12 @@ export const EntretiensList: NextPage<Props> = ({ data, hubURL, page }) => {
   const InterventionExpansion = () => <TextField source="intervention" label="Détail de l'intervention"/>
 
   return (
-    <List resource="entretiens" actions={<ListActions/>}>
+    <List resource="entretiens" actions={<ListActions/>} filters={ filters }>
         <Datagrid expand={ <InterventionExpansion/> } sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
             <DateField source="date" label="Date" sortable={ true } />
             <TextField source="aeronef.immatriculation" label="Aéronef" sortable={ true }/>
             <NumberField source="horametreIntervention" options={{ style: 'unit', unit: 'hour' }} label="Horamètre à l'intervention"/>
-            <NumberField source="horametreNextIntervention" options={{ style: 'unit', unit: 'hour' }} label="Prochaine intervention"/>
+            <BooleanField source="changementMoteur" label="Changement moteur" textAlign="center"/>
             <p className="text-right">
                 <ShowButton />
                 <EditButton />

@@ -27,8 +27,8 @@ export const OptionForm: React.FC = ({ selectedOption, setSelectedOption, isUpda
   }, []);
 
   return (
-        <div>
-          <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+        <div className="mb-2">
+          <label className="mb-2 block text-sm font-medium text-black dark:text-white">
             Option
           </label>
 
@@ -44,9 +44,9 @@ export const OptionForm: React.FC = ({ selectedOption, setSelectedOption, isUpda
                 setSelectedOption(newOptions);
                 changeTextColor();
               }}
-              className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-12 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input ${
+              className={`relative z-20 w-full appearance-none rounded-lg border border-stroke bg-transparent px-12 py-2 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input ${
                 isOptionSelected ? "text-black dark:text-white" : ""
-              }`}
+              } h-[41px]`}
             >
               <option value="" className="text-body dark:text-bodydark">
                 Aucune option

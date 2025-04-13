@@ -40,7 +40,11 @@ export const AeronefsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
   const getRemainingTime = record => record.decimal ? getRemainingDecimalTime(record) : getRemainingLocaleTime(record);
 
+  const getRemainingMotorTime = record => record.decimal ? getRemainingDecimalTime({entretien: record.changementMoteur, horametre: record.horametre, seuilAlerte: record.seuilAlerteChangementMoteur}) : getRemainingMotorLocaleTime(record);
+
   const getRemainingLocaleTime = ({entretien, horametre, seuilAlerte}) => getRemainingDecimalTime({entretien : getDecimalTimeFromLocale(entretien), horametre: getDecimalTimeFromLocale(horametre), seuilAlerte});
+
+  const getRemainingMotorLocaleTime = ({changementMoteur, horametre, seuilAlerteChangementMoteur}) => getRemainingDecimalTime({entretien : getDecimalTimeFromLocale(changementMoteur), horametre: getDecimalTimeFromLocale(horametre), seuilAlerte: seuilAlerteChangementMoteur});
   
   const getRemainingDecimalTime = ({entretien, horametre, seuilAlerte}) => {
       const alerte = isDefined(seuilAlerte) ? seuilAlerte : 10;
@@ -48,11 +52,11 @@ export const AeronefsList: NextPage<Props> = ({ data, hubURL, page }) => {
       const sign = remainingDecimalTime > 0 ? "" : "+ ";
       const intRemainingTime = Math.abs(Math.trunc(remainingDecimalTime));
       const rest = Math.round((Math.abs(remainingDecimalTime) - intRemainingTime) * 60);
-      const formattedRest = rest < 10 ? "0" + rest.toFixed(0) : rest.toFixed(0);
+      const formattedRest = !isNaN(rest) ? rest < 10 ? "0" + rest.toFixed(0) : rest.toFixed(0) : "-";
       return (
           <p className={`${ (entretien - alerte) - horametre > 0 ? 'font-normal' : 'font-bold'} 
                           ${ (entretien - alerte) - horametre < 0 ? (horametre > entretien ? 'text-red-500' : 'text-orange-500') : 'text-green-500'}`}>
-              { sign + intRemainingTime + "h" + formattedRest }
+              { (!isNaN(intRemainingTime) ? (sign + intRemainingTime + "h") : "") + formattedRest }
           </p>
       );
   };
@@ -64,9 +68,15 @@ export const AeronefsList: NextPage<Props> = ({ data, hubURL, page }) => {
             <NumberField source="horametre" options={{ style: 'unit', unit: 'hour' }} label="Horamètre"/>
             <FunctionField
               source="entretien"
-              label="Temps de vol avant entretien"
+              label="Entretien"
               textAlign="right"
               render={ record => <>{ getRemainingTime(record) }</> }
+            />
+            <FunctionField
+              source="changementMoteur"
+              label="Changement moteur"
+              textAlign="right"
+              render={ record => <>{ getRemainingMotorTime(record) }</> }
             />
             <p className="text-right">
                 <ShowButton />

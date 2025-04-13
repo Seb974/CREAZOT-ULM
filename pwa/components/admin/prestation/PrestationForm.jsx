@@ -7,18 +7,16 @@ import { AircraftForm } from "./Form/AircraftForm";
 import { FlightForm } from "./Form/FlightForm";
 import { FlightTimeForm } from "./Form/FlightTimeForm";
 import {SubmitButton} from "./Form/SubmitButton";
-import { useDataProvider } from "react-admin";
-import { toast } from 'react-hot-toast';
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
-import { useRedirect } from 'react-admin';
-import { API_DOMAIN } from '../../../app/lib/api';
+import { useRedirect, useNotify, useCreate } from 'react-admin';
 import { getCircuitDuration, getTotalPrice, getRealDuration, getCircuitPrice, isDefined } from '../../../app/lib/utils';
 
 export const PrestationForm = () => {
 
+  const notify = useNotify();
   const redirect = useRedirect();
-  const dataProvider = useDataProvider();
+  const [create] = useCreate();
   const [date, setDate] = useState(new Date());
   const [aircrafts, setAircrafts] = useState([]);
   const [selectedPilot, setSelectedPilot] = useState("");
@@ -30,7 +28,6 @@ export const PrestationForm = () => {
   const isObject = obj => Object.prototype.toString.call(obj) === '[object Object]';
 
   const handleSubmit = async e => {
-      e.preventDefault()
       const prestation = {
         aeronef: selectedAircraft.id,
         pilote: isDefined(selectedPilot) && isObject(selectedPilot) ? (selectedPilot['@id'] || selectedPilot.id) : selectedPilot,
@@ -51,13 +48,13 @@ export const PrestationForm = () => {
         remarques
       };
       try {
-          await dataProvider.create('prestations', {data: prestation});
-          toast.success(`Les vols ont bien été enregistrés.`, {duration: 1000});
-          redirect(`${ API_DOMAIN }/admin`)
+          create('prestations', {data: prestation});
+          notify('Les vols ont bien été enregistrés.', { type: 'info' });
+          redirect('list', 'prestations');
       } catch (error) {
-          toast.error('Une erreur bloque l\'enregistrement des vols.', {duration: 3000});
+          notify(`Une erreur bloque l\'enregistrement des vols.`, { type: 'error' });
+          redirect('list', 'prestations');
           console.log(error);
-          return error;
       }
   };
 
@@ -79,7 +76,6 @@ export const PrestationForm = () => {
                         static: true,
                         disableMobile: "true"
                     }}
-                    // style={{ height: "35px" }}
                 />
             </div>
             <PilotForm 

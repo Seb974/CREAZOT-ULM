@@ -19,10 +19,10 @@ export const CircuitForm: React.FC = ({ selectedCircuit, setSelectedCircuit, isU
         .getList('circuits', {})
         .then(({ data }) => {
             setCircuits(data);
-            if (!isUpdate)
+            if (!isUpdate && selectedCircuit === "")
               setSelectedCircuit(data[0]);
             else {
-              if (reservation !== null && reservation !== undefined)
+              if (reservation !== null && reservation !== undefined && selectedCircuit === "")
                 setSelectedCircuit(reservation.circuit || "");
             }
         })
@@ -30,13 +30,13 @@ export const CircuitForm: React.FC = ({ selectedCircuit, setSelectedCircuit, isU
   }, []);
 
   return (
-        <div>
-          <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+        <div className={`relative z-20 bg-white dark:bg-form-input pb-[4px] ${ !isUpdate && 'w-2/3' }`}>
+          <label className="mb-2 block text-sm font-medium text-black dark:text-white">
             Circuit
           </label>
 
           <div className="relative z-20 bg-white dark:bg-form-input">
-            <PublicIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/>
+            <PublicIcon className="left-4 absolute top-1/2 z-30 -translate-y-1/2 opacity-80"/>
 
             <select
               value={ isDefined(selectedCircuit) && isDefined(selectedCircuit['@id']) ? selectedCircuit['@id'] : 0 }
@@ -45,9 +45,9 @@ export const CircuitForm: React.FC = ({ selectedCircuit, setSelectedCircuit, isU
                 setSelectedCircuit(newCircuit);
                 changeTextColor();
               }}
-              className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-12 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input ${
+              className={`relative z-20 w-full appearance-none rounded-lg border border-stroke bg-transparent px-12 py-2 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input ${
                 isCircuitSelected ? "text-black dark:text-white" : ""
-              }`}
+              } h-[41px]`}
             >
               <option value="" disabled className="text-body dark:text-bodydark">
                 Choisissez un circuit

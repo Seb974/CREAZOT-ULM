@@ -11,7 +11,10 @@ import PublicIcon from '@mui/icons-material/Public';
 import BuildIcon from '@mui/icons-material/Build';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import EventIcon from '@mui/icons-material/Event';
+import StyleIcon from '@mui/icons-material/Style';
+import RedeemIcon from '@mui/icons-material/Redeem';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
+import MediationIcon from '@mui/icons-material/Mediation';
 import authProvider from "../authProvider";
 import { useSession } from "next-auth/react";
 import { isDefined } from "../../../app/lib/utils";
@@ -50,6 +53,14 @@ const CustomMenu = () => {
       {/* @ts-ignore */}
       { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
         <Menu.Item
+          to="/cadeaux"
+          primaryText="Bons cadeaux"
+          leftIcon={<RedeemIcon />}
+        />
+      }
+      {/* @ts-ignore */}
+      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
+        <Menu.Item
           to="/entretiens"
           primaryText="Maintenance"
           leftIcon={<BuildIcon />}
@@ -69,6 +80,14 @@ const CustomMenu = () => {
           to="/circuits"
           primaryText="Circuits"
           leftIcon={<PublicIcon />}
+        />
+      }
+      {/* @ts-ignore */}
+      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
+        <Menu.Item
+          to="/origines"
+          primaryText="Pouvoyeurs"
+          leftIcon={<StyleIcon />}
         />
       }
       {/* @ts-ignore */}

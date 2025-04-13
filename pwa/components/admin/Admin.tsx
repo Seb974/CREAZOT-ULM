@@ -29,6 +29,9 @@ import passagerResourceProps from "./passager";
 import userResourceProps from "./user";
 import reservationResourceProps from "./reservation";
 import { toast } from 'react-hot-toast';
+import origineResourceProps from "./origine";
+import contactResourceProps from "./contact";
+import cadeauResourceProps from "./cadeau";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -128,6 +131,9 @@ const AdminWithOIDC = () => {
       <ResourceGuesser name="aeronefs" {...aeronefResourceProps}/>
       <ResourceGuesser name="options"/>
       <ResourceGuesser name="natures"/>
+      <ResourceGuesser name="cadeaux" {...cadeauResourceProps}/>
+      <ResourceGuesser name="contacts" {...contactResourceProps}/>
+      <ResourceGuesser name="origines" {...origineResourceProps}/>
       <ResourceGuesser name="entretiens" {...entretienResourceProps}/>
       <ResourceGuesser name="users" {...userResourceProps}/>
       <ResourceGuesser name="reservations" {...reservationResourceProps}/>

@@ -172,3 +172,48 @@ services:
         arguments:
             $properties: { prestation.pilote.email: 'exact' } # ]
         tags: [ 'api_platform.filter' ]
+
+    app.filter.entretien.aeronef:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { aeronef.immatriculation: 'ipartial' } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.entretien.moteur:
+        parent: 'api_platform.doctrine.orm.boolean_filter'
+        arguments:
+            $properties:  {changementMoteur: ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.cadeau.fin:
+        parent: 'api_platform.doctrine.orm.date_filter'
+        arguments:
+            $properties: { fin: ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.cadeau.used:
+        parent: 'api_platform.doctrine.orm.boolean_filter'
+        arguments:
+            $properties:  {used: ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.cadeau.beneficiaire:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { beneficiaire: 'iword_start' } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.cadeau.offreur:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { offreur: 'iword_start' } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.cadeau.valid:
+        class: 'App\Doctrine\Orm\Filter\ValidCadeauFilter'
+        arguments:
+            $managerRegistry: '@doctrine'
+            $logger: '@logger'
+            $nameConverter: '@?api_platform.name_converter'
+            $properties: { valid: 'iexact' } # ]
+        tags: [ 'api_platform.filter' ]

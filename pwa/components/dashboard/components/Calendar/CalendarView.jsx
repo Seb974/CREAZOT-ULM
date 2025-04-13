@@ -6,8 +6,9 @@ import { Calendar, Views, momentLocalizer } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import "../../../../css/calendar.css";
+import WarningIcon from '@mui/icons-material/Warning';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
-import { getRandomColor, isDefined } from "../../../../app/lib/utils";
+import { getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../../app/lib/utils";
 import { useSession } from 'next-auth/react';
 
 const DOW = 1;
@@ -56,7 +57,7 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
     }
   }
 
-  const getTitle = ({ circuit, nom, pilote, avion, telephone, option, statut, report }) => {
+  const getTitle = ({ circuit, nom, pilote, avion, telephone, option, statut, report, prix, position, remarques, paid }) => {
     if (view == Views.DAY)
       return (
         <>
@@ -65,13 +66,26 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
           </b><i className="text-xs">{`${ isDefined(option) ? " + " + option.nom  : "" }` }</i>
           <br/>
           <b className="text-xs">{`${ nom }` }</b> <span className="text-xs"><i>{`${ telephone }` }</i></span>
+     
           <br/>
-          
-          <span className="text-xs">
-            {`${ isDefined(pilote) ? pilote.firstName : "" }
-              ${ isDefined(pilote) && isDefined(avion) ? " | " : "" }
-              ${ isDefined(avion) ? avion.immatriculation : "" }` }
+          { (isDefined(remarques) && remarques.trim() !== "") && 
+            <>
+              <span className="text-xs"><i className="text-red-50"><WarningIcon/> { remarques }</i></span>
+        
+              <br/>
+            </>
+          }
+          <span className="text-xs"><b>
+            {`${ isDefined(pilote) ? pilote.firstName.toUpperCase() : "" }
+              ${ isDefined(pilote) && isDefined(avion) ? "  |  " : "" }
+              ${ isDefined(avion) ? avion.immatriculation : "" }
+              ${ (isDefined(pilote) || isDefined(avion)) && (isDefined(position) && position !== "-") ? " -> " : "" }
+               ${ (isDefined(position) && position !== "-") ? position : "" }`
+            }
+          </b>
           </span>
+          <br/>
+          <span className="text-xs"><b>{ prix }€ </b>{`${(isDefined(paid) && paid) ?  "- PRÉPAYÉ" : ""}`}</span>
         </>
       );
     else 
@@ -118,13 +132,17 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
 [setEvents, reservations, setReservations]);
 
 const getFormattedUpdate = (event, start, end) => {
-  const { circuit, option, pilote, avion } = event;
+  const { circuit, option, pilote, avion, contact, origine, cadeau } = event;
   return {
       ...event,
+      statut: "WHEATER_REPORT",
       circuit: circuit['@id'],
       option: isDefined(option) ? option['@id'] : null,
       pilote: isDefined(pilote) ? pilote['@id'] : null,
       avion: isDefined(avion) ? avion['@id'] : null,
+      cadeau: isDefined(cadeau) ? cadeau['@id'] : null,
+      contact: isDefinedAndNotVoid(contact) ? contact.map(c => c['@id']) : [],
+      origine: isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : [],
       report: event.report ? true : (new Date(event.debut) < new Date(start)),
       debut: new Date(start), 
       fin: new Date(end)

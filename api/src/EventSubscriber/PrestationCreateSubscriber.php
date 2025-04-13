@@ -56,8 +56,26 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
                     'immatriculation' => $aeronef->getImmatriculation(),
                     'horametre' => $aeronef->getHorametre(),
                     'entretien' => $aeronef->getEntretien(),
-                    'time' => $this->getRemainingTime($aeronef),
+                    'time' => $this->getRemainingTime($aeronef, 'ENTRETIEN'),
                     'introduction' => $aeronef->getHorametre() > $aeronef->getEntretien() ? 'dépassée de' : 'programmée dans'
+                ]);
+
+            $this->mailer->send($message);
+            $aeronef->setAlerteEnvoyee(true);
+        }
+
+        if ( ($aeronef->getChangementMoteur() - $aeronef->getHorametre()) < $aeronef->getSeuilAlerteChangementMoteur() && !$aeronef->isAlerteMoteurEnvoyee()) {
+            $message = (new TemplatedEmail())
+                ->from('contact@planetair974.com')
+                ->to('planetair974@gmail.com')
+                ->subject('Changement moteur proche sur ' . $aeronef->getImmatriculation())
+                ->htmlTemplate('emails/changement_moteur.html.twig')
+                ->context([
+                    'immatriculation' => $aeronef->getImmatriculation(),
+                    'horametre' => $aeronef->getHorametre(),
+                    'entretien' => $aeronef->getEntretien(),
+                    'time' => $this->getRemainingTime($aeronef, 'MOTEUR'),
+                    'introduction' => $aeronef->getHorametre() > $aeronef->getEntretien() ? 'dépassé de' : 'programmé dans'
                 ]);
 
             $this->mailer->send($message);
@@ -65,18 +83,22 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
         }
     }
 
-    private function getRemainingTime(Aeronef $aeronef) : string
+    private function getRemainingTime(Aeronef $aeronef, $wantedInfo) : string
     {
-        $decimalEntretien = $aeronef->isDecimal() ? $aeronef->getEntretien() : $this->getDecimalTimeFromLocale($aeronef->getEntretien());
+        if ($wantedInfo === "ENTRETIEN")
+            $decimal = $aeronef->isDecimal() ? $aeronef->getEntretien() : $this->getDecimalTimeFromLocale($aeronef->getEntretien());
+        else 
+            $decimal = $aeronef->isDecimal() ? $aeronef->getChangementMoteur() : $this->getDecimalTimeFromLocale($aeronef->getChangementMoteur());
+
         $decimalHorametre = $aeronef->isDecimal() ? $aeronef->getHorametre() : $this->getDecimalTimeFromLocale($aeronef->getHorametre());
 
-        return $this->getRemains($decimalEntretien, $decimalHorametre);
+        return $this->getRemains($decimal, $decimalHorametre);
     }
 
-    private function getRemains(float $decimalEntretien, float $decimalHorametre) : string
+    private function getRemains(float $decimal, float $decimalHorametre) : string
     {
-        $remainingDecimalTime = $decimalEntretien - $decimalHorametre;
-        $intRemainingTime = abs(floor($remainingDecimalTime));
+        $remainingDecimalTime = $decimal - $decimalHorametre;
+        $intRemainingTime = abs($remainingDecimalTime);
         $restRemainingTime = abs($remainingDecimalTime) - $intRemainingTime;
         $formattedRest = round($restRemainingTime * 60, 0) < 10 ? "0" . round($restRemainingTime * 60, 0) : round($restRemainingTime * 60, 0);
  

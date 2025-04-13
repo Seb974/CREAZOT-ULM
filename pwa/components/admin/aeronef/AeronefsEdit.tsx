@@ -14,7 +14,10 @@ export const AeronefsEdit = () => {
         <TextInput source="immatriculation" label="Immatriculation"/>
         <NumberInput source="horametre" label="Horamètre actuel"/>
         <NumberInput source="entretien" label="Prochain entretien"/>
+        <NumberInput source="changementMoteur" label="Changement du moteur" />
         <NumberInput source="seuilAlerte" label="Seuil d'alerte (en h) avant entretien"/>
+        <NumberInput source="seuilAlerteChangementMoteur" label="Seuil d'alerte (en h) avant changement du moteur"/>
+        <TextInput source="codeBalise" label="Code Microtrak"/>
         <BooleanInput source="decimal" label="Horamètre décimal"/>
       </SimpleForm>
   </Edit>

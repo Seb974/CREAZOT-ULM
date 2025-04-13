@@ -54,23 +54,23 @@ class Circuit
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 10, nullable: true)]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
     private ?string $code = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
     private ?float $prix = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
     private ?float $cout = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
@@ -82,14 +82,14 @@ class Circuit
     private ?Nature $nature = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
     private ?bool $prixFixe = null;
 
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?bool $avecOptions = null;
 
-    #[Groups(groups: ['Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
     public function getName(): ?string
     {
         return $this->code;

@@ -5,6 +5,7 @@ export const EntretienShow = () => (
         <SimpleShowLayout>
             <DateField source="date" label="Date"/>
             <TextField source="aeronef.immatriculation" />
+            <BooleanField source="changementMoteur" label="Changement moteur"/>
             <TextField source="intervention" />
             <ArrayField source="intervenants">
                 <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {display: "none"}}} className="text-xs italic">

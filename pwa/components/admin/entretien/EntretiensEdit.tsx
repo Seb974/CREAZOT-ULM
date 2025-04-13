@@ -4,6 +4,7 @@ import {
   SimpleForm, 
   TextInput,
   NumberInput,
+  BooleanInput
 } from "react-admin";
 
 export const EntretiensEdit = () => {
@@ -24,6 +25,7 @@ export const EntretiensEdit = () => {
               </SimpleFormIterator>
           </ArrayInput>
           <TextInput source="intervention" label="Détail de l'intervention" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
+          <BooleanInput source="changementMoteur" label="Changement du moteur"/>
           <NumberInput source="horametreIntervention" label="Horamètre"/>
           <NumberInput source="horametreNextIntervention" label="Prochaine intervention"/>
       </SimpleForm>

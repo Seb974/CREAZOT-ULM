@@ -31,9 +31,9 @@ export const InformationsModal = ({ selectedReservation, setSelectedReservation,
             return statut === "WAITING" ? <b className="text-yellow-400">{"En attente de confirmation."}<br/></b> : 
                    statut === "WEATHER_CANCEL" ? <b className="text-red-500">{"Annulation météo."}<br/></b> : 
                    statut === "PASSENGER_CANCEL" ? <b className="text-red-500">{"Annulation passager."}<br/></b> : 
-                   statut === "INTERN_CANCEL" ?  <b className="text-red-500">{"Annulation interne."}<br/></b> : <br/>;
+                   statut === "INTERN_CANCEL" ?  <b className="text-red-500">{"Annulation interne."}<br/></b> : <></>;
         }
-        return <br/>;
+        return <></>;
     };
 
     const getResourceInformations = () => {
@@ -71,8 +71,8 @@ export const InformationsModal = ({ selectedReservation, setSelectedReservation,
                         <div className="space-y-4">
                             <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
                                 M ou Mme <b>{ selectedReservation.nom }</b> { isDefined(selectedReservation.nom) && isDefined(selectedReservation.telephone) && selectedReservation.telephone !== "" ? "-" : "" } { isDefined(selectedReservation.telephone) ? <a href={ `tel:${ selectedReservation.telephone }`} className="underline text-cyan-500">{ selectedReservation.telephone }</a> : <></> }<br/>
-                                { selectedReservation.quantite }x { selectedReservation.circuit.nom }. { getStatusInformation() }
-                                { selectedReservation.report && <span className="text-xs italic font-normal">{"Vol reporté"}</span>}
+                                { selectedReservation.quantite }x { selectedReservation.circuit.nom } { getStatusInformation() }{ selectedReservation.report && <span className="text-xs italic font-normal">{"(REPORT)"}</span>}<br/>
+                                
                                 { isDefined(selectedReservation.option) ?  <><i>{ selectedReservation.option.nom }</i><br/></>  : <></> }
                                 { getResourceInformations() }
                             </p>

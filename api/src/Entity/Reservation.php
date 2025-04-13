@@ -6,6 +6,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\ReservationRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\Delete;
@@ -133,6 +135,42 @@ class Reservation
     #[ORM\Column(length: 180, nullable: true)]
     #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
     private ?string $email = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
+    private ?string $position = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
+    private ?bool $paid = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
+    private ?bool $upsell = null;
+
+    /**
+     * @var Collection<int, Contact>
+     */
+    #[ORM\ManyToMany(targetEntity: Contact::class)]
+    #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
+    private Collection $contact;
+
+    /**
+     * @var Collection<int, Origine>
+     */
+    #[ORM\ManyToMany(targetEntity: Origine::class)]
+    #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
+    private Collection $origine;
+
+    #[ORM\ManyToOne]
+    #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
+    private ?Cadeau $cadeau = null;
+
+    public function __construct()
+    {
+        $this->contact = new ArrayCollection();
+        $this->origine = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -315,6 +353,102 @@ class Reservation
     public function setEmail(?string $email): static
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function getPosition(): ?string
+    {
+        return $this->position;
+    }
+
+    public function setPosition(?string $position): static
+    {
+        $this->position = $position;
+
+        return $this;
+    }
+
+    public function isPaid(): ?bool
+    {
+        return $this->paid;
+    }
+
+    public function setPaid(?bool $paid): static
+    {
+        $this->paid = $paid;
+
+        return $this;
+    }
+
+    public function isUpsell(): ?bool
+    {
+        return $this->upsell;
+    }
+
+    public function setUpsell(?bool $upsell): static
+    {
+        $this->upsell = $upsell;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Contact>
+     */
+    public function getContact(): Collection
+    {
+        return $this->contact;
+    }
+
+    public function addContact(Contact $contact): static
+    {
+        if (!$this->contact->contains($contact)) {
+            $this->contact->add($contact);
+        }
+
+        return $this;
+    }
+
+    public function removeContact(Contact $contact): static
+    {
+        $this->contact->removeElement($contact);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Origine>
+     */
+    public function getOrigine(): Collection
+    {
+        return $this->origine;
+    }
+
+    public function addOrigine(Origine $origine): static
+    {
+        if (!$this->origine->contains($origine)) {
+            $this->origine->add($origine);
+        }
+
+        return $this;
+    }
+
+    public function removeOrigine(Origine $origine): static
+    {
+        $this->origine->removeElement($origine);
+
+        return $this;
+    }
+
+    public function getCadeau(): ?Cadeau
+    {
+        return $this->cadeau;
+    }
+
+    public function setCadeau(?Cadeau $cadeau): static
+    {
+        $this->cadeau = $cadeau;
 
         return $this;
     }

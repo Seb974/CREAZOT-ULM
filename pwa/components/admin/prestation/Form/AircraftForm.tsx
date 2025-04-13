@@ -30,8 +30,8 @@ export const AircraftForm: React.FC = ({ selectedAircraft, setSelectedAircraft, 
   };
 
   return (
-        <div className="mt-4">
-          <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+        <div className="my-2">
+          <label className="mb-2 block text-sm font-medium text-black dark:text-white">
             Aéronef
           </label>
 
@@ -41,9 +41,9 @@ export const AircraftForm: React.FC = ({ selectedAircraft, setSelectedAircraft, 
             <select
               value={ isDefined(selectedAircraft) && isDefined(selectedAircraft['@id']) ? selectedAircraft['@id'] : 0 }
               onChange={ e => handleAircraftChange(e) }
-              className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-12 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input ${
+              className={`relative z-20 w-full appearance-none rounded-lg border border-stroke bg-transparent px-12 py-2 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input ${
                 isAircraftSelected ? "text-black dark:text-white" : ""
-              }`}
+              } h-[41px]`}
             >
               <option value="" className="text-body dark:text-bodydark">
                 Choisissez un aéronef

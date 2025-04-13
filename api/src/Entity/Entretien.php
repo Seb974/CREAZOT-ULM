@@ -25,7 +25,11 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     operations: [
         new GetCollection(
             itemUriTemplate: '/entretiens/{id}{._format}',
-            paginationClientItemsPerPage: true
+            paginationClientItemsPerPage: true,
+            filters: [
+                'app.filter.entretien.aeronef',
+                'app.filter.entretien.moteur'
+            ],
         ),
         new Post(
             itemUriTemplate: '/entretiens/{id}{._format}'
@@ -86,6 +90,10 @@ class Entretien
     #[ORM\ManyToMany(targetEntity: User::class)]
     #[Groups(groups: ['Entretien:write', 'Entretien:read'])]
     private Collection $intervenants;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Entretien:write', 'Entretien:read'])]
+    private ?bool $changementMoteur = null;
 
     public function __construct()
     {
@@ -177,6 +185,18 @@ class Entretien
     public function removeIntervenant(User $intervenant): static
     {
         $this->intervenants->removeElement($intervenant);
+
+        return $this;
+    }
+
+    public function isChangementMoteur(): ?bool
+    {
+        return $this->changementMoteur;
+    }
+
+    public function setChangementMoteur(?bool $changementMoteur): static
+    {
+        $this->changementMoteur = $changementMoteur;
 
         return $this;
     }

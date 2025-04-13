@@ -7,9 +7,11 @@ import {
   SimpleForm, 
   TextInput,
   NumberInput,
-  BooleanInput
+  BooleanInput,
+  ArrayInput,
+  SimpleFormIterator
 } from "react-admin";
-import { isDefined } from "../../../app/lib/utils";
+import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { useEffect, useState } from "react";
 
 export const ReservationsEdit = () => {
@@ -17,18 +19,31 @@ export const ReservationsEdit = () => {
   const dataProvider = useDataProvider();
   const [circuits, setCircuits] = useState([]);
   const [options, setOptions] = useState([]);
+  const [origines, setOrigines] = useState([]);
   
   const status = [
     {id: "VALIDATED", name: "Validé"},
     {id: "WAITING", name: "En attente de confirmation"},
+    {id: "WHEATER_REPORT", name:"Report météo"},
+    {id: "PASSENGER_REPORT", name: "Report client"},
+    {id: "INTERN_REPORT", name: "Report interne"},
     {id: "WHEATER_CANCEL", name:"Annulation météo"},
     {id: "PASSENGER_CANCEL", name: "Annulation client"},
     {id: "INTERN_CANCEL", name: "Annulation interne"}
   ];
 
+  const positions = [
+    {id: "Leader", name: "Leader"},
+    {id: "2", name: "2"},
+    {id: "3", name:"3"},
+    {id: "4", name: "4"},
+    {id: "-", name: "-"}
+  ];
+
   useEffect(() => {
     getCircuits();
     getOptions();
+    getOrigines();
   }, []);
 
   const getCircuits = () => {
@@ -43,22 +58,38 @@ export const ReservationsEdit = () => {
       .then(({ data }) => setOptions(data));
   };
 
-  const transform = ({circuit, option, debut, avion, pilote, ...data}) => {
+  const getOrigines = () => {
+    dataProvider
+        .getList("origines", {})
+        .then(({ data }) => setOrigines(data));
+  };
+
+  const transform = ({circuit, option, debut, avion, pilote, contact, origine, cadeau, paid, ...data}) => {
     const selectedCircuit = isDefined(circuit) && isDefined(circuit['@id']) ? circuits.find(c => c['@id'] === circuit['@id']) : null;
     const selectedOption = isDefined(option) && isDefined(option['@id']) ? options.find(c => c['@id'] === option['@id']) : null;
+    const seletedContacts = isDefinedAndNotVoid(contact) ? contact.map(c => c['@id']) : [];
+    const selectedOrigines = isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === o['@id']))) : [];
+    const formattedCadeau = isDefined(cadeau) && isDefined(cadeau['@id']) ? cadeau['@id'] : null;
     return {...data,
-    fin: getEnd(debut, selectedCircuit),
-    prix: getTotalPrice(selectedCircuit, selectedOption),
-    circuit: isDefined(circuit) ? circuit['@id'] : null,
-    avion: isDefined(avion) ? avion['@id'] : null,
-    option: isDefined(option) ? option['@id'] : null,
-    pilote: isDefined(pilote) ? pilote['@id'] : null
+        fin: getEnd(debut, selectedCircuit),
+        prix: getTotalPrice(selectedCircuit, selectedOption, selectedOrigines),
+        circuit: isDefined(circuit) ? circuit['@id'] : null,
+        avion: isDefined(avion) ? avion['@id'] : null,
+        option: isDefined(option) ? option['@id'] : null,
+        pilote: isDefined(pilote) ? pilote['@id'] : null,
+        paid: isDefined(formattedCadeau) ? true : paid,
+        origine: isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : [],
+        cadeau: formattedCadeau,
+        contact: seletedContacts,
     }
   };
 
-  const getTotalPrice = (circuit, option) => {
-    return (isDefined(circuit) && isDefined(circuit.prix) ? circuit.prix : 0) + (isDefined(option) && isDefined(option.prix) ? option.prix : 0);
+  const getTotalPrice = (circuit, option, origines) => {
+      const maxOriginDiscount = isDefinedAndNotVoid(origines) ? getMaxDiscountFromOrigin(origines) : 0;
+      return (isDefined(circuit) && isDefined(circuit.prix) ? circuit.prix : 0) * (1 - (maxOriginDiscount / 100)) + (isDefined(option) && isDefined(option.prix) ? option.prix : 0);
   };
+        
+  const getMaxDiscountFromOrigin = origines =>  origines.map(o => o.discount).reduce((max, current) => current > max ? current : max, 0);
 
   const getEnd = (debut, circuit) => {
     const start = new Date(debut);
@@ -73,13 +104,27 @@ export const ReservationsEdit = () => {
           <TextInput source="nom" label="Nom & prénom du passager"/>
           <TextInput source="telephone" label="N° de téléphone"/>
           <TextInput source="email" label="Adresse email"/>
+          <ReferenceInput reference="cadeaux" source="cadeau.@id" label="Bon cadeau" filter={{ "fin['after']": new Date()  }}/>
           <ReferenceInput reference="circuits" source="circuit.@id" label="Circuit" />
           <ReferenceInput reference="options" source="option.@id" label="Option" />
           <ReferenceInput reference="users" source="pilote.@id" label="Pilote" />
           <ReferenceInput reference="aeronefs" source="avion.@id" label="Aéronef" />
+          <SelectInput source="position" choices={ positions } defaultValue="-"/>
           <SelectInput source="statut" choices={ status} />
           <TextInput source="color" label="Code couleur"/>
+          <ArrayInput source="contact" label="Contact initial">
+            <SimpleFormIterator inline disableReordering>
+                <ReferenceInput reference="contacts" source="@id" label="Contact initial" />
+            </SimpleFormIterator>
+          </ArrayInput>
+          <ArrayInput source="origine" label="Origine de l'appel">
+            <SimpleFormIterator inline disableReordering>
+                <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
+            </SimpleFormIterator>
+          </ArrayInput>
           <TextInput source="remarques" label="Remarques" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
+          <BooleanInput source="paid" label="Prépayé"/>
+          <BooleanInput source="upsell" label="Upsell"/>
           <BooleanInput source="report" label="Report"/>
       </SimpleForm>
   </Edit>

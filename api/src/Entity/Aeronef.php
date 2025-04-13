@@ -81,6 +81,22 @@ class Aeronef
     #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Entretien:read'])]
     private ?bool $alerteEnvoyee = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Aeronef:write', 'Entretien:write', 'Aeronef:read', 'Prestation:read', 'Entretien:read'])]
+    private ?float $changementMoteur = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Entretien:read'])]
+    private ?float $seuilAlerteChangementMoteur = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Entretien:read'])]
+    private ?bool $alerteMoteurEnvoyee = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ['Aeronef:write', 'Aeronef:read'])]
+    private ?string $codeBalise = null;
+
     #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read'])]
     public function getName(): ?string
     {
@@ -160,6 +176,54 @@ class Aeronef
     public function setAlerteEnvoyee(?bool $alerteEnvoyee): static
     {
         $this->alerteEnvoyee = $alerteEnvoyee;
+
+        return $this;
+    }
+
+    public function getChangementMoteur(): ?float
+    {
+        return $this->changementMoteur;
+    }
+
+    public function setChangementMoteur(?float $changementMoteur): static
+    {
+        $this->changementMoteur = $changementMoteur;
+
+        return $this;
+    }
+
+    public function getSeuilAlerteChangementMoteur(): ?float
+    {
+        return $this->seuilAlerteChangementMoteur;
+    }
+
+    public function setSeuilAlerteChangementMoteur(?float $seuilAlerteChangementMoteur): static
+    {
+        $this->seuilAlerteChangementMoteur = $seuilAlerteChangementMoteur;
+
+        return $this;
+    }
+
+    public function isAlerteMoteurEnvoyee(): ?bool
+    {
+        return $this->alerteMoteurEnvoyee;
+    }
+
+    public function setAlerteMoteurEnvoyee(?bool $alerteMoteurEnvoyee): static
+    {
+        $this->alerteMoteurEnvoyee = $alerteMoteurEnvoyee;
+
+        return $this;
+    }
+
+    public function getCodeBalise(): ?string
+    {
+        return $this->codeBalise;
+    }
+
+    public function setCodeBalise(?string $codeBalise): static
+    {
+        $this->codeBalise = $codeBalise;
 
         return $this;
     }

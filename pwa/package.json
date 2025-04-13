@@ -58,8 +58,9 @@
     "apexcharts": "^3.45.2",
     "react-apexcharts": "^1.4.1",
     "jwt-decode":"^4.0.0",
-     "flatpickr": "^4.6.9",
-    "react-flatpickr": "^3.10.7"
+    "flatpickr": "^4.6.9",
+    "react-flatpickr": "^3.10.7",
+    "react-select": "^4.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

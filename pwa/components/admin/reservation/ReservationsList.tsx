@@ -61,10 +61,18 @@ export const ReservationsList: NextPage<Props> = ({ data, hubURL, page }) => {
   const status = [
     {id: "VALIDATED", name: "Validé"},
     {id: "WAITING", name: "En attente de confirmation"},
+    {id: "WHEATER_REPORT", name:"Report météo"},
+    {id: "PASSENGER_REPORT", name: "Report client"},
+    {id: "INTERN_REPORT", name: "Report interne"},
     {id: "WHEATER_CANCEL", name:"Annulation météo"},
     {id: "PASSENGER_CANCEL", name: "Annulation client"},
     {id: "INTERN_CANCEL", name: "Annulation interne"}
   ];
+
+  const getStatusLabel = ({statut, report}) => {
+    const selectedStatus = status.find(s => s.id === statut);
+    return isDefined(selectedStatus) ? selectedStatus.name : report ? status[2].name : status[0].name;
+};
 
   return (
     <List resource="reservations" actions={<ListActions/>} filters={ filters }>
@@ -78,7 +86,7 @@ export const ReservationsList: NextPage<Props> = ({ data, hubURL, page }) => {
             <FunctionField
                 source="statut"
                 label="Statut"
-                render={record => <>{ (status.find(s => s.id === record.statut).name )}</> }
+                render={record => <>{ getStatusLabel(record) }</> }
             />
             <BooleanField source="report" label="Report"/>
 
