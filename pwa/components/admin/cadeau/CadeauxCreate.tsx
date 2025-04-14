@@ -1,4 +1,4 @@
-import { SimpleForm, TextInput, DateInput, ReferenceInput, ArrayInput, SimpleFormIterator, required, Create, useCreate, useRedirect, useNotify, useDataProvider } from "react-admin";
+import { SimpleForm, TextInput, DateInput, ReferenceInput, ArrayInput, BooleanInput, SimpleFormIterator, required, Create, useCreate, useRedirect, useNotify, useDataProvider } from "react-admin";
 import { useEffect, useState } from "react";
 import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 
@@ -86,6 +86,7 @@ export const CadeauxCreate = () => {
         <TextInput source="paymentId" label="N° du paiement"/>
         <DateInput source="fin" defaultValue={ new Date(today.getFullYear() + 1, today.getMonth(), today.getDate() + 1) } label="Date d'expiration"/>
         <TextInput source="message" label="Message" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
+        <BooleanInput source="sendEmail" label="Envoi du bon cadeau par email"/>
       </SimpleForm>
     </Create>
   );

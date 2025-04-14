@@ -69,6 +69,7 @@ const getMaxDiscountFromOrigin = origines =>  origines.map(o => o.discount).redu
         <TextInput source="paymentId" label="N° du paiement"/>
         <DateInput source="fin" label="Date d'expiration"/>
         <TextInput source="message" label="Message" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
+        <BooleanInput source="sendEmail" label="Envoi du bon cadeau par email"/>
         <BooleanInput source="used" label="Bon déjà utilisé"/>
       </SimpleForm>
   </Edit>

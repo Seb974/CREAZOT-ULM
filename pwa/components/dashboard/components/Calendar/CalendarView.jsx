@@ -143,7 +143,7 @@ const getFormattedUpdate = (event, start, end) => {
       cadeau: isDefined(cadeau) ? cadeau['@id'] : null,
       contact: isDefinedAndNotVoid(contact) ? contact.map(c => c['@id']) : [],
       origine: isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : [],
-      report: event.report ? true : (new Date(event.debut) < new Date(start)),
+      report: event.report ? true : ((new Date(event.debut)).getDate() !== (new Date(start)).getDate()),
       debut: new Date(start), 
       fin: new Date(end)
   }

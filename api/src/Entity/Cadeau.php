@@ -118,6 +118,10 @@ class Cadeau
     #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
     private ?string $message = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    private ?bool $sendEmail = null;
+
     public function __construct()
     {
         $this->origine = new ArrayCollection();
@@ -286,6 +290,18 @@ class Cadeau
     public function setMessage(?string $message): static
     {
         $this->message = $message;
+
+        return $this;
+    }
+
+    public function isSendEmail(): ?bool
+    {
+        return $this->sendEmail;
+    }
+
+    public function setSendEmail(?bool $sendEmail): static
+    {
+        $this->sendEmail = $sendEmail;
 
         return $this;
     }

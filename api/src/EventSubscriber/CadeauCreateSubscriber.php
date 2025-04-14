@@ -28,7 +28,7 @@ class CadeauCreateSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::VIEW => ['onCadeauCreated', EventPriorities::POST_WRITE],
+            KernelEvents::VIEW => ['onCadeauCreated', EventPriorities::PRE_WRITE],
         ];
     }
 
@@ -37,20 +37,22 @@ class CadeauCreateSubscriber implements EventSubscriberInterface
         $cadeau = $event->getControllerResult();
         $method = $event->getRequest()->getMethod();
 
-        if (!$cadeau instanceof Cadeau || $method !== 'POST') {
+        if (!$cadeau instanceof Cadeau || ($method !== 'POST' && $method !== 'PUT')) {
             return;
         }
 
-        $pdfContent = $this->pdfGenerator->generate($cadeau);
-
-        $email = (new Email())
-            ->from('contact@planetair974.com')
-            ->to($cadeau->getEmail())
-            ->bcc('planetair974@gmail.com')
-            ->subject('Votre bon cadeau')
-            ->html($this->twig->render('emails/cadeau.html.twig', ['cadeau' => $cadeau]))
-            ->attach($pdfContent, 'bon-cadeau.pdf', 'application/pdf');
-
-        $this->mailer->send($email);
+        if (!is_null($cadeau->isSendEmail()) && $cadeau->isSendEmail()) {
+            $pdfContent = $this->pdfGenerator->generate($cadeau);
+            $email = (new Email())
+                ->from('contact@planetair974.com')
+                ->to($cadeau->getEmail())
+                ->bcc('planetair974@gmail.com')
+                ->subject('Votre bon cadeau')
+                ->html($this->twig->render('emails/cadeau.html.twig', ['cadeau' => $cadeau]))
+                ->attach($pdfContent, 'bon-cadeau.pdf', 'application/pdf');
+    
+            $this->mailer->send($email);
+            $cadeau->setSendEmail(false);
+        }
     }
 }
