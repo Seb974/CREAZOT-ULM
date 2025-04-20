@@ -57,3 +57,51 @@ export const getCircuitPrice = (circuit, option, flightTime, aircraft) => {
 export const convertMinutesToDecimal = (duration) => Number((Math.floor(duration) + (duration - Math.floor(duration)) / 60 * 100).toFixed(2));
 
 export const getRandomColor = () => "#" + Math.floor(Math.random()*16777215).toString(16);
+
+export const getDaysArray = (start, end) => {
+  const daysArray=[];
+  for ( const day = new Date(start); day <= new Date(end); day.setDate(day.getDate() + 1) ) {
+    daysArray.push( new Date(day) );
+  }
+  return daysArray;
+};
+
+export const formatDate = date => {
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return localDate.toISOString().split('T')[0];
+};
+
+const generateDateRange = (start, end) => {
+  const dates = [];
+  const current = new Date(start);
+  while (current <= end) {
+    dates.push(new Date(current));
+    current.setDate(current.getDate() + 1);
+  }
+  return dates;
+};
+
+export const groupRappelsByDate = (rappels, startDate, endDate) => {
+  const range = generateDateRange(new Date(startDate), new Date(endDate));
+  const grouped = {};
+
+  range.forEach(date => {
+    const formattedDate = formatDate(date);
+    const dayOfWeek = date.getDay();
+
+    const rappelsDuJour = rappels.filter(rappel => {
+      if (rappel.recurrent) {
+        return rappel.jour === dayOfWeek;
+      } else {
+        const rappelDateFormatted = formatDate(new Date(rappel.date));
+        return rappelDateFormatted === formattedDate;
+      }
+    });
+
+    if (rappelsDuJour.length > 0) {
+      grouped[formattedDate] = rappelsDuJour;
+    }
+  });
+
+  return grouped;
+};

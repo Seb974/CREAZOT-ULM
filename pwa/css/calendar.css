@@ -27,7 +27,11 @@
 }
 
 .rbc-event {
-    width: 33.33%!important;
+    width: auto !important;
+}
+
+.rbc-event.event-reservation {
+    width: 33.33% !important;
 }
 
 .rbc-event[style*="width: 50%"] {
@@ -36,4 +40,18 @@
 
 .rbc-current-time-indicator {
     display: none;
+}
+
+.rbc-allday-cell {
+    z-index: 0 !important;
+}
+  
+.rbc-event-allday {
+    z-index: 0 !important;
+    position: relative !important;
+}
+
+.rbc-row.rbc-allday-row {
+    z-index: 0 !important;
+    position: relative !important;
 }

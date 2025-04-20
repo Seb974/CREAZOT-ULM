@@ -1,12 +1,14 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../../../css/satoshi.css";
 import "../../../../css/style.css";
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { MetarView } from "./MetarView";
 import { CalendarView } from "../Calendar/CalendarView";
+import { RappelModal } from "../Modal/RappelModal";
 import { RegisterModal } from "../Modal/RegisterModal";
 import { InformationsModal } from "../Modal/InformationsModal";
+import { RappelInformationsModal } from "../Modal/RappelInformationsModal";
 import { UpdateModal } from "../Modal/UpdateModal";
 import { cameras } from "../../../../app/lib/cameras";
 
@@ -16,10 +18,13 @@ const Dashboard = () => {
   const min = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0);
   const max = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30);
   const [selection, setSelection] = useState(null);
+  const [rappelSelection, setRappelSelection] = useState(null);
   const [events, setEvents] = useState([]);
   const [visible, setVisible] = useState(false);
+  const [rappelVisible, setRappelVisible] = useState(false);
   const [slot, setSlot] = useState({start: min, end: max});
   const [reservations, setReservations] = useState([]);
+  const [rappels, setRappels] = useState([]);
   const [toUpdate, setToUpdate] = useState(null);
   const [appli, setAppli] = useState("W");
 
@@ -28,6 +33,8 @@ const Dashboard = () => {
   const onCSelect = () => setAppli("C");
   const onMBSelect = () => setAppli("MB");
   const onMetarClick = e => e.preventDefault();
+
+  useEffect(() => console.log(rappelSelection), [rappelSelection]);
 
 return (
     <>
@@ -116,6 +123,12 @@ return (
             setVisible={ setVisible }
             reservations={ reservations }
             setReservations={ setReservations }
+            rappelVisible={ rappelVisible } 
+            setRappelVisible={ setRappelVisible }
+            rappels={ rappels }
+            setRappels={ setRappels }
+            rappelSelection={ rappelSelection } 
+            setRappelSelection={ setRappelSelection }
             // popup={ true }
             />
       </div>
@@ -139,6 +152,21 @@ return (
           setToUpdate={ setToUpdate }
           reservations={ reservations }
           setReservations={ setReservations }
+      />
+      <RappelModal 
+          rappelVisible={ rappelVisible } 
+          setRappelVisible={ setRappelVisible } 
+          slot={ slot }
+          rappels={ rappels }
+          setRappels={ setRappels }
+      />
+      <RappelInformationsModal 
+          selectedRappel={ rappelSelection } 
+          setSelectedRappel={ setRappelSelection }
+          rappels={ rappels }
+          setRappels={ setRappels }
+          events={ events }
+          setEvents={ setEvents }
       />
     </>
   );

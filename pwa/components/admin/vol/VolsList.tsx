@@ -1,8 +1,10 @@
 import { type NextPage } from "next";
+import { TableRow, TableCell } from '@mui/material';
+
 import {
   TextInput,
   Datagrid,
-  useRecordContext,
+  DatagridBody,
   List,
   TextField,
   ExportButton,
@@ -11,9 +13,9 @@ import {
   DateField,
   NumberField,
   DateInput,
+  useListContext
 } from "react-admin";
-
-import { useMercure } from "../../../utils/mercure";
+import { Fragment } from 'react';
 import { type Vol } from "../../../types/Vol";
 import { type PagedCollection } from "../../../types/collection";
 import { useSession } from "next-auth/react";
@@ -27,7 +29,6 @@ export interface Props {
 const ListActions = () => (
   <TopToolbar>
       <FilterButton/> 
-      {/* <CreateButton/> */}
       <ExportButton/>
   </TopToolbar>
 );
@@ -40,16 +41,51 @@ const filters = [
   <DateInput source="prestation.date[before]"  key="DateMax" label="Date Max"/>,
 ];
 
-export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
+const CustomBody = (props) => {
 
-  const session = useSession();
-  const user = session.data.user;
+    const { data, isLoading } = useListContext();
+    const session = useSession();
+    const user = session.data.user;
+    const hasAdminAccess = user => isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin")
+  
+    if (isLoading || !data) return null;
+  
+    const totalVols = data.reduce((sum, row) => sum + row.quantite, 0);
+    const totalCoutPilote = data.reduce((sum, row) => sum + row.cout, 0);
+    const totalCA = data.reduce((sum, row) => sum + row.prix, 0);
 
-  const hasAdminAccess = user => isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin")
+    return (
+      <Fragment>
+        <DatagridBody {...props} />
+        <TableRow sx={{ backgroundColor: '#ededed' }}>
+            <TableCell colSpan={4} sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
+              Totaux
+            </TableCell>
+            <TableCell style={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'right' }}>
+              <strong>{totalVols}</strong>
+            </TableCell>
+            <TableCell colSpan={3}/>
+            <TableCell style={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'right' }}>
+              <strong>{totalCoutPilote.toFixed(2)} €</strong>
+            </TableCell>
+            { hasAdminAccess(user) && 
+              <TableCell style={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'right' }}>
+                <strong>{totalCA.toFixed(2)} €</strong>
+              </TableCell>
+            }
+        </TableRow>
+      </Fragment>
+    );
+};
 
-  return (
-    <List resource="vols" actions={<ListActions/>} filters={ filters } filter={ !hasAdminAccess(user) ? { "prestation.pilote.email": user.email } : null}> 
-        <Datagrid  sx={{'& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
+const CustomDatagrid = () => {
+
+    const session = useSession();
+    const user = session.data.user;
+    const hasAdminAccess = user => isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin");
+
+    return (
+      <Datagrid body={<CustomBody />}  sx={{'& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
             <DateField source="prestation.date" label="Date" sortable={ true }/>
             <TextField source="prestation.aeronef.immatriculation" label="Aéronef" sortable={ true }/>
             <TextField source="prestation.pilote.firstName" label="Pilote" sortable={ true }/>
@@ -61,7 +97,20 @@ export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
             { hasAdminAccess(user) && 
                 <NumberField source="prix" label="C.A." options={{ style: 'currency', currency: 'EUR' }}/>
             }
-        </Datagrid>
+      </Datagrid>
+    )
+};
+
+export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
+
+  const session = useSession();
+  const user = session.data.user;
+
+  const hasAdminAccess = user => isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin");
+
+  return (
+    <List resource="vols" actions={<ListActions/>} filters={ filters } filter={ !hasAdminAccess(user) ? { "prestation.pilote.email": user.email } : null}> 
+        <CustomDatagrid />
     </List>
   );
 }

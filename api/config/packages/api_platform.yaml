@@ -217,3 +217,18 @@ services:
             $nameConverter: '@?api_platform.name_converter'
             $properties: { valid: 'iexact' } # ]
         tags: [ 'api_platform.filter' ]
+
+    app.filter.rappel.date:
+        parent: 'api_platform.doctrine.orm.date_filter'
+        arguments:
+            $properties: { date: ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.rappel.periode:
+        class: 'App\Doctrine\Orm\Filter\RappelPeriodeFilte'
+        arguments:
+            $managerRegistry: '@doctrine'
+            $logger: '@logger'
+            $nameConverter: '@?api_platform.name_converter'
+            $properties: { periode: 'iexact' } # ]
+        tags: [ 'api_platform.filter' ]

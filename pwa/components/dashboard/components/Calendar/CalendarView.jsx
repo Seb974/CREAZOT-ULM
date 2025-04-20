@@ -8,7 +8,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import "../../../../css/calendar.css";
 import WarningIcon from '@mui/icons-material/Warning';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
-import { getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../../app/lib/utils";
+import { getRandomColor, isDefined, isDefinedAndNotVoid, getDaysArray, groupRappelsByDate } from "../../../../app/lib/utils";
 import { useSession } from 'next-auth/react';
 
 const DOW = 1;
@@ -18,7 +18,7 @@ moment.locale('fr', { week: { dow: DOW, doy: 1 } });
 
 const localizer = momentLocalizer (moment);
 
-export const CalendarView = ({ events, setEvents, selection, setSelection, slot, setSlot, visible, setVisible, reservations, setReservations }) => {
+export const CalendarView = ({ events, setEvents, selection, setSelection, slot, setSlot, visible, setVisible, reservations, setReservations, rappelVisible, setRappelVisible, rappels, setRappels, rappelSelection, setRappelSelection }) => {
 
   const now = new Date();
   const session = useSession();
@@ -31,31 +31,84 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
   const [view, setView] = useState(Views.DAY);        // Views.WEEK
 
   useEffect(() => {
-    const {start, end} = Array.isArray(dates) ? dates[0] : dates; 
+    const {start, end} = Array.isArray(dates) ? dates[0] : dates;
+    getReservations(start, end);
+    getRappels(start, end);
+  }, [dates])
+
+  useEffect(() => getEvents(reservations, rappels), [reservations, rappels, view]);
+
+  const getReservations = (start, end) => {
     dataProvider
       .getList('reservations', {
         filter: {'debut[after]': (new Date(start)).toISOString(), 'debut[before]': (new Date(end)).toISOString(), 'cancel': false, 'pagination': false},
         sort: {id: 'ASC' },
         pagination: {}
       })
-      .then(({ data }) => setReservations(data))
-  }, [dates])
+      .then(({ data }) => setReservations(data));
+  };
 
-  useEffect(() => getEventsFromReservations(reservations), [reservations, view]);
+  const getRappels = (start, end) => {
+    const filters = getRappelsFilter(start, end);
+    dataProvider
+      .getList('rappels', {
+        filter: filters,
+        sort: {id: 'ASC' },
+        pagination: {}
+      })
+      .then(({ data }) => setRappels(data));
+  };
+
+  const getRappelsFilter = (start, end) => {
+    const daysArray = getDaysArray(start, end);
+    const dayNumbers = daysArray.map(day => day.getDay());
+    return {
+        'periode[start]': (new Date(start)).toLocaleDateString('fr-CA'),
+        'periode[end]': (new Date(end)).toLocaleDateString('fr-CA'),
+        'periode[jours][]': [...new Set(dayNumbers)],
+        'pagination': false
+    }; 
+  };
+
+  const getEvents = (reservations, rappels) => {
+    const reservationEvents = getEventsFromReservations(reservations);
+    const rappelEvents = getEventsFromRappels(rappels);
+    setEvents([...reservationEvents, ...rappelEvents]);
+  };
 
   const getEventsFromReservations = reservations => {
     let newEvents = [];
-    if (reservations.length > 0) {
-      let color = getRandomColor();
-      reservations.map((d, i, array) => {
-        color = i > 0 && (array[i].nom === array[i-1].nom && array[i].quantite === array[i-1].quantite ? color : getRandomColor())
-        const newEvent = {...d, title: getTitle(d), start: new Date(d.debut), end: new Date(d.fin), color: isDefined(d.color) ? d.color : getRandomColor() };
-        newEvents = [...newEvents, newEvent];
-      });
-      const filteredEvents = newEvents.filter(e => isDefined(e.statut) && !e.statut.includes("CANCEL"));
-      setEvents(filteredEvents);
+    if (isDefinedAndNotVoid(reservations)) {
+        let color = getRandomColor();
+        reservations.map((d, i, array) => {
+          color = i > 0 && (array[i].nom === array[i-1].nom && array[i].quantite === array[i-1].quantite ? color : getRandomColor())
+          const newEvent = {...d, title: getTitle(d), start: new Date(d.debut), end: new Date(d.fin), color: isDefined(d.color) ? d.color : getRandomColor(), type: 'event-reservation' };
+          newEvents = [...newEvents, newEvent];
+        });
+        return newEvents.filter(e => isDefined(e.statut) && !e.statut.includes("CANCEL"));
     }
-  }
+    return [];
+  };
+
+  const getEventsFromRappels = rappels => {
+    if (isDefinedAndNotVoid(rappels)) {
+        const {start, end} = Array.isArray(dates) ? dates[0] : dates;
+        const groupedRappels = groupRappelsByDate(rappels, start, end);
+        return Object.keys(groupedRappels).map((date, i) => {
+            const isImportant = isDefined(groupedRappels[date].map(r => r.important).find(r => r === true));
+            return {
+              id: i + 1,
+              rappels: groupedRappels[date],
+              title: <>{ isImportant && <WarningIcon/> } { groupedRappels[date].length + " rappel" + (groupedRappels[date].length > 1 ? "s" : "") }</>,
+              start: new Date(date),
+              end: new Date(date),
+              allDay: true,
+              type: 'event-rappel'
+            }
+        });
+    }
+    return [];
+  };
 
   const getTitle = ({ circuit, nom, pilote, avion, telephone, option, statut, report, prix, position, remarques, paid }) => {
     if (view == Views.DAY)
@@ -80,7 +133,7 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
               ${ isDefined(pilote) && isDefined(avion) ? "  |  " : "" }
               ${ isDefined(avion) ? avion.immatriculation : "" }
               ${ (isDefined(pilote) || isDefined(avion)) && (isDefined(position) && position !== "-") ? " -> " : "" }
-               ${ (isDefined(position) && position !== "-") ? position : "" }`
+              ${ (isDefined(position) && position !== "-") ? position : "" }`
             }
           </b>
           </span>
@@ -95,23 +148,24 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
   const getVerticalName = name => {
     const arrayName = name.split('');
     return (
-      <span className="text-sm">
-        { arrayName.map((n, i) => <span key={ i }>{ n }<br/></span> )}
-      </span>
+        <span className="text-sm">
+            { arrayName.map((n, i) => <span key={ i }>{ n }<br/></span> )}
+        </span>
     );
   };
     
   const onView = e => setView(Views[e.toUpperCase()]);
     
   const onRangeChange = useCallback((range) => {
-    const newView = Array.isArray(range) ? range.length === 1 ? Views.DAY : Views.WEEK : Views.MONTH;
-    const date = newView === Views.DAY || newView === Views.WEEK ? range[0] : range.start;
-    const newDates = getLimits(date, newView);
-    setDates(newDates);
+      const newView = Array.isArray(range) ? range.length === 1 ? Views.DAY : Views.WEEK : Views.MONTH;
+      const date = newView === Views.DAY || newView === Views.WEEK ? range[0] : range.start;
+      const newDates = getLimits(date, newView);
+      setDates(newDates);
   }, []);
     
   const moveEvent = useCallback(({ event, start, end, isAllDay: droppedOnAllDaySlot = false }) => {
-        const { allDay } = event;
+      const { allDay } = event;
+      if (!allDay) {
         if (!allDay && droppedOnAllDaySlot)
             event.allDay = true
         setEvents((prev) => {
@@ -128,6 +182,7 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
             setReservations(newReservations);
           })
           .catch(error => console.log(error));
+      }
 },
 [setEvents, reservations, setReservations]);
 
@@ -150,12 +205,13 @@ const getFormattedUpdate = (event, start, end) => {
 };
     
 const eventStyleGetter = (event, start, end, isSelected) => {
-  const { color } = event;
+  const { color, type } = event;
   return {
+      className: type,
       style: {
-          backgroundColor : color,
-          opacity: 0.98,
-          width: '33.33%!important',
+          backgroundColor : type === 'event-reservation' ? color : 'red',
+          opacity: type === 'event-reservation' ? 0.98 : 0.4,
+          width: type === 'event-reservation' ? '33.33%!important' : 'auto!important',
       }
   };
 };
@@ -199,16 +255,13 @@ const getCurrentMonthDates = (date = new Date()) => {
     
 const onEventClick = (event) => {
   const selected = events.find(e => e.id === event.id);
-  setSelection(selected);
+  event.type === 'event-reservation'? setSelection(selected) : setRappelSelection(selected);
 };
 
-const onSelecting = useCallback((slotInfo) => {
+const onSelecting = useCallback((slotInfo) => { 
   if (isDefined(session) && isDefined(user) && user.roles.find(r => r === "admin")) {
-    setSlot({
-      start: new Date(slotInfo.start),
-      end: new Date(slotInfo.end)
-    })
-    setVisible(true);
+      setSlot({ start: new Date(slotInfo.start), end: new Date(slotInfo.end)});
+      slotInfo.slots.length === 2 ? setVisible(true) : setRappelVisible(true);
   }
 }, []);
 

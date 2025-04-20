@@ -13,6 +13,7 @@ const DownloadGiftButton = () => {
         e.preventDefault();
         fetch(`/admin/bons-cadeaux/${record.originId}/download`, {
             method: 'GET',
+            // @ts-ignore
             headers: new Headers({'Authorization': `Bearer ${session?.data.accessToken}`})
         })
         .then(response => response.blob())

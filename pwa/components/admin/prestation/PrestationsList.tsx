@@ -1,8 +1,10 @@
-
+import { TableRow, TableCell } from '@mui/material';
+import * as React from 'react';
 import { type NextPage } from "next";
 import {
   TextInput,
   Datagrid,
+  DatagridBody,
   List,
   TextField,
   EditButton,
@@ -16,38 +18,40 @@ import {
   ShowButton,
   ArrayField,
   FunctionField,
+  useListContext
 } from "react-admin";
-
+import { Fragment } from 'react';
 import { type Prestation } from "../../../types/Prestation";
 import { type PagedCollection } from "../../../types/collection";
 import { useSession } from "next-auth/react";
 import { isDefined } from "../../../app/lib/utils";
 
 export interface Props {
-  data: PagedCollection<Prestation> | null;
-  hubURL: string | null;
-  page: number;
-}
+    data: PagedCollection<Prestation> | null;
+    hubURL: string | null;
+    page: number;
+  }
+  
+  const ListActions = () => (
+    <TopToolbar>
+        <FilterButton/> 
+        <CreateButton/>
+        <ExportButton/>
+    </TopToolbar>
+  );
+  
+  const filters = [
+    <TextInput source="aeronef.immatriculation" key="Aeronef" label="Aéronef"/>,
+    <TextInput source="pilote.firstName" key="Pilote" label="Pilote" />,
+    <DateInput source="date[after]"  key="DateMin" label="Date Min"/>,
+    <DateInput source="date[before]"  key="DateMax" label="Date Max"/>,
+  ];
 
-const ListActions = () => (
-  <TopToolbar>
-      <FilterButton/> 
-      <CreateButton/>
-      <ExportButton/>
-  </TopToolbar>
-);
-
-const filters = [
-  <TextInput source="aeronef.immatriculation" key="Aeronef" label="Aéronef"/>,
-  <TextInput source="pilote.firstName" key="Pilote" label="Pilote" />,
-  <DateInput source="date[after]"  key="DateMin" label="Date Min"/>,
-  <DateInput source="date[before]"  key="DateMax" label="Date Max"/>,
-];
-
-export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
-
-  const session = useSession();
-  const user = session.data.user;
+  const formatHeure = (duree) => {
+    const heures = Math.floor(duree);
+    const minutes = Math.round((duree - heures) * 60);
+    return `${String(heures).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  };
 
   const getFormattedDuration = ({ aeronef, duree }) => {
     const hours = Math.trunc(duree);
@@ -81,46 +85,188 @@ export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
     </>
   );
 
-  return (
-    
-    <List 
-      resource="prestations"
-      // @ts-ignore
-      actions={isDefined(session) && isDefined(user) && user.roles.find(r => r === "admin") ? <ListActions/> : null} 
-      filters={ filters }
-    >
-        <Datagrid expand={ <VolsExpansion/> } sx={{ '& .RaDatagrid-expandedPanel': {backgroundColor: '#ededed'}, '& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
-            <DateField source="date" sortable={ true }/>
-            <TextField source="aeronef.immatriculation" label="Aéronef" sortable={ true }/>
-            <TextField source="pilote.firstName" label="Pilote" sortable={ true }/>
-            <FunctionField
-                source="horametreDepart"
-                label="Horamètre au Départ"
-                render={record => getFormattedHorametre(record, "horametreDepart")}
-                textAlign="right"
-            />
-            <FunctionField
-                source="duree"
-                label="Durée"
-                render={record => getFormattedDuration(record)}
-                textAlign="right"
-            />
-            <FunctionField
-                source="horametreFin"
-                label="Horamètre à l'arrivée"
-                render={record => getFormattedHorametre(record, "horametreFin")}
-                textAlign="right"
-            />
-            <TextField source="remarques" label="Remarques"/>
-            {/* @ts-ignore */}
-            { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
-                <p className="text-right">
-                    <ShowButton />
-                    <EditButton />
-                </p>
-            }
-        </Datagrid>
-    </List>
-  );
-}
+const CustomBody = (props) => {
 
+    const { data, isLoading } = useListContext();
+    const session = useSession();
+    const user = session.data.user;
+  
+    if (isLoading || !data) return null;
+  
+    const totalDuration = data.reduce((sum, record) => {
+      const duree = parseFloat(record.duree) || 0;
+      return sum + duree;
+    }, 0);
+  
+    return (
+      <Fragment>
+        <DatagridBody {...props} />
+        <TableRow sx={{ backgroundColor: '#ededed' }}>
+          <TableCell colSpan={ 6 } sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
+            Total
+          </TableCell>
+
+          <TableCell sx={{fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'right' }}>
+            {formatHeure(totalDuration)}
+          </TableCell>
+          <TableCell sx={{}} />
+          <TableCell sx={{}} textAlign="right"/>
+          {isDefined(session) && isDefined(user) && user.roles.includes("admin") && (
+            <TableCell sx={{}} />
+          )}
+        </TableRow>
+      </Fragment>
+    );
+};
+
+const CustomDatagrid = () => {
+
+    const session = useSession();
+    const user = session.data.user;
+
+    return (
+      <Datagrid body={<CustomBody />} expand={ <VolsExpansion/> } sx={{ '& .RaDatagrid-expandedPanel': {backgroundColor: '#ededed'}, '& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
+          <DateField source="date" sortable={ true }/>
+          <TextField source="aeronef.immatriculation" label="Aéronef" sortable={ true }/>
+          <TextField source="pilote.firstName" label="Pilote" sortable={ true }/>
+          <FunctionField
+              source="horametreDepart"
+              label="Horamètre au Départ"
+              render={record => getFormattedHorametre(record, "horametreDepart")}
+              textAlign="right"
+          />
+          <FunctionField
+              source="duree"
+              label="Durée"
+              render={record => getFormattedDuration(record)}
+              textAlign="right"
+          />
+          <FunctionField
+              source="horametreFin"
+              label="Horamètre à l'arrivée"
+              render={record => getFormattedHorametre(record, "horametreFin")}
+              textAlign="right"
+          />
+          <TextField source="remarques" label="Remarques"/>
+          {/* @ts-ignore */}
+          { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
+              <p className="text-right">
+                  <ShowButton />
+                  <EditButton />
+              </p>
+          }
+      </Datagrid>
+    )
+};
+  
+    
+//     const { data, isLoading } = useListContext();
+
+//     const session = useSession();
+//     const user = session.data.user;
+  
+//     if (isLoading || !data) return null;
+  
+//     const totalDuration = data.reduce((sum, record) => {
+//       const duree = parseFloat(record.duree) || 0;
+//       return sum + duree;
+//     }, 0);
+
+    
+  
+//     return (
+//       <>
+//         <Datagrid expand={ <VolsExpansion/> } sx={{ '& .RaDatagrid-expandedPanel': {backgroundColor: '#ededed'}, '& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
+//             <DateField source="date" sortable={ true }/>
+//             <TextField source="aeronef.immatriculation" label="Aéronef" sortable={ true }/>
+//             <TextField source="pilote.firstName" label="Pilote" sortable={ true }/>
+//             <FunctionField
+//                 source="horametreDepart"
+//                 label="Horamètre au Départ"
+//                 render={record => getFormattedHorametre(record, "horametreDepart")}
+//                 textAlign="right"
+//             />
+//             <FunctionField
+//                 source="duree"
+//                 label="Durée"
+//                 render={record => getFormattedDuration(record)}
+//                 textAlign="right"
+//             />
+//             <FunctionField
+//                 source="horametreFin"
+//                 label="Horamètre à l'arrivée"
+//                 render={record => getFormattedHorametre(record, "horametreFin")}
+//                 textAlign="right"
+//             />
+//             <TextField source="remarques" label="Remarques"/>
+//             {/* @ts-ignore */}
+//             { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
+//                 <p className="text-right">
+//                     <ShowButton />
+//                     <EditButton />
+//                 </p>
+//             }
+            
+//         </Datagrid>
+//         <TableRow>
+//             {/* Colonnes vides pour alignement */}
+//             <TableCell />
+//             <TableCell />
+//             <TableCell />
+//             <TableCell />
+            
+//             {/* Total durée */}
+//             <TableCell>
+//               <strong>{formatHeure(totalDuration)}</strong>
+//             </TableCell>
+
+//             {/* Colonnes restantes vides */}
+//             <TableCell />
+//             <TableCell />
+//             { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") && <TableCell /> }
+//         </TableRow>
+//         <Box
+//           sx={{
+//             display: 'grid',
+//             gridTemplateColumns: '15% 10% 10% 15% 10% 15% 25%', // 7 colonnes, tailles égales
+//             mt: 2,
+//             py: 1,
+//             px: 2,
+//             backgroundColor: '#f5f5f5',
+//             borderTop: '1px solid #ddd',
+//           }}
+//         >
+//            <Box gridColumn="1 / 5"> 
+//             <Typography variant="body1">
+//               Durée totale : 
+//             </Typography>
+//           </Box>
+//           <Box>
+//             <Typography variant="body1" fontWeight="bold" textAlign="center"> {/* fontWeight="bold" */}
+//               {formatHeure(totalDuration)}
+//             </Typography>
+//           </Box>
+//           <Box gridColumn="6 / 8" />
+//         </Box>
+//       </>
+//     );
+//   };
+  
+export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
+
+    const session = useSession();
+    const user = session.data.user;
+
+    return (
+        <List
+            resource="prestations"
+            // @ts-ignore
+            actions={isDefined(session) && isDefined(user) && user.roles.find(r => r === "admin") ? <ListActions/> : null} 
+            filters={ filters }
+        >
+            <CustomDatagrid />
+        </List>
+
+    );
+};
+  
