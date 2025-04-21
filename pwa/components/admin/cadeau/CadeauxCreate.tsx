@@ -38,16 +38,18 @@ export const CadeauxCreate = () => {
   };
 
   const onSubmit = async ({circuit, option, origine, ...data}) => {
-    const selectedCircuit = isDefined(circuit) && isDefined(circuit['@id']) ? circuits.find(c => c['@id'] === circuit['@id']) : null;
-    const selectedOption = isDefined(option) && isDefined(option['@id']) ? options.find(c => c['@id'] === option['@id']) : null;
+    const circuitId = isDefined(circuit) ? (typeof circuit === 'string' ? circuit : circuit['@id']) : null;
+    const optionId = isDefined(option) ? (typeof option === 'string' ? option : option['@id']) : null;
+    const selectedCircuit = isDefined(circuit) && isDefined(circuitId) ? circuits.find(c => c['@id'] === circuitId) : null;
+    const selectedOption = isDefined(option) && isDefined(optionId) ? options.find(c => c['@id'] === optionId) : null;
     const selectedOrigines = isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === o['@id']))) : [];
     try {
         data = {
             ...data, 
             code: getUniqueCode(), 
             used: false,
-            circuit: isDefined(circuit) ? circuit['@id'] : null,        
-            option: isDefined(option) ? option['@id'] : null,
+            circuit: circuitId,        
+            option: optionId,
             origine: isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : [],
             cout: getTotalPrice(selectedCircuit, selectedOption, selectedOrigines)
         };

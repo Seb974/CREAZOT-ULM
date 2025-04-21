@@ -11,7 +11,7 @@ use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
 use Doctrine\ORM\QueryBuilder;
 
-final class RappelPeriodeFilte extends AbstractFilter
+final class RappelPeriodeFilter extends AbstractFilter
 {
     use PropertyHelperTrait;
 

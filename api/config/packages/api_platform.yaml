@@ -225,7 +225,7 @@ services:
         tags: [ 'api_platform.filter' ]
 
     app.filter.rappel.periode:
-        class: 'App\Doctrine\Orm\Filter\RappelPeriodeFilte'
+        class: 'App\Doctrine\Orm\Filter\RappelPeriodeFilter'
         arguments:
             $managerRegistry: '@doctrine'
             $logger: '@logger'

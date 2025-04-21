@@ -11,24 +11,27 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Twig\Environment;
+use Doctrine\ORM\EntityManagerInterface;
 
 class CadeauCreateSubscriber implements EventSubscriberInterface
 {
     private PdfGenerator $pdfGenerator;
     private MailerInterface $mailer;
     private Environment $twig;
+    private EntityManagerInterface $entityManager;
 
-    public function __construct(PdfGenerator $pdfGenerator, MailerInterface $mailer, Environment $twig)
+    public function __construct(PdfGenerator $pdfGenerator, MailerInterface $mailer, Environment $twig, EntityManagerInterface $entityManager)
     {
         $this->pdfGenerator = $pdfGenerator;
         $this->mailer = $mailer;
         $this->twig = $twig;
+        $this->entityManager = $entityManager;
     }
 
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::VIEW => ['onCadeauCreated', EventPriorities::PRE_WRITE],
+            KernelEvents::VIEW => ['onCadeauCreated', EventPriorities::POST_WRITE],
         ];
     }
 
@@ -37,7 +40,7 @@ class CadeauCreateSubscriber implements EventSubscriberInterface
         $cadeau = $event->getControllerResult();
         $method = $event->getRequest()->getMethod();
 
-        if (!$cadeau instanceof Cadeau || ($method !== 'POST' && $method !== 'PUT')) {
+        if (!$cadeau instanceof Cadeau || !in_array($method, ['POST', 'PUT'])) {
             return;
         }
 
@@ -53,6 +56,7 @@ class CadeauCreateSubscriber implements EventSubscriberInterface
     
             $this->mailer->send($email);
             $cadeau->setSendEmail(false);
+            $this->entityManager->flush();
         }
     }
 }
