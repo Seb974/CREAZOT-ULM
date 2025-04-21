@@ -1,5 +1,4 @@
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import CircularProgress from '@mui/material/CircularProgress';
 import { useRecordContext } from 'react-admin';
 import { useSession } from "next-auth/react";
 import { useState } from 'react';
@@ -54,11 +53,6 @@ const DownloadGiftButton = () => {
     return (
         <a href="#" onClick={handleDownload} style={{ pointerEvents: loading ? 'none' : 'auto', opacity: loading ? 0.6 : 1 }} title={loading ? "Génération en cours..." : "Télécharger le bon cadeau"}>
             {loading ? <PulsingIcon /> : <PictureAsPdfIcon />}
-            {/* {loading ? (
-                <CircularProgress size={24} />
-            ) : (
-                <PictureAsPdfIcon />
-            )} */}
         </a>
     );
 };
