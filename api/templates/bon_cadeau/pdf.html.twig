@@ -19,8 +19,10 @@
             width: 80%;
             border-radius: 12px;
             box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
-            /* background-image: url('{{ absolute_url(asset("images/Plane.png")) }}'); */
-            background-image: url('https://admin.planetair974.re/images/Plane.png');
+        }
+
+        .with-bg {
+            background-image: url('{{ encoded_image }}');
             background-repeat: no-repeat;
             background-position: top center;
             background-size: auto;
@@ -63,6 +65,7 @@
 </head>
 <body>
     <div class="overlay">
+    <div class="overlay {% if encoded_image is not null %}with-bg{% endif %}">
         <h1>PLANETAIR 974</h1>
         <h2>Bon Cadeau pour un Circuit {{ cadeau.circuit.nom }} {{ cadeau.option is not null ? 'avec ' ~ cadeau.option.nom : '' }}</h2>
 

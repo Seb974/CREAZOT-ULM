@@ -30,6 +30,7 @@ class PdfGenerator
         // Rendu HTML
         $html = $this->twig->render('bon_cadeau/pdf.html.twig', [
             'cadeau' => $data,
+            'encoded_image' => $this->getEncodedImage(),
         ]);
 
         $dompdf->loadHtml($html);
@@ -38,5 +39,18 @@ class PdfGenerator
 
         // Retourne le contenu binaire du PDF
         return $dompdf->output();
+    }
+
+    private function getEncodedImage()
+    {
+        $imagePath = __DIR__.'/../../public/images/Plane.png';
+
+        $encodedImage = null;
+        if (file_exists($imagePath)) {
+            $imageData = file_get_contents($imagePath);
+            $encodedImage = 'data:image/png;base64,' . base64_encode($imageData);
+        }
+
+        return $encodedImage;
     }
 }
