@@ -109,10 +109,10 @@ const CustomBody = (props) => {
           <TableCell sx={{fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'right' }}>
             {formatHeure(totalDuration)}
           </TableCell>
-          <TableCell sx={{}} />
-          <TableCell sx={{}} textAlign="right"/>
+          <TableCell />
+          <TableCell />
           {isDefined(session) && isDefined(user) && user.roles.includes("admin") && (
-            <TableCell sx={{}} />
+            <TableCell />
           )}
         </TableRow>
       </Fragment>
