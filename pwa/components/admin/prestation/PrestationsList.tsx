@@ -111,6 +111,7 @@ const CustomBody = (props) => {
           </TableCell>
           <TableCell />
           <TableCell />
+          {/* @ts-ignore */}
           {isDefined(session) && isDefined(user) && user.roles.includes("admin") && (
             <TableCell />
           )}
