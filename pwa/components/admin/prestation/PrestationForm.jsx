@@ -17,7 +17,7 @@ export const PrestationForm = () => {
   const notify = useNotify();
   const redirect = useRedirect();
   const [create] = useCreate();
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(new Date((new Date()).setHours(12, 0, 0)));
   const [aircrafts, setAircrafts] = useState([]);
   const [selectedPilot, setSelectedPilot] = useState("");
   const [selectedAircraft, setSelectedAircraft] = useState("");
@@ -66,7 +66,7 @@ export const PrestationForm = () => {
                 <Flatpickr
                     name="debut"
                     value={ date }
-                    onChange={ datetime => setDate(new Date(datetime[0])) }
+                    onChange={ datetime => setDate(new Date((new Date(datetime[0])).setHours(12, 0, 0))) }
                     className="form-control form-control-sm border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                     options={{
                         enableTime: false,

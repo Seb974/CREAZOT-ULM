@@ -6,7 +6,7 @@ export const PrestationEdit = () => {
     const transform = ({date, aeronef, pilote, vols, ...data}) => {
         const newData = ({
           ...data, 
-          date: new Date(date),
+          date: new Date((new Date(date)).setHours(12, 0, 0)),
           pilote: isDefined(pilote) && isDefined(pilote['@id']) ? pilote['@id'] : null,
           aeronef: isDefined(aeronef) && isDefined(aeronef['@id']) ? aeronef['@id'] : null,
           vols: vols.map(vol => ({
