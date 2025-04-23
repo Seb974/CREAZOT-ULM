@@ -232,3 +232,9 @@ services:
             $nameConverter: '@?api_platform.name_converter'
             $properties: { periode: 'iexact' } # ]
         tags: [ 'api_platform.filter' ]
+    
+    app.filter.combinaison.min_passager:
+        parent: 'api_platform.doctrine.orm.range_filter'
+        arguments:
+            $properties: { minPassager: ~ } # ]
+        tags: [ 'api_platform.filter' ]

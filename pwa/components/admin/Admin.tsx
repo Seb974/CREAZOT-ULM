@@ -32,6 +32,7 @@ import { toast } from 'react-hot-toast';
 import origineResourceProps from "./origine";
 import contactResourceProps from "./contact";
 import cadeauResourceProps from "./cadeau";
+import combinaisonResourceProps from "./combinaison";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -131,6 +132,7 @@ const AdminWithOIDC = () => {
       <ResourceGuesser name="aeronefs" {...aeronefResourceProps}/>
       <ResourceGuesser name="options"/>
       <ResourceGuesser name="natures"/>
+      <ResourceGuesser name="combinaisons" {...combinaisonResourceProps}/>
       <ResourceGuesser name="cadeaux" {...cadeauResourceProps}/>
       <ResourceGuesser name="contacts" {...contactResourceProps}/>
       <ResourceGuesser name="origines" {...origineResourceProps}/>

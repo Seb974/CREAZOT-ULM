@@ -22,7 +22,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     operations: [
         new GetCollection(
             itemUriTemplate: '/options/{id}{._format}',
-            paginationClientItemsPerPage: true
+            paginationClientItemsPerPage: true,
         ),
         new Post(
             itemUriTemplate: '/options/{id}{._format}'
@@ -53,18 +53,18 @@ class Option
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'Combinaison:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 60, nullable: true)]
-    #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'Combinaison:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'Combinaison:read'])]
     private ?float $prix = null;
 
-    #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Option:write', 'Option:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'Combinaison:read'])]
     public function getName(): ?string
     {
         return $this->nom;
