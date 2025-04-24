@@ -24,7 +24,7 @@ export const RappelInformationsModal = ({ selectedRappel, setSelectedRappel, rap
 
     const onDeleteRappel = (e, id) => {
         e.preventDefault();
-        if (!isDefined(session) || !isDefined(user) || !isDefined(user.roles.find(r => r === "admin"))) {
+        if (isDefined(session) && isDefined(user) && isDefined(user.roles.find(r => r === "admin"))) {
             dataProvider
                 .delete('rappels', { id })
                 .then(({data}) => {
@@ -44,7 +44,13 @@ export const RappelInformationsModal = ({ selectedRappel, setSelectedRappel, rap
     const onFinishRappel = (e, id) => {
         e.preventDefault();
         const selection  = rappels.find(rappel => rappel.id === id);
-        setSelectedRappel({...selectedRappel, rappels: selectedRappel.rappels.map(r => r.id !== selection.id ? r : {...r, finished: (isDefined(r.finished) ? !r.finished : true)})})
+        const newValue = isDefined(selection.finished) ? !selection.finished : true;
+        dataProvider
+                .update('rappels',{ id: selection.id, data: {...selection, finished: newValue }})
+                .then(({data}) => {
+                    setSelectedRappel({...selectedRappel, rappels: selectedRappel.rappels.map(r => r.id !== data.id ? r : data)});
+                    setRappels(rappels.map(r => r.id === data.id ? data : r));
+                });
     };
 
     const onBackClick = (e) => {
@@ -53,7 +59,7 @@ export const RappelInformationsModal = ({ selectedRappel, setSelectedRappel, rap
     };
 
     const getIsFinished = (selectedRappel, rappel) => {
-        const bool = isDefined(rappel.finished) ? rappel.finished : false;
+        const bool = !isDefined(rappel.finished) ? false : rappel.finished;
         const selectedRappelDate = formatDate(new Date(selectedRappel.start));
         return bool && (!rappel.recurrent || (new Date(selectedRappelDate) <= new Date()));
     };
@@ -78,15 +84,15 @@ export const RappelInformationsModal = ({ selectedRappel, setSelectedRappel, rap
                             { selectedRappel.rappels.map((rappel, i) =>
                                 <div className="flex justify-between" key={ i }>
                                     <div className="w-5/6">
-                                        <h4 className={"text-red-700 " + getIsFinished(selectedRappel, rappel) ? "line-through" : ""}>{rappel.important && <><WarningIcon/>{" "}</>}{ i + 1 } - { rappel.titre }</h4>
-                                        <p className={ "text-base leading-relaxed text-gray-500 dark:text-gray-400 " + getIsFinished(selectedRappel, rappel) ? "line-through" : ""}>
+                                        <h4 className={"text-red-700 " + (getIsFinished(selectedRappel, rappel) ? "line-through" : "")}>{rappel.important && <><WarningIcon/>{" "}</>}{ i + 1 } - { rappel.titre }</h4>
+                                        <p className={ "text-base leading-relaxed text-gray-500 dark:text-gray-400 " + (getIsFinished(selectedRappel, rappel) ? "line-through" : "")}>
                                             { rappel.description }
                                         </p>
                                     </div>
                                     <div className="w-1/6 mr-0 pr-0 text-right">
                                         <p className="mb-4 mr-0 pr-0">
                                             <a href="#" onClick={ e => onFinishRappel(e, rappel.id) } data-modal-hide="default-modal" type="button">
-                                                { rappel.finished ? <span className="text-green-500"><DoneIcon/></span> : <DoneIcon/>}
+                                                { getIsFinished(selectedRappel, rappel) ? <span className="text-green-500"><DoneIcon/></span> : <DoneIcon/>}
                                             </a>
                                         </p>
                                         <p className="mb-4 mr-0 pr-0">

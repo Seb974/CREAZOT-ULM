@@ -85,6 +85,10 @@ class Rappel
     #[Groups(groups: ['Rappel:write', 'Rappel:read'])]
     private ?bool $important = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Rappel:write', 'Rappel:read'])]
+    private ?bool $finished = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -158,6 +162,18 @@ class Rappel
     public function setImportant(?bool $important): static
     {
         $this->important = $important;
+
+        return $this;
+    }
+
+    public function isFinished(): ?bool
+    {
+        return $this->finished;
+    }
+
+    public function setFinished(?bool $finished): static
+    {
+        $this->finished = $finished;
 
         return $this;
     }

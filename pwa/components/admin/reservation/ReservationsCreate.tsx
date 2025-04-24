@@ -15,9 +15,19 @@ import {
   useRedirect,
   useNotify
 } from "react-admin";
+import { useWatch, useFormContext } from 'react-hook-form';
 import { getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { useEffect, useState } from "react";
 import { toast } from 'react-hot-toast';
+
+const QuantiteWatcher = ({ setSelectedQuantite }) => {
+  const { control } = useFormContext();
+  const quantite = useWatch({ control, name: 'quantite', defaultValue: 1 });
+
+  useEffect(() => setSelectedQuantite(quantite), [quantite, setSelectedQuantite]);
+
+  return null;
+};
 
 export const ReservationsCreate = () => {
 
@@ -25,8 +35,12 @@ export const ReservationsCreate = () => {
   const redirect = useRedirect();
   const [create] = useCreate();
   const dataProvider = useDataProvider();
+  const [options, setOptions] = useState([]);
   const [circuits, setCircuits] = useState([]);
   const [origines, setOrigines] = useState([]);
+  const [combinaisons, setCombinaisons] = useState([]);
+  const [enabledCombinaisons, setEnabledCOmbinaisons] = useState([]);
+  const [selectedQuantite, setSelectedQuantite] = useState(1);
 
   const status = [
     {id: "VALIDATED", name: "Validé"},
@@ -42,7 +56,11 @@ export const ReservationsCreate = () => {
   useEffect(() => {
       getCircuits();
       getOrigines();
+      getCombinaisons();
+      getOptions();
   }, []);
+
+  useEffect(() => getEnabledCombinaisons(selectedQuantite, combinaisons), [selectedQuantite, combinaisons]);
 
   const getCircuits = () => {
     dataProvider
@@ -55,26 +73,42 @@ export const ReservationsCreate = () => {
         .getList("origines", {})
         .then(({ data }) => setOrigines(data));
   };
+
+  const getOptions = () => {
+    dataProvider
+        .getList("options", {})
+        .then(({ data }) => setOptions(data));
+  };
+
+  const getCombinaisons = () => {
+    dataProvider
+        .getList("combinaisons", {})
+        .then(({ data }) => setCombinaisons(data));
+  };
     
-  const onSubmit = async data => {
+  const onSubmit = async ({option, origine, contact, remarques, ...data}) => {
     try {
       const selectedCircuit = circuits.find(c => c['@id'] === data.circuit);
-      const selectedOrigines = isDefinedAndNotVoid(data.origine) ? origines.filter(origine => isDefined(data.origine.find(o => origine['@id'] === o['@id']))) : [];
+      const selectedOrigines = isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === o['@id']))) : [];
+      const selectedOptions = getSelectedOptions(option, data.quantite, options);
       data = {
         ...data, 
-        remarques: isDefined(data.remarques) ? data.remarques : '', 
-        prix: getTotalPrice(selectedCircuit, null, selectedOrigines), 
+        remarques: isDefined(remarques) ? remarques : '', 
         fin: getEnd(data.debut, selectedCircuit),
         color: getRandomColor(),
         report: false,
-        contact: isDefinedAndNotVoid(data.contact) ? data.contact.map(c => c['@id']) : [],
-        origine: isDefinedAndNotVoid(data.origine) ? data.origine.map(o => o['@id']) : []
+        contact: isDefinedAndNotVoid(contact) ? contact.map(c => c['@id']) : [],
+        origine: isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : []
       };
       for (let i = 0; i < data.quantite; i++) {
+        const option = isDefined(selectedOptions[i]) ? selectedOptions[i]['@id'] : null;
+        const bddOption = isDefined(option) ? options.find(o => o['@id'] === option) : null;
+        const prix = getTotalPrice(selectedCircuit, bddOption, selectedOrigines);
+        const newData = {...data, option, prix };
         if (i < data.quantite - 1)
-          create('reservations', { data });
+          create('reservations', {data: newData});
         else
-          await create('reservations', { data });
+          await create('reservations', {data: newData});
       }
       notify('La réservation a bien été enregistrée.', { type: 'info' });
       redirect('list', 'reservations');
@@ -98,15 +132,34 @@ export const ReservationsCreate = () => {
     return new Date(start.setHours(start.getHours() + duration.getHours(), start.getMinutes() + duration.getMinutes(), start.getSeconds() + duration.getSeconds()));
   };
 
+  const getEnabledCombinaisons = (quantite, combinaisons) => {
+      const enabledCombinaisons = combinaisons.map(c => ({...c, disabled: c.minPassager > quantite}));
+      setEnabledCOmbinaisons(enabledCombinaisons);
+  };
+
+  const getSelectedOptions = (selection, quantite, bddOptions) => {
+    const selectedCombinaison = combinaisons.find(c => c['@id'] === (!isDefined(selection) || typeof selection === 'string' ? selection : selection['@id']));
+    let options = selectedCombinaison.options.map(o => bddOptions.find(option => option['@id'] === o['@id']));
+
+    const missingInputs = quantite - options.length;
+    if (missingInputs > 0) {
+      for (let i = 0; i < missingInputs; i++) {
+        options.unshift(null);
+      }
+    }
+    return options;
+  };
+
   return (
     <Create redirect="list">
-      <SimpleForm onSubmit={ onSubmit }>    {/* noValidate */}
+      <SimpleForm onSubmit={onSubmit}>
         <DateTimeInput source="debut" defaultValue={ new Date((new Date()).setHours(7,0,0)) } label="Décollage" validate={required()}/>
-        <TextInput source="nom" label="Nom & prénom du passager" validate={required()}/>   {/* validate={required()} */}
+        <TextInput source="nom" label="Nom & prénom du passager" validate={required()}/>
         <TextInput source="telephone" label="N° de téléphone" validate={required()}/>
         <TextInput source="email" label="Adresse email"/>
-        <NumberInput source="quantite" label="Nombre de passager(s)" defaultValue={ 1 } validate={required()}/>
+        <NumberInput source="quantite" label="Nombre de passager(s)" min={ 1 } defaultValue={ 1 } validate={required()}/>
         <ReferenceInput reference="circuits" source="circuit" label="Circuit"/>
+        <SelectInput key={ selectedQuantite }  source="option" choices={ enabledCombinaisons } label="Option" />
         <SelectInput source="statut" choices={ status } defaultValue={ status[0].id } validate={required()}/>
         <ArrayInput source="contact" label="Contact initial">
           <SimpleFormIterator inline disableReordering>
@@ -122,6 +175,7 @@ export const ReservationsCreate = () => {
         <BooleanInput source="paid" label="Prépayé"/>
         <BooleanInput source="upsell" label="Upsell"/>
         <BooleanInput source="report" label="Report"/>
+        <QuantiteWatcher setSelectedQuantite={setSelectedQuantite} />
       </SimpleForm>
     </Create>
   ) ;

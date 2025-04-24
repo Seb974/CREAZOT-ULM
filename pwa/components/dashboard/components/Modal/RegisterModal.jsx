@@ -7,13 +7,17 @@ import { getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../../app/
 import { PlusForm } from "../../../admin/prestation/Form/PlusForm";
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
+import { CombinaisonForm } from '../../../admin/prestation/Form/CombinaisonForm';
 
 export const RegisterModal = ({ visible, setVisible, slot, reservations, setReservations }) => {
 
     const dataProvider = useDataProvider();
     const timeOptions = { hour: "2-digit", minute: "2-digit" };
     const dateOptions = { year: 'numeric', month: 'long', day: 'numeric'};
+    const [options, setOptions] = useState([]);
     const [selectedCircuit, setSelectedCircuit] = useState("");
+    const [selectedOptions, setSelectedOptions] = useState([]);
+    const [selectedCombinaison, setSelectedCombinaison] = useState("");
     const [isUpToDate, setIsUpToDate] = useState(false);
     const [section, setSection] = useState("contact");
     const [previousPaidValue, setPreviousPaidValue] = useState(false);
@@ -21,12 +25,22 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     const [selectedOriginContact, setSelectedOriginContact] = useState([]);
     const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, paid: false, upsell: false, debut: new Date(slot.start), color: getRandomColor()});
 
+    useEffect(() => getOptions(), []);
+    
     useEffect(() => {
         if (visible && !isUpToDate) {
             setConsumer({...consumer, debut: new Date(slot.start)});
             setIsUpToDate(true);
         }
     }, [slot.start]);
+
+    useEffect(() => setSelectedOptions(getSelectedOptions(selectedCombinaison, consumer.quantite)), [selectedCombinaison]);
+
+    const getOptions = () => {
+        dataProvider
+            .getList('options', {})
+            .then(({ data }) => setOptions(data))
+      };
 
     const onConsumerChange = e => setConsumer({...consumer, [e.target.name]: e.target.value});
 
@@ -37,7 +51,6 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
         let newReservations = [];
         const endTime = getEndTime(consumer.debut, selectedCircuit);
         const quantite = parseInt(consumer.quantite);
-        const prix = getFinalPrice(selectedCircuit, selectedOriginContact);
         const reservation = {
             ...consumer,
             quantite,
@@ -45,10 +58,11 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
             fin: endTime,
             contact: isDefinedAndNotVoid(selectedInitialContact) ? selectedInitialContact.map(c => c['@id']) : [],
             origine: isDefinedAndNotVoid(selectedOriginContact) ? selectedOriginContact.map(o => o['@id']) : [],
-            prix,
         }
         for (let i = 0; i < quantite; i++) {
-            const newReservation = await dataProvider.create('reservations', {data: reservation});
+            const option = isDefined(selectedOptions[i]) ? selectedOptions[i]['@id'] : null;
+            const prix = getFinalPrice(selectedCircuit, selectedOptions[i], selectedOriginContact);
+            const newReservation = await dataProvider.create('reservations', {data: {...reservation, option, prix}});
             newReservations = !isDefined(newReservation.data) || (isDefined(newReservation.data.statut) && newReservation.data.statut.includes('CANCEL')) ? 
             newReservations : [...newReservations, newReservation.data];
         }
@@ -56,10 +70,9 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
         reinitializeData();
     };
 
-    const getFinalPrice = (selectedCircuit, selectedOriginContact) => {
-        const circuitPrice = selectedCircuit.prix;
+    const getFinalPrice = (selectedCircuit, selectedOption, selectedOriginContact) => {
         const maxOriginDiscount = isDefinedAndNotVoid(selectedOriginContact) ? getMaxDiscountFromOrigin(selectedOriginContact) : 0;
-        return circuitPrice * (1 - (maxOriginDiscount / 100));
+        return selectedCircuit.prix * (1 - (maxOriginDiscount / 100)) + (isDefined(selectedOption) && isDefined(selectedOption.prix) ? selectedOption.prix : 0);
     };
 
     const getMaxDiscountFromOrigin = selectedOriginContact =>  selectedOriginContact.map(o => o.discount).reduce((max, current) => current > max ? current : max, 0);
@@ -77,6 +90,8 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
 
     const reinitializeData = () => {
         setConsumer({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, paid: false, upsell: false, debut: new Date((new Date()).setHours(8, 0, 0)), color: getRandomColor()});
+        setSelectedCombinaison("");
+        setSelectedOptions([]);
         setSection("contact");
         setVisible(false);
         setIsUpToDate(false);
@@ -94,6 +109,20 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     const onChangeColor = e => {
         e.preventDefault();
         setConsumer({...consumer, color: getRandomColor()});
+    };
+
+    const getSelectedOptions = (combinaison, quantite) => {
+        if (combinaison !== "") {
+            let selectedOptions = combinaison.options.map(o => options.find(option => o['@id'] === option['@id']));
+            const missingInputs = quantite - selectedOptions.length;
+            if (missingInputs > 0) {
+                for (let i = 0; i < missingInputs; i++) {
+                  selectedOptions.unshift(null);
+                }
+            }
+            return selectedOptions;
+        }
+        return [];
     };
 
     return (
@@ -231,7 +260,11 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                                         getOnlyId={ false }
                                     /> 
                                 </div>
-
+                                <CombinaisonForm 
+                                    selectedCombinaison={ selectedCombinaison }
+                                    setSelectedCombinaison={ setSelectedCombinaison }
+                                    quantite={ consumer.quantite }
+                                />
                             </div>
                             }
                             { section === "details" && 

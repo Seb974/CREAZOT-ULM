@@ -34,8 +34,6 @@ const Dashboard = () => {
   const onMBSelect = () => setAppli("MB");
   const onMetarClick = e => e.preventDefault();
 
-  useEffect(() => console.log(rappelSelection), [rappelSelection]);
-
 return (
     <>
       <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4"> 

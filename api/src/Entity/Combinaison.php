@@ -77,6 +77,12 @@ class Combinaison
     #[Groups(groups: ['Combinaison:write', 'Combinaison:read'])]
     private ?array $options = null;
 
+    #[Groups(groups: ['Combinaison:write', 'Combinaison:read'])]
+    public function getName(): ?string
+    {
+        return $this->nom;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
