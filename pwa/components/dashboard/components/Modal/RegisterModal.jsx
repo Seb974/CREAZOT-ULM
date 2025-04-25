@@ -102,7 +102,10 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
             onClose();
     };
 
-    const onSectionChange = e => setSection(e.target.id);
+    const onSectionChange = e => {
+        e.preventDefault();
+        setSection(e.target.id);
+    };
 
     const onDateChange = datetime => setConsumer({...consumer, debut: new Date(datetime[0])});
 

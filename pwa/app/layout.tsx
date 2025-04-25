@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { type ReactNode } from "react";
 import { SessionProvider } from "next-auth/react";
 import "@fontsource/poppins";
@@ -12,7 +12,18 @@ import { auth } from "./auth";
 
 export const metadata: Metadata = {
   title: 'Planetair974 - Administration',
+  visualViewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
 }
+ 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  // userScalable: false,
+  // Also supported but less commonly used
+  interactiveWidget: 'resizes-visual',
+}
+
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const session = await auth();
 

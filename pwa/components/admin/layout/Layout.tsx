@@ -7,6 +7,18 @@ const MyLayout = (props: React.JSX.IntrinsicAttributes & LayoutProps) => (
     {...props} 
     appBar={AppBar} 
     menu={Menu}
+    sx={{
+      '& .RaLayout-appFrame': {
+        width: '100%',
+        maxWidth: '100vw',
+      },
+      '& .RaLayout-content': {
+        '@media (max-width: 768px)': {
+          maxWidth: '100vw',
+          overflowX: 'hidden',
+        }
+      }
+  }}
   />
 );
 
