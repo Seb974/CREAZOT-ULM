@@ -11,8 +11,7 @@ import { Providers } from "./providers";
 import { auth } from "./auth";
 
 export const metadata: Metadata = {
-  title: 'Planetair974 - Administration',
-  visualViewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+  title: 'Planetair974 - Administration'
 }
  
 export const viewport: Viewport = {
