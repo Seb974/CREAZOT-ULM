@@ -7,10 +7,11 @@ import {
   ExportButton,
   TopToolbar,
   ShowButton,
-  EmailField
+  SimpleList
 } from "react-admin";
 import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
+import { useMediaQuery, Theme } from '@mui/material';
 
 export interface Props {
   data: PagedCollection<Circuit> | null;
@@ -20,22 +21,27 @@ export interface Props {
 
 export const UsersList: NextPage<Props> = ({ data, hubURL, page }) => {
 
+  const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
+
   const ListActions = () => (
     <TopToolbar>
-        <CreateButton/>
         <ExportButton/>
     </TopToolbar>
   );
 
   return (
     <List resource="users" actions={<ListActions/>}>
-        <Datagrid sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
-            <TextField source="firstName" label="Prénom" sortable={ true }/>
-            <TextField source="lastName" label="Nom" sortable={ true }/>
-            <p className="text-right">
-                <ShowButton />
-            </p>
-        </Datagrid>
+        { isSmall ? 
+            <SimpleList
+              primaryText={ record => record.firstName }
+              linkType={ false }
+            /> 
+            :
+            <Datagrid sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}} rowClick={ false }>
+                <TextField source="firstName" label="Prénom" sortable={ true }/>
+                <TextField source="lastName" label="Nom" sortable={ true }/>
+            </Datagrid>
+        }
     </List>
   );
 }

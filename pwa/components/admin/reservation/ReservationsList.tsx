@@ -14,12 +14,14 @@ import {
   FilterButton,
   FunctionField,
   BooleanField,
+  SimpleList,
   useRecordContext,
 } from "react-admin";
 import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
 import { isDefined } from "../../../app/lib/utils";
 import { TextFieldProps } from "@mui/material";
+import { useMediaQuery, Theme } from '@mui/material';
 
 export interface Props {
   data: PagedCollection<Circuit> | null;
@@ -56,7 +58,13 @@ const ColoredTextField = (props: TextFieldProps) => {
   );
 };
 
+const ColoredRowSx = (record, index) => ({
+  color: isDefined(record.color) ? record.color : 'black',
+});
+
 export const ReservationsList: NextPage<Props> = ({ data, hubURL, page }) => {
+
+  const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
 
   const status = [
     {id: "VALIDATED", name: "Validé"},
@@ -76,26 +84,38 @@ export const ReservationsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
   return (
     <List resource="reservations" actions={<ListActions/>} filters={ filters }>
-        <Datagrid sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
-            <DateField source="debut" label="Date" sortable={ true } />
-            <DateField source="debut" label="Heure" showTime showDate={false}/>
-            <ColoredTextField />
-            <TextField source="telephone" label="Téléphone" />
-            <TextField source="circuit.code" label="Circuit" />
-            <TextField source="option.nom" label="Option"/>
-            <FunctionField
-                source="statut"
-                label="Statut"
-                render={record => <>{ getStatusLabel(record) }</> }
-            />
-            <BooleanField source="report" label="Report"/>
+        { isSmall ? 
+            <SimpleList
+              primaryText={ record => record.nom }
+              secondaryText={ record => `${ (new Date(record.debut)).toLocaleString("fr-FR") } `}
+              tertiaryText={ record => record.circuit.code + (isDefined(record.option) ? (' + ' + record.option.nom) : ' ') }
+              rowSx={ ColoredRowSx }
+              linkType="show"
+            /> 
+            : 
+            <Datagrid sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
+                  <DateField source="debut" label="Date" sortable={ true } />
+                  <DateField source="debut" label="Heure" showTime showDate={false}/>
+                  <ColoredTextField />
+                  <TextField source="telephone" label="Téléphone" />
+                  <TextField source="circuit.code" label="Circuit" />
+                  <TextField source="option.nom" label="Option"/>
+                  <FunctionField
+                      source="statut"
+                      label="Statut"
+                      render={record => <>{ getStatusLabel(record) }</> }
+                  />
+                  <BooleanField source="report" label="Report"/>
 
-            
-            <p className="text-right">
-                <ShowButton />
-                <EditButton />
-            </p>
-        </Datagrid>
+                  
+                  <p className="text-right">
+                      <ShowButton />
+                      <EditButton />
+                  </p>
+              </Datagrid>
+
+              }
+        
     </List>
   );
 }

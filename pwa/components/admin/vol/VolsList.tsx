@@ -13,6 +13,7 @@ import {
   DateField,
   NumberField,
   DateInput,
+  SimpleList,
   useListContext
 } from "react-admin";
 import { Fragment } from 'react';
@@ -20,6 +21,8 @@ import { type Vol } from "../../../types/Vol";
 import { type PagedCollection } from "../../../types/collection";
 import { useSession } from "next-auth/react";
 import { isDefined } from "../../../app/lib/utils";
+import { useMediaQuery, Theme } from '@mui/material';
+
 export interface Props {
   data: PagedCollection<Vol> | null;
   hubURL: string | null;
@@ -46,7 +49,7 @@ const CustomBody = (props) => {
     const { data, isLoading } = useListContext();
     const session = useSession();
     const user = session.data.user;
-    const hasAdminAccess = user => isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin")
+    const hasAdminAccess = user => isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin");
   
     if (isLoading || !data) return null;
   
@@ -105,12 +108,24 @@ export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
   const session = useSession();
   const user = session.data.user;
+  const options = { year: "numeric", month: "numeric", day: "numeric" };
+  const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
 
   const hasAdminAccess = user => isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin");
 
   return (
     <List resource="vols" actions={<ListActions/>} filters={ filters } filter={ !hasAdminAccess(user) ? { "prestation.pilote.email": user.email } : null}> 
-        <CustomDatagrid />
+        { isSmall ? 
+            <SimpleList
+              primaryText={ record => record.prestation.aeronef.immatriculation + ' | ' +  record.prestation.pilote.firstName }
+              // @ts-ignore
+              secondaryText={ record => `${ (new Date(record.prestation.date)).toLocaleDateString("fr-FR", options) } `}
+              tertiaryText={ record => record.quantite + ' x ' + record.circuit.code }
+              linkType="show"
+            /> 
+            : 
+            <CustomDatagrid />
+        }
     </List>
   );
 }

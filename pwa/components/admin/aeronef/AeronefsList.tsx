@@ -5,19 +5,18 @@ import {
   TextField,
   CreateButton,
   ExportButton,
-  FilterButton,
   TopToolbar,
-  DateField,
   NumberField,
   EditButton,
   ShowButton,
-  BooleanField,
+  SimpleList,
   FunctionField
 } from "react-admin";
 import { useMercure } from "../../../utils/mercure";
 import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
 import { isDefined } from "../../../app/lib/utils";
+import { useMediaQuery, Theme } from '@mui/material';
 
 export interface Props {
   data: PagedCollection<Circuit> | null;
@@ -35,6 +34,7 @@ const ListActions = () => (
 export const AeronefsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
   const collection = useMercure(data, hubURL);
+  const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
 
   const getDecimalTimeFromLocale = timeToFormat => Math.trunc(timeToFormat) + (timeToFormat - Math.trunc(timeToFormat)) / 60 * 100;
 
@@ -63,26 +63,35 @@ export const AeronefsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
   return (
     <List resource="aeronefs" actions={<ListActions/>}>
-        <Datagrid sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
-            <TextField source="immatriculation" label="Immatriculation" sortable={ true }/>
-            <NumberField source="horametre" options={{ style: 'unit', unit: 'hour' }} label="Horamètre"/>
-            <FunctionField
-              source="entretien"
-              label="Entretien"
-              textAlign="right"
-              render={ record => <>{ getRemainingTime(record) }</> }
-            />
-            <FunctionField
-              source="changementMoteur"
-              label="Changement moteur"
-              textAlign="right"
-              render={ record => <>{ getRemainingMotorTime(record) }</> }
-            />
-            <p className="text-right">
-                <ShowButton />
-                <EditButton />
-            </p>
-        </Datagrid>
+        { isSmall ? 
+            <SimpleList
+              primaryText={ record => record.immatriculation }
+              secondaryText={ record => record.horametre + 'h' }
+              tertiaryText={ record => getRemainingTime(record) }
+              linkType="show"
+            /> 
+            : 
+            <Datagrid sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
+                <TextField source="immatriculation" label="Immatriculation" sortable={ true }/>
+                <NumberField source="horametre" options={{ style: 'unit', unit: 'hour' }} label="Horamètre"/>
+                <FunctionField
+                  source="entretien"
+                  label="Entretien"
+                  textAlign="right"
+                  render={ record => <>{ getRemainingTime(record) }</> }
+                />
+                <FunctionField
+                  source="changementMoteur"
+                  label="Changement moteur"
+                  textAlign="right"
+                  render={ record => <>{ getRemainingMotorTime(record) }</> }
+                />
+                <p className="text-right">
+                    <ShowButton />
+                    <EditButton />
+                </p>
+            </Datagrid>
+        }
     </List>
   );
 }

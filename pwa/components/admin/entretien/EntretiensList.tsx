@@ -13,11 +13,14 @@ import {
   EditButton,
   ShowButton,
   BooleanField,
+  SimpleList,
   FilterButton
 } from "react-admin";
 import { useMercure } from "../../../utils/mercure";
 import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
+import { useMediaQuery, Theme } from '@mui/material';
+import { isDefined } from "../../../app/lib/utils";
 
 export interface Props {
   data: PagedCollection<Circuit> | null;
@@ -41,21 +44,33 @@ const filters = [
 export const EntretiensList: NextPage<Props> = ({ data, hubURL, page }) => {
 
   const collection = useMercure(data, hubURL);
+  const options = { year: "numeric", month: "numeric", day: "numeric" };
+  const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
 
   const InterventionExpansion = () => <TextField source="intervention" label="Détail de l'intervention"/>
 
   return (
     <List resource="entretiens" actions={<ListActions/>} filters={ filters }>
-        <Datagrid expand={ <InterventionExpansion/> } sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
-            <DateField source="date" label="Date" sortable={ true } />
-            <TextField source="aeronef.immatriculation" label="Aéronef" sortable={ true }/>
-            <NumberField source="horametreIntervention" options={{ style: 'unit', unit: 'hour' }} label="Horamètre à l'intervention"/>
-            <BooleanField source="changementMoteur" label="Changement moteur" textAlign="center"/>
-            <p className="text-right">
-                <ShowButton />
-                <EditButton />
-            </p>
-        </Datagrid>
+        { isSmall ? 
+            <SimpleList
+              primaryText={ record => record.aeronef.immatriculation + (isDefined(record.changementMoteur) && record.changementMoteur ? ' - Nouveau moteur' : '') }
+              // @ts-ignore
+              secondaryText={ record => `${ (new Date(record.date)).toLocaleDateString("fr-FR", options) } `}
+              tertiaryText={ record => record.horametreIntervention +'h' }
+              linkType="show"
+            /> 
+            : 
+            <Datagrid expand={ <InterventionExpansion/> } sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
+                <DateField source="date" label="Date" sortable={ true } />
+                <TextField source="aeronef.immatriculation" label="Aéronef" sortable={ true }/>
+                <NumberField source="horametreIntervention" options={{ style: 'unit', unit: 'hour' }} label="Horamètre à l'intervention"/>
+                <BooleanField source="changementMoteur" label="Changement moteur" textAlign="center"/>
+                <p className="text-right">
+                    <ShowButton />
+                    <EditButton />
+                </p>
+            </Datagrid>
+        }
     </List>
   );
 }

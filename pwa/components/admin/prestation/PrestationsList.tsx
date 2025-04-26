@@ -17,6 +17,7 @@ import {
   DateInput,
   ShowButton,
   ArrayField,
+  SimpleList,
   FunctionField,
   useListContext
 } from "react-admin";
@@ -25,6 +26,7 @@ import { type Prestation } from "../../../types/Prestation";
 import { type PagedCollection } from "../../../types/collection";
 import { useSession } from "next-auth/react";
 import { isDefined } from "../../../app/lib/utils";
+import { useMediaQuery, Theme } from '@mui/material';
 
 export interface Props {
     data: PagedCollection<Prestation> | null;
@@ -160,103 +162,12 @@ const CustomDatagrid = () => {
     )
 };
   
-    
-//     const { data, isLoading } = useListContext();
-
-//     const session = useSession();
-//     const user = session.data.user;
-  
-//     if (isLoading || !data) return null;
-  
-//     const totalDuration = data.reduce((sum, record) => {
-//       const duree = parseFloat(record.duree) || 0;
-//       return sum + duree;
-//     }, 0);
-
-    
-  
-//     return (
-//       <>
-//         <Datagrid expand={ <VolsExpansion/> } sx={{ '& .RaDatagrid-expandedPanel': {backgroundColor: '#ededed'}, '& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
-//             <DateField source="date" sortable={ true }/>
-//             <TextField source="aeronef.immatriculation" label="Aéronef" sortable={ true }/>
-//             <TextField source="pilote.firstName" label="Pilote" sortable={ true }/>
-//             <FunctionField
-//                 source="horametreDepart"
-//                 label="Horamètre au Départ"
-//                 render={record => getFormattedHorametre(record, "horametreDepart")}
-//                 textAlign="right"
-//             />
-//             <FunctionField
-//                 source="duree"
-//                 label="Durée"
-//                 render={record => getFormattedDuration(record)}
-//                 textAlign="right"
-//             />
-//             <FunctionField
-//                 source="horametreFin"
-//                 label="Horamètre à l'arrivée"
-//                 render={record => getFormattedHorametre(record, "horametreFin")}
-//                 textAlign="right"
-//             />
-//             <TextField source="remarques" label="Remarques"/>
-//             {/* @ts-ignore */}
-//             { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
-//                 <p className="text-right">
-//                     <ShowButton />
-//                     <EditButton />
-//                 </p>
-//             }
-            
-//         </Datagrid>
-//         <TableRow>
-//             {/* Colonnes vides pour alignement */}
-//             <TableCell />
-//             <TableCell />
-//             <TableCell />
-//             <TableCell />
-            
-//             {/* Total durée */}
-//             <TableCell>
-//               <strong>{formatHeure(totalDuration)}</strong>
-//             </TableCell>
-
-//             {/* Colonnes restantes vides */}
-//             <TableCell />
-//             <TableCell />
-//             { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") && <TableCell /> }
-//         </TableRow>
-//         <Box
-//           sx={{
-//             display: 'grid',
-//             gridTemplateColumns: '15% 10% 10% 15% 10% 15% 25%', // 7 colonnes, tailles égales
-//             mt: 2,
-//             py: 1,
-//             px: 2,
-//             backgroundColor: '#f5f5f5',
-//             borderTop: '1px solid #ddd',
-//           }}
-//         >
-//            <Box gridColumn="1 / 5"> 
-//             <Typography variant="body1">
-//               Durée totale : 
-//             </Typography>
-//           </Box>
-//           <Box>
-//             <Typography variant="body1" fontWeight="bold" textAlign="center"> {/* fontWeight="bold" */}
-//               {formatHeure(totalDuration)}
-//             </Typography>
-//           </Box>
-//           <Box gridColumn="6 / 8" />
-//         </Box>
-//       </>
-//     );
-//   };
-  
 export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
     const session = useSession();
     const user = session.data.user;
+    const options = { year: "numeric", month: "numeric", day: "numeric" };
+    const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
 
     return (
         <List
@@ -265,7 +176,17 @@ export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
             actions={isDefined(session) && isDefined(user) && user.roles.find(r => r === "admin") ? <ListActions/> : null} 
             filters={ filters }
         >
-            <CustomDatagrid />
+            { isSmall ? 
+                <SimpleList
+                  primaryText={ record => record.aeronef.immatriculation + ' | ' +  record.pilote.firstName }
+                  // @ts-ignore
+                  secondaryText={ record => `${ (new Date(record.date)).toLocaleDateString("fr-FR", options) } `}
+                  tertiaryText={ record => getFormattedDuration(record) }
+                  linkType="show"
+                /> 
+                : 
+                <CustomDatagrid />
+            }
         </List>
 
     );
