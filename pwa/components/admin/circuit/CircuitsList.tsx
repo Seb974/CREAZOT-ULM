@@ -49,7 +49,7 @@ export const CircuitsList: NextPage<Props> = ({ data, hubURL, page }) => {
                 <TextField source="code" label="Code" sortable={ true }/>
                 <TextField source="nom" label="Nom" sortable={ true }/>
                 <TextField source="nature.code" label="Nature" sortable={ true }/>
-                <DateField source="duree" label="Durée" sortable={ false } showTime showDate={false}/>
+                <DateField source="duree" label="Durée" sortable={ false } showTime showDate={false} options={{ hour: '2-digit', minute: '2-digit' }}/>
                 <NumberField source="prix" options={{ style: 'currency', currency: 'EUR' }} label="Prix"/>
                 <p className="text-right">
                     <ShowButton />

@@ -65,6 +65,14 @@ const ColoredRowSx = (record, index) => ({
 export const ReservationsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
+  const options = {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }
 
   const status = [
     {id: "VALIDATED", name: "Validé"},
@@ -87,7 +95,8 @@ export const ReservationsList: NextPage<Props> = ({ data, hubURL, page }) => {
         { isSmall ? 
             <SimpleList
               primaryText={ record => record.nom }
-              secondaryText={ record => `${ (new Date(record.debut)).toLocaleString("fr-FR") } `}
+              // @ts-ignore
+              secondaryText={ record => `${ (new Date(record.debut)).toLocaleString("fr-FR", options) } `}
               tertiaryText={ record => record.circuit.code + (isDefined(record.option) ? (' + ' + record.option.nom) : ' ') }
               rowSx={ ColoredRowSx }
               linkType="show"
@@ -95,7 +104,7 @@ export const ReservationsList: NextPage<Props> = ({ data, hubURL, page }) => {
             : 
             <Datagrid sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
                   <DateField source="debut" label="Date" sortable={ true } />
-                  <DateField source="debut" label="Heure" showTime showDate={false}/>
+                  <DateField source="debut" label="Heure" showTime showDate={false} options={{ hour: '2-digit', minute: '2-digit' }}/>
                   <ColoredTextField />
                   <TextField source="telephone" label="Téléphone" />
                   <TextField source="circuit.code" label="Circuit" />

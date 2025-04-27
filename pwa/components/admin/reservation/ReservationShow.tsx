@@ -23,7 +23,7 @@ export const ReservationShow = () => {
         <Show>
             <SimpleShowLayout>
                 <DateField source="debut" label="Date" sortable={ true } />
-                <DateField source="debut" label="Heure" showTime showDate={false}/>
+                <DateField source="debut" label="Heure" showTime showDate={false} options={{ hour: '2-digit', minute: '2-digit' }}/>
                 <TextField source="nom" label="Passager" sortable={ true }/>
                 <TextField source="telephone" label="Téléphone" />
                 <TextField source="email" label="Adresse email" />
