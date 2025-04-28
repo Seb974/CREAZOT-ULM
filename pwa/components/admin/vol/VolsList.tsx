@@ -3,6 +3,7 @@ import { TableRow, TableCell } from '@mui/material';
 
 import {
   TextInput,
+  FunctionField,
   Datagrid,
   DatagridBody,
   List,
@@ -91,7 +92,14 @@ const CustomDatagrid = () => {
       <Datagrid body={<CustomBody />}  sx={{'& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
             <DateField source="prestation.date" label="Date" sortable={ true }/>
             <TextField source="prestation.aeronef.immatriculation" label="Aéronef" sortable={ true }/>
-            <TextField source="prestation.pilote.firstName" label="Pilote" sortable={ true }/>
+            <FunctionField
+                label="Pilote"
+                source="prestation.pilote.firstName"
+                sortable={ true }
+                render={(record) => isDefined(record.prestation) && isDefined(record.prestation.pilote) && isDefined(record.prestation.pilote.firstName) ?
+                    record.prestation.pilote.firstName.charAt(0).toUpperCase() + record.prestation.pilote.firstName.slice(1) : ''
+                }
+            />
             <NumberField source="quantite" label="Nombre de vol(s)"/>
             <TextField source="circuit.code" label="Circuit" sortable={ true }/>
             <TextField source="circuit.nature.code" label="Nature" sortable={ true }/> 
@@ -117,7 +125,7 @@ export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
     <List resource="vols" actions={<ListActions/>} filters={ filters } filter={ !hasAdminAccess(user) ? { "prestation.pilote.email": user.email } : null}> 
         { isSmall ? 
             <SimpleList
-              primaryText={ record => record.prestation.aeronef.immatriculation + ' | ' +  record.prestation.pilote.firstName }
+              primaryText={ record => record.prestation.aeronef.immatriculation + ' | ' +  (isDefined(record.prestation) && isDefined(record.prestation.pilote) && isDefined(record.prestation.pilote.firstName) ? record.prestation.pilote.firstName.charAt(0).toUpperCase() + record.prestation.pilote.firstName.slice(1) : '') }
               // @ts-ignore
               secondaryText={ record => `${ (new Date(record.prestation.date)).toLocaleDateString("fr-FR", options) } `}
               tertiaryText={ record => record.quantite + ' x ' + record.circuit.code }

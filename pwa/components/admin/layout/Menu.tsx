@@ -93,7 +93,8 @@ const CustomMenu = () => {
       {/* @ts-ignore */}
       { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
         <Menu.Item
-          to="/users"
+          // to="/users"
+          to="/profil_pilotes"
           primaryText="Pilotes"
           leftIcon={<BadgeIcon />}
         />

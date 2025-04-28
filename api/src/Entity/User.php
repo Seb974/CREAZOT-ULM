@@ -39,12 +39,12 @@ use Symfony\Component\Uid\Uuid;
         ),
         new Get(
             uriTemplate: '/users/{id}{._format}',
-            security: 'is_granted("OIDC_ADMIN")'
+            security: 'is_granted("OIDC_ADMIN") or object === user'
         ),
-        new Get(
-            uriTemplate: '/users/{id}{._format}',
-            security: 'object === user'
-        ),
+        // new Get(
+        //     uriTemplate: '/users/{id}{._format}',
+        //     security: 'object === user'
+        // ),
     ],
     normalizationContext: [
         AbstractNormalizer::GROUPS => ['User:read'],
@@ -63,6 +63,7 @@ class User implements UserInterface
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\CustomIdGenerator(class: UuidGenerator::class)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[Groups(groups: ['Profil_pilote:read'])]
     #[ORM\Id]
     private ?Uuid $id = null;
 
@@ -70,14 +71,14 @@ class User implements UserInterface
      * @see https://schema.org/email
      */
     #[ORM\Column(unique: true)]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read'])]
     public ?string $email = null;
 
     /**
      * @see https://schema.org/givenName
      */
     #[ApiProperty(types: ['https://schema.org/givenName'])]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read'])]
     #[ORM\Column]
     public ?string $firstName = null;
 
@@ -85,7 +86,7 @@ class User implements UserInterface
      * @see https://schema.org/familyName
      */
     #[ApiProperty(types: ['https://schema.org/familyName'])]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read'])]
     #[ORM\Column]
     public ?string $lastName = null;
 

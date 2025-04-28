@@ -131,7 +131,14 @@ const CustomDatagrid = () => {
       <Datagrid body={<CustomBody />} expand={ <VolsExpansion/> } sx={{ '& .RaDatagrid-expandedPanel': {backgroundColor: '#ededed'}, '& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
           <DateField source="date" sortable={ true }/>
           <TextField source="aeronef.immatriculation" label="Aéronef" sortable={ true }/>
-          <TextField source="pilote.firstName" label="Pilote" sortable={ true }/>
+          <FunctionField
+            label="Prénom"
+            source="pilote.firstName"
+            sortable={ true }
+            render={(record) => isDefined(record.pilote) && isDefined(record.pilote.firstName) ?
+              record.pilote.firstName.charAt(0).toUpperCase() + record.pilote.firstName.slice(1) : ''
+            }
+          />
           <FunctionField
               source="horametreDepart"
               label="Horamètre au Départ"
@@ -178,7 +185,7 @@ export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
         >
             { isSmall ? 
                 <SimpleList
-                  primaryText={ record => record.aeronef.immatriculation + ' | ' +  record.pilote.firstName }
+                  primaryText={ record => record.aeronef.immatriculation + ' | ' +  (isDefined(record.pilote) && isDefined(record.pilote.firstName) ? record.pilote.firstName.charAt(0).toUpperCase() + record.pilote.firstName.slice(1) : '') }
                   // @ts-ignore
                   secondaryText={ record => `${ (new Date(record.date)).toLocaleDateString("fr-FR", options) } `}
                   tertiaryText={ record => getFormattedDuration(record) }

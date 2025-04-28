@@ -35,7 +35,13 @@ export const ReservationShow = () => {
                 />
                 <TextField source="option.nom" label="Option"/>
                 <TextField source="cadeau.name" label="Bon cadeau"/>
-                <TextField source="pilote.firstName" label="Pilote" sortable={ true }/>
+                <FunctionField
+                    label="Prénom"
+                    source="pilote.firstName"
+                    render={(record) => isDefined(record.pilote) && isDefined(record.pilote.firstName) ?
+                        record.pilote.firstName.charAt(0).toUpperCase() + record.pilote.firstName.slice(1) : ''
+                    }
+                />
                 <TextField source="avion.immatriculation" label="Aéronef" sortable={ true }/>
                 <TextField source="position" label="Position"/>
                 <ArrayField source="contact" label="Contact initial">

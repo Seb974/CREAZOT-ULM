@@ -1,11 +1,19 @@
-import { Show, SimpleShowLayout, TextField, DateField, NumberField } from 'react-admin';
+import { Show, SimpleShowLayout, TextField, DateField, NumberField, FunctionField } from 'react-admin';
+import { isDefined } from '../../../app/lib/utils';
 
 export const VolShow = () => (
     <Show>
         <SimpleShowLayout>
             <DateField source="prestation.date" label="Date"/>
             <TextField source="prestation.aeronef.immatriculation" label="Aéronef"/>
-            <TextField source="prestation.pilote.firstName" label="Pilote"/>
+            <FunctionField
+                label="Prénom"
+                source="prestation.pilote.firstName"
+                sortable={ true }
+                render={(record) => isDefined(record.prestation) && isDefined(record.prestation.pilote) && isDefined(record.prestation.pilote.firstName) ?
+                    record.prestation.pilote.firstName.charAt(0).toUpperCase() + record.prestation.pilote.firstName.slice(1) : ''
+                }
+            />
             <NumberField source="quantite" label="Nombre de vol(s)"/>
             <TextField source="circuit.nom" label="Circuit"/>
             <TextField source="circuit.nature.label" label="Nature"/> 

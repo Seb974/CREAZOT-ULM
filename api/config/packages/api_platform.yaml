@@ -238,3 +238,27 @@ services:
         arguments:
             $properties: { minPassager: ~ } # ]
         tags: [ 'api_platform.filter' ]
+
+    app.filter.profile.pilote:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { pilote.firstName: 'iword_start' } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.profile.eleve:
+        parent: 'api_platform.doctrine.orm.boolean_filter'
+        arguments:
+            $properties:  {isEleve: ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.profile.professionnel:
+        parent: 'api_platform.doctrine.orm.boolean_filter'
+        arguments:
+            $properties:  {isPro: ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.profile.instructeur:
+        parent: 'api_platform.doctrine.orm.boolean_filter'
+        arguments:
+            $properties:  {isInstructeur: ~ } # ]
+        tags: [ 'api_platform.filter' ]

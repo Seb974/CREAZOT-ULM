@@ -33,6 +33,7 @@ import origineResourceProps from "./origine";
 import contactResourceProps from "./contact";
 import cadeauResourceProps from "./cadeau";
 import combinaisonResourceProps from "./combinaison";
+import profileResourceProps from "./profile";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -138,6 +139,7 @@ const AdminWithOIDC = () => {
       <ResourceGuesser name="origines" {...origineResourceProps}/>
       <ResourceGuesser name="entretiens" {...entretienResourceProps}/>
       <ResourceGuesser name="users" {...userResourceProps}/>
+      <ResourceGuesser name="profil_pilotes" {...profileResourceProps}/>
       <ResourceGuesser name="reservations" {...reservationResourceProps}/>
     </AdminAdapter>
   );
