@@ -133,6 +133,7 @@ const AdminWithOIDC = () => {
       <ResourceGuesser name="aeronefs" {...aeronefResourceProps}/>
       <ResourceGuesser name="options"/>
       <ResourceGuesser name="natures"/>
+      <ResourceGuesser name="qualifications"/>
       <ResourceGuesser name="combinaisons" {...combinaisonResourceProps}/>
       <ResourceGuesser name="cadeaux" {...cadeauResourceProps}/>
       <ResourceGuesser name="contacts" {...contactResourceProps}/>

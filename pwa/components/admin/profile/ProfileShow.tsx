@@ -1,4 +1,4 @@
-import { Show, SimpleShowLayout, BooleanField, FunctionField } from 'react-admin';
+import { Show, SimpleShowLayout, ArrayField, FunctionField, Datagrid, TextField } from 'react-admin';
 import { isDefined } from '../../../app/lib/utils';
 
 export const ProfileShow = () => (
@@ -11,9 +11,11 @@ export const ProfileShow = () => (
                     record.pilote.firstName.charAt(0).toUpperCase() + record.pilote.firstName.slice(1) : ''
                 }
             />
-            <BooleanField source="isEleve" label="Pilote en formation"/>
-            <BooleanField source="isPro" label="Pilote professionnel"/>
-            <BooleanField source="isInstructeur" label="Pilote instructeur"/>
+            <ArrayField source="qualifications" label="Qualifications">
+                <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {display: 'none'}}} className="text-xs italic">
+                    <TextField source="name" label=""/>
+                </Datagrid>
+            </ArrayField>
         </SimpleShowLayout>
     </Show>
 )

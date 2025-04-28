@@ -45,12 +45,14 @@ export const ProfilesList: NextPage<Props> = ({ data, hubURL, page }) => {
 
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
 
-  const getPilotStatus = ({ isEleve, isPro, isInstructeur }) => {
-      return isInstructeur ? <span className="text-red-600">{'Instructeur'}</span> : 
-             isPro ? <span className="text-amber-600">{'Professionnel'}</span> : 
-             isEleve ? <span className="text-sky-600">{'En formation'}</span> : 
-             <span className="text-lime-600">{'Pilote de loisir'}</span>;
-  };
+  // const getPilotStatus = ({ isEleve, isPro, isInstructeur }) => {
+  //     return isInstructeur ? <span className="text-red-600">{'Instructeur'}</span> : 
+  //            isPro ? <span className="text-amber-600">{'Professionnel'}</span> : 
+  //            isEleve ? <span className="text-sky-600">{'En formation'}</span> : 
+  //            <span className="text-lime-600">{'Pilote de loisir'}</span>;
+  // };
+
+  const getPilotStatus = ({ qualifications }) => <span className="text-sm italic">{ qualifications.map((q, i) => q.nom + (i < (qualifications.length - 1) ? ' - ' : ' ')) }</span>
 
   return (
     <List resource="profil_pilotes" actions={<ListActions/>} filters={ filters }>
@@ -69,9 +71,11 @@ export const ProfilesList: NextPage<Props> = ({ data, hubURL, page }) => {
                     record.pilote.firstName.charAt(0).toUpperCase() + record.pilote.firstName.slice(1) : ''
                   }
                 />
-                <BooleanField source="isEleve" label="En formation" textAlign="center"/>
-                <BooleanField source="isPro" label="Professionnel" textAlign="center"/>
-                <BooleanField source="isInstructeur" label="Instructeur" textAlign="center"/>
+                <FunctionField
+                  label="Qualifications"
+                  source="qualifications"
+                  render={(record) => <span className="text-sm italic">{ record.qualifications.map((q, i) => q.nom + (i < (record.qualifications.length - 1) ? ' - ' : ' ')) }</span>}
+                />
                 <p className="text-right">
                     <ShowButton />
                     <EditButton />

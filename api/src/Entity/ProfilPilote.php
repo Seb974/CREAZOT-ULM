@@ -73,17 +73,17 @@ class ProfilPilote
     #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
     private ?User $pilote = null;
 
-    #[ORM\Column(nullable: true)]
+    /**
+     * @var Collection<int, Qualification>
+     */
+    #[ORM\ManyToMany(targetEntity: Qualification::class)]
     #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
-    private ?bool $isEleve = null;
+    private Collection $qualifications;
 
-    #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
-    private ?bool $isPro = null;
-
-    #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
-    private ?bool $isInstructeur = null;
+    public function __construct()
+    {
+        $this->qualifications = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -102,38 +102,26 @@ class ProfilPilote
         return $this;
     }
 
-    public function getIsEleve(): ?bool
+    /**
+     * @return Collection<int, Qualification>
+     */
+    public function getQualifications(): Collection
     {
-        return $this->isEleve;
+        return $this->qualifications;
     }
 
-    public function setIsEleve(?bool $isEleve): static
+    public function addQualification(Qualification $qualification): static
     {
-        $this->isEleve = $isEleve;
+        if (!$this->qualifications->contains($qualification)) {
+            $this->qualifications->add($qualification);
+        }
 
         return $this;
     }
 
-    public function getIsPro(): ?bool
+    public function removeQualification(Qualification $qualification): static
     {
-        return $this->isPro;
-    }
-
-    public function setIsPro(?bool $isPro): static
-    {
-        $this->isPro = $isPro;
-
-        return $this;
-    }
-
-    public function getIsInstructeur(): ?bool
-    {
-        return $this->isInstructeur;
-    }
-
-    public function setIsInstructeur(?bool $isInstructeur): static
-    {
-        $this->isInstructeur = $isInstructeur;
+        $this->qualifications->removeElement($qualification);
 
         return $this;
     }
