@@ -11,15 +11,18 @@ import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
 import { useRedirect, useNotify, useCreate } from 'react-admin';
 import { getCircuitDuration, getTotalPrice, getRealDuration, getCircuitPrice, isDefined } from '../../../app/lib/utils';
+import { EncadrantForm } from './Form/EncadrantForm';
 
 export const PrestationForm = () => {
 
   const notify = useNotify();
   const redirect = useRedirect();
   const [create] = useCreate();
+  const [encadrants, setEncadrants] = useState([]);
   const [date, setDate] = useState(new Date((new Date()).setHours(12, 0, 0)));
   const [aircrafts, setAircrafts] = useState([]);
   const [selectedPilot, setSelectedPilot] = useState("");
+  const [selectedEncadrant, setSelectedEncadrant] = useState("");
   const [selectedAircraft, setSelectedAircraft] = useState("");
   const [selectedCircuits, setSelectedCircuits] = useState([]);
   const [selectedFlightTime, setSelectedFlightTime] = useState(0);
@@ -31,6 +34,7 @@ export const PrestationForm = () => {
       const prestation = {
         aeronef: selectedAircraft.id,
         pilote: isDefined(selectedPilot) && isObject(selectedPilot) ? (selectedPilot['@id'] || selectedPilot.id) : selectedPilot,
+        encadrant: isDefined(selectedEncadrant) && isObject(selectedEncadrant) ? (selectedEncadrant['@id'] || selectedEncadrant.id) : selectedEncadrant,
         horametreDepart: selectedAircraft.horametre,
         horametreFin: typeof selectedFlightTime === 'string' ? parseFloat(selectedFlightTime.replace(',','.')) : selectedFlightTime,
         duree: getRealDuration(selectedFlightTime, selectedAircraft),
@@ -47,6 +51,7 @@ export const PrestationForm = () => {
         date,
         remarques
       };
+      console.log(prestation);
       try {
           create('prestations', {data: prestation});
           notify('Les vols ont bien été enregistrés.', { type: 'info' });
@@ -81,6 +86,7 @@ export const PrestationForm = () => {
             <PilotForm 
                 selectedPilot={ selectedPilot } 
                 setSelectedPilot={ setSelectedPilot }
+                setEncadrants={ setEncadrants }
             />
             <AircraftForm 
                 selectedAircraft={ selectedAircraft }
@@ -93,6 +99,7 @@ export const PrestationForm = () => {
                 setSelectedCircuits={ setSelectedCircuits }
                 selectedAircraft={ selectedAircraft }
                 selectedFlightTime={ selectedFlightTime }
+                selectedPilot={ selectedPilot }
             />
             <FlightTimeForm
                 aircrafts={ aircrafts }
@@ -100,6 +107,14 @@ export const PrestationForm = () => {
                 selectedCircuits={ selectedCircuits }
                 selectedFlightTime={ selectedFlightTime }
                 setSelectedFlightTime={ setSelectedFlightTime }
+            />
+            <EncadrantForm
+                selectedPilot={ selectedPilot } 
+                encadrants={ encadrants }
+                selectedEncadrant={ selectedEncadrant }
+                setSelectedEncadrant={ setSelectedEncadrant }
+                selectedCircuits={ selectedCircuits }
+                autoSelect={ true }
             />
             <div className="mt-7">
                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">

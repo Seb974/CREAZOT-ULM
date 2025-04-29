@@ -5,15 +5,16 @@ import { useDataProvider } from "react-admin";
 import { OneFlightForm } from "./OneFlightForm";
 import { Button } from '../../../common/ui/button';
 import AddIcon from '@mui/icons-material/Add';
-import { getCircuitPrice } from '../../../../app/lib/utils';
+import { getCircuitPrice, isDefined, isDefinedAndNotVoid } from '../../../../app/lib/utils';
 
-export const FlightForm = ({ selectedCircuits, setSelectedCircuits, selectedAircraft, selectedFlightTime }) => {
+export const FlightForm = ({ selectedCircuits, setSelectedCircuits, selectedAircraft, selectedFlightTime, selectedPilot }) => {
 
   const defaultOption = {id: 0, prix: 0};
   const dataProvider = useDataProvider();
 
   const [circuits, setCircuits] = useState([]);
   const [options, setOptions] = useState([]);
+  const [availableCircuits, setAvailableCircuits] = useState([]);
   const [disableOption, setDisableOption] = useState(false);
   const [disableAdd, setDisableAdd] = useState(false);
   
@@ -23,8 +24,13 @@ export const FlightForm = ({ selectedCircuits, setSelectedCircuits, selectedAirc
   }, []);
 
   useEffect(() => {
+    if (isDefinedAndNotVoid(circuits) && isDefined(selectedPilot) && isDefined(selectedPilot.profil))
+      getAvailableCircuits(circuits, selectedPilot.profil.qualifications);
+  }, [circuits, selectedPilot]);
+
+  useEffect(() => {
     const circuitWithNoFixedPrice = selectedCircuits.find(c => !c.circuit.prixFixe);
-    if (circuitWithNoFixedPrice !== undefined && circuitWithNoFixedPrice !== null) {
+    if (isDefined(circuitWithNoFixedPrice)) {
         setDisableOption(false);
         setDisableAdd(true);
     } else {
@@ -36,31 +42,46 @@ export const FlightForm = ({ selectedCircuits, setSelectedCircuits, selectedAirc
   const getCircuits = () => {
     dataProvider
         .getList('circuits', {})
-        .then(({ data }) => {
-            setCircuits(data);
-            if (data.length > 0)
-                setSelectedCircuits([{ ident: new Date().valueOf(), circuit: data[0], quantite: 1, details: data[0].nom, duree: data[0].duree, option: defaultOption, prix: getCircuitPrice(data[0], defaultOption, selectedFlightTime, selectedAircraft) }])
-            else
-                setDisableAdd(true);
-    });
+        .then(({ data }) => setCircuits(data));
   };
 
   const getOptions = () => {
     dataProvider
         .getList('options', {})
-        .then(({ data }) => {
-            setOptions(data);
-    });
+        .then(({ data }) => setOptions(data));
+  };
+
+  const getAvailableCircuits = (circuits, userQualifications) => {
+    if (isDefinedAndNotVoid(userQualifications)) {
+      const availables = circuits.filter(circuit =>
+        Array.isArray(circuit.qualifications) &&
+        circuit.qualifications.map(q => q['@id']).some(q => (userQualifications.map(q => q['@id']) || []).includes(q))
+      );
+      setAvailableCircuits(availables);
+      if (availables.length > 0)
+        setSelectedCircuits([{ ident: new Date().valueOf(), circuit: availables[0], quantite: 1, details: availables[0].nom, duree: availables[0].duree, option: defaultOption, prix: getCircuitPrice(availables[0], defaultOption, selectedFlightTime, selectedAircraft) }])
+      else
+        setDisableAdd(true);
+      return ;
+    } else {
+      const voids = circuits.filter(c => !isDefinedAndNotVoid(c.qualifications));
+      setAvailableCircuits(voids);
+      if (voids.length > 0)
+        setSelectedCircuits([{ ident: new Date().valueOf(), circuit: voids[0], quantite: 1, details: voids[0].nom, duree: voids[0].duree, option: defaultOption, prix: getCircuitPrice(voids[0], defaultOption, selectedFlightTime, selectedAircraft) }])
+      else
+        setDisableAdd(true);
+      return ;
+    }
   };
 
   const handleAdd = (e) => {
     e.preventDefault();
     if (!disableAdd)
-        setSelectedCircuits([...selectedCircuits, { ident: new Date().valueOf(), circuit: circuits[0], quantite: 1, details: circuits[0].nom, option: defaultOption, prix: getCircuitPrice(circuits[0], defaultOption, selectedFlightTime, selectedAircraft) }])
+        setSelectedCircuits([...selectedCircuits, { ident: new Date().valueOf(), circuit: availableCircuits[0], quantite: 1, details: availableCircuits[0].nom, option: defaultOption, prix: getCircuitPrice(availableCircuits[0], defaultOption, selectedFlightTime, selectedAircraft) }])
   };
 
   const handleCircuitChange = (selectedCircuit, e) => {
-    const newCircuit = circuits.find(c => `${c.id}` === `${e.target.value}`) || circuits[0];
+    const newCircuit = circuits.find(c => `${c.id}` === `${e.target.value}`) || availableCircuits[0];
     const newSelection = selectedCircuits.map(s => {
       const newOption = newCircuit.avecOptions ? s.option : defaultOption;
       return s.ident !== selectedCircuit.ident ? s : 
@@ -105,7 +126,7 @@ export const FlightForm = ({ selectedCircuits, setSelectedCircuits, selectedAirc
                 return( 
                     <OneFlightForm
                       key={ selectedCircuit.ident }
-                      circuits={ circuits }
+                      circuits={ availableCircuits }
                       options={ options }
                       selectedCircuit={ selectedCircuit }
                       selectedCircuits={ selectedCircuits }

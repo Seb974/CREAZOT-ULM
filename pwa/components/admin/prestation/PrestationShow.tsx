@@ -32,11 +32,18 @@ export const PrestationShow = () => {
                 <DateField source="date" label="Date"/>
                 <TextField source="aeronef.immatriculation" label="Aéronef"/>
                 <FunctionField
-                    label="Prénom"
+                    label="Pilote"
                     source="pilote.firstName"
                     render={(record) => isDefined(record.pilote) && isDefined(record.pilote.firstName) ?
                         record.pilote.firstName.charAt(0).toUpperCase() + record.pilote.firstName.slice(1) : ''
-                    }
+                    }                     
+                />
+                <FunctionField
+                    label="Encadrant"
+                    source="encadrant.firstName"
+                    render={(record) => isDefined(record.encadrant) && isDefined(record.encadrant.firstName) ?
+                        record.encadrant.firstName.charAt(0).toUpperCase() + record.encadrant.firstName.slice(1) : ''
+                    }                     
                 />
                 <FunctionField
                     source="horametreDepart"

@@ -6,7 +6,7 @@ import { useDataProvider } from "react-admin";
 import { isDefined } from "../../../../app/lib/utils";
 
 // @ts-ignore
-export const PilotForm: React.FC = ({ selectedPilot, setSelectedPilot, autoSelect = true}) => {
+export const PilotForm: React.FC = ({ selectedPilot, setSelectedPilot, setEncadrants, autoSelect = true}) => {
 
   const dataProvider = useDataProvider();
   const changeTextColor = () => setIsPilotSelected(true);
@@ -14,26 +14,20 @@ export const PilotForm: React.FC = ({ selectedPilot, setSelectedPilot, autoSelec
   const [pilots, setPilots] = useState([]);
   const [isPilotSelected, setIsPilotSelected] = useState<boolean>(false);
 
-  useEffect(() => {
-    dataProvider
-        .getList('users', {})
-        .then(({ data }) => {
-            setPilots(data);
-            if (autoSelect)
-              setSelectedPilot(data[0]);
-        })
-  }, []);
+  useEffect(() => getProfiles(), []);
 
-  useEffect(() => {
+  const getProfiles = () => {
     dataProvider
-        .getList('profil_pilotes', {})
-        .then(({ data }) => {
-            console.log(data);
-            // setPilots(data);
-            // if (autoSelect)
-            //   setSelectedPilot(data[0]);
-        })
-  }, []);
+      .getList('profil_pilotes', {})
+      .then(({ data }) => {
+          const pilots = data.map(({pilote, ...user}) => ({...pilote, profil: user}));
+          const encadrants = pilots.filter(p => isDefined(p.profil.qualifications.find(q => (isDefined(q.encadrant) && q.encadrant))));
+          setPilots(pilots);
+          setEncadrants(encadrants);
+          if (autoSelect)
+            setSelectedPilot(pilots[0]);
+      })
+  };
 
   return (
         <div className="my-2">
@@ -58,7 +52,7 @@ export const PilotForm: React.FC = ({ selectedPilot, setSelectedPilot, autoSelec
               <option value="" disabled className="text-body dark:text-bodydark">
                 Choisissez un pilote
               </option>
-              { pilots.map(pilot => <option key={ pilot.id } value={ pilot['@id'] } className="text-body dark:text-bodydark">{ pilot.firstName }</option>)}
+              { pilots.map(pilot => <option key={ pilot.id } value={ pilot['@id'] } className="text-body dark:text-bodydark">{ pilot.firstName.charAt(0).toUpperCase() + pilot.firstName.slice(1) }</option>)}
             </select>
           </div>
         </div>

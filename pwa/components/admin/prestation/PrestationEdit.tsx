@@ -3,11 +3,12 @@ import { isDefined } from "../../../app/lib/utils";
 
 export const PrestationEdit = () => {
 
-    const transform = ({date, aeronef, pilote, vols, ...data}) => {
+    const transform = ({date, aeronef, pilote, encadrant, vols, ...data}) => {
         const newData = ({
           ...data, 
           date: new Date((new Date(date)).setHours(12, 0, 0)),
           pilote: isDefined(pilote) && isDefined(pilote['@id']) ? pilote['@id'] : null,
+          encadrant: isDefined(encadrant) && isDefined(encadrant['@id']) ? encadrant['@id'] : null,
           aeronef: isDefined(aeronef) && isDefined(aeronef['@id']) ? aeronef['@id'] : null,
           vols: vols.map(vol => ({
               ...vol,
@@ -25,6 +26,7 @@ export const PrestationEdit = () => {
             <DateInput source="date" />
             <ReferenceInput reference="aeronefs" source="aeronef.@id" label="Aéronef" />
             <ReferenceInput reference="users" source="pilote.@id" label="Pilote" />
+            <ReferenceInput reference="users" source="encadrant.@id" label="Encadrant" />
             <ArrayInput source="vols">
                 <SimpleFormIterator inline disableReordering>
                     <ReferenceInput reference="circuits" source="circuit.@id" label="Circuit" />

@@ -110,6 +110,10 @@ class Prestation
     #[Groups(groups: ['Prestation:write', 'Prestation:read'])]
     private ?string $remarques = null;
 
+    #[ORM\ManyToOne]
+    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read'])]
+    private ?User $encadrant = null;
+
     public function __construct()
     {
         $this->vols = new ArrayCollection();
@@ -242,6 +246,18 @@ class Prestation
     public function setRemarques(?string $remarques): static
     {
         $this->remarques = $remarques;
+
+        return $this;
+    }
+
+    public function getEncadrant(): ?User
+    {
+        return $this->encadrant;
+    }
+
+    public function setEncadrant(?User $encadrant): static
+    {
+        $this->encadrant = $encadrant;
 
         return $this;
     }

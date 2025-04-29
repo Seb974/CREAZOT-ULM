@@ -117,12 +117,16 @@ const CustomDatagrid = () => {
           <DateField source="date" sortable={ true }/>
           <TextField source="aeronef.immatriculation" label="Aéronef" sortable={ true }/>
           <FunctionField
-            label="Prénom"
+            label="Pilote(s)"
             source="pilote.firstName"
             sortable={ true }
-            render={(record) => isDefined(record.pilote) && isDefined(record.pilote.firstName) ?
-              record.pilote.firstName.charAt(0).toUpperCase() + record.pilote.firstName.slice(1) : ''
-            }
+            render={(record) => <span>
+              {isDefined(record.pilote) && isDefined(record.pilote.firstName) ?
+                  record.pilote.firstName.charAt(0).toUpperCase() + record.pilote.firstName.slice(1) : ''}
+              {isDefined(record.encadrant) && isDefined(record.encadrant.firstName) ?
+                  <span className="text-gray-500 italic text-xs"><br/>{ record.encadrant.firstName.charAt(0).toUpperCase() + record.encadrant.firstName.slice(1) }</span> : ''}
+              </span>
+}
           />
           <FunctionField
               source="horametreDepart"
@@ -192,7 +196,15 @@ export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
         >
             { isSmall ? 
                 <SimpleList
-                  primaryText={ record => record.aeronef.immatriculation + ' | ' +  (isDefined(record.pilote) && isDefined(record.pilote.firstName) ? record.pilote.firstName.charAt(0).toUpperCase() + record.pilote.firstName.slice(1) : '') }
+                  primaryText={ 
+                    record => <>
+                      { record.aeronef.immatriculation + 
+                        ' | ' +  
+                        (isDefined(record.pilote) && isDefined(record.pilote.firstName) ? record.pilote.firstName.charAt(0).toUpperCase() + record.pilote.firstName.slice(1) : '')
+                      } 
+                      { (<span className="text-gray-500 italic text-sm">{isDefined(record.encadrant) && isDefined(record.encadrant.firstName) ? ' - ' + record.encadrant.firstName.charAt(0).toUpperCase() + record.encadrant.firstName.slice(1) : ''}</span>) }
+                    </>
+                  }
                   // @ts-ignore
                   secondaryText={ record => `${ (new Date(record.date)).toLocaleDateString("fr-FR", options) } `}
                   tertiaryText={ record => getFormattedDuration(record) }
