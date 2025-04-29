@@ -41,10 +41,6 @@ use Symfony\Component\Uid\Uuid;
             uriTemplate: '/users/{id}{._format}',
             security: 'is_granted("OIDC_ADMIN") or object === user'
         ),
-        // new Get(
-        //     uriTemplate: '/users/{id}{._format}',
-        //     security: 'object === user'
-        // ),
     ],
     normalizationContext: [
         AbstractNormalizer::GROUPS => ['User:read'],

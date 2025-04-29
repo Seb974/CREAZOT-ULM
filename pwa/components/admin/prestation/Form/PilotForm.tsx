@@ -22,7 +22,17 @@ export const PilotForm: React.FC = ({ selectedPilot, setSelectedPilot, autoSelec
             if (autoSelect)
               setSelectedPilot(data[0]);
         })
+  }, []);
 
+  useEffect(() => {
+    dataProvider
+        .getList('profil_pilotes', {})
+        .then(({ data }) => {
+            console.log(data);
+            // setPilots(data);
+            // if (autoSelect)
+            //   setSelectedPilot(data[0]);
+        })
   }, []);
 
   return (

@@ -26,7 +26,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
         new GetCollection(
             itemUriTemplate: '/profil_pilotes/{id}{._format}',
             paginationClientItemsPerPage: true,
-            security: 'is_granted("OIDC_ADMIN") or object.pilote == user',
+            security: 'is_granted("OIDC_USER")',
             filters: [
                 'app.filter.profile.pilote',
                 'app.filter.profile.eleve',

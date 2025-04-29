@@ -33,21 +33,6 @@ export interface Props {
     hubURL: string | null;
     page: number;
   }
-  
-  const ListActions = () => (
-    <TopToolbar>
-        <FilterButton/> 
-        <CreateButton/>
-        <ExportButton/>
-    </TopToolbar>
-  );
-  
-  const filters = [
-    <TextInput source="aeronef.immatriculation" key="Aeronef" label="Aéronef"/>,
-    <TextInput source="pilote.firstName" key="Pilote" label="Pilote" />,
-    <DateInput source="date[after]"  key="DateMin" label="Date Min"/>,
-    <DateInput source="date[before]"  key="DateMax" label="Date Max"/>,
-  ];
 
   const formatHeure = (duree) => {
     const heures = Math.floor(duree);
@@ -176,12 +161,34 @@ export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
     const options = { year: "numeric", month: "numeric", day: "numeric" };
     const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
 
+    const ListActions = () => (
+      <TopToolbar>
+          <FilterButton/> 
+          <CreateButton/>
+          <ExportButton/>
+      </TopToolbar>
+    );
+    
+    const adminFilters = [
+      <TextInput source="pilote.firstName" key="Pilote" label="Pilote" />,
+      <TextInput source="aeronef.immatriculation" key="Aeronef" label="Aéronef"/>,
+      <DateInput source="date[after]"  key="DateMin" label="Date Min"/>,
+      <DateInput source="date[before]"  key="DateMax" label="Date Max"/>,
+    ];
+
+    const userFilters = [
+      <TextInput source="pilote.firstName" key="Pilote" label="Pilote" />,
+      <TextInput source="aeronef.immatriculation" key="Aeronef" label="Aéronef"/>,
+      <DateInput source="date[after]"  key="DateMin" label="Date Min"/>,
+      <DateInput source="date[before]"  key="DateMax" label="Date Max"/>,
+    ];
+
     return (
         <List
             resource="prestations"
+            actions={<ListActions/>} 
             // @ts-ignore
-            actions={isDefined(session) && isDefined(user) && user.roles.find(r => r === "admin") ? <ListActions/> : null} 
-            filters={ filters }
+            filters={ isDefined(session) && isDefined(user) && user.roles.find(r => r === "admin") ? adminFilters : userFilters }
         >
             { isSmall ? 
                 <SimpleList
