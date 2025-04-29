@@ -34,6 +34,7 @@ import contactResourceProps from "./contact";
 import cadeauResourceProps from "./cadeau";
 import combinaisonResourceProps from "./combinaison";
 import profileResourceProps from "./profile";
+import qualificationResourceProps from "./qualification";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -133,7 +134,7 @@ const AdminWithOIDC = () => {
       <ResourceGuesser name="aeronefs" {...aeronefResourceProps}/>
       <ResourceGuesser name="options"/>
       <ResourceGuesser name="natures"/>
-      <ResourceGuesser name="qualifications"/>
+      <ResourceGuesser name="qualifications" {...qualificationResourceProps}/>
       <ResourceGuesser name="combinaisons" {...combinaisonResourceProps}/>
       <ResourceGuesser name="cadeaux" {...cadeauResourceProps}/>
       <ResourceGuesser name="contacts" {...contactResourceProps}/>

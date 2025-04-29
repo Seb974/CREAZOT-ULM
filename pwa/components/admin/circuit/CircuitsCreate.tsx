@@ -5,6 +5,8 @@ import {
   TextInput,
   NumberInput,
   BooleanInput,
+  ArrayInput,
+  SimpleFormIterator
 } from "react-admin";
 import { Create } from "react-admin";
 import { useWatch } from "react-hook-form";
@@ -26,9 +28,15 @@ export const CircuitsCreate = () => {
           <NumberInput source="prix"/>
           <NumberInput source="cout"/>
           <DurationInput />
-          <ReferenceInput reference="natures" source="nature" /> 
-          <BooleanInput source="prixFixe" label="Prix indépendant de la durée" />
-          <BooleanInput source="avecOptions" label="Options disponibles"/>
+          <ReferenceInput reference="natures" source="nature" />
+          <ArrayInput source="qualifications" label="Qualification(s) requise(s) du pilote">
+            <SimpleFormIterator inline disableReordering>
+                <ReferenceInput reference="qualifications" source="@id" label="Qualifications" />
+            </SimpleFormIterator>
+          </ArrayInput>
+          <BooleanInput source="needsEncadrant" label="Pilote encadrant requis" defaultValue={ false }/>
+          <BooleanInput source="prixFixe" label="Tarif non lié à la durée" defaultValue={ false }/>
+          <BooleanInput source="avecOptions" label="Options disponibles" defaultValue={ false }/>
         </SimpleForm>
       </Create>
   )

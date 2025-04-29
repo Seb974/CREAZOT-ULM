@@ -6,6 +6,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\CircuitRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\Delete;
@@ -88,6 +90,22 @@ class Circuit
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?bool $avecOptions = null;
+
+    /**
+     * @var Collection<int, Qualification>
+     */
+    #[ORM\ManyToMany(targetEntity: Qualification::class)]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read'])]
+    private Collection $qualifications;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read'])]
+    private ?bool $needsEncadrant = null;
+
+    public function __construct()
+    {
+        $this->qualifications = new ArrayCollection();
+    }
 
     #[Groups(groups: ['Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
     public function getName(): ?string
@@ -192,6 +210,42 @@ class Circuit
     public function setAvecOptions(?bool $avecOptions): static
     {
         $this->avecOptions = $avecOptions;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Qualification>
+     */
+    public function getQualifications(): Collection
+    {
+        return $this->qualifications;
+    }
+
+    public function addQualification(Qualification $qualification): static
+    {
+        if (!$this->qualifications->contains($qualification)) {
+            $this->qualifications->add($qualification);
+        }
+
+        return $this;
+    }
+
+    public function removeQualification(Qualification $qualification): static
+    {
+        $this->qualifications->removeElement($qualification);
+
+        return $this;
+    }
+
+    public function isNeedsEncadrant(): ?bool
+    {
+        return $this->needsEncadrant;
+    }
+
+    public function setNeedsEncadrant(?bool $needsEncadrant): static
+    {
+        $this->needsEncadrant = $needsEncadrant;
 
         return $this;
     }

@@ -60,14 +60,26 @@ class Qualification
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read'])]
+    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read'])]
+    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read'])]
     private ?string $nom = null;
 
-    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read'])]
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read'])]
+    private ?bool $encadrant = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read'])]
+    private ?string $color = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read'])]
+    private ?string $slug = null;
+
+    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read'])]
     public function getName(): ?string
     {
         return $this->nom;
@@ -86,6 +98,42 @@ class Qualification
     public function setNom(?string $nom): static
     {
         $this->nom = $nom;
+
+        return $this;
+    }
+
+    public function isEncadrant(): ?bool
+    {
+        return $this->encadrant;
+    }
+
+    public function setEncadrant(?bool $encadrant): static
+    {
+        $this->encadrant = $encadrant;
+
+        return $this;
+    }
+
+    public function getColor(): ?string
+    {
+        return $this->color;
+    }
+
+    public function setColor(?string $color): static
+    {
+        $this->color = $color;
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(?string $slug): static
+    {
+        $this->slug = $slug;
 
         return $this;
     }
