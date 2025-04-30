@@ -96,11 +96,11 @@ class Circuit
      * @var Collection<int, Qualification>
      */
     #[ORM\ManyToMany(targetEntity: Qualification::class)]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private Collection $qualifications;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?bool $needsEncadrant = null;
 
     public function __construct()

@@ -51,7 +51,6 @@ export const PrestationForm = () => {
         date,
         remarques
       };
-      console.log(prestation);
       try {
           create('prestations', {data: prestation});
           notify('Les vols ont bien été enregistrés.', { type: 'info' });

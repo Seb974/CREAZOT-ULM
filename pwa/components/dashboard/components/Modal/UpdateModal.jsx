@@ -2,7 +2,7 @@ import 'flatpickr/dist/themes/material_red.css';
 import React, { useEffect, useState } from "react";
 import { useDataProvider } from "react-admin";
 import DoneIcon from '@mui/icons-material/Done';
-import { PilotForm } from "../../../admin/prestation/Form/PilotForm";
+import { ProfilPiloteForm } from '../../../admin/prestation/Form/ProfilPiloteForm';
 import { CircuitForm } from "../../../admin/prestation/Form/CircuitForm";
 import { AircraftForm } from "../../../admin/prestation/Form/AircraftForm";
 import { OptionForm } from "../../../admin/prestation/Form/OptionForm";
@@ -17,6 +17,8 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
     const defaultCadeau = {['@id']: 0, name: " "};
     const timeOptions = { hour: "2-digit", minute: "2-digit" };
     const dateOptions = { year: 'numeric', month: 'long', day: 'numeric'};
+    const [pilots, setPilots] = useState([]);
+    const [eligiblePilots, setEligiblePilots] = useState([]);
     const [aircrafts, setAircrafts] = useState([]);
     const [selectedPilot, setSelectedPilot] = useState("");
     const [selectedCircuit, setSelectedCircuit] = useState("");
@@ -29,14 +31,16 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
     const [selectedOriginContact, setSelectedOriginContact] = useState([]);
     const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, paid: false, upsell: false, debut: new Date((new Date()).setHours(8, 0, 0)), color: getRandomColor(), position: "-", cadeau: defaultCadeau['@id']});
 
+    useEffect(() => getProfiles(), []);
+
     useEffect(() => {
         if (!isDefinedAndNotVoid(validCadeaux))
-            getValidCadeaux()
+            getValidCadeaux();
     }, [consumer]);
 
     useEffect(() => {
-        if (toUpdate !== null) {
-            setSelectedPilot(toUpdate.pilote || "");
+        if (isDefined(toUpdate)) {
+            // setSelectedPilot(toUpdate.pilote || "");
             setSelectedCircuit(toUpdate.circuit || "");
             setSelectedOption(toUpdate.option || "");
             setSelectedAircraft(toUpdate.avion || "");
@@ -60,6 +64,42 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
         }
     }, [toUpdate]);
 
+    useEffect(() => {
+        if (isDefined(toUpdate) && isDefinedAndNotVoid(pilots) && isDefined(toUpdate.pilote) && selectedPilot === "") {
+            const currentPilot = pilots.find(p => p['@id'] === (typeof toUpdate.pilote === 'string' ? toUpdate.pilote : toUpdate.pilote['@id']));
+            if (isDefined(currentPilot))
+                setSelectedPilot(currentPilot);
+        }
+    }, [toUpdate, pilots])
+
+    useEffect(() => {
+        if (isDefined(selectedCircuit)) {
+        let pilotesEligibles = [];
+        if (isDefinedAndNotVoid(pilots)) {
+            const qualificationsRequises = selectedCircuit?.qualifications?.map(q => q['@id']) || [];
+            const needsEncadrant = selectedCircuit?.needsEncadrant;
+            pilotesEligibles = qualificationsRequises.length === 0
+            ? (needsEncadrant ? pilots.filter(({profil, ...p}) => isDefined(profil.qualifications.find(q => isDefined(q.encadrant) && q.encadrant))) : pilots)
+            : pilots.filter(({profil, ...p}) =>
+                Array.isArray(profil.qualifications) &&
+                profil.qualifications.map(q => q['@id']).some(q => qualificationsRequises.includes(q))
+            );
+        }
+        setEligiblePilots(pilotesEligibles);
+        if (!isDefined(selectedPilot) || selectedPilot === "" || !pilotesEligibles.some(p => p['@id'] === selectedPilot['@id'])) 
+            setSelectedPilot("");
+        }
+    }, [selectedCircuit, pilots]);
+    
+    const getProfiles = () => {
+        dataProvider
+            .getList('profil_pilotes', {})
+            .then(({ data }) => {
+                const pilots = data.map(({pilote, ...profil}) => ({...pilote, profil}));
+                setPilots(pilots);
+            });
+    };
+
     const onConsumerChange = e => setConsumer({...consumer, [e.target.name]: e.target.value});
 
     const onClose = () => setToUpdate(null);
@@ -74,7 +114,6 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                     .then(({ data }) => setValidCadeaux([...data, defaultCadeau]));
             }
         } catch (e) {
-            console.log(consumer);
             console.log(e);
         }
     };
@@ -320,9 +359,14 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                                         reservation={ toUpdate }
                                     /> 
                                     
-                                    <PilotForm 
+                                    <ProfilPiloteForm 
                                         selectedPilot={ selectedPilot } 
                                         setSelectedPilot={ setSelectedPilot }
+                                        pilots={ pilots }
+                                        setPilots={ setPilots }
+                                        eligiblePilots={ eligiblePilots }
+                                        setEligiblePilots={ setEligiblePilots }
+                                        selectedCircuit={ selectedCircuit }
                                         autoSelect={ false }
                                     />
                                     <AircraftForm 

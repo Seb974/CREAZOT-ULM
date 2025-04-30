@@ -60,26 +60,26 @@ class Qualification
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read'])]
+    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read'])]
+    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read'])]
+    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?bool $encadrant = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read'])]
+    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?string $color = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read'])]
+    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?string $slug = null;
 
-    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read'])]
+    #[Groups(groups: ['Qualification:write', 'Qualification:read', 'Profil_pilote:read', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     public function getName(): ?string
     {
         return $this->nom;
