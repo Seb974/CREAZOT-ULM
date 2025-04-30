@@ -59,6 +59,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
         AbstractNormalizer::GROUPS => ['Profil_pilote:write'],
     ],
     collectDenormalizationErrors: true,
+    paginationEnabled: false,
     mercure: true,
 )]
 class ProfilPilote

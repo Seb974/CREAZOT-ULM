@@ -1,18 +1,8 @@
 import { Show, SimpleShowLayout, TextField, DateField, NumberField, BooleanField, FunctionField, ArrayField, Datagrid } from 'react-admin';
 import { isDefined } from '../../../app/lib/utils';
+import { status } from "../../../app/lib/reservation";
 
 export const ReservationShow = () => {
-
-    const status = [
-        {id: "VALIDATED", name: "Validé"},
-        {id: "WAITING", name: "En attente de confirmation"},
-        {id: "WHEATER_REPORT", name:"Report météo"},
-        {id: "PASSENGER_REPORT", name: "Report client"},
-        {id: "INTERN_REPORT", name: "Report interne"},
-        {id: "WHEATER_CANCEL", name:"Annulation météo"},
-        {id: "PASSENGER_CANCEL", name: "Annulation client"},
-        {id: "INTERN_CANCEL", name: "Annulation interne"}
-      ];
 
     const getStatusLabel = ({statut, report}) => {
         const selectedStatus = status.find(s => s.id === statut);
@@ -36,7 +26,7 @@ export const ReservationShow = () => {
                 <TextField source="option.nom" label="Option"/>
                 <TextField source="cadeau.name" label="Bon cadeau"/>
                 <FunctionField
-                    label="Prénom"
+                    label="Pilote"
                     source="pilote.firstName"
                     render={(record) => isDefined(record.pilote) && isDefined(record.pilote.firstName) ?
                         record.pilote.firstName.charAt(0).toUpperCase() + record.pilote.firstName.slice(1) : ''

@@ -18,7 +18,7 @@ import {
 import { useWatch, useFormContext } from 'react-hook-form';
 import { getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { useEffect, useState } from "react";
-import { toast } from 'react-hot-toast';
+import { status } from "../../../app/lib/reservation";
 
 const QuantiteWatcher = ({ setSelectedQuantite }) => {
   const { control } = useFormContext();
@@ -41,17 +41,6 @@ export const ReservationsCreate = () => {
   const [combinaisons, setCombinaisons] = useState([]);
   const [enabledCombinaisons, setEnabledCOmbinaisons] = useState([]);
   const [selectedQuantite, setSelectedQuantite] = useState(1);
-
-  const status = [
-    {id: "VALIDATED", name: "Validé"},
-    {id: "WAITING", name: "En attente de confirmation"},
-    {id: "WHEATER_REPORT", name:"Report météo"},
-    {id: "PASSENGER_REPORT", name: "Report client"},
-    {id: "INTERN_REPORT", name: "Report interne"},
-    {id: "WHEATER_CANCEL", name:"Annulation météo"},
-    {id: "PASSENGER_CANCEL", name: "Annulation client"},
-    {id: "INTERN_CANCEL", name: "Annulation interne"}
-  ];
 
   useEffect(() => {
       getCircuits();

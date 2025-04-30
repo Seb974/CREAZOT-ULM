@@ -6,13 +6,49 @@ import {
   ReferenceInput, 
   SimpleForm, 
   TextInput,
-  NumberInput,
   BooleanInput,
   ArrayInput,
   SimpleFormIterator
 } from "react-admin";
+import { useWatch, useFormContext } from "react-hook-form";
 import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { status, positions } from "../../../app/lib/reservation";
 import { useEffect, useState } from "react";
+
+const FilteredPiloteInput = ({ pilotes, circuits }) => {
+  const circuitId = useWatch({ name: "circuit.@id" });
+  const { setValue, getValues } = useFormContext();
+
+  const selectedCircuit = circuits.find(c => c['@id'] === circuitId);
+  const qualificationsRequises = selectedCircuit?.qualifications?.map(q => q['@id']) || [];
+  const needsEncadrant = selectedCircuit?.needsEncadrant;
+
+  const pilotesEligibles = qualificationsRequises.length === 0
+    ? (needsEncadrant ? pilotes.filter(({profil, ...p}) => isDefined(profil.qualifications.find(q => isDefined(q.encadrant) && q.encadrant))) : pilotes)
+    : pilotes.filter(({profil, ...p}) =>
+        Array.isArray(profil.qualifications) &&
+        profil.qualifications.map(q => q['@id']).some(q => qualificationsRequises.includes(q))
+  );
+
+  useEffect(() => {
+    const selectedPiloteId = getValues("pilote.@id");
+    const stillEligible = pilotesEligibles.some(p => p['@id'] === selectedPiloteId);
+    if (!stillEligible) {
+      setValue("pilote.@id", null);
+    }
+  }, [circuitId]);
+  
+  return (
+    <SelectInput
+      source="pilote.@id"
+      label="Pilote"
+      choices={ pilotesEligibles }
+      optionText={(r) => isDefined(r) && isDefined(r.firstName) ? r.firstName.charAt(0).toUpperCase() + r.firstName.slice(1) : ' '}
+      optionValue="@id"
+      // emptyText="Aucun pilote éligible"
+    />
+  );
+};
 
 export const ReservationsEdit = () => {
 
@@ -20,30 +56,13 @@ export const ReservationsEdit = () => {
   const [circuits, setCircuits] = useState([]);
   const [options, setOptions] = useState([]);
   const [origines, setOrigines] = useState([]);
-  
-  const status = [
-    {id: "VALIDATED", name: "Validé"},
-    {id: "WAITING", name: "En attente de confirmation"},
-    {id: "WHEATER_REPORT", name:"Report météo"},
-    {id: "PASSENGER_REPORT", name: "Report client"},
-    {id: "INTERN_REPORT", name: "Report interne"},
-    {id: "WHEATER_CANCEL", name:"Annulation météo"},
-    {id: "PASSENGER_CANCEL", name: "Annulation client"},
-    {id: "INTERN_CANCEL", name: "Annulation interne"}
-  ];
-
-  const positions = [
-    {id: "Leader", name: "Leader"},
-    {id: "2", name: "2"},
-    {id: "3", name:"3"},
-    {id: "4", name: "4"},
-    {id: "-", name: "-"}
-  ];
+  const [pilotes, setPilotes] = useState([]);
 
   useEffect(() => {
     getCircuits();
     getOptions();
     getOrigines();
+    getProfilPilotes();
   }, []);
 
   const getCircuits = () => {
@@ -64,7 +83,23 @@ export const ReservationsEdit = () => {
         .then(({ data }) => setOrigines(data));
   };
 
+  const getProfilPilotes = () => {
+    dataProvider
+        .getList("profil_pilotes", {})
+        .then(({ data }) => {
+          const piloteProfils = data
+            .filter(p => isDefined(p.pilote))
+            .map(({pilote, ...profil}) => ({
+              ...pilote, 
+              profil: {...profil, qualifications: isDefinedAndNotVoid(profil.qualifications) ? profil.qualifications : []},
+              encadrant: !!profil.qualifications?.find(q => q.encadrant)
+            }))
+          setPilotes(piloteProfils)
+        });
+  };
+
   const transform = ({circuit, option, debut, avion, pilote, contact, origine, cadeau, paid, ...data}) => {
+    const selectedPilote = isDefined(pilote) && isDefined(pilote['@id']) ? pilote['@id'] : null;
     const selectedCircuit = isDefined(circuit) && isDefined(circuit['@id']) ? circuits.find(c => c['@id'] === circuit['@id']) : null;
     const selectedOption = isDefined(option) && isDefined(option['@id']) ? options.find(c => c['@id'] === option['@id']) : null;
     const seletedContacts = isDefinedAndNotVoid(contact) ? contact.map(c => c['@id']) : [];
@@ -76,12 +111,12 @@ export const ReservationsEdit = () => {
         circuit: isDefined(circuit) ? circuit['@id'] : null,
         avion: isDefined(avion) ? avion['@id'] : null,
         option: isDefined(option) ? option['@id'] : null,
-        pilote: isDefined(pilote) ? pilote['@id'] : null,
+        pilote: selectedPilote,
         paid: isDefined(formattedCadeau) ? true : paid,
         origine: isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : [],
         cadeau: formattedCadeau,
         contact: seletedContacts,
-    }
+    };
   };
 
   const getTotalPrice = (circuit, option, origines) => {
@@ -107,10 +142,10 @@ export const ReservationsEdit = () => {
           <ReferenceInput reference="cadeaux" source="cadeau.@id" label="Bon cadeau" filter={{ "fin['after']": new Date()  }}/>
           <ReferenceInput reference="circuits" source="circuit.@id" label="Circuit" />
           <ReferenceInput reference="options" source="option.@id" label="Option" />
-          <ReferenceInput reference="users" source="pilote.@id" label="Pilote" />
+          <FilteredPiloteInput pilotes={ pilotes } circuits={ circuits } />
           <ReferenceInput reference="aeronefs" source="avion.@id" label="Aéronef" />
           <SelectInput source="position" choices={ positions } defaultValue="-"/>
-          <SelectInput source="statut" choices={ status} />
+          <SelectInput source="statut" choices={ status } />
           <TextInput source="color" label="Code couleur"/>
           <ArrayInput source="contact" label="Contact initial">
             <SimpleFormIterator inline disableReordering>

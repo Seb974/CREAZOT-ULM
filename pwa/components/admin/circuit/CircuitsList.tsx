@@ -35,7 +35,7 @@ export const CircuitsList: NextPage<Props> = ({ data, hubURL, page }) => {
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
 
   return (
-    <List resource="circuits" actions={<ListActions/>}>
+    <List resource="circuits" actions={<ListActions/>} pagination={false}>
         { isSmall ? 
             <SimpleList
               primaryText={ record => record.code + ' - ' +  record.nom }

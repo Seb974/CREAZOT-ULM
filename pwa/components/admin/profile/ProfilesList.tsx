@@ -57,7 +57,7 @@ export const ProfilesList: NextPage<Props> = ({ data, hubURL, page }) => {
   const getPilotStatus = ({ qualifications }) => <span className="text-right flex flex-end">{ qualifications.map((q, i) => <Chip key={i} label={q.slug} size="small" sx={ getShipStyle(q) }/>) }</span>
 
   return (
-    <List resource="profil_pilotes" actions={<ListActions/>} filters={ filters }>
+    <List resource="profil_pilotes" actions={<ListActions/>} filters={ filters } pagination={false}>
         { isSmall ? 
             <SimpleList
               primaryText={ record => isDefined(record.pilote) && isDefined(record.pilote.firstName) ? record.pilote.firstName.charAt(0).toUpperCase() + record.pilote.firstName.slice(1) : '' }

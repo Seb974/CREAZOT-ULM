@@ -49,6 +49,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     ],
     collectDenormalizationErrors: true,
     security: 'is_granted("OIDC_USER")',
+    paginationEnabled: false,
     mercure: true
 )]
 class Circuit

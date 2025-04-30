@@ -22,6 +22,7 @@ import { type PagedCollection } from "../../../types/collection";
 import { isDefined } from "../../../app/lib/utils";
 import { TextFieldProps } from "@mui/material";
 import { useMediaQuery, Theme } from '@mui/material';
+import { status } from "../../../app/lib/reservation";
 
 export interface Props {
   data: PagedCollection<Circuit> | null;
@@ -72,18 +73,7 @@ export const ReservationsList: NextPage<Props> = ({ data, hubURL, page }) => {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false
-  }
-
-  const status = [
-    {id: "VALIDATED", name: "Validé"},
-    {id: "WAITING", name: "En attente de confirmation"},
-    {id: "WHEATER_REPORT", name:"Report météo"},
-    {id: "PASSENGER_REPORT", name: "Report client"},
-    {id: "INTERN_REPORT", name: "Report interne"},
-    {id: "WHEATER_CANCEL", name:"Annulation météo"},
-    {id: "PASSENGER_CANCEL", name: "Annulation client"},
-    {id: "INTERN_CANCEL", name: "Annulation interne"}
-  ];
+  };
 
   const getStatusLabel = ({statut, report}) => {
     const selectedStatus = status.find(s => s.id === statut);
