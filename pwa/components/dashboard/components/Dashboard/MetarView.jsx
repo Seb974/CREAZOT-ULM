@@ -1,80 +1,40 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { getMetarOrTaf } from '../../../../app/lib/actions' 
-import { isDefined } from '../../../../app/lib/utils';
+import React from 'react';
+import { EncodedMetarTaf } from './EncodedMetarTaf';
+import { GraphicMetar } from './GraphicMetar';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import ExploreIcon from '@mui/icons-material/Explore';
+import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 
+export const MetarView = ({ showGraphic, setShowGraphic, switchToMap, hidden }) => {
 
-export const MetarView = () => {
-
-    const [metarFMEP, setMetarFMEP] = useState("");
-    const [tafFMEP, setTafFMEP] = useState("");
-    const [metarFMEE, setMetarFMEE] = useState("");
-    const [tafFMEE, setTafFMEE] = useState("");
-
-    useEffect(() => {
-        if (metarFMEP === "")
-            getMetarOrTaf('FMEP', 'metar', true)
-                .then(response => setMetarFMEP(response.data[0]))
-        if (tafFMEP === "")
-            getMetarOrTaf('FMEP', 'taf', true)
-                .then(response => setTafFMEP(response.data[0]))
-        if (metarFMEE === "")
-            getMetarOrTaf('FMEE', 'metar', true)
-                .then(response => setMetarFMEE(response.data[0]))
-        if (tafFMEE === "")
-            getMetarOrTaf('FMEE', 'taf', true)
-                .then(response => setTafFMEE(response.data[0]))
-        
-    }, []);
+    const changeView = e => setShowGraphic(!showGraphic);
 
     return (
-        <div className="hidden md:block w-full mt-6 ">
-            <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark h-full">
-                <h3><b>METARs</b></h3>
-                { isDefined(metarFMEP) && metarFMEP !== "" &&
-                    <p>
-                        <i className="text-xs">
-                            Le { (new Date(metarFMEP.observed)).toLocaleDateString() } à { (new Date(metarFMEP.observed)).toLocaleTimeString() }
-                        </i>
-                        <br/>
-                        { metarFMEP.raw_text } 
-                    </p>
-                }
-                <br/>
-                { isDefined(metarFMEE) && metarFMEE !== "" &&
-                    <p>
-                        <i className="text-xs">
-                            Le { (new Date(metarFMEE.observed)).toLocaleDateString() } à { (new Date(metarFMEE.observed)).toLocaleTimeString() }
-                        </i>
-                        <br/>
-                        { metarFMEE.raw_text }   
-                    </p>     
-                }
-                <br/>
-                <h2><b>TAFs</b></h2>
-                { isDefined(tafFMEP) && tafFMEP !== "" &&
-                    <p>
-                        <i className="text-xs">
-                            Du { (new Date(tafFMEP.timestamp.from)).toLocaleDateString() }, { (new Date(tafFMEP.timestamp.from)).toLocaleTimeString() } { " " } 
-                             au { (new Date(tafFMEP.timestamp.to)).toLocaleDateString() }, { (new Date(tafFMEP.timestamp.to)).toLocaleTimeString() }
-                        </i>
-                        <br/>
-                        { tafFMEP.raw_text } 
-                    </p>
-                }
-                <br/>
-                { isDefined(tafFMEE) && tafFMEE !== "" &&
-                    <p>
-                        <i className="text-xs">
-                            Du { (new Date(tafFMEE.timestamp.from)).toLocaleDateString() }, { (new Date(tafFMEE.timestamp.from)).toLocaleTimeString() } { " " } 
-                             au { (new Date(tafFMEE.timestamp.to)).toLocaleDateString() }, { (new Date(tafFMEE.timestamp.to)).toLocaleTimeString() }
-                        </i>
-                        <br/>
-                        { tafFMEE.raw_text } 
-                    </p>
-                }
-                
+        <div className={`w-full mt-6 overflow-hidden ${ hidden ? 'hidden' : ''}`}>
+            <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark h-full min-h-[300px] flex flex-col">
+                <div className="flex-grow">
+                    <div className={`transition-all ${ showGraphic ? "" : "hidden"}`}>
+                        <GraphicMetar />
+                    </div>
+                    <div className={`transition-all ${ !showGraphic ? "" : "hidden"}`}>
+                        <EncodedMetarTaf />
+                    </div>
+                </div>
+                <div className="my-4 text-right">
+                    <a href="#" onClick={changeView} className="text-danger text-sm underline hover:underline hover:text-red-700 transition-colors duration-150 cursor-pointer">
+                        { showGraphic ? 
+                            <><AssignmentIcon className="mr-2"/>{ "METAR & TAF bruts" }</>
+                            : 
+                            <><ExploreIcon className="mr-2"/>{ "METAR graphique" }</>
+                        }
+                    </a>
+                </div>
+                <div className="mt-4 text-left md:hidden">
+                    <a href="#" onClick={switchToMap} className="inline-flex items-center text-sm gap-1 px-3 py-1 rounded border border-gray-800 text-gray-800 hover:text-red-600 hover:border-red-600 hover:bg-red-50 transition-all md:hidden">
+                        <><TravelExploreIcon className="mr-2"/>{ "Localisation" }</>
+                    </a>
+                </div>
             </div>
         </div>
     );
-
 };
