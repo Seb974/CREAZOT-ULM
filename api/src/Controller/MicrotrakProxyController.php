@@ -22,8 +22,8 @@ class MicrotrakProxyController extends AbstractController
     #[Route('/admin/microtrak/position/{id}', name: 'microtrak_proxy', methods: ['GET'])]
     public function getMicrotrakData(string $id, Request $request): JsonResponse
     {
-
-        $url = "https://suividevol.fr/api/v0/?apikey=". $this->microtrakApiKey . "&deveui=" . $id;
+        //https:/suividevol.fr/api/v0/
+        $url = "https://dev.baliselora.fr/api/v0/?apikey=". $this->microtrakApiKey . "&deveui=" . $id;
 
         try {
             $response = $this->httpClient->request('GET', $url);

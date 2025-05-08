@@ -6,6 +6,9 @@ import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 export const SelectBalise = ({ value, onChange, setAeronefs }) => {
 
     const dataProvider = useDataProvider();
+    const all = { id: 'all', name: 'Toutes' };
+    const none = { id: 'none', name: 'Aucune' };
+    const defaultChoices = [none, all];
 
     const [choices, setChoices] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -24,7 +27,7 @@ export const SelectBalise = ({ value, onChange, setAeronefs }) => {
                     name: item.immatriculation
                 }));
                 setAeronefs(data);
-                setChoices([{ id: 'all', name: 'Toutes' }, ...balises]);
+                setChoices([...defaultChoices, ...balises]);
             } catch (err) {
                 setError(err.message || 'Erreur de chargement');
             } finally {
@@ -70,7 +73,7 @@ export const SelectBalise = ({ value, onChange, setAeronefs }) => {
                 shrink
                 sx={{ marginBottom: '6px', paddingBottom: '12px' }}
             >
-                Balises
+                Balises suivies
             </InputLabel>
             <Select
                 labelId="balise-label"
