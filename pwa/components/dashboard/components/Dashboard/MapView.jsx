@@ -3,7 +3,7 @@
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import CloudIcon from '@mui/icons-material/Cloud';
 import { SelectBalise } from './Map/SelectBalise';
 import { LeafletControl } from './Map/LeafletControl';
@@ -43,17 +43,16 @@ const AutoCenter = ({ position, zoom = null }) => {
 
 const MapView = ({ isSmall, switchToMetar, hidden }) => {
 
+  const mapRef = useRef(null);
+  const markersRef = useRef({});
   const pollingInterval = 20000;
-  const duration = pollingInterval - 1000;
-  const steps = 90; 
-  const interval = duration / steps;
   const defaultView = {center: [-21.1351, 55.5114], zoom: isSmall ? 9 : 10};
   const defaultCenter = { lat: defaultView.center[0], lng: defaultView.center[1]};
+  const dateTimeOptions = { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'};
 
   const [isChange, setIsChange] = useState(false);
   const [aeronefs, setAeronefs] = useState([]);
   const [selectedBalise, setSelectedBalise] = useState('none');
-  const [animatedPositions, setAnimatedPositions] = useState({});
   const { positions, error} = useBalisePositions(selectedBalise, aeronefs, pollingInterval, isChange, setIsChange, hidden);
 
   const onBaliseChange = baliseId => {
@@ -82,51 +81,80 @@ const MapView = ({ isSmall, switchToMetar, hidden }) => {
     });
   };
 
+  const animateMarker = (marker, fromLatLng, toLatLng, fromCap = 0, toCap = 0, duration = 20000) => {
+    const startTime = performance.now();
+
+    let capDiff = ((toCap - fromCap + 540) % 360) - 180;
+
+    const step = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      const currentLat = fromLatLng.lat + (toLatLng.lat - fromLatLng.lat) * progress;
+      const currentLng = fromLatLng.lng + (toLatLng.lng - fromLatLng.lng) * progress;
+      const currentCap = (fromCap + capDiff * progress + 360) % 360;
+
+      marker.setLatLng([currentLat, currentLng]);
+      marker.setIcon(getRotatedPlaneIcon(currentCap));
+      marker.options.rotationCap = currentCap;
+
+      if (progress < 1)
+        requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+
   useEffect(() => {
-      if (!Array.isArray(positions)) return;
+    if (!positions || !markersRef.current)
+       return;
 
-      const animIds = [];
-    
-      positions.forEach((newPos) => {
+    positions.forEach((newPos) => {
         const id = newPos.nombalise || `idx_${newPos.lat}_${newPos.lng}`;
-        const prev = animatedPositions[id] || { lat: newPos.lat, lng: newPos.lng };
-    
-        let step = 0;
-        const latDiff = newPos.lat - prev.lat;
-        const lngDiff = newPos.lng - prev.lng;
-    
-        const anim = setInterval(() => {
-          step++;
-          const progress = step / steps;
-    
-          setAnimatedPositions((prevPositions) => ({
-            ...prevPositions,
-            [id]: {
-              lat: prev.lat + latDiff * progress,
-              lng: prev.lng + lngDiff * progress,
-              cap: newPos.cap
-            }
-          }));
-    
-          if (step >= steps) clearInterval(anim);  
-        }, interval);
+        const marker = markersRef.current[id];
+        if (!marker) return;
 
-        animIds.push(anim);
-      });
+        const fromLatLng = marker.getLatLng();
+        const toLatLng = L.latLng(newPos.lat, newPos.lng);
 
-      return () => animIds.forEach(clearInterval);
+        if (fromLatLng.lat === toLatLng.lat && fromLatLng.lng === toLatLng.lng) {
+          const fromCap = marker.options.rotationCap || 0;
+          const toCap = parseFloat(newPos.cap) || 0;
+          
+          if (Math.abs(toCap - fromCap) > 1) {
+            marker.setIcon(getRotatedPlaneIcon(toCap));
+            marker.options.rotationCap = toCap;
+          }
+          return;
+        }
 
-    }, [positions]);
+        animateMarker(marker, fromLatLng, toLatLng, fromCap, toCap, pollingInterval - 1000);
+    });
+  }, [positions]);
+
+  const convertToKmh = (speedStr) => {
+    const speedMs = parseFloat(speedStr);
+    if (isNaN(speedMs)) {
+      return 0; 
+    }
+    return (speedMs * 3.6).toFixed(2);
+  }
+  
+  function parseDate(dateString) {
+    const [datePart, timePart] = dateString.split(' ');
+    const [day, month, year] = datePart.split('/').map(Number);
+    const [hour, minute, second] = timePart.split(':').map(Number);
+    return new Date(year, month - 1, day, hour, minute, second);
+  }
   
     return (
         <div className={`block w-full mt-6 ${ hidden ? 'hidden' : ''}`}>
             <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark h-full flex flex-col">
               <div className="flex-grow min-h-[420px]">
-                <MapContainer center={ defaultView.center } zoom={ defaultView.zoom } style={{ height: '100%', width: '100%'}}>      {/*  minHeight: '420px'  */}
+                <MapContainer center={ defaultView.center } zoom={ defaultView.zoom } whenCreated={map => (mapRef.current = map)} style={{ height: '100%', width: '100%'}}>      {/*  minHeight: '420px'  */}
                     <ForceResize hidden={ hidden }/>
                     { selectedBalise === 'all' || selectedBalise === 'none' ?
-                          <AutoCenter position={defaultCenter} zoom={ defaultView.zoom }/>
-                      : positions.length === 1 && <AutoCenter position={positions[0]} /> 
+                          <AutoCenter position={ defaultCenter } zoom={ defaultView.zoom }/>
+                      : positions.length === 1 && <AutoCenter position={ positions[0] } /> 
                     }
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                     <LeafletControl position="topright">
@@ -152,22 +180,30 @@ const MapView = ({ isSmall, switchToMetar, hidden }) => {
 
                     { error && <div>Erreur : {error}</div> }
 
-                    { !isChange && !error && isDefinedAndNotVoid(positions) && positions.map((pos, idx) => {
-                      const id = pos.nombalise || `idx_${pos.lat}_${pos.lng}`;
-                      const animated = animatedPositions[id] || pos;
+                    {!isChange && !error && isDefinedAndNotVoid(positions) && positions.map((pos) => {
+                        const id = pos.nombalise || `idx_${pos.lat}_${pos.lng}`;
 
-                      return (
-                       // <Marker key={idx} position={[pos.lat, pos.lng]} icon={getRotatedPlaneIcon(pos.cap)}>
-                        <Marker key={ id } position={ [animated.lat, animated.lng] } icon={ getRotatedPlaneIcon(animated.cap) }>
-
-                          <Popup>
-                            { pos.nombalise || 'Balise' }<br />
-                            {/* ({pos.lat}, {pos.lng}) */}
-                            [ { animated.lat.toFixed(5) }, { animated.lng.toFixed(5) } ]
-                          </Popup>
-                        </Marker>
-                      )}
-                    )}
+                        return (
+                          <Marker key={id} position={[pos.lat, pos.lng]} icon={getRotatedPlaneIcon(pos.cap)}
+                              ref={(ref) => {
+                                  if (ref) {
+                                    markersRef.current[id] = ref;
+                                    ref.options.rotationCap = parseFloat(pos.cap) || 0;
+                                  } else {
+                                    delete markersRef.current[id];
+                                  }
+                              }}
+                          >
+                              <Popup>
+                                { pos.nombalise || 'Balise' } <span className={`text-[9px] italic ${ pos.mode === 'SLEEPING' ? 'text-zinc-500' : 'text-lime-500'}`}>{ pos.mode }</span><br />
+                                [{ pos.lat.toFixed(5) }, { pos.lng.toFixed(5) }] - { parseDate(pos.time).toLocaleString('fr-FR', dateTimeOptions) }<br />
+                                Altitude : { pos.altitude }m<br />
+                                Cap : { pos.cap }°<br />
+                                Vitesse : { convertToKmh(pos.vitesse) }km/h
+                              </Popup>
+                          </Marker>
+                        );
+                    })}
                 </MapContainer>
               </div>
                 <div className="mt-4 text-left md:hidden">
