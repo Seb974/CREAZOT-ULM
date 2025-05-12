@@ -19,6 +19,8 @@ const MapView = dynamic(() => import('./MapView'), {
 
 const Dashboard = () => {
 
+  const defaultView = {center: [-21.1351, 55.5114], zoom: 9};
+
   const now = new Date();
   const min = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0);
   const max = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30);
@@ -94,12 +96,12 @@ const Dashboard = () => {
 
           <div className={` ${ appli !== "C" ? "visible" : "invisible"} w-full`}>
             { appli !== "C" ? 
-                appli === "W" ?    // className="w-full h-80 md:h-96 rounded-sm flex justify-center"
-                  <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=default&zoom=9&overlay=clouds&product=ecmwf&level=surface&lat=-21.152&lon=55.54&message=true"></iframe>
+                appli === "W" ?
+                  <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src={`https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=default&zoom=${ defaultView.zoom } &overlay=clouds&product=ecmwf&level=surface&lat=${ defaultView.center[0] }&lon=${ defaultView.center[1] }&message=true`}></iframe>
                 : appli === "M" ?
-                  <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} _ngcontent-serverapp-c135101453="" id="radarIframe" allow="web-share" src="https://radar.wo-cloud.com/pwa/?zoom=7.45&amp;placemark=-21.250048,55.476224&amp;layer=WetterRadar&amp;center=-21.48,55.84&amp;tz=Indian/Reunion&amp;tf=HH:mm&amp;windunit=kmh&amp;lang=fr-FR&amp;placemarkName=Entre-Deux&amp;desktop=true&amp;fadeTop=false" title="Carte radar météo"></iframe>
+                  <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} _ngcontent-serverapp-c135101453="" id="radarIframe" allow="web-share" src={`https://radar.wo-cloud.com/pwa/?zoom=${ defaultView.zoom }&layer=WetterRadar&center=${ defaultView.center[0] + ',' + defaultView.center[1] }&tz=Indian/Reunion&tf=HH:mm&windunit=kmh&lang=fr-FR&desktop=true&fadeTop=false`} title="Carte radar météo"></iframe>
                 :
-                <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src="https://www.meteoblue.com/fr/meteo/cartes/widget?windAnimation=0&gust=0&satellite=1&cloudsAndPrecipitation=1&temperature=1&sunshine=1&extremeForecastIndex=1&geoloc=detect&tempunit=C&windunit=km%252Fh&lengthunit=metric&zoom=8&autowidth=auto"  frameborder="0" scrolling="NO" allowtransparency="true" sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>
+                <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src={`https://www.meteoblue.com/fr/meteo/cartes/widget?windAnimation=0&gust=0&satellite=1&cloudsAndPrecipitation=1&temperature=1&sunshine=1&extremeForecastIndex=1&geoloc=detect&tempunit=C&windunit=km%252Fh&lengthunit=metric&zoom=${ defaultView.zoom - 1 }&autowidth=auto`}  frameborder="0" scrolling="NO" allowtransparency="true" sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>
             : 
             <></>
             }

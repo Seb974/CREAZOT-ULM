@@ -5,15 +5,8 @@ import { useRef } from "react";
 import { type DataProvider, defaultTheme } from "react-admin";
 import { signIn, useSession } from "next-auth/react";
 import SyncLoader from "react-spinners/SyncLoader";
-import {
-  fetchHydra,
-  HydraAdmin,
-  hydraDataProvider,
-  ResourceGuesser,
-} from "@api-platform/admin";
+import { fetchHydra, HydraAdmin, hydraDataProvider, ResourceGuesser } from "@api-platform/admin";
 import { parseHydraDocumentation } from "@api-platform/api-doc-parser";
-import { CustomRoutes } from 'react-admin';
-import { Route } from "react-router-dom";
 import { type Session } from "../../app/auth";
 import authProvider from "../../components/admin/authProvider";
 import Layout from "./layout/Layout";
@@ -28,7 +21,6 @@ import aeronefResourceProps from "./aeronef";
 import passagerResourceProps from "./passager";
 import userResourceProps from "./user";
 import reservationResourceProps from "./reservation";
-import { toast } from 'react-hot-toast';
 import origineResourceProps from "./origine";
 import contactResourceProps from "./contact";
 import cadeauResourceProps from "./cadeau";
@@ -37,6 +29,7 @@ import profileResourceProps from "./profile";
 import qualificationResourceProps from "./qualification";
 import natureResourceProps from "./nature";
 import optionResourceProps from "./option";
+import clientResourceProps from "./client";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -129,6 +122,7 @@ const AdminWithOIDC = () => {
       {/* <CustomRoutes>
           <Route path="/vols" element={<PrestationsList />} />
       </CustomRoutes> */}
+      <ResourceGuesser name="clients" {...clientResourceProps}/>
       <ResourceGuesser name="prestations" {...prestationResourceProps} />
       <ResourceGuesser name="vols" {...volResourceProps}/>
       <ResourceGuesser name="passagers" {...passagerResourceProps}/>

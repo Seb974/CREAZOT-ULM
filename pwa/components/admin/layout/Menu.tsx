@@ -19,6 +19,7 @@ import { Collapse } from '@mui/material';
 import TuneIcon from '@mui/icons-material/Tune';
 import FilterIcon from '@mui/icons-material/Filter';
 import StoreIcon from '@mui/icons-material/Store';
+import PersonIcon from '@mui/icons-material/Person';
 import CollectionsIcon from '@mui/icons-material/Collections';
 
 const CustomMenu = () => {
@@ -168,6 +169,12 @@ const CustomMenu = () => {
                   to="/contacts"
                   primaryText="Contacts"
                   leftIcon={<PermPhoneMsgIcon />}
+                  sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+                />
+            <Menu.Item
+                  to="/clients"
+                  primaryText="Client"
+                  leftIcon={<PersonIcon />}
                   sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
                 />
         </Collapse>

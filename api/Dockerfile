@@ -28,6 +28,7 @@ RUN apt-get update; \
 		gettext \
 		git \
 		zip \
+		libmagickwand-dev \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
@@ -39,6 +40,7 @@ RUN set -eux; \
 		opcache \
 		zip \
 		gd \
+		imagick \
 	;
 
 ###> recipes ###

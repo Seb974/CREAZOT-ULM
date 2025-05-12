@@ -5,6 +5,9 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     microtrak.api_key: '%env(MICROTRAK_API_KEY)%'
+    image.client_dir: '%kernel.project_dir%/public/images/client'
+    image.shared_dir: '%kernel.project_dir%/public/images'
+    image.public_dir: '%kernel.project_dir%/public'
 
 services:
     # default configuration for services in *this* file
@@ -26,6 +29,14 @@ services:
     App\Controller\MicrotrakProxyController:
         arguments:
             $microtrakApiKey: '%microtrak.api_key%'
+
+    App\DataTransformer\ClientInputDataTransformer:
+        arguments:
+            $persistProcessor: '@api_platform.doctrine.orm.state.persist_processor'
+            $validator: '@api_platform.validator'
+            $fileUploader: '@App\Service\FileUploader'
+            $itemProvider: '@api_platform.doctrine.orm.state.item_provider'
+        tags: [ 'api_platform.state_processor' ]
 
 when@test:
     services:

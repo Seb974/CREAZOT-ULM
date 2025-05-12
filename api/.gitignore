@@ -33,3 +33,6 @@ phpstan.neon
 /point.env.(dev)
 /point.env.(prod)
 ###< Files containing env secret variables ###
+###> liip/imagine-bundle ###
+/public/media/cache/
+###< liip/imagine-bundle ###
