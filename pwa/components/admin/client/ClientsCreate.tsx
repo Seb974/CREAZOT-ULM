@@ -1,8 +1,9 @@
 import { SimpleForm, TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, SimpleFormIterator, ArrayInput, required, useCreate, useRedirect, useNotify } from "react-admin";
 import { Create } from "react-admin";
-import { colors, timezones } from "../../../app/lib/client";
+import { colors, objectToFormData, timezones } from "../../../app/lib/client";
 import { Box } from "@mui/material";
 import { useWatch } from 'react-hook-form';
+import { useSession } from "next-auth/react";
 
 const ColorPreview = () => {
   const selectedColor = useWatch({ name: 'color', defaultValue: colors[0].id });
@@ -25,6 +26,10 @@ const ColorPreview = () => {
 
 export const ClientsCreate = () => {
 
+    const notify = useNotify();
+    const redirect = useRedirect();
+    const session = useSession();
+
     const fileInputSX = {
         '& .RaFileInput-dropZone': {
             minHeight: '48px', 
@@ -36,28 +41,25 @@ export const ClientsCreate = () => {
         }
     };
 
-    // const onSubmit = async (data) => {
-
-    //     console.log(data);
-        // try {
-          
-        //     await create('reservations', {data: newData});
-        //   }
-        //   notify('La réservation a bien été enregistrée.', { type: 'info' });
-        //   redirect('list', 'reservations');
-        // } catch (error) {
-        //   notify(`Une erreur bloque l\'enregistrement de la réservation.`, { type: 'error' });
-        //   redirect('list', 'reservations');
-        //   console.log(error);
-        // }
-    //   };
+    const onSubmit = async data => {
+        const formData = objectToFormData(data);
+        try {
+            // @ts-ignore
+            const response = await fetch('/clients', { method: 'POST', body: formData, headers: {'Authorization': `Bearer ${session.data.accessToken}`}});
+        
+            if (!response.ok) throw new Error('Erreur lors de l’envoi');
+            notify('Le client a bien été enregistré.', { type: 'success' });
+            redirect('list', 'clients');
+          } catch (error) {
+            notify('Erreur : ' + error.message, { type: 'error' });
+          }
+    };
 
     return (
         <Create redirect="list">
-            <SimpleForm>
+            <SimpleForm onSubmit={ onSubmit }>
                 <TextInput source="name" label="Nom" validate={required()}/>
                 <TextInput source="address" label="Adresse" validate={required()}/>
-
                 <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
                     <Box flex={1} display="flex" alignItems="center">
                         <TextInput source="zipcode" label="Code postal" validate={required()}/>
@@ -66,8 +68,6 @@ export const ClientsCreate = () => {
                         <TextInput source="city" label="Ville" validate={required()}/>
                     </Box>
                 </Box>
-
-
                 <TextInput source="email" label="Adresse email" validate={required()}/>
                 <TextInput source="phone" label="N° de téléphone" validate={required()}/>
                 <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
@@ -97,7 +97,7 @@ export const ClientsCreate = () => {
                 <FileInput label="Icone GPS" source="mapIcon" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>
                     <FileField source="src" title="title" />
                 </FileInput> 
-                <FileInput label="Favicon" source="favicon" accept={{ 'image/vnd.microsoft.icon': ['.ico'], 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>
+                <FileInput label="Favicon" source="favicon" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>
                     <FileField source="src" title="title" />
                 </FileInput>
                 <Box display="flex" gap={2} flexWrap="nowrap" width="100%">

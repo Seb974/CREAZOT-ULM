@@ -62,4 +62,28 @@ export const getTimezone = timezone => {
     return isDefined(selection) ? selection : defaultTimezone;
 };
 
+export const objectToFormData = (data, form = new FormData(), namespace = '') => {
+    for (let key in data) {
+        if (!data.hasOwnProperty(key)) continue;
 
+        let value = data[key];
+        const formKey = namespace ? `${namespace}[${key}]` : key;
+
+        if (value === undefined)
+            value = null;
+        
+        if (value === null || value === '')
+            form.append(formKey, value);
+        else if (Array.isArray(value))
+            form.append(formKey, JSON.stringify(value));
+        else if (value instanceof File)
+            form.append(formKey, value);
+        else if (value?.rawFile instanceof File)
+            form.append(formKey, value.rawFile, value.rawFile.name);
+        else if (typeof value === 'object')
+            objectToFormData(value, form, formKey);
+        else
+            form.append(formKey, value);
+    }
+    return form;
+};

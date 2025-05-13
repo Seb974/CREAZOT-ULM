@@ -34,23 +34,17 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
         new Post(
             input: ClientInput::class,
             output: Client::class,
-            itemUriTemplate: '/clients/{id}{._format}',
+            uriTemplate: '/clients{._format}',
             processor: ClientInputDataTransformer::class,
             controller: CreateClientController::class,
             inputFormats: ['multipart' => ['multipart/form-data']],
             deserialize: false
-        ),
+        ), 
         new Get(
             uriTemplate: '/clients/{id}{._format}'
         ),
         new Put(
-            input: ClientInput::class,
-            output: Client::class,
             uriTemplate: '/clients/{id}{._format}',
-            processor: ClientInputDataTransformer::class,
-            controller: UpdateClientController::class,
-            inputFormats: ['multipart' => ['multipart/form-data']],
-            deserialize: false
         ),
         new Delete(
             uriTemplate: '/clients/{id}{._format}',
@@ -95,24 +89,24 @@ class Client
     private ?string $phone = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\File(maxSize: '4M')]
+    // #[Assert\File(maxSize: '4M')]
     #[Groups(groups: ['Client:write', 'Client:read'])]
-    private string|UploadedFile|null $logo = null;
+    private ?string $logo = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\File(maxSize: '2M')]
+    // #[Assert\File(maxSize: '2M')]
     #[Groups(groups: ['Client:write', 'Client:read'])]
-    private string|UploadedFile|null $favicon = null;
+    private ?string $favicon = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\File(maxSize: '4M')]
+    // #[Assert\File(maxSize: '4M')]
     #[Groups(groups: ['Client:write', 'Client:read'])]
-    private string|UploadedFile|null $pdfBackground = null;
+    private ?string $pdfBackground = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\File(maxSize: '2M')]
+    // #[Assert\File(maxSize: '2M')]
     #[Groups(groups: ['Client:write', 'Client:read'])]
-    private string|UploadedFile|null $mapIcon = null;
+    private ?string $mapIcon = null;
 
     #[ORM\Column(length: 7, nullable: true)]
     #[Assert\Regex('/^#[0-9A-Fa-f]{6}$/')]

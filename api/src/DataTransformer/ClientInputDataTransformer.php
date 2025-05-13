@@ -10,6 +10,7 @@ use ApiPlatform\Validator\ValidatorInterface;
 use App\Dto\ClientInput;
 use App\Entity\Client;
 use App\Service\FileUploader;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ClientInputDataTransformer implements ProcessorInterface
 {
@@ -51,17 +52,28 @@ class ClientInputDataTransformer implements ProcessorInterface
         $client->setCity($data->city);
 
         // Uploads de fichiers
-        if ($data->logo) {
+        if ($data->logo instanceof UploadedFile) {
             $client->setLogo($this->fileUploader->upload($data->logo, 'logo'));
+        } elseif ($data->logo === 'DELETE') {
+            $client->setLogo(null);
         }
-        if ($data->favicon) {
+
+        if ($data->favicon instanceof UploadedFile) {
             $client->setFavicon($this->fileUploader->upload($data->favicon, 'favicon'));
+        } elseif ($data->favicon === 'DELETE') {
+            $client->setFavicon(null);
         }
-        if ($data->pdfBackground) {
+
+        if ($data->pdfBackground instanceof UploadedFile) {
             $client->setPdfBackground($this->fileUploader->upload($data->pdfBackground, 'pdfBackground', $data->opacity));
+        } elseif ($data->pdfBackground === 'DELETE') {
+            $client->setPdfBackground(null);
         }
-        if ($data->mapIcon) {
+
+        if ($data->mapIcon instanceof UploadedFile) {
             $client->setMapIcon($this->fileUploader->upload($data->mapIcon, 'mapIcon'));
+        } elseif ($data->mapIcon === 'DELETE') {
+            $client->setMapIcon(null);
         }
 
         return $this->persistProcessor->process($client, $operation, $uriVariables, $context);
