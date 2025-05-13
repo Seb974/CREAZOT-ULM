@@ -2,72 +2,39 @@ import React, { useEffect, useState } from 'react';
 import { getMetarOrTaf } from '../../../../app/lib/actions' 
 import { isDefined } from '../../../../app/lib/utils';
 
-export const EncodedMetarTaf = () => {
+export const EncodedMetarTaf = ({ code }) => {
 
-    const [metarFMEP, setMetarFMEP] = useState("");
-    const [tafFMEP, setTafFMEP] = useState("");
-    const [metarFMEE, setMetarFMEE] = useState("");
-    const [tafFMEE, setTafFMEE] = useState("");
+    const [metar, setMetar] = useState("");
+    const [taf, setTaf] = useState("");
 
     useEffect(() => {
-        if (metarFMEP === "")
-            getMetarOrTaf('FMEP', 'metar', true)
-                .then(response => setMetarFMEP(response.data[0]))
-        if (tafFMEP === "")
-            getMetarOrTaf('FMEP', 'taf', true)
-                .then(response => setTafFMEP(response.data[0]))
-        if (metarFMEE === "")
-            getMetarOrTaf('FMEE', 'metar', true)
-                .then(response => setMetarFMEE(response.data[0]))
-        if (tafFMEE === "")
-            getMetarOrTaf('FMEE', 'taf', true)
-                .then(response => setTafFMEE(response.data[0]))
-        
-    }, []);
+        if (!code) return;
+        getMetarOrTaf(code, 'metar', true).then(res => setMetar(res.data[0]));
+        getMetarOrTaf(code, 'taf', true).then(res => setTaf(res.data[0]));
+    }, [code]);
 
     return (
         <>
-            <h3><b>METARs</b></h3>
-            { isDefined(metarFMEP) && metarFMEP !== "" &&
+            <h3><b>METAR</b></h3>
+            { isDefined(metar) && metar !== "" &&
                 <p>
                     <i className="text-xs">
-                        Le { (new Date(metarFMEP.observed)).toLocaleDateString() } à { (new Date(metarFMEP.observed)).toLocaleTimeString() }
+                    Le {new Date(metar.observed).toLocaleDateString()} à {new Date(metar.observed).toLocaleTimeString()}
                     </i>
                     <br/>
-                    { metarFMEP.raw_text } 
+                    {metar.raw_text}
                 </p>
             }
             <br/>
-            { isDefined(metarFMEE) && metarFMEE !== "" &&
+            <h2><b>TAF</b></h2>
+            { isDefined(taf) && taf !== "" &&
                 <p>
                     <i className="text-xs">
-                        Le { (new Date(metarFMEE.observed)).toLocaleDateString() } à { (new Date(metarFMEE.observed)).toLocaleTimeString() }
+                        Du {new Date(taf.timestamp.from).toLocaleDateString()} {new Date(taf.timestamp.from).toLocaleTimeString()}{" "}
+                        au {new Date(taf.timestamp.to).toLocaleDateString()} {new Date(taf.timestamp.to).toLocaleTimeString()}
                     </i>
                     <br/>
-                    { metarFMEE.raw_text }   
-                </p>     
-            }
-            <br/>
-            <h2><b>TAFs</b></h2>
-            { isDefined(tafFMEP) && tafFMEP !== "" &&
-                <p>
-                    <i className="text-xs">
-                        Du { (new Date(tafFMEP.timestamp.from)).toLocaleDateString() }, { (new Date(tafFMEP.timestamp.from)).toLocaleTimeString() } { " " } 
-                            au { (new Date(tafFMEP.timestamp.to)).toLocaleDateString() }, { (new Date(tafFMEP.timestamp.to)).toLocaleTimeString() }
-                    </i>
-                    <br/>
-                    { tafFMEP.raw_text } 
-                </p>
-            }
-            <br/>
-            { isDefined(tafFMEE) && tafFMEE !== "" &&
-                <p>
-                    <i className="text-xs">
-                        Du { (new Date(tafFMEE.timestamp.from)).toLocaleDateString() }, { (new Date(tafFMEE.timestamp.from)).toLocaleTimeString() } { " " } 
-                            au { (new Date(tafFMEE.timestamp.to)).toLocaleDateString() }, { (new Date(tafFMEE.timestamp.to)).toLocaleTimeString() }
-                    </i>
-                    <br/>
-                    { tafFMEE.raw_text } 
+                    {taf.raw_text} 
                 </p>
             }
         </>
