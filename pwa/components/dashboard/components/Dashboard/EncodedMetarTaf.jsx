@@ -1,19 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { getMetarOrTaf } from '../../../../app/lib/actions' 
 import { isDefined } from '../../../../app/lib/utils';
+import { CircularProgress } from '@mui/material';
 
 export const EncodedMetarTaf = ({ code }) => {
 
     const [metar, setMetar] = useState("");
     const [taf, setTaf] = useState("");
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!code) return;
-        getMetarOrTaf(code, 'metar', true).then(res => setMetar(res.data[0]));
-        getMetarOrTaf(code, 'taf', true).then(res => setTaf(res.data[0]));
+        const load = async () => {
+            setLoading(true);
+            await fetchData();
+            setLoading(false);
+        };
+        load();
     }, [code]);
 
-    return (
+    const fetchData = async () => {
+        const [metarRes, tafRes] = await Promise.all([
+            getMetarOrTaf(code, 'metar', true),
+            getMetarOrTaf(code, 'taf', true)
+        ]);
+
+        setMetar(metarRes.data[0]);
+        setTaf(tafRes.data[0]);
+    };
+
+    return loading ?
+        <div className="flex justify-center items-center w-full h-full">
+            <CircularProgress color="error" size={50} />
+        </div>
+        :
         <>
             <h3><b>METAR</b></h3>
             { isDefined(metar) && metar !== "" &&
@@ -38,6 +58,4 @@ export const EncodedMetarTaf = ({ code }) => {
                 </p>
             }
         </>
-    );
-
 };
