@@ -41,13 +41,11 @@ const AutoCenter = ({ position, zoom = null }) => {
   return null;
 };
 
-const MapView = ({ isSmall, switchToMetar, hidden }) => {
+const MapView = ({ isSmall, switchToMetar, hidden, client }) => {
 
   const mapRef = useRef(null);
   const markersRef = useRef({});
   const pollingInterval = 20000;
-  const defaultView = {center: [-21.1351, 55.5114], zoom: isSmall ? 9 : 10};
-  const defaultCenter = { lat: defaultView.center[0], lng: defaultView.center[1]};
   const dateTimeOptions = { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'};
 
   const [isChange, setIsChange] = useState(false);
@@ -150,10 +148,10 @@ const MapView = ({ isSmall, switchToMetar, hidden }) => {
         <div className={`block w-full mt-6 ${ hidden ? 'hidden' : ''}`}>
             <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark h-full flex flex-col">
               <div className="flex-grow min-h-[420px]">
-                <MapContainer center={ defaultView.center } zoom={ defaultView.zoom } whenCreated={map => (mapRef.current = map)} style={{ height: '100%', width: '100%'}}>      {/*  minHeight: '420px'  */}
+                <MapContainer center={ [client.lat, client.lng] } zoom={ client.zoom + (isSmall ? 0 : 1) } whenCreated={map => (mapRef.current = map)} style={{ height: '100%', width: '100%'}}>      {/*  minHeight: '420px'  */}
                     <ForceResize hidden={ hidden }/>
                     { selectedBalise === 'all' || selectedBalise === 'none' ?
-                          <AutoCenter position={ defaultCenter } zoom={ defaultView.zoom }/>
+                          <AutoCenter position={{lat: client.lat, lng: client.lng}} zoom={ client.zoom + (isSmall ? 0 : 1) }/>
                       : positions.length === 1 && <AutoCenter position={ positions[0] } /> 
                     }
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />

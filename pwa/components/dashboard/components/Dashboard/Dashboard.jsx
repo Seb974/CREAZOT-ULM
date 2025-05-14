@@ -12,14 +12,14 @@ import { InformationsModal } from "../Modal/InformationsModal";
 import { RappelInformationsModal } from "../Modal/RappelInformationsModal";
 import { UpdateModal } from "../Modal/UpdateModal";
 import dynamic from 'next/dynamic';
+import { useClient } from '../../../admin/ClientProvider';
+import GlobalLoader from "../../../admin/layout/GlobalLoader";
 
-const MapView = dynamic(() => import('./MapView'), {
-  ssr: false,
-});
+const MapView = dynamic(() => import('./MapView'), { ssr: false });
 
 const Dashboard = () => {
 
-  const defaultView = {center: [-21.1351, 55.5114], zoom: 9};
+  const { client, loading } = useClient();
 
   const now = new Date();
   const min = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0);
@@ -53,12 +53,12 @@ const Dashboard = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  return (
+  return loading ? <GlobalLoader/> : (
     <div className="overflow-x-hidden w-full">
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full" >
-        <MetarView showGraphic={ showGraphic } setShowGraphic={ setShowGraphic } switchToMap={() => setShowMetarMobile(false)} hidden={ isSmall && !showMetarMobile }/>
-        <MapView isSmall={ isSmall } switchToMetar={() => setShowMetarMobile(true)} hidden={ isSmall && showMetarMobile }/>
+        <MetarView showGraphic={ showGraphic } setShowGraphic={ setShowGraphic } switchToMap={() => setShowMetarMobile(false)} hidden={ isSmall && !showMetarMobile } client={ client }/>
+        <MapView isSmall={ isSmall } switchToMetar={() => setShowMetarMobile(true)} hidden={ isSmall && showMetarMobile } client={ client }/>
       </div>
 
       <div className="col-span-12 mt-6">
@@ -97,18 +97,18 @@ const Dashboard = () => {
           <div className={` ${ appli !== "C" ? "visible" : "invisible"} w-full`}>
             { appli !== "C" ? 
                 appli === "W" ?
-                  <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src={`https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=default&zoom=${ defaultView.zoom } &overlay=clouds&product=ecmwf&level=surface&lat=${ defaultView.center[0] }&lon=${ defaultView.center[1] }&message=true`}></iframe>
+                  <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src={`https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=default&zoom=${ client.zoom } &overlay=clouds&product=ecmwf&level=surface&lat=${ client.lat }&lon=${ client.lng }&message=true`}></iframe>
                 : appli === "M" ?
-                  <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} _ngcontent-serverapp-c135101453="" id="radarIframe" allow="web-share" src={`https://radar.wo-cloud.com/pwa/?zoom=${ defaultView.zoom }&layer=WetterRadar&center=${ defaultView.center[0] + ',' + defaultView.center[1] }&tz=Indian/Reunion&tf=HH:mm&windunit=kmh&lang=fr-FR&desktop=true&fadeTop=false`} title="Carte radar météo"></iframe>
+                  <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} _ngcontent-serverapp-c135101453="" id="radarIframe" allow="web-share" src={`https://radar.wo-cloud.com/pwa/?zoom=${ client.zoom }&layer=WetterRadar&center=${ client.lat + ',' + client.lng }&tz=Indian/Reunion&tf=HH:mm&windunit=kmh&lang=fr-FR&desktop=true&fadeTop=false`} title="Carte radar météo"></iframe>
                 :
-                <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src={`https://www.meteoblue.com/fr/meteo/cartes/widget?windAnimation=0&gust=0&satellite=1&cloudsAndPrecipitation=1&temperature=1&sunshine=1&extremeForecastIndex=1&geoloc=detect&tempunit=C&windunit=km%252Fh&lengthunit=metric&zoom=${ defaultView.zoom - 1 }&autowidth=auto`}  frameborder="0" scrolling="NO" allowtransparency="true" sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>
+                <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src={`https://www.meteoblue.com/fr/meteo/cartes/widget?windAnimation=0&gust=0&satellite=1&cloudsAndPrecipitation=1&temperature=1&sunshine=1&extremeForecastIndex=1&geoloc=detect&tempunit=C&windunit=km%252Fh&lengthunit=metric&zoom=${ client.zoom - 1 }&autowidth=auto`}  frameborder="0" scrolling="NO" allowtransparency="true" sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>
             : 
             <></>
             }
           </div>
 
           <div className={ `camera-container ${ appli === "C" ? "visible" : "invisible no-visible-cam"}`}>
-            <Cameras />
+            <Cameras client={ client }/>
           </div>
         </div>
       </div>

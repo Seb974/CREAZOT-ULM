@@ -102,7 +102,16 @@ export const ClientsEdit = () => {
   const transform = async data => {
     const images = await uploadImages(data);
     // @ts-ignore
-    return {...data, ...Object.fromEntries(images.map(img => [img.name, img.path || null]))};
+    const updatedClient = { ...data, ...Object.fromEntries(images.map(img => [img.name, img.path || null])) };
+
+    const cachedClient = sessionStorage.getItem("client");
+    if (cachedClient) {
+      const parsedClient = JSON.parse(cachedClient);
+      if (parsedClient.id === updatedClient.id) {
+        sessionStorage.setItem("client", JSON.stringify(updatedClient)); 
+      }
+    }
+    return updatedClient;
   };
 
   return (
@@ -133,11 +142,13 @@ export const ClientsEdit = () => {
             <ArrayInput source="airportCodes" label="Codes des aéroports">
                 <SimpleFormIterator inline disableReordering>
                     <TextInput source="code"/>
+                    <TextInput source="nom"/>
                 </SimpleFormIterator>
             </ArrayInput>
             <ArrayInput source="camIds" label="Caméras Windy">
                 <SimpleFormIterator inline disableReordering>
                     <TextInput source="id"/>
+                    <TextInput source="nom"/>
                 </SimpleFormIterator>
             </ArrayInput>
             <SelectInput source="timezone" choices={ timezones } defaultValue={ timezones[0].id } validate={required()}/>

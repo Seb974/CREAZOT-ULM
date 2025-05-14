@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { cameras } from "../../../../app/lib/cameras";
+import { isDefinedAndNotVoid } from "../../../../app/lib/utils";
 
-export const Cameras = () => {
+export const Cameras = ({ client }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,9 +20,7 @@ export const Cameras = () => {
     script.type = "text/javascript";
     document.body.appendChild(script);
 
-    const timeout = setTimeout(() => {
-      setLoading(false);
-    }, 2500);
+    const timeout = setTimeout(() => setLoading(false), 2500);
 
     return () => {
       script.remove();
@@ -43,9 +41,9 @@ export const Cameras = () => {
           loading ? "opacity-0" : "opacity-100"
         }`}
       >
-        {cameras.map((camera, i) => (
+        {isDefinedAndNotVoid(client.camIds) && client.camIds.map((camera, i) => (
           <div key={i} className="camera">
-            <label>{camera.title}</label>
+            <label>{camera.nom}</label>
             <a
               name="windy-webcam-timelapse-player"
               data-id={camera.id}

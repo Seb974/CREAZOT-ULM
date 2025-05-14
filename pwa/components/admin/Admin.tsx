@@ -95,7 +95,7 @@ const AdminAdapter = ({
       layout={Layout}
       // theme={ myTheme }
     >
-      {!!children && children}
+      {!!children && children}      
     </HydraAdmin>
   );
 };
@@ -117,29 +117,29 @@ const AdminWithOIDC = () => {
 
   
   return (
-    // @ts-ignore
-    <AdminAdapter session={session}>
-      {/* <CustomRoutes>
-          <Route path="/vols" element={<PrestationsList />} />
-      </CustomRoutes> */}
-      <ResourceGuesser name="clients" {...clientResourceProps}/>
-      <ResourceGuesser name="prestations" {...prestationResourceProps} />
-      <ResourceGuesser name="vols" {...volResourceProps}/>
-      <ResourceGuesser name="passagers" {...passagerResourceProps}/>
-      <ResourceGuesser name="circuits" {...circuitResourceProps}/>
-      <ResourceGuesser name="aeronefs" {...aeronefResourceProps}/>
-      <ResourceGuesser name="options" {...optionResourceProps}/>
-      <ResourceGuesser name="natures" {...natureResourceProps}/>
-      <ResourceGuesser name="qualifications" {...qualificationResourceProps}/>
-      <ResourceGuesser name="combinaisons" {...combinaisonResourceProps}/>
-      <ResourceGuesser name="cadeaux" {...cadeauResourceProps}/>
-      <ResourceGuesser name="contacts" {...contactResourceProps}/>
-      <ResourceGuesser name="origines" {...origineResourceProps}/>
-      <ResourceGuesser name="entretiens" {...entretienResourceProps}/>
-      <ResourceGuesser name="users" {...userResourceProps}/>
-      <ResourceGuesser name="profil_pilotes" {...profileResourceProps}/>
-      <ResourceGuesser name="reservations" {...reservationResourceProps}/>
-    </AdminAdapter>
+      // @ts-ignore
+      <AdminAdapter session={session}>
+        {/* <CustomRoutes>
+            <Route path="/vols" element={<PrestationsList />} />
+        </CustomRoutes> */}
+        <ResourceGuesser name="clients" {...clientResourceProps}/>
+        <ResourceGuesser name="prestations" {...prestationResourceProps} />
+        <ResourceGuesser name="vols" {...volResourceProps}/>
+        <ResourceGuesser name="passagers" {...passagerResourceProps}/>
+        <ResourceGuesser name="circuits" {...circuitResourceProps}/>
+        <ResourceGuesser name="aeronefs" {...aeronefResourceProps}/>
+        <ResourceGuesser name="options" {...optionResourceProps}/>
+        <ResourceGuesser name="natures" {...natureResourceProps}/>
+        <ResourceGuesser name="qualifications" {...qualificationResourceProps}/>
+        <ResourceGuesser name="combinaisons" {...combinaisonResourceProps}/>
+        <ResourceGuesser name="cadeaux" {...cadeauResourceProps}/>
+        <ResourceGuesser name="contacts" {...contactResourceProps}/>
+        <ResourceGuesser name="origines" {...origineResourceProps}/>
+        <ResourceGuesser name="entretiens" {...entretienResourceProps}/>
+        <ResourceGuesser name="users" {...userResourceProps}/>
+        <ResourceGuesser name="profil_pilotes" {...profileResourceProps}/>
+        <ResourceGuesser name="reservations" {...reservationResourceProps}/>
+      </AdminAdapter>
   );
 };
 
@@ -149,8 +149,8 @@ const Admin = () => (
       <title>PLANETAIR974 - Administration</title>
     </Head>
 
-    {/*@ts-ignore*/}
-    <AdminWithOIDC />
+      {/*@ts-ignore*/}
+      <AdminWithOIDC />
 
   </>
 );

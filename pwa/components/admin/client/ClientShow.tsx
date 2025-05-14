@@ -32,7 +32,7 @@ export const ClientShow = () => {
                         <FunctionField
                             label=""
                             source="name"
-                            render={ ({ code }) => code }
+                            render={ ({ code, nom }) => code + " - " + nom }
                         />
                     </Datagrid>
                 </ArrayField>
@@ -53,7 +53,7 @@ export const ClientShow = () => {
                         <FunctionField
                             label=""
                             source="id"
-                            render={ ({ id }) => id }
+                            render={ ({ id, nom }) => id + " - " + nom }
                         />
                     </Datagrid>
                 </ArrayField>

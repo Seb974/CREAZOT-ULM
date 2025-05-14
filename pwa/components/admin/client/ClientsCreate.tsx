@@ -82,11 +82,13 @@ export const ClientsCreate = () => {
                 <ArrayInput source="airportCodes" label="Codes des aéroports">
                     <SimpleFormIterator inline disableReordering>
                         <TextInput source="code"/>
+                        <TextInput source="nom"/>
                     </SimpleFormIterator>
                 </ArrayInput>
                 <ArrayInput source="camIds" label="Caméras Windy">
                     <SimpleFormIterator inline disableReordering>
                         <TextInput source="id"/>
+                        <TextInput source="nom"/>
                     </SimpleFormIterator>
                 </ArrayInput>
                 <SelectInput source="timezone" choices={ timezones } defaultValue={ timezones[0].id } validate={required()}/>
