@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Link } from 'react-router-dom';
 import logo from "../../../public/api-platform/logo.png";
+// import logo from ''
 import Reservation from "./Reservation";
 import { isDefined } from "../../../app/lib/utils";
 
