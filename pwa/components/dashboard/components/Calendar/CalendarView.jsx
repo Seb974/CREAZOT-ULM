@@ -24,11 +24,20 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
   const session = useSession();
   const dataProvider = useDataProvider();
   const user = session.data.user;
+  const authorizedProfiles = ['pro', 'instructeur'];
   const min = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0);
   const max = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30);
   const defaultDates = useState({start: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0), end: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 0) });
+  const [profile, setProfile] = useState(null);
   const [dates, setDates] = useState(defaultDates);
   const [view, setView] = useState(Views.DAY);        // Views.WEEK
+
+  useEffect(() => getUserProfile(user), [user]);
+
+  useEffect(() => {
+    console.log(profile);
+    console.log(isAuthorized(profile));
+  }, [profile]);
 
   useEffect(() => {
     const {start, end} = Array.isArray(dates) ? dates[0] : dates;
@@ -57,6 +66,17 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
         pagination: {}
       })
       .then(({ data }) => setRappels(data));
+  };
+
+  const getUserProfile = user => {
+    if (isDefined(user)) {
+      dataProvider
+        .getList('profil_pilotes',{ filter: { 'pilote.email': user.email }, sort: {id: 'ASC' } })
+        .then(({ data }) => {
+          console.log(data);
+          setProfile(data[0]);
+        });
+    }
   };
 
   const getRappelsFilter = (start, end) => {
@@ -138,7 +158,9 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
           </b>
           </span>
           <br/>
-          <span className="text-xs"><b>{ prix }€ </b>{`${(isDefined(paid) && paid) ?  "- PRÉPAYÉ" : ""}`}</span>
+          { isAuthorized(profile) && 
+            <span className="text-xs"><b>{ prix }€ </b>{`${(isDefined(paid) && paid) ?  "- PRÉPAYÉ" : ""}`}</span>
+          }
         </>
       );
     else 
@@ -264,6 +286,17 @@ const onSelecting = useCallback((slotInfo) => {
       slotInfo.slots.length === 2 ? setVisible(true) : setRappelVisible(true);
   }
 }, []);
+
+const isAuthorized = profile => {
+  if (isDefined(profile)) {
+    const { qualifications } = profile;
+    if (isDefinedAndNotVoid(qualifications)) {
+      const authorizedSet = new Set(authorizedProfiles);
+      return qualifications.map(q => q.slug).some(item => authorizedSet.has(item));
+    }
+  }
+  return false;
+};
 
     return (
         <div className="calendar-container col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-12">

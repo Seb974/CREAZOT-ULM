@@ -58,7 +58,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
         AbstractNormalizer::GROUPS => ['Client:write'],
     ],
     collectDenormalizationErrors: true,
-    security: 'is_granted("OIDC_USER")',
+    // security: 'is_granted("OIDC_USER")',
     mercure: true
 )]
 class Client

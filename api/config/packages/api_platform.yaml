@@ -245,6 +245,12 @@ services:
             $properties: { pilote.firstName: 'iword_start' } # ]
         tags: [ 'api_platform.filter' ]
 
+    app.filter.profile.email:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { pilote.email: 'exact' } # ]
+        tags: [ 'api_platform.filter' ]
+
     app.filter.profile.eleve:
         parent: 'api_platform.doctrine.orm.boolean_filter'
         arguments:

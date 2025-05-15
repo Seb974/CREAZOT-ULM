@@ -24,11 +24,12 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     uriTemplate: '/profil_pilotes{._format}',
     operations: [
         new GetCollection(
-            itemUriTemplate: '/profil_pilotes/{id}{._format}',
+            itemUriTemplate: '/profil_pilotes{._format}',
             paginationClientItemsPerPage: true,
             security: 'is_granted("OIDC_USER")',
             filters: [
                 'app.filter.profile.pilote',
+                'app.filter.profile.email',
                 'app.filter.profile.eleve',
                 'app.filter.profile.professionnel',
                 'app.filter.profile.instructeur',

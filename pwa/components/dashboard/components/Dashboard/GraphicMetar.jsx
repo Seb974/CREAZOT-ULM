@@ -49,7 +49,7 @@ export const GraphicMetar = ({ code }) => {
                     <CircularProgress color="error" size={50} />
                 </div>
             }
-            <div ref={containerRef} className={loading ? 'invisible' : 'visible w-full h-full'} />
+            <div ref={containerRef} className={loading ? 'invisible' : 'visible mx-auto max-w-xl h-full'}/>
         </>
     );
 };

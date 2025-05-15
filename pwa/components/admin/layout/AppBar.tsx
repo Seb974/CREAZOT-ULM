@@ -17,9 +17,7 @@ const CustomAppBar = () => {
   const user = session.data.user;
   const { client, loading } = useClient();
 
-  const logoSrc = client.logo ? `${client.logo}?v=${Date.now()}` : "/images/logo.png";
-
-  useEffect(() => console.log(client), [client]);
+  const logoSrc = isDefined(client) && isDefined(client.logo) ? `${client.logo}?v=${Date.now()}` : "/images/logo.png";
 
   return loading ? <GlobalLoader/> : 
     isDefined(client) && (
