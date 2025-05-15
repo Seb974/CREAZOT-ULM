@@ -16,6 +16,7 @@ class FileUploader
         'mapicon' => 'FlightIcon.png',
         'favicon' => 'favicon.ico',
         'apple-touch-icon' => 'apple-touch-icon.png',
+        'thanksimage' => 'Thanks.png'
     ];
 
     public function __construct(
@@ -35,7 +36,7 @@ class FileUploader
         }
 
         $isSharedAsset = in_array($type, ['favicon', 'apple-touch-icon']);
-        $targetDir = $isSharedAsset ? $this->sharedDirectory : $this->clientDirectory;
+        $targetDir = $isSharedAsset ? $this->publicDir : $this->clientDirectory;
 
         if (!$this->filesystem->exists($targetDir)) {
             $this->filesystem->mkdir($targetDir, 0755);
@@ -54,10 +55,12 @@ class FileUploader
             case 'logo':
             case 'mapicon':
             case 'apple-touch-icon':
+            case 'thanksimage':
                 $filter = match ($type) {
                     'logo' => 'logo',
                     'mapicon' => 'map_icon',
                     'apple-touch-icon' => 'apple_touch_icon',
+                    'thanksimage' => 'thanks_image'
                 };
                 $filtered = $this->filterManager->applyFilter($this->createBinaryFromFile($file), $filter);
                 $this->filesystem->dumpFile($filePath, $filtered->getContent());

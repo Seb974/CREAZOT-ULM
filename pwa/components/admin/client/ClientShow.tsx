@@ -36,14 +36,15 @@ export const ClientShow = () => {
                         />
                     </Datagrid>
                 </ArrayField>
-                <FunctionField source="logo" label="Logo" render={({ logo }) => getFilename(logo) }/>
-                <FunctionField source="favicon" label="Favicon" render={({ favicon }) => getFilename(favicon) }/>
-                <FunctionField source="mapIcon" label="Icone représentative sur les cartes" render={({ mapIcon }) => getFilename(mapIcon) }/>
+                <FunctionField source="logo" label="Logo" render={({ logo }) => isDefined(logo) ? <a href={logo} target="_blank" rel="noopener noreferrer">{ getFilename(logo) }</a> : ''}/>
+                <FunctionField source="favicon" label="Favicon" render={({ favicon }) => isDefined(favicon) ? <a href={favicon} target="_blank" rel="noopener noreferrer">{ getFilename(favicon) }</a> : ''}/>
+                <FunctionField source="mapIcon" label="Icone représentative sur les cartes" render={({ mapIcon }) => isDefined(mapIcon) ? <a href={mapIcon} target="_blank" rel="noopener noreferrer">{ getFilename(mapIcon) }</a> : ''}/>
+                <FunctionField source="thanksImage" label="Image de la page de remerciement" render={({ thanksImage }) => isDefined(thanksImage) ? <a href={thanksImage} target="_blank" rel="noopener noreferrer">{ getFilename(thanksImage) }</a> : ''}/>
                 <FunctionField 
                     source="pdfBackground" 
                     label="Image de fond du PDF" 
                     render={({ pdfBackground, opacity }) => <p>
-                        { getFilename(pdfBackground) }
+                        { isDefined(pdfBackground) ? <a href={pdfBackground} target="_blank" rel="noopener noreferrer">{  getFilename(pdfBackground) }</a> : '' }
                         { isDefined(opacity) && opacity > 0 && <span className="ml-4 text-xs italic text-teal-800">{ "Opacité de " + opacity + " appliquée"}</span> }
                         </p>
                     }

@@ -14,6 +14,7 @@ import { UpdateModal } from "../Modal/UpdateModal";
 import dynamic from 'next/dynamic';
 import { useClient } from '../../../admin/ClientProvider';
 import GlobalLoader from "../../../admin/layout/GlobalLoader";
+import { isDefined } from "../../../../app/lib/utils";
 
 const MapView = dynamic(() => import('./MapView'), { ssr: false });
 
@@ -53,124 +54,119 @@ const Dashboard = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  return loading ? <GlobalLoader/> : (
-    <div className="overflow-x-hidden w-full">
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full" >
-        <MetarView showGraphic={ showGraphic } setShowGraphic={ setShowGraphic } switchToMap={() => setShowMetarMobile(false)} hidden={ isSmall && !showMetarMobile } client={ client }/>
-        <MapView isSmall={ isSmall } switchToMetar={() => setShowMetarMobile(true)} hidden={ isSmall && showMetarMobile } client={ client }/>
-      </div>
-
-      <div className="col-span-12 mt-6">
-        <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="flex flex-wrap md:inline-flex mb-4 sm:justify-end md:justify-left">
-            <button 
-              className={`bg-white hover:bg-gray-100 active:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded-l ${appli === "W" && 'active'}`}
-              onClick={ onWSelect }
-            >
-              <span className="hidden sm:inline">Windy</span>
-              <span className="inline sm:hidden">Wdy</span>
-            </button>
-            <button 
-              className={`bg-white hover:bg-gray-100 active:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 ${appli === "M" && 'active'}`}
-              onClick={ onMSelect }
-            >
-              <span className="hidden sm:inline">MétéoRadar</span>
-              <span className="inline sm:hidden">Radar</span>
-            </button>
-            <button 
-              className={`bg-white hover:bg-gray-100 active:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 ${appli === "MB" && 'active'}`}
-              onClick={ onMBSelect }
-            >
-              <span className="hidden sm:inline">MeteoBlue</span>
-              <span className="inline sm:hidden">Blue</span>
-            </button>
-            <button 
-              className={`bg-white hover:bg-gray-100 active:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded-r ${appli === "C" && 'active'}`}
-              onClick={ onCSelect }
-            >
-              <span className="hidden sm:inline">Caméras</span>
-              <span className="inline sm:hidden">Cams</span>
-            </button>
-          </div>
-
-          <div className={` ${ appli !== "C" ? "visible" : "invisible"} w-full`}>
-            { appli !== "C" ? 
-                appli === "W" ?
-                  <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src={`https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=default&zoom=${ client.zoom } &overlay=clouds&product=ecmwf&level=surface&lat=${ client.lat }&lon=${ client.lng }&message=true`}></iframe>
-                : appli === "M" ?
-                  <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} _ngcontent-serverapp-c135101453="" id="radarIframe" allow="web-share" src={`https://radar.wo-cloud.com/pwa/?zoom=${ client.zoom }&layer=WetterRadar&center=${ client.lat + ',' + client.lng }&tz=Indian/Reunion&tf=HH:mm&windunit=kmh&lang=fr-FR&desktop=true&fadeTop=false`} title="Carte radar météo"></iframe>
-                :
-                <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src={`https://www.meteoblue.com/fr/meteo/cartes/widget?windAnimation=0&gust=0&satellite=1&cloudsAndPrecipitation=1&temperature=1&sunshine=1&extremeForecastIndex=1&geoloc=detect&tempunit=C&windunit=km%252Fh&lengthunit=metric&zoom=${ client.zoom - 1 }&autowidth=auto`}  frameborder="0" scrolling="NO" allowtransparency="true" sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>
-            : 
-            <></>
-            }
-          </div>
-
-          <div className={ `camera-container ${ appli === "C" ? "visible" : "invisible no-visible-cam"}`}>
-            <Cameras client={ client }/>
+  return loading ? <GlobalLoader/> : 
+    isDefined(client) && (
+      <div className="overflow-x-hidden w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full" >
+          <MetarView showGraphic={ showGraphic } setShowGraphic={ setShowGraphic } switchToMap={() => setShowMetarMobile(false)} hidden={ isSmall && !showMetarMobile } client={ client }/>
+          <MapView isSmall={ isSmall } switchToMetar={() => setShowMetarMobile(true)} hidden={ isSmall && showMetarMobile } client={ client }/>
+        </div>
+        <div className="col-span-12 mt-6">
+          <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div className="flex flex-wrap md:inline-flex mb-4 sm:justify-end md:justify-left">
+              <button 
+                className={`bg-white hover:bg-gray-100 active:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded-l ${appli === "W" && 'active'}`}
+                onClick={ onWSelect }
+              >
+                <span className="hidden sm:inline">Windy</span>
+                <span className="inline sm:hidden">Wdy</span>
+              </button>
+              <button 
+                className={`bg-white hover:bg-gray-100 active:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 ${appli === "M" && 'active'}`}
+                onClick={ onMSelect }
+              >
+                <span className="hidden sm:inline">MétéoRadar</span>
+                <span className="inline sm:hidden">Radar</span>
+              </button>
+              <button 
+                className={`bg-white hover:bg-gray-100 active:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 ${appli === "MB" && 'active'}`}
+                onClick={ onMBSelect }
+              >
+                <span className="hidden sm:inline">MeteoBlue</span>
+                <span className="inline sm:hidden">Blue</span>
+              </button>
+              <button 
+                className={`bg-white hover:bg-gray-100 active:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded-r ${appli === "C" && 'active'}`}
+                onClick={ onCSelect }
+              >
+                <span className="hidden sm:inline">Caméras</span>
+                <span className="inline sm:hidden">Cams</span>
+              </button>
+            </div>
+            <div className={` ${ appli !== "C" ? "visible" : "invisible"} w-full`}>
+              { appli !== "C" ? 
+                  appli === "W" ?
+                    <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src={`https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=default&zoom=${ client.zoom } &overlay=clouds&product=ecmwf&level=surface&lat=${ client.lat }&lon=${ client.lng }&message=true`}></iframe>
+                  : appli === "M" ?
+                    <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} _ngcontent-serverapp-c135101453="" id="radarIframe" allow="web-share" src={`https://radar.wo-cloud.com/pwa/?zoom=${ client.zoom }&layer=WetterRadar&center=${ client.lat + ',' + client.lng }&tz=Indian/Reunion&tf=HH:mm&windunit=kmh&lang=fr-FR&desktop=true&fadeTop=false`} title="Carte radar météo"></iframe>
+                  :
+                  <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src={`https://www.meteoblue.com/fr/meteo/cartes/widget?windAnimation=0&gust=0&satellite=1&cloudsAndPrecipitation=1&temperature=1&sunshine=1&extremeForecastIndex=1&geoloc=detect&tempunit=C&windunit=km%252Fh&lengthunit=metric&zoom=${ client.zoom - 1 }&autowidth=auto`}  frameborder="0" scrolling="NO" allowtransparency="true" sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>
+              : 
+              <></>
+              }
+            </div>
+            <div className={ `camera-container ${ appli === "C" ? "visible" : "invisible no-visible-cam"}`}>
+              <Cameras client={ client }/>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
-        <CalendarView 
-            events={ events } 
-            setEvents={ setEvents } 
-            selection={ selection } 
-            setSelection={ setSelection }
+        <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
+          <CalendarView 
+              events={ events } 
+              setEvents={ setEvents } 
+              selection={ selection } 
+              setSelection={ setSelection }
+              slot={ slot }
+              setSlot={ setSlot }
+              visible={ visible }
+              setVisible={ setVisible }
+              reservations={ reservations }
+              setReservations={ setReservations }
+              rappelVisible={ rappelVisible } 
+              setRappelVisible={ setRappelVisible }
+              rappels={ rappels }
+              setRappels={ setRappels }
+              rappelSelection={ rappelSelection } 
+              setRappelSelection={ setRappelSelection }
+          />
+        </div>
+        <RegisterModal 
+            visible={ visible } 
+            setVisible={ setVisible } 
             slot={ slot }
-            setSlot={ setSlot }
-            visible={ visible }
-            setVisible={ setVisible }
             reservations={ reservations }
             setReservations={ setReservations }
+        />
+        <InformationsModal 
+            selectedReservation={ selection } 
+            setSelectedReservation={ setSelection }
+            reservations={ reservations }
+            setReservations={ setReservations }
+            toUpdate={ toUpdate }
+            setToUpdate={ setToUpdate }
+        />
+        <UpdateModal 
+            toUpdate={ toUpdate } 
+            setToUpdate={ setToUpdate }
+            reservations={ reservations }
+            setReservations={ setReservations }
+        />
+        <RappelModal 
             rappelVisible={ rappelVisible } 
-            setRappelVisible={ setRappelVisible }
+            setRappelVisible={ setRappelVisible } 
+            slot={ slot }
             rappels={ rappels }
             setRappels={ setRappels }
-            rappelSelection={ rappelSelection } 
-            setRappelSelection={ setRappelSelection }
+        />
+        <RappelInformationsModal 
+            selectedRappel={ rappelSelection } 
+            setSelectedRappel={ setRappelSelection }
+            rappels={ rappels }
+            setRappels={ setRappels }
+            events={ events }
+            setEvents={ setEvents }
         />
       </div>
-
-      <RegisterModal 
-          visible={ visible } 
-          setVisible={ setVisible } 
-          slot={ slot }
-          reservations={ reservations }
-          setReservations={ setReservations }
-      />
-      <InformationsModal 
-          selectedReservation={ selection } 
-          setSelectedReservation={ setSelection }
-          reservations={ reservations }
-          setReservations={ setReservations }
-          toUpdate={ toUpdate }
-          setToUpdate={ setToUpdate }
-      />
-      <UpdateModal 
-          toUpdate={ toUpdate } 
-          setToUpdate={ setToUpdate }
-          reservations={ reservations }
-          setReservations={ setReservations }
-      />
-      <RappelModal 
-          rappelVisible={ rappelVisible } 
-          setRappelVisible={ setRappelVisible } 
-          slot={ slot }
-          rappels={ rappels }
-          setRappels={ setRappels }
-      />
-      <RappelInformationsModal 
-          selectedRappel={ rappelSelection } 
-          setSelectedRappel={ setRappelSelection }
-          rappels={ rappels }
-          setRappels={ setRappels }
-          events={ events }
-          setEvents={ setEvents }
-      />
-    </div>
   );
 };
 

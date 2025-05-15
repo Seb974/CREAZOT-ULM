@@ -102,6 +102,9 @@ export const ClientsCreate = () => {
                 <FileInput label="Favicon" source="favicon" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>
                     <FileField source="src" title="title" />
                 </FileInput>
+                <FileInput label="Image de la page de remerciement" source="thanksImage" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>
+                    <FileField source="src" title="title" />
+                </FileInput>
                 <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
                     <Box flex={2}>
                         <FileInput label="Arrière plan PDF" source="pdfBackground" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>

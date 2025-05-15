@@ -89,22 +89,22 @@ class Client
     private ?string $phone = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    // #[Assert\File(maxSize: '4M')]
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?string $logo = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    // #[Assert\File(maxSize: '2M')]
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?string $favicon = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    // #[Assert\File(maxSize: '4M')]
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?string $pdfBackground = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    // #[Assert\File(maxSize: '2M')]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?string $thanksImage = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?string $mapIcon = null;
 
@@ -444,6 +444,18 @@ class Client
     public function setCity(?string $city): static
     {
         $this->city = $city;
+
+        return $this;
+    }
+
+    public function getThanksImage(): ?string
+    {
+        return $this->thanksImage;
+    }
+
+    public function setThanksImage(?string $thanksImage): static
+    {
+        $this->thanksImage = $thanksImage;
 
         return $this;
     }

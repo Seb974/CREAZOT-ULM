@@ -32,6 +32,7 @@ export const ClientsEdit = () => {
     {name: 'logo', type: 'logo', opacity: null},
     {name: 'favicon', type: 'favicon', opacity: null},
     {name: 'mapIcon', type: 'mapicon', opacity: null},
+    {name: 'thanksImage', type: 'thanksimage', opacity: null},
     {name: 'pdfBackground', type: 'pdfbackground', opacity: null}
   ];
 
@@ -174,6 +175,16 @@ export const ClientsEdit = () => {
                 <FileField source="src" title="title" />
             </FileInput> 
             <FileInput label="Favicon" source="favicon" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }
+                       format={(value) => {
+                        if (typeof value === 'string') {
+                            return [{ src: value, title: value.split('/').pop() }];
+                        }
+                        return value;
+                    }}
+            >
+                <FileField source="src" title="title" />
+            </FileInput>
+            <FileInput label="Image de la page de remerciement" source="thanksImage" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }
                        format={(value) => {
                         if (typeof value === 'string') {
                             return [{ src: value, title: value.split('/').pop() }];

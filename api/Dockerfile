@@ -107,3 +107,15 @@ RUN set -eux; \
 	composer dump-env prod; \
 	composer run-script --no-dev post-install-cmd; \
 	chmod +x bin/console; sync;
+
+############### NOUVEAUTE #################
+# Copier les images par défaut dans un dossier interne (hors volume partagé)
+RUN mkdir -p /srv/assets/default-images
+COPY public/images/ /srv/assets/default-images/
+
+# Copier le script d'initialisation
+COPY init.sh /usr/local/bin/init.sh
+RUN chmod +x /usr/local/bin/init.sh
+
+# Utiliser le script comme point d'entrée
+ENTRYPOINT ["/usr/local/bin/init.sh"]

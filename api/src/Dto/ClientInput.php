@@ -37,6 +37,10 @@ final class ClientInput
     #[Groups(['Client:write'])]
     public ?UploadedFile $pdfBackground = null;
 
+    #[Assert\File(maxSize: '8M')]
+    #[Groups(['Client:write'])]
+    public ?UploadedFile $thanksImage = null;
+
     #[Assert\File(maxSize: '2M')]
     #[Groups(['Client:write'])]
     public ?UploadedFile $mapIcon = null;

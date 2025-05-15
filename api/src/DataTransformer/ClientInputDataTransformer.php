@@ -70,6 +70,12 @@ class ClientInputDataTransformer implements ProcessorInterface
             $client->setPdfBackground(null);
         }
 
+        if ($data->thanksImage instanceof UploadedFile) {
+            $client->setThanksImage($this->fileUploader->upload($data->thanksImage, 'thanksImage'));
+        } elseif ($data->thanksImage === 'DELETE') {
+            $client->setThanksImage(null);
+        }
+
         if ($data->mapIcon instanceof UploadedFile) {
             $client->setMapIcon($this->fileUploader->upload($data->mapIcon, 'mapIcon'));
         } elseif ($data->mapIcon === 'DELETE') {

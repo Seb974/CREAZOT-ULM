@@ -37,6 +37,7 @@ class CreateClientController extends AbstractController
         $dto->favicon = $request->files->get('favicon');
         $dto->pdfBackground = $request->files->get('pdfBackground');
         $dto->mapIcon = $request->files->get('mapIcon');
+        $dto->thanksImage = $request->files->get('thanksImage');
 
         // Champs array
         $dto->camIds = $this->parseArrayField($request, 'camIds');
