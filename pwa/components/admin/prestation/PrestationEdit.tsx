@@ -1,7 +1,88 @@
-import { ArrayInput, DateInput, Edit, NumberInput, ReferenceInput, SimpleForm, SimpleFormIterator, TextInput } from "react-admin";
-import { isDefined } from "../../../app/lib/utils";
+import { ArrayInput, DateInput, Edit, NumberInput, ReferenceInput, SimpleForm, SimpleFormIterator, TextInput, SelectInput, useDataProvider } from "react-admin";
+import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { useClient } from '../../admin/ClientProvider';
+import { clientWithOptions } from "../../../app/lib/client";
+import { useWatch, useFormContext } from "react-hook-form";
+import { useEffect, useState } from "react";
+
+const FilteredPiloteInput = ({ pilotes }) => {
+  const vols = useWatch({ name: "vols" });
+  const { setValue, getValues } = useFormContext();
+  
+  let needsEncadrant = false;
+  let qualificationsRequises = [];
+  if (isDefinedAndNotVoid(vols)) {
+    vols.forEach(({ circuit }) => {
+      qualificationsRequises = [...qualificationsRequises, ...circuit?.qualifications?.map(q => q['@id']) || []];
+      needsEncadrant = circuit.needsEncadrant === true ? true : needsEncadrant;
+    });
+  }
+
+  const pilotesEligibles = qualificationsRequises.length === 0
+    ? pilotes
+    : pilotes.filter(({profil, ...p}) =>
+        Array.isArray(profil.qualifications) &&
+        profil.qualifications.map(q => q['@id']).some(q => qualificationsRequises.includes(q))
+  );
+
+  useEffect(() => {
+    const selectedPiloteId = getValues("pilote.@id");
+    const stillEligible = pilotesEligibles.some(p => p['@id'] === selectedPiloteId);
+    if (!stillEligible) {
+      setValue("pilote.@id", null);
+    }
+  }, [vols]);
+  
+  return (
+    <SelectInput
+      source="pilote.@id"
+      label="Pilote @id"
+      choices={ pilotesEligibles }
+      optionText={(r) => isDefined(r) && isDefined(r.firstName) ? r.firstName.charAt(0).toUpperCase() + r.firstName.slice(1) : ' '}
+      optionValue="@id"
+    />
+  );
+};
+
+const EncadrantInput = ({ pilotes }) => {
+    const vols = useWatch({ name: "vols" });
+    const needsEncadrant = vols.reduce((result, { circuit }) => result = circuit.needsEncadrant === true ? true : result, false);
+    const encadrants = pilotes.filter(p => p.encadrant);
+
+    return (
+      <SelectInput
+        source="encadrant.@id" 
+        label="Encadrant @id"
+        choices={ encadrants }
+        disabled={ !needsEncadrant }
+        optionText={(r) => isDefined(r) && isDefined(r.firstName) ? r.firstName.charAt(0).toUpperCase() + r.firstName.slice(1) : ' '}
+        optionValue="@id"
+      />
+    );
+};
 
 export const PrestationEdit = () => {
+
+    const { client } = useClient();
+    const dataProvider = useDataProvider();
+    const [pilotes, setPilotes] = useState([]);
+
+    useEffect(() => getProfilPilotes(), []);
+
+    const getProfilPilotes = () => {
+        dataProvider
+            .getList("profil_pilotes", {})
+            .then(({ data }) => {
+              const piloteProfils = data
+                .filter(p => isDefined(p.pilote))
+                .map(({pilote, ...profil}) => ({
+                  ...pilote, 
+                  profil: {...profil, qualifications: isDefinedAndNotVoid(profil.qualifications) ? profil.qualifications : []},
+                  encadrant: !!profil.qualifications?.find(q => q.encadrant)
+                }))
+              setPilotes(piloteProfils)
+            });
+    };
 
     const transform = ({date, aeronef, pilote, encadrant, vols, ...data}) => {
         const newData = ({
@@ -13,10 +94,15 @@ export const PrestationEdit = () => {
           vols: vols.map(vol => ({
               ...vol,
               circuit: isDefined(vol.circuit) && isDefined(vol.circuit['@id']) ? vol.circuit['@id'] : null,
-              option: isDefined(vol.option) && isDefined(vol.option['@id']) ? vol.option['@id'] : null,
+              option: clientWithOptions(client) && (isDefined(vol.option) && isDefined(vol.option['@id'])) ? vol.option['@id'] : null,
           }))
         });
         return newData;
+    };
+
+    const OptionInput = () => {
+      return !clientWithOptions(client) ? null :
+        <ReferenceInput reference="options" source="option.@id" label="Option" />
     };
 
     return (
@@ -25,12 +111,12 @@ export const PrestationEdit = () => {
         <SimpleForm>
             <DateInput source="date" />
             <ReferenceInput reference="aeronefs" source="aeronef.@id" label="Aéronef" />
-            <ReferenceInput reference="users" source="pilote.@id" label="Pilote" />
-            <ReferenceInput reference="users" source="encadrant.@id" label="Encadrant" />
+            <FilteredPiloteInput pilotes={ pilotes }/>
+            <EncadrantInput pilotes={ pilotes }/>
             <ArrayInput source="vols">
                 <SimpleFormIterator inline disableReordering>
                     <ReferenceInput reference="circuits" source="circuit.@id" label="Circuit" />
-                    <ReferenceInput reference="options" source="option.@id" label="Option" />
+                    <OptionInput/>
                     <NumberInput source="quantite" />
                 </SimpleFormIterator>
             </ArrayInput>

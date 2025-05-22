@@ -14,6 +14,9 @@ import { useWatch, useFormContext } from "react-hook-form";
 import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { status, positions } from "../../../app/lib/reservation";
 import { useEffect, useState } from "react";
+import { useClient } from '../../admin/ClientProvider';
+import { useLocation } from 'react-router-dom';
+import { clientWithOptions, clientWithGifts, clientWithOriginContact, clientWithPartners } from "../../../app/lib/client";
 
 const FilteredPiloteInput = ({ pilotes, circuits }) => {
   const circuitId = useWatch({ name: "circuit.@id" });
@@ -41,22 +44,26 @@ const FilteredPiloteInput = ({ pilotes, circuits }) => {
   return (
     <SelectInput
       source="pilote.@id"
-      label="Pilote"
+      label="Pilote @id"
       choices={ pilotesEligibles }
       optionText={(r) => isDefined(r) && isDefined(r.firstName) ? r.firstName.charAt(0).toUpperCase() + r.firstName.slice(1) : ' '}
       optionValue="@id"
-      // emptyText="Aucun pilote éligible"
     />
   );
 };
 
 export const ReservationsEdit = () => {
 
+  const { client } = useClient();
+  const location = useLocation();
   const dataProvider = useDataProvider();
+  const origin = location?.state?.state?.origin;
+
   const [circuits, setCircuits] = useState([]);
   const [options, setOptions] = useState([]);
   const [origines, setOrigines] = useState([]);
   const [pilotes, setPilotes] = useState([]);
+  const [recordDate, setRecordDate] = useState(new Date());
 
   useEffect(() => {
     getCircuits();
@@ -99,21 +106,22 @@ export const ReservationsEdit = () => {
   };
 
   const transform = ({circuit, option, debut, avion, pilote, contact, origine, cadeau, paid, ...data}) => {
+    setRecordDate(new Date(debut));
     const selectedPilote = isDefined(pilote) && isDefined(pilote['@id']) ? pilote['@id'] : null;
     const selectedCircuit = isDefined(circuit) && isDefined(circuit['@id']) ? circuits.find(c => c['@id'] === circuit['@id']) : null;
-    const selectedOption = isDefined(option) && isDefined(option['@id']) ? options.find(c => c['@id'] === option['@id']) : null;
-    const seletedContacts = isDefinedAndNotVoid(contact) ? contact.map(c => c['@id']) : [];
-    const selectedOrigines = isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === o['@id']))) : [];
-    const formattedCadeau = isDefined(cadeau) && isDefined(cadeau['@id']) ? cadeau['@id'] : null;
+    const selectedOption = clientWithOptions(client) && isDefined(option) && isDefined(option['@id']) ? options.find(c => c['@id'] === option['@id']) : null;
+    const seletedContacts = clientWithOriginContact(client) && isDefinedAndNotVoid(contact) ? contact.map(c => c['@id']) : [];
+    const selectedOrigines = clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === o['@id']))) : [];
+    const formattedCadeau = clientWithGifts(client) && isDefined(cadeau) && isDefined(cadeau['@id']) ? cadeau['@id'] : null;
     return {...data,
         fin: getEnd(debut, selectedCircuit),
         prix: getTotalPrice(selectedCircuit, selectedOption, selectedOrigines),
         circuit: isDefined(circuit) ? circuit['@id'] : null,
         avion: isDefined(avion) ? avion['@id'] : null,
-        option: isDefined(option) ? option['@id'] : null,
+        option: clientWithOptions(client) && isDefined(option) ? option['@id'] : null,
         pilote: selectedPilote,
         paid: isDefined(formattedCadeau) ? true : paid,
-        origine: isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : [],
+        origine: clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : [],
         cadeau: formattedCadeau,
         contact: seletedContacts,
     };
@@ -132,31 +140,43 @@ export const ReservationsEdit = () => {
     return new Date(start.setHours(start.getHours() + duration.getHours(), start.getMinutes() + duration.getMinutes(), start.getSeconds() + duration.getSeconds()));
   };
 
+  const OptionInput = () => !clientWithOptions(client) ? null : 
+    <ReferenceInput reference="options" source="option.@id" label="Option" />
+  
+  const GiftInput = () => !clientWithGifts(client) ? null : 
+    <ReferenceInput reference="cadeaux" source="cadeau.@id" label="Bon cadeau" filter={{ "fin['after']": new Date()  }}/>
+  
+  const OriginContactInput = () => !clientWithOriginContact(client) ? null : 
+    <ArrayInput source="contact" label="Contact initial">
+      <SimpleFormIterator inline disableReordering>
+          <ReferenceInput reference="contacts" source="@id" label="Contact initial" />
+      </SimpleFormIterator>
+    </ArrayInput>
+  
+  const PartnersInput = () => !clientWithPartners(client) ? null : 
+    <ArrayInput source="origine" label="Origine de l'appel">
+      <SimpleFormIterator inline disableReordering>
+          <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
+      </SimpleFormIterator>
+    </ArrayInput>
+
   return (
-  <Edit transform={transform}>
+  <Edit transform={transform} redirect={ origin === 'calendar' ? `/?scroll=calendar&date=${recordDate.toJSON().slice(0, 10) || ''}` : 'list' }>
       <SimpleForm>
           <DateTimeInput source="debut" defaultValue={ new Date((new Date()).setHours(8, 0, 0)) } label="Date"/>
           <TextInput source="nom" label="Nom & prénom du passager"/>
           <TextInput source="telephone" label="N° de téléphone"/>
           <TextInput source="email" label="Adresse email"/>
-          <ReferenceInput reference="cadeaux" source="cadeau.@id" label="Bon cadeau" filter={{ "fin['after']": new Date()  }}/>
+          <GiftInput/>
           <ReferenceInput reference="circuits" source="circuit.@id" label="Circuit" />
-          <ReferenceInput reference="options" source="option.@id" label="Option" />
+          <OptionInput/>
           <FilteredPiloteInput pilotes={ pilotes } circuits={ circuits } />
           <ReferenceInput reference="aeronefs" source="avion.@id" label="Aéronef" />
           <SelectInput source="position" choices={ positions } defaultValue="-"/>
           <SelectInput source="statut" choices={ status } />
           <TextInput source="color" label="Code couleur"/>
-          <ArrayInput source="contact" label="Contact initial">
-            <SimpleFormIterator inline disableReordering>
-                <ReferenceInput reference="contacts" source="@id" label="Contact initial" />
-            </SimpleFormIterator>
-          </ArrayInput>
-          <ArrayInput source="origine" label="Origine de l'appel">
-            <SimpleFormIterator inline disableReordering>
-                <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
-            </SimpleFormIterator>
-          </ArrayInput>
+          <OriginContactInput/>
+          <PartnersInput/>
           <TextInput source="remarques" label="Remarques" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
           <BooleanInput source="paid" label="Prépayé"/>
           <BooleanInput source="upsell" label="Upsell"/>

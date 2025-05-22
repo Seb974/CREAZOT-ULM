@@ -2,15 +2,9 @@
 import React, { useState, useEffect } from "react";
 import "../../../../css/satoshi.css";
 import "../../../../css/style.css";
-import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { MetarView } from "./MetarView";
 import { Cameras } from "./Cameras";
-import { CalendarView } from "../Calendar/CalendarView";
-import { RappelModal } from "../Modal/RappelModal";
-import { RegisterModal } from "../Modal/RegisterModal";
-import { InformationsModal } from "../Modal/InformationsModal";
-import { RappelInformationsModal } from "../Modal/RappelInformationsModal";
-import { UpdateModal } from "../Modal/UpdateModal";
+import { CalendarWidget } from "./CalendarWidget";
 import dynamic from 'next/dynamic';
 import { useClient } from '../../../admin/ClientProvider';
 import GlobalLoader from "../../../admin/layout/GlobalLoader";
@@ -21,24 +15,11 @@ const MapView = dynamic(() => import('./MapView'), { ssr: false });
 const Dashboard = () => {
 
   const { client, loading } = useClient();
-
-  const now = new Date();
-  const min = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0);
-  const max = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30);
-
   const [isSmall, setIsSmall] = useState(true);
   const [showGraphic, setShowGraphic] = useState(true);
   const [showMetarMobile, setShowMetarMobile] = useState(true);
-  const [selection, setSelection] = useState(null);
-  const [rappelSelection, setRappelSelection] = useState(null);
-  const [events, setEvents] = useState([]);
-  const [visible, setVisible] = useState(false);
-  const [rappelVisible, setRappelVisible] = useState(false);
-  const [slot, setSlot] = useState({start: min, end: max});
-  const [reservations, setReservations] = useState([]);
-  const [rappels, setRappels] = useState([]);
-  const [toUpdate, setToUpdate] = useState(null);
-  const [appli, setAppli] = useState("W");
+
+  const [appli, setAppli] = useState("W");  
 
   const onWSelect = () => setAppli("W");
   const onMSelect = () => setAppli("M");
@@ -46,9 +27,8 @@ const Dashboard = () => {
   const onMBSelect = () => setAppli("MB");
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsSmall(window.innerWidth < 768);
-    };
+    const handleResize = () => setIsSmall(window.innerWidth < 768);
+
     handleResize(); 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -110,62 +90,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-        <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
-          <CalendarView 
-              events={ events } 
-              setEvents={ setEvents } 
-              selection={ selection } 
-              setSelection={ setSelection }
-              slot={ slot }
-              setSlot={ setSlot }
-              visible={ visible }
-              setVisible={ setVisible }
-              reservations={ reservations }
-              setReservations={ setReservations }
-              rappelVisible={ rappelVisible } 
-              setRappelVisible={ setRappelVisible }
-              rappels={ rappels }
-              setRappels={ setRappels }
-              rappelSelection={ rappelSelection } 
-              setRappelSelection={ setRappelSelection }
-          />
-        </div>
-        <RegisterModal 
-            visible={ visible } 
-            setVisible={ setVisible } 
-            slot={ slot }
-            reservations={ reservations }
-            setReservations={ setReservations }
-        />
-        <InformationsModal 
-            selectedReservation={ selection } 
-            setSelectedReservation={ setSelection }
-            reservations={ reservations }
-            setReservations={ setReservations }
-            toUpdate={ toUpdate }
-            setToUpdate={ setToUpdate }
-        />
-        <UpdateModal 
-            toUpdate={ toUpdate } 
-            setToUpdate={ setToUpdate }
-            reservations={ reservations }
-            setReservations={ setReservations }
-        />
-        <RappelModal 
-            rappelVisible={ rappelVisible } 
-            setRappelVisible={ setRappelVisible } 
-            slot={ slot }
-            rappels={ rappels }
-            setRappels={ setRappels }
-        />
-        <RappelInformationsModal 
-            selectedRappel={ rappelSelection } 
-            setSelectedRappel={ setRappelSelection }
-            rappels={ rappels }
-            setRappels={ setRappels }
-            events={ events }
-            setEvents={ setEvents }
-        />
+          { isDefined(client.hasReservation) && client.hasReservation &&  <CalendarWidget isSmall={ isSmall } client={ client }/> }
       </div>
   );
 };

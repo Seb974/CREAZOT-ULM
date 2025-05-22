@@ -10,57 +10,61 @@ import {SubmitButton} from "./Form/SubmitButton";
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
 import { useRedirect, useNotify, useCreate } from 'react-admin';
-import { getCircuitDuration, getTotalPrice, getRealDuration, getCircuitPrice, isDefined } from '../../../app/lib/utils';
+import { getCircuitDuration, getTotalPrice, getRealDuration, getCircuitPrice, isDefined, isValidDuration } from '../../../app/lib/utils';
 import { EncadrantForm } from './Form/EncadrantForm';
+import { useClient } from '../../admin/ClientProvider';
+import { clientWithOptions } from "../../../app/lib/client";
 
 export const PrestationForm = () => {
 
-  const notify = useNotify();
-  const redirect = useRedirect();
-  const [create] = useCreate();
-  const [encadrants, setEncadrants] = useState([]);
-  const [date, setDate] = useState(new Date((new Date()).setHours(12, 0, 0)));
-  const [aircrafts, setAircrafts] = useState([]);
-  const [selectedPilot, setSelectedPilot] = useState("");
-  const [selectedEncadrant, setSelectedEncadrant] = useState("");
-  const [selectedAircraft, setSelectedAircraft] = useState("");
-  const [selectedCircuits, setSelectedCircuits] = useState([]);
-  const [selectedFlightTime, setSelectedFlightTime] = useState(0);
-  const [remarques, setRemarques] = useState("Rien à signaler.");
+    const notify = useNotify();
+    const redirect = useRedirect();
+    const [create] = useCreate();
+    const { client } = useClient();
+    const [pilots, setPilots] = useState([]);
+    const [encadrants, setEncadrants] = useState([]);
+    const [date, setDate] = useState(new Date((new Date()).setHours(12, 0, 0)));
+    const [aircrafts, setAircrafts] = useState([]);
+    const [selectedPilot, setSelectedPilot] = useState("");
+    const [selectedEncadrant, setSelectedEncadrant] = useState("");
+    const [selectedAircraft, setSelectedAircraft] = useState("");
+    const [selectedCircuits, setSelectedCircuits] = useState([]);
+    const [selectedFlightTime, setSelectedFlightTime] = useState(0);
+    const [remarques, setRemarques] = useState("Rien à signaler.");
 
-  const isObject = obj => Object.prototype.toString.call(obj) === '[object Object]';
+    const isObject = obj => Object.prototype.toString.call(obj) === '[object Object]';
 
-  const handleSubmit = async e => {
-      const prestation = {
-        aeronef: selectedAircraft.id,
-        pilote: isDefined(selectedPilot) && isObject(selectedPilot) ? (selectedPilot['@id'] || selectedPilot.id) : selectedPilot,
-        encadrant: isDefined(selectedEncadrant) && isObject(selectedEncadrant) ? (selectedEncadrant['@id'] || selectedEncadrant.id) : selectedEncadrant,
-        horametreDepart: selectedAircraft.horametre,
-        horametreFin: typeof selectedFlightTime === 'string' ? parseFloat(selectedFlightTime.replace(',','.')) : selectedFlightTime,
-        duree: getRealDuration(selectedFlightTime, selectedAircraft),
-        turnover: getTotalPrice(selectedFlightTime, selectedAircraft, selectedCircuits),
-        vols: selectedCircuits.map(c => {
-            return {
-              circuit: c.circuit.id,
-              quantite: parseInt(c.quantite),
-              duree: c.circuit.prixFixe ? getCircuitDuration(selectedAircraft, c.circuit, c.quantite) : getRealDuration(selectedFlightTime, selectedAircraft),
-              option: c.option.id !== 0 ? c.option.id : null,
-              prix: parseInt(c.quantite) * getCircuitPrice(c.circuit, c.option, selectedFlightTime, selectedAircraft)
-            }
-        }),
-        date,
-        remarques
-      };
-      try {
-          create('prestations', {data: prestation});
-          notify('Les vols ont bien été enregistrés.', { type: 'info' });
-          redirect('list', 'prestations');
-      } catch (error) {
-          notify(`Une erreur bloque l\'enregistrement des vols.`, { type: 'error' });
-          redirect('list', 'prestations');
-          console.log(error);
-      }
-  };
+    const handleSubmit = async e => {
+        const prestation = {
+            aeronef: selectedAircraft.id,
+            pilote: isDefined(selectedPilot) && isObject(selectedPilot) ? (selectedPilot['@id'] || selectedPilot.id) : selectedPilot,
+            encadrant: isDefined(selectedEncadrant) && isObject(selectedEncadrant) ? (selectedEncadrant['@id'] || selectedEncadrant.id) : selectedEncadrant,
+            horametreDepart: selectedAircraft.horametre,
+            horametreFin: typeof selectedFlightTime === 'string' ? parseFloat(selectedFlightTime.replace(',','.')) : selectedFlightTime,
+            duree: getRealDuration(selectedFlightTime, selectedAircraft),
+            turnover: getTotalPrice(selectedFlightTime, selectedAircraft, selectedCircuits),
+            vols: selectedCircuits.map(c => {
+                return {
+                    circuit: c.circuit.id,
+                    quantite: parseInt(c.quantite),
+                    duree: c.circuit.prixFixe ? getCircuitDuration(selectedAircraft, c.circuit, c.quantite) : getRealDuration(selectedFlightTime, selectedAircraft),
+                    option: clientWithOptions(client) && c.option.id !== 0 ? c.option.id : null,
+                    prix: parseInt(c.quantite) * getCircuitPrice(c.circuit, c.option, selectedFlightTime, selectedAircraft)
+                }
+            }),
+            date,
+            remarques
+        };
+        try {
+            create('prestations', {data: prestation});
+            notify('Les vols ont bien été enregistrés.', { type: 'info' });
+            redirect('list', 'prestations');
+        } catch (error) {
+            notify(`Une erreur bloque l\'enregistrement des vols.`, { type: 'error' });
+            redirect('list', 'prestations');
+            console.log(error);
+        }
+    };
 
   return (
       <div className="w-full">
@@ -82,9 +86,11 @@ export const PrestationForm = () => {
                     }}
                 />
             </div>
-            <PilotForm 
+            <PilotForm
                 selectedPilot={ selectedPilot } 
                 setSelectedPilot={ setSelectedPilot }
+                pilots={ pilots } 
+                setPilots={ setPilots }
                 setEncadrants={ setEncadrants }
             />
             <AircraftForm 
@@ -120,21 +126,22 @@ export const PrestationForm = () => {
                   Remarque(s)
                 </label>
                 <textarea 
-                  id="remarques" 
-                  name="remarques" 
-                  rows="4" 
-                  placeholder="Une particularité à préciser ?"
-                  className="w-full rounded border-[1.5px] border-stroke bg-white px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  onChange={(e) => setRemarques( e.target.value)}
-                  value={ remarques }
+                    id="remarques" 
+                    name="remarques" 
+                    rows="4" 
+                    placeholder="Une particularité à préciser ?"
+                    className="w-full rounded border-[1.5px] border-stroke bg-white px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    onChange={(e) => setRemarques( e.target.value)}
+                    value={ remarques }
                 >
                 </textarea>
             </div>
         </div>
         <div className="pl-7 py-6 flex justify-start gap-4 bg-gray-50">
            <SubmitButton
-              selectedCircuits={ selectedCircuits }
-              handleSubmit={ handleSubmit }
+                selectedCircuits={ selectedCircuits }
+                handleSubmit={ handleSubmit }
+                isValid={ isValidDuration(selectedFlightTime, selectedAircraft) }
             />
         </div>
       </div>

@@ -1,13 +1,37 @@
 import { Show, SimpleShowLayout, TextField, DateField, NumberField, BooleanField, FunctionField, ArrayField, Datagrid } from 'react-admin';
+import { clientWithOptions, clientWithGifts, clientWithOriginContact, clientWithPartners } from "../../../app/lib/client";
 import { isDefined } from '../../../app/lib/utils';
 import { status } from "../../../app/lib/reservation";
+import { useClient } from '../../admin/ClientProvider';
 
 export const ReservationShow = () => {
+
+    const { client } = useClient();
 
     const getStatusLabel = ({statut, report}) => {
         const selectedStatus = status.find(s => s.id === statut);
         return isDefined(selectedStatus) ? selectedStatus.name : report ? status[2].name : status[0].name;
     };
+
+    const OptionField = () => !clientWithOptions(client) ? null : 
+        <TextField source="option.nom" label="Option"/>
+
+    const GiftField = () => !clientWithGifts(client) ? null : 
+        <TextField source="cadeau.name" label="Bon cadeau"/>
+
+    const OriginContactField = () => !clientWithOriginContact(client) ? null : 
+        <ArrayField source="contact" label="Contact initial">
+            <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {display: 'none'}}} className="text-xs italic">
+                <TextField source="name" label="Nom"/>
+            </Datagrid>
+        </ArrayField>
+
+    const PartnersField = () => !clientWithPartners(client) ? null : 
+        <ArrayField source="origine" label="Origine de l'appel">
+            <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {display: 'none'}}} className="text-xs italic">
+                <TextField source="name" label="Nom"/>
+            </Datagrid>
+        </ArrayField>
 
     return (
         <Show>
@@ -23,8 +47,8 @@ export const ReservationShow = () => {
                     render={record => <>{record.quantite}<span className="text-xs italic">{'x'}</span> { record.circuit.code }</> }
                     textAlign="right"
                 />
-                <TextField source="option.nom" label="Option"/>
-                <TextField source="cadeau.name" label="Bon cadeau"/>
+                <OptionField/>
+                <GiftField/>
                 <FunctionField
                     label="Pilote"
                     source="pilote.firstName"
@@ -34,16 +58,8 @@ export const ReservationShow = () => {
                 />
                 <TextField source="avion.immatriculation" label="Aéronef" sortable={ true }/>
                 <TextField source="position" label="Position"/>
-                <ArrayField source="contact" label="Contact initial">
-                    <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {display: 'none'}}} className="text-xs italic">
-                        <TextField source="name" label="Nom"/>
-                    </Datagrid>
-                </ArrayField>
-                <ArrayField source="origine" label="Origine de l'appel">
-                    <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {display: 'none'}}} className="text-xs italic">
-                        <TextField source="name" label="Nom"/>
-                    </Datagrid>
-                </ArrayField>
+                <OriginContactField/>
+                <PartnersField/>
                 <TextField source="remarques" label="Remarque(s)" />
                 <NumberField source="prix" label="Prix" options={{ style: 'currency', currency: 'EUR' }}/>
                 <FunctionField

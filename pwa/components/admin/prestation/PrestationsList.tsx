@@ -27,6 +27,8 @@ import { type PagedCollection } from "../../../types/collection";
 import { useSession } from "next-auth/react";
 import { isDefined } from "../../../app/lib/utils";
 import { useMediaQuery, Theme } from '@mui/material';
+import { useClient } from '../../admin/ClientProvider';
+import { clientWithOptions } from "../../../app/lib/client";
 
 export interface Props {
     data: PagedCollection<Prestation> | null;
@@ -52,25 +54,35 @@ export interface Props {
     return `${ hours }${prestation.aeronef.decimal ? ',' : ':'}${ !prestation.aeronef.decimal && minutes < 10 ? '0' : '' }${ minutes }`;
   }
 
-  const VolsExpansion = () => (
-    <>
-      <ArrayField source="vols">
-          <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}} className="text-xs italic">
-              <NumberField source="quantite" label="Nb vol(s)"/>
-              <FunctionField
-                source="circuit"
-                render={record => isDefined(record.circuit) && <p>{record.circuit.code} - <span className="text-xs italic">{record.circuit.nom}</span></p>}
-              />
-              <FunctionField
-                source="nature"
-                render={record => isDefined(record.circuit) && isDefined(record.circuit.nature) && <p>{record.circuit.nature.code} - <span className="text-xs italic">{record.circuit.nature.label}</span></p>}
-              />
-              <TextField source="option.nom" label="Option"/>
-          </Datagrid>
-      </ArrayField>
-      
-    </>
-  );
+  const VolsExpansion = () => {
+
+    const { client } = useClient();
+
+    const OptionField = () => {
+      return !clientWithOptions(client) ? null :
+        <TextField source="option.nom" label="Option"/>
+    };
+
+    return (
+      <>
+        <ArrayField source="vols">
+            <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}} className="text-xs italic">
+                <NumberField source="quantite" label="Nb vol(s)"/>
+                <FunctionField
+                  source="circuit"
+                  render={record => isDefined(record.circuit) && <p>{record.circuit.code} - <span className="text-xs italic">{record.circuit.nom}</span></p>}
+                />
+                <FunctionField
+                  source="nature"
+                  render={record => isDefined(record.circuit) && isDefined(record.circuit.nature) && <p>{record.circuit.nature.code} - <span className="text-xs italic">{record.circuit.nature.label}</span></p>}
+                />
+                <OptionField/>
+            </Datagrid>
+        </ArrayField>
+        
+      </>
+    );
+  };
 
 const CustomBody = (props) => {
 

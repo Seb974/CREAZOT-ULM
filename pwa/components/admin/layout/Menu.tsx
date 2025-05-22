@@ -12,6 +12,7 @@ import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import CropOriginalIcon from '@mui/icons-material/CropOriginal';
 import { useSession } from "next-auth/react";
+import { useClient } from '../../admin/ClientProvider';
 import { isDefined } from "../../../app/lib/utils";
 import PermPhoneMsgIcon from '@mui/icons-material/PermPhoneMsg';
 import { useState } from 'react';
@@ -26,6 +27,7 @@ const CustomMenu = () => {
 
   const session = useSession();
   const user = session.data.user;
+  const { client, loading } = useClient();
   const [superAdminOpen, setSuperAdminOpen] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [openSidebar] = useSidebarState();
@@ -43,7 +45,7 @@ const CustomMenu = () => {
     <Menu>
       <Menu.DashboardItem />
       {/* @ts-ignore */}
-      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
+      { (isDefined(client) && isDefined(client.hasReservation) && client.hasReservation) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
         <Menu.Item
           to="/reservations"
           primaryText="Réservations"
@@ -60,13 +62,15 @@ const CustomMenu = () => {
         primaryText="Vols"
         leftIcon={<FlightTakeoffIcon />}
       />
-      <Menu.Item
-        to="/passagers"
-        primaryText="Passagers"
-        leftIcon={<GroupIcon />}
-      />
+      { isDefined(client) && isDefined(client.hasPassengerRegistration) && client.hasPassengerRegistration && 
+        <Menu.Item
+          to="/passagers"
+          primaryText="Passagers"
+          leftIcon={<GroupIcon />}
+        />
+      }
       {/* @ts-ignore */}
-      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
+      { (isDefined(client) && isDefined(client.hasGifts) && client.hasGifts) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
         <Menu.Item
           to="/cadeaux"
           primaryText="Bons cadeaux"
@@ -98,7 +102,7 @@ const CustomMenu = () => {
         />
       }
       {/* @ts-ignore */}
-      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
+      { (isDefined(client) && isDefined(client.hasPartners) && client.hasPartners) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
         <Menu.Item
           to="/origines"
           primaryText="Pouvoyeurs"
@@ -136,41 +140,47 @@ const CustomMenu = () => {
                   leftIcon={<AdminPanelSettingsIcon />}
                   sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
                 />
-            <MenuItemLink
-                  to="#"
-                  onClick={ handleOptionsClick }
-                  primaryText="Options"
-                  leftIcon={<CollectionsIcon className="h-[24px] w-[24px]"/>}
-                  dense={ !openSidebar }
-                  sx={{ cursor: 'pointer',  pl: 3, backgroundColor: optionsOpen ? '#E4E7EB' : '#EFF2F5' }}
-              >
-              </MenuItemLink>
-              <Collapse in={ optionsOpen } timeout="auto" unmountOnExit>
-                  <Menu.Item
-                        to="/options"
-                        primaryText="Eléments"
-                        leftIcon={<CropOriginalIcon />}
-                        sx={{ pl: 2, backgroundColor: '#E4E7EB' }}
-                      />
-                  <Menu.Item
-                        to="/combinaisons"
-                        primaryText="Packs commerciaux"
-                        leftIcon={<FilterIcon />}
-                        sx={{ pl: 2, backgroundColor: '#E4E7EB' }}
-                      />
-            </Collapse>
+            { isDefined(client) && isDefined(client.hasOptions) && client.hasOptions && 
+              <>
+                <MenuItemLink
+                      to="#"
+                      onClick={ handleOptionsClick }
+                      primaryText="Options"
+                      leftIcon={<CollectionsIcon className="h-[24px] w-[24px]"/>}
+                      dense={ !openSidebar }
+                      sx={{ cursor: 'pointer',  pl: 3, backgroundColor: optionsOpen ? '#E4E7EB' : '#EFF2F5' }}
+                  >
+                  </MenuItemLink>
+                  <Collapse in={ optionsOpen } timeout="auto" unmountOnExit>
+                      <Menu.Item
+                            to="/options"
+                            primaryText="Eléments"
+                            leftIcon={<CropOriginalIcon />}
+                            sx={{ pl: 2, backgroundColor: '#E4E7EB' }}
+                          />
+                      <Menu.Item
+                            to="/combinaisons"
+                            primaryText="Packs commerciaux"
+                            leftIcon={<FilterIcon />}
+                            sx={{ pl: 2, backgroundColor: '#E4E7EB' }}
+                          />
+                </Collapse>
+              </>
+            }
             <Menu.Item
                   to="/natures"
                   primaryText="Natures"
                   leftIcon={<CommentIcon />}
                   sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
                 />
-            <Menu.Item
-                  to="/contacts"
-                  primaryText="Contacts"
-                  leftIcon={<PermPhoneMsgIcon />}
-                  sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
-                />
+            { (isDefined(client) && isDefined(client.hasOriginContact) && client.hasOriginContact) && 
+              <Menu.Item
+                    to="/contacts"
+                    primaryText="Contacts"
+                    leftIcon={<PermPhoneMsgIcon />}
+                    sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+                  />
+            }
             <Menu.Item
                   to="/clients"
                   primaryText="Client"

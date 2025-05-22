@@ -82,4 +82,31 @@ final class ClientInput
 
     #[Groups(['Client:write'])]
     public ?string $city = null;
+
+    #[Groups(['Client:write'])]
+    public ?string $website = null;
+
+    #[Groups(['Client:write'])]
+    public ?bool $hasPassengerRegistration = null;
+
+    #[Groups(['Client:write'])]
+    public ?bool $hasOptions = null;
+
+    #[Groups(['Client:write'])]
+    public ?bool $hasPartners = null;
+
+    #[Groups(['Client:write'])]
+    public ?bool $hasGifts = null;
+
+    #[Groups(['Client:write'])]
+    public ?bool $hasOriginContact = null;
+
+    #[Groups(['Client:write'])]
+    public ?bool $hasReservation = null;
+
+    #[Groups(['Client:write'])]
+    public ?string $thanksTitle = null;
+
+    #[Groups(['Client:write'])]
+    public ?string $thanksMessage = null;
 }

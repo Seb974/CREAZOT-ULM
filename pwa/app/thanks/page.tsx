@@ -67,7 +67,6 @@ export default function Page({ searchParams }: Props) {
         <p className="text-sm"><i>Profitez pleinement du moment, nous nous occupons de <a href="https://drive.google.com/drive/u/3/folders/0BzOWcOCzePzTSzRLTmFVMDFPOHM?resourcekey=0-iLj4-YqX5cggqazBJQxd7A" className="text-blue-500" target="_blank" rel="noopener noreferrer">vos souvenirs de l'Île intense vue du ciel</a>.</i><br/><br/><br/><br/></p>
 
         <div className="animate-bounce flex justify-center mt-6">
-
           <Image
               className="text-center"
               src={ source || defaultImage }

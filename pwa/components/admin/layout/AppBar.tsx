@@ -4,12 +4,10 @@ import Flight from "./Flight";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Link } from 'react-router-dom';
-import logo from "../../../public/api-platform/logo.png";
 import Reservation from "./Reservation";
 import { isDefined } from "../../../app/lib/utils";
 import { useClient } from '../../admin/ClientProvider';
 import GlobalLoader from "../../admin/layout/GlobalLoader";
-import { useEffect } from "react";
 
 const CustomAppBar = () => {
 
@@ -22,11 +20,12 @@ const CustomAppBar = () => {
   return loading ? <GlobalLoader/> : 
     isDefined(client) && (
       <AppBar
-        color="error"
+        // color={"error"}
+        sx={{ backgroundColor: client.color || 'primary' }}
         userMenu={
           <UserMenu>
             {/* @ts-ignore  */}
-            { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") && <Reservation /> }
+            { (isDefined(client) && isDefined(client.hasReservation) && client.hasReservation) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") && <Reservation /> }
             <Flight />
             <Logout />
           </UserMenu>

@@ -6,10 +6,13 @@ import PublicIcon from '@mui/icons-material/Public';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import NoPhotographyIcon from '@mui/icons-material/NoPhotography';
 import { Button } from '../../../common/ui/button';
+import { useClient } from '../../../admin/ClientProvider';
+import { clientWithOptions } from "../../../../app/lib/client";
 
 // @ts-ignore
 export const OneFlightForm: React.FC = ({ circuits, options, selectedCircuit, selectedCircuits, handleCircuitChange, handleQuantityChange, handleDeleteCircuit, handleOptionChange, disableOption }) => {
 
+  const { client } = useClient();
   const changeTextCircuitColor = () => setIsCircuitSelected(true);
   const changeTextOptionColor = () => setIsOptionSelected(true);
 
@@ -19,7 +22,7 @@ export const OneFlightForm: React.FC = ({ circuits, options, selectedCircuit, se
   return (
         <div className="mb-7">
             <div className="flex w-full">
-              <div className="relative z-20 bg-white dark:bg-form-input w-9/12 mr-4">
+              <div className={`relative z-20 bg-white dark:bg-form-input ${ clientWithOptions(client) ? 'w-9/12 mr-4' : 'w-full' }`}>
                 <PublicIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/>
 
                 <select
@@ -48,37 +51,39 @@ export const OneFlightForm: React.FC = ({ circuits, options, selectedCircuit, se
                   }
                 </select>
               </div>
-              <div className="relative z-20 bg-white dark:bg-form-input w-3/12">
-                  { selectedCircuit.option.id === 0 ? 
-                      <NoPhotographyIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/> :
-                      <AddAPhotoIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/>
-                  }
-                  <select
-                    value={ selectedCircuit.option.id }
-                    disabled={ !selectedCircuit.circuit.avecOptions }
-                    onChange={(e) => {
-                      handleOptionChange(selectedCircuit, e);
-                      changeTextOptionColor();
-                    }}
-                    className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-12 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input disabled:cursor-default disabled:bg-whiter ${
-                      isOptionSelected ? "text-black dark:text-white" : ""
-                    }`}
-                  >
-                    <option value={ 0 } className="text-body dark:text-bodydark">
-                        Sans option
-                    </option>
-                    { options.map(option => {
-                        return <option 
-                                  key={ option.id } 
-                                  value={ option.id } 
-                                  className="text-body dark:text-bodydark"
-                                >
-                                  { option.nom }
-                              </option>
-                      })
-                    }
-                  </select>
-                </div>  
+              { clientWithOptions(client) &&
+                  <div className="relative z-20 bg-white dark:bg-form-input w-3/12">
+                      { selectedCircuit.option.id === 0 ? 
+                          <NoPhotographyIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/> :
+                          <AddAPhotoIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/>
+                      }
+                      <select
+                        value={ selectedCircuit.option.id }
+                        disabled={ !selectedCircuit.circuit.avecOptions }
+                        onChange={(e) => {
+                          handleOptionChange(selectedCircuit, e);
+                          changeTextOptionColor();
+                        }}
+                        className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-12 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input disabled:cursor-default disabled:bg-whiter ${
+                          isOptionSelected ? "text-black dark:text-white" : ""
+                        }`}
+                      >
+                        <option value={ 0 } className="text-body dark:text-bodydark">
+                            Sans option
+                        </option>
+                        { options.map(option => {
+                            return <option 
+                                      key={ option.id } 
+                                      value={ option.id } 
+                                      className="text-body dark:text-bodydark"
+                                    >
+                                      { option.nom }
+                                  </option>
+                          })
+                        }
+                      </select>
+                  </div>  
+              }
             </div>
             <div className="flex mt-2">
               <div className="relative z-20 bg-white dark:bg-form-input w-9/12 mr-2">

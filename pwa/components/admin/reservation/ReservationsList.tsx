@@ -23,6 +23,8 @@ import { isDefined } from "../../../app/lib/utils";
 import { TextFieldProps } from "@mui/material";
 import { useMediaQuery, Theme } from '@mui/material';
 import { status } from "../../../app/lib/reservation";
+import { useClient } from '../../admin/ClientProvider';
+import { clientWithOptions } from "../../../app/lib/client";
 
 export interface Props {
   data: PagedCollection<Circuit> | null;
@@ -65,20 +67,19 @@ const ColoredRowSx = (record, index) => ({
 
 export const ReservationsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
+  const { client } = useClient();
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
-  const options = {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  };
+  const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
 
   const getStatusLabel = ({statut, report}) => {
     const selectedStatus = status.find(s => s.id === statut);
     return isDefined(selectedStatus) ? selectedStatus.name : report ? status[2].name : status[0].name;
-};
+  };
+
+  const OptionField = () => {
+    return !clientWithOptions(client) ? null :
+      <TextField source="option.nom" label="Option"/>
+  };
 
   return (
     <List resource="reservations" actions={<ListActions/>} filters={ filters }>
@@ -98,7 +99,8 @@ export const ReservationsList: NextPage<Props> = ({ data, hubURL, page }) => {
                   <ColoredTextField />
                   <TextField source="telephone" label="Téléphone" />
                   <TextField source="circuit.code" label="Circuit" />
-                  <TextField source="option.nom" label="Option"/>
+                  {/* <TextField source="option.nom" label="Option"/> */}
+                  <OptionField/>
                   <FunctionField
                       source="statut"
                       label="Statut"

@@ -30,6 +30,11 @@ export const getRealDuration = (selectedFlightTime, aircraft) => {
     }
 };
 
+export const isValidDuration = (selectedFlightTime, aircraft) => {
+  const duration = getRealDuration(selectedFlightTime, aircraft);
+  return duration > 0;
+};
+
 export const getTotalPrice = (flightTime, aircraft, circuits) => {
   const notFixedPrice = circuits.find(c => !c.circuit.prixFixe);
   if (notFixedPrice !== undefined) {
@@ -104,4 +109,36 @@ export const groupRappelsByDate = (rappels, startDate, endDate) => {
   });
 
   return grouped;
+};
+
+export const getSlotFromDate = date => {
+  const formattedDate = new Date(date);
+  return {
+      start: new Date((formattedDate).setHours(6, 0, 0)),
+      end: new Date((formattedDate).setHours(12, 30, 0))
+  };
+};
+
+export const getDefaultDatesFromDate = date => {
+  const formattedDate = new Date(date);
+  return {
+      start: new Date((formattedDate).setHours(0, 0, 0)),
+      end: new Date((formattedDate).setHours(23, 59, 59))
+  };
+};
+
+export const getDatesFromSlot = ({ start, end }) => {
+  const formattedStart = new Date(start);
+  const formattedEnd = new Date(end);
+  return {
+    start: new Date((formattedStart).setHours(0, 0, 0)),
+    end: new Date((formattedEnd).setHours(23, 59, 59))
+  }
+};
+
+export const isSameDates = (date1, date2) => {
+  if (isDefined(date1) && isDefined(date2)) {
+    return +date1.start === +date2.start && +date1.end === +date2.end;
+  }
+  return false;
 };

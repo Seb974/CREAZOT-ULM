@@ -3,16 +3,16 @@ import { Button } from '../../../common/ui/button';
 import SaveIcon from '@mui/icons-material/Save';
 
 // @ts-ignore
-export const SubmitButton: React.FC = ({ selectedCircuits, handleSubmit }) => {
+export const SubmitButton: React.FC = ({ selectedCircuits, handleSubmit, isValid = true }) => {
 
     const [pending, setPending] = useState(false);
     const [disabled, setDisabled] = useState(true);
 
     useEffect(() => {
       const numberOfCircuits = selectedCircuits.reduce((sum, current) => sum += parseInt(current.quantite), 0);
-      const disableState = numberOfCircuits <= 0;
+      const disableState = numberOfCircuits <= 0 || !isValid;
       setDisabled(disableState);
-    }, [selectedCircuits]);
+    }, [selectedCircuits, isValid]);
 
     const onClick = async e => {
       e.preventDefault();

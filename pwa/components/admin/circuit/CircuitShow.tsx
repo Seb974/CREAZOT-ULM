@@ -1,7 +1,11 @@
 import { Show, SimpleShowLayout, TextField, DateField, NumberField, BooleanField, FunctionField } from 'react-admin';
 import Chip from '@mui/material/Chip';
+import { useClient } from '../../admin/ClientProvider';
+import { clientWithOptions } from "../../../app/lib/client";
 
 export const CircuitShow = () => {
+
+    const { client } = useClient();
 
     const getShipStyle = ({ color }) => ({
         backgroundColor: color + '33',
@@ -12,6 +16,11 @@ export const CircuitShow = () => {
         marginBottom: '2px',
         marginTop: '2px'
     });
+
+    const OptionsField = () => {
+        return !clientWithOptions(client) ? null :
+            <BooleanField source="avecOptions" label="Options disponibles"/>
+    };
 
     return (
         <Show>
@@ -28,7 +37,7 @@ export const CircuitShow = () => {
                 />
                 <BooleanField source="needsEncadrant" label="Pilote encadrant requis"/>
                 <BooleanField source="prixFixe" label="Prix indépendant de la durée"/>
-                <BooleanField source="avecOptions" label="Options disponibles"/>
+                <OptionsField/>
             </SimpleShowLayout>
         </Show>
     )

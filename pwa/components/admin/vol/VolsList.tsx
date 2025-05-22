@@ -1,6 +1,5 @@
 import { type NextPage } from "next";
 import { TableRow, TableCell } from '@mui/material';
-
 import {
   TextInput,
   FunctionField,
@@ -23,6 +22,8 @@ import { type PagedCollection } from "../../../types/collection";
 import { useSession } from "next-auth/react";
 import { isDefined } from "../../../app/lib/utils";
 import { useMediaQuery, Theme } from '@mui/material';
+import { useClient } from '../../admin/ClientProvider';
+import { clientWithOptions } from "../../../app/lib/client";
 
 export interface Props {
   data: PagedCollection<Vol> | null;
@@ -84,9 +85,15 @@ const CustomBody = (props) => {
 
 const CustomDatagrid = () => {
 
+    const { client } = useClient();
     const session = useSession();
     const user = session.data.user;
     const hasAdminAccess = user => isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin");
+
+    const OptionField = () => {
+      return !clientWithOptions(client) ? null :
+        <TextField source="option.nom" label="Option" sortable={ true }/>
+    };
 
     return (
       <Datagrid body={<CustomBody />}  sx={{'& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
@@ -103,7 +110,7 @@ const CustomDatagrid = () => {
             <NumberField source="quantite" label="Nombre de vol(s)"/>
             <TextField source="circuit.code" label="Circuit" sortable={ true }/>
             <TextField source="circuit.nature.code" label="Nature" sortable={ true }/> 
-            <TextField source="option.nom" label="Option" sortable={ true }/>
+            <OptionField/>
             <NumberField source="cout" label={hasAdminAccess(user) ? "Coût pilote" : "Revenu pilote"} options={{ style: 'currency', currency: 'EUR' }}/>
             { hasAdminAccess(user) && 
                 <NumberField source="prix" label="C.A." options={{ style: 'currency', currency: 'EUR' }}/>

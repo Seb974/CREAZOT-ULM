@@ -1,6 +1,8 @@
 import { useSession } from 'next-auth/react';
-import { Show, SimpleShowLayout, TextField, DateField, NumberField, List, Datagrid, WrapperField, ReferenceManyField, ArrayField, FunctionField, EditButton, TopToolbar } from 'react-admin';
+import { Show, SimpleShowLayout, TextField, DateField, NumberField, Datagrid, ArrayField, FunctionField, EditButton, TopToolbar } from 'react-admin';
 import { isDefined } from '../../../app/lib/utils';
+import { useClient } from '../../admin/ClientProvider';
+import { clientWithOptions } from "../../../app/lib/client";
 
 const ListActions = () => (
     <TopToolbar>
@@ -12,6 +14,7 @@ export const PrestationShow = () => {
 
     const session = useSession();
     const user = session.data.user;
+    const { client } = useClient();
 
     const getFormattedDuration = ({ aeronef, duree }) => {
         const hours = Math.trunc(duree);
@@ -20,10 +23,15 @@ export const PrestationShow = () => {
     }
     
     const getFormattedHorametre = (prestation, horametre) => {
-    const hours = Math.trunc(prestation[horametre]);
-    const minutes = Math.round((prestation[horametre] - Math.trunc(prestation[horametre])) * (prestation.aeronef.decimal ? 10 : 100));
-    return `${ hours }${prestation.aeronef.decimal ? ',' : ':'}${ !prestation.aeronef.decimal && minutes < 10 ? '0' : '' }${ minutes }`;
+        const hours = Math.trunc(prestation[horametre]);
+        const minutes = Math.round((prestation[horametre] - Math.trunc(prestation[horametre])) * (prestation.aeronef.decimal ? 10 : 100));
+        return `${ hours }${prestation.aeronef.decimal ? ',' : ':'}${ !prestation.aeronef.decimal && minutes < 10 ? '0' : '' }${ minutes }`;
     }
+
+    const OptionField = () => {
+        return !clientWithOptions(client) ? null :
+            <TextField source="option.nom" label="Option"/>
+    };
 
     return (
         // @ts-ignore
@@ -74,7 +82,7 @@ export const PrestationShow = () => {
                         source="nature"
                         render={record => <p>{record.circuit.nature.code} - <span className="text-xs italic">{record.circuit.nature.label}</span></p>}
                         />
-                        <TextField source="option.nom" label="Option"/>
+                        <OptionField/>
                     </Datagrid>
                 </ArrayField>
                 <TextField source="remarques" label="Remarques"/>

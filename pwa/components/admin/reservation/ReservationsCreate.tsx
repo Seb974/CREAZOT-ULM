@@ -15,10 +15,13 @@ import {
   useRedirect,
   useNotify
 } from "react-admin";
+import { useLocation } from 'react-router-dom';
 import { useWatch, useFormContext } from 'react-hook-form';
 import { getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { useEffect, useState } from "react";
 import { status } from "../../../app/lib/reservation";
+import { useClient } from '../../admin/ClientProvider';
+import { clientWithOptions, clientWithOriginContact, clientWithPartners } from "../../../app/lib/client";
 
 const QuantiteWatcher = ({ setSelectedQuantite }) => {
   const { control } = useFormContext();
@@ -34,6 +37,8 @@ export const ReservationsCreate = () => {
   const notify = useNotify();
   const redirect = useRedirect();
   const [create] = useCreate();
+  const { client } = useClient();
+  const location = useLocation();
   const dataProvider = useDataProvider();
   const [options, setOptions] = useState([]);
   const [circuits, setCircuits] = useState([]);
@@ -41,6 +46,8 @@ export const ReservationsCreate = () => {
   const [combinaisons, setCombinaisons] = useState([]);
   const [enabledCombinaisons, setEnabledCOmbinaisons] = useState([]);
   const [selectedQuantite, setSelectedQuantite] = useState(1);
+  const searchParams = new URLSearchParams(location.search);
+  const debut = searchParams.get('debut');
 
   useEffect(() => {
       getCircuits();
@@ -78,19 +85,19 @@ export const ReservationsCreate = () => {
   const onSubmit = async ({option, origine, contact, remarques, ...data}) => {
     try {
       const selectedCircuit = circuits.find(c => c['@id'] === data.circuit);
-      const selectedOrigines = isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === o['@id']))) : [];
-      const selectedOptions = getSelectedOptions(option, data.quantite, options);
+      const selectedOrigines = clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === o['@id']))) : [];
+      const selectedOptions = clientWithOptions(client) ? getSelectedOptions(option, data.quantite, options) : [];
       data = {
         ...data, 
         remarques: isDefined(remarques) ? remarques : '', 
         fin: getEnd(data.debut, selectedCircuit),
         color: getRandomColor(),
         report: false,
-        contact: isDefinedAndNotVoid(contact) ? contact.map(c => c['@id']) : [],
-        origine: isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : []
+        contact: clientWithOriginContact(client) && isDefinedAndNotVoid(contact) ? contact.map(c => c['@id']) : [],
+        origine: clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : []
       };
       for (let i = 0; i < data.quantite; i++) {
-        const option = isDefined(selectedOptions[i]) ? selectedOptions[i]['@id'] : null;
+        const option = isDefinedAndNotVoid(selectedOptions) && isDefined(selectedOptions[i]) ? selectedOptions[i]['@id'] : null;
         const bddOption = isDefined(option) ? options.find(o => o['@id'] === option) : null;
         const prix = getTotalPrice(selectedCircuit, bddOption, selectedOrigines);
         const newData = {...data, option, prix };
@@ -100,11 +107,18 @@ export const ReservationsCreate = () => {
           await create('reservations', {data: newData});
       }
       notify('La réservation a bien été enregistrée.', { type: 'info' });
-      redirect('list', 'reservations');
+      if (debut)
+        window.location.href = `/admin#/?scroll=calendar&date=${new Date(data.debut).toJSON().slice(0, 10) || ''}`;
+      else
+        redirect('list', 'reservations'); 
+
     } catch (error) {
       notify(`Une erreur bloque l\'enregistrement de la réservation.`, { type: 'error' });
-      redirect('list', 'reservations');
       console.log(error);
+      if (debut)
+        window.location.href = `/admin#/?scroll=calendar&date=${new Date(data.debut).toJSON().slice(0, 10) || ''}`;
+      else
+        redirect('list', 'reservations'); 
     }
   };
 
@@ -139,27 +153,36 @@ export const ReservationsCreate = () => {
     return options;
   };
 
+   const OptionInput = () => !clientWithOptions(client) ? null : 
+      <SelectInput key={ selectedQuantite }  source="option" choices={ enabledCombinaisons } label="Option" />
+    
+    const OriginContactInput = () => !clientWithOriginContact(client) ? null : 
+      <ArrayInput source="contact" label="Contact initial">
+        <SimpleFormIterator inline disableReordering>
+            <ReferenceInput reference="contacts" source="@id" label="Contact initial" />
+        </SimpleFormIterator>
+      </ArrayInput>
+    
+    const PartnersInput = () => !clientWithPartners(client) ? null : 
+      <ArrayInput source="origine" label="Origine de l'appel">
+        <SimpleFormIterator inline disableReordering>
+            <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
+        </SimpleFormIterator>
+      </ArrayInput>
+
   return (
     <Create redirect="list">
-      <SimpleForm onSubmit={onSubmit}>
+      <SimpleForm onSubmit={onSubmit} defaultValues={{ debut }}>
         <DateTimeInput source="debut" defaultValue={ new Date((new Date()).setHours(7,0,0)) } label="Décollage" validate={required()}/>
         <TextInput source="nom" label="Nom & prénom du passager" validate={required()}/>
         <TextInput source="telephone" label="N° de téléphone" validate={required()}/>
         <TextInput source="email" label="Adresse email"/>
         <NumberInput source="quantite" label="Nombre de passager(s)" min={ 1 } defaultValue={ 1 } validate={required()}/>
         <ReferenceInput reference="circuits" source="circuit" label="Circuit"/>
-        <SelectInput key={ selectedQuantite }  source="option" choices={ enabledCombinaisons } label="Option" />
+        <OptionInput/>
         <SelectInput source="statut" choices={ status } defaultValue={ status[0].id } validate={required()}/>
-        <ArrayInput source="contact" label="Contact initial">
-          <SimpleFormIterator inline disableReordering>
-              <ReferenceInput reference="contacts" source="@id" label="Contact initial" />
-          </SimpleFormIterator>
-        </ArrayInput>
-        <ArrayInput source="origine" label="Origine de l'appel">
-          <SimpleFormIterator inline disableReordering>
-              <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
-          </SimpleFormIterator>
-        </ArrayInput>
+        <OriginContactInput/>
+        <PartnersInput/>
         <TextInput source="remarques" label="Remarques" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
         <BooleanInput source="paid" label="Prépayé"/>
         <BooleanInput source="upsell" label="Upsell"/>

@@ -1,109 +1,20 @@
-import { SimpleForm, TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, SimpleFormIterator, ArrayInput, required } from "react-admin";
+import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, SimpleFormIterator, ArrayInput, TabbedForm } from "react-admin";
 import { Edit } from "react-admin";
-import { colors, timezones } from "../../../app/lib/client";
+import { timezones, fileInputSX, uploadImages, sanitizeData } from "../../../app/lib/client";
 import { Box } from "@mui/material";
-import { useWatch } from 'react-hook-form';
 import { useSession } from "next-auth/react";
-
-const ColorPreview = () => {
-  const selectedColor = useWatch({ name: 'color', defaultValue: colors[0].id });
-
-  return (
-      <Box display="flex" alignItems="center" width="100%" gap={2}>
-        <Box flexGrow={1}>
-          <SelectInput source="color" label="Couleur du header" choices={ colors } defaultValue={ colors[0].id } fullWidth/>
-        </Box>
-        <Box
-          width={48}
-          height={48}
-          borderRadius={1}
-          border="1px solid #ccc"
-          style={{ backgroundColor: selectedColor, marginBottom: '1.2rem' }}
-        />
-      </Box>
-  );
-};
+import { ColorPreview } from './ColorPreview';
+import { ThanksOptions } from './ThanksOptions';
 
 export const ClientsEdit = () => {
 
   const session = useSession();
 
-  const images = [
-    {name: 'logo', type: 'logo', opacity: null},
-    {name: 'favicon', type: 'favicon', opacity: null},
-    {name: 'mapIcon', type: 'mapicon', opacity: null},
-    {name: 'thanksImage', type: 'thanksimage', opacity: null},
-    {name: 'pdfBackground', type: 'pdfbackground', opacity: null}
-  ];
-
-  const fileInputSX = {
-    '& .RaFileInput-dropZone': {
-        minHeight: '48px', 
-        padding: '8.5px 14px',
-        display: 'flex',
-        alignItems: 'center',
-        borderBottom: '1px solid rgba(0, 0, 0, 0.23)',
-        borderRadius: 0
-    }
-  };
-
-  const uploadImages = async (data) => {
-    const uploadPromises = images.map(async (image) => {
-        const value = data[image.name];
-    
-        const file = value instanceof File
-          ? value
-          : value?.rawFile instanceof File
-            ? value.rawFile
-            : null;
-    
-        if (file) {
-          // Nouveau fichier envoyé
-          const opacity = image.type === 'pdfbackground' ? data.opacity : image.opacity;
-          const formData = new FormData();
-          formData.append('file', file);
-          formData.append('type', image.type);
-          if (opacity !== null && opacity !== undefined) {
-            formData.append('opacity', opacity);
-          }
-    
-          try {
-            const response = await fetch('/admin/upload/client-asset', {
-              method: 'POST',
-              body: formData,
-              // @ts-ignore
-              headers: { Authorization: `Bearer ${session.data.accessToken}` },
-            });
-    
-            const jsonResponse = await response.json();
-    
-            if (response.ok && jsonResponse.path) {
-              return { name: image.name, path: jsonResponse.path };
-            } else {
-              console.error(`Erreur lors de l'upload de ${image.name} :`, jsonResponse.error || response.statusText);
-              return { name: image.name, path: null };
-            }
-          } catch (error) {
-            console.error(`Exception lors de l'upload de ${image.name} :`, error);
-            return { name: image.name, path: null };
-          }
-    
-        } else if (typeof value === 'string') {
-          // Image déjà existante
-          return { name: image.name, path: value };
-        } else {
-          // Aucun fichier ni path → null
-          return { name: image.name, path: null };
-        }
-    });
-  
-    return await Promise.all(uploadPromises);
-  };
-  
   const transform = async data => {
-    const images = await uploadImages(data);
+    const sanitizedData = sanitizeData(data);
+    const images = await uploadImages(sanitizedData, session);
     // @ts-ignore
-    const updatedClient = { ...data, ...Object.fromEntries(images.map(img => [img.name, img.path || null])) };
+    const updatedClient = { ...sanitizedData, ...Object.fromEntries(images.map(img => [img.name, img.path || null])) };
 
     const cachedClient = sessionStorage.getItem("client");
     if (cachedClient) {
@@ -117,102 +28,151 @@ export const ClientsEdit = () => {
 
   return (
     // @ts-ignore
-    <Edit transform={ transform }>
-        <SimpleForm >
-            <TextInput source="name" label="Nom"/>
-            <TextInput source="address" label="Adresse"/>
-            <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                <Box flex={1} display="flex" alignItems="center">
-                    <TextInput source="zipcode" label="Code postal"/>
-                </Box>
-                <Box flex={2}>
-                    <TextInput source="city" label="Ville"/>
-                </Box>
-            </Box>
-            <TextInput source="email" label="Adresse email"/>
-            <TextInput source="phone" label="N° de téléphone"/>
-            <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                <Box flex={1}>
-                    <NumberInput source="lat" label="Latitude" fullWidth />
-                </Box>
-                <Box flex={1}>
-                    <NumberInput source="lng" label="Longitude" fullWidth />
-                </Box>
-            </Box>
-            <NumberInput source="zoom" label="Zoom" defaultValue={ 9 } min={ 1 } max={ 15 }/>
-            <ArrayInput source="airportCodes" label="Codes des aéroports">
-                <SimpleFormIterator inline disableReordering>
-                    <TextInput source="code"/>
-                    <TextInput source="nom"/>
-                </SimpleFormIterator>
-            </ArrayInput>
-            <ArrayInput source="camIds" label="Caméras Windy">
-                <SimpleFormIterator inline disableReordering>
-                    <TextInput source="id"/>
-                    <TextInput source="nom"/>
-                </SimpleFormIterator>
-            </ArrayInput>
-            <SelectInput source="timezone" choices={ timezones } defaultValue={ timezones[0].id } validate={required()}/>
-            <ColorPreview />
-            <FileInput label="Logo" source="logo" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }
-                       format={(value) => {
-                        if (typeof value === 'string') {
-                            return [{ src: value, title: value.split('/').pop() }];
-                        }
-                        return value;
-                    }}
-            >
-                <FileField source="src" title="title" />
-            </FileInput> 
-            <FileInput label="Icone GPS" source="mapIcon" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }
-                       format={(value) => {
-                        if (typeof value === 'string') {
-                            return [{ src: value, title: value.split('/').pop() }];
-                        }
-                        return value;
-                    }}
-            >
-                <FileField source="src" title="title" />
-            </FileInput> 
-            <FileInput label="Favicon" source="favicon" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }
-                       format={(value) => {
-                        if (typeof value === 'string') {
-                            return [{ src: value, title: value.split('/').pop() }];
-                        }
-                        return value;
-                    }}
-            >
-                <FileField source="src" title="title" />
-            </FileInput>
-            <FileInput label="Image de la page de remerciement" source="thanksImage" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }
-                       format={(value) => {
-                        if (typeof value === 'string') {
-                            return [{ src: value, title: value.split('/').pop() }];
-                        }
-                        return value;
-                    }}
-            >
-                <FileField source="src" title="title" />
-            </FileInput>
-            <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                <Box flex={2}>
-                    <FileInput label="Arrière plan PDF" source="pdfBackground" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }
-                               format={(value) => {
-                                if (typeof value === 'string') {
-                                    return [{ src: value, title: value.split('/').pop() }];
-                                }
-                                return value;
-                            }}
-                    >
-                        <FileField source="src" title="title" />
-                    </FileInput>
-                </Box>
-                <Box flex={1} display="flex" alignItems="center" pt={2}>
-                    <NumberInput source="opacity" label="Opacité" min={ 0 } max={ 1 } fullWidth />
-                </Box>
-            </Box>
-            <BooleanInput source="active" label="Utilisateur actif" defaultValue={ true }/>
-        </SimpleForm>
-    </Edit>
+    <div style={{ overflowX: 'auto', width: '100%'}}>
+      <Edit transform={ transform }>
+          <TabbedForm  
+            syncWithLocation={false} 
+            defaultValues={(record) => ({
+              ...record,
+              hasPassengerRegistration: false,
+              hasOptions: false, 
+              hasPartners: false,
+              hasGifts: false,
+              hasReservation: false,
+              airportCodes: record?.airportCodes?.map(code => ({ ...code, meteo: code.meteo ?? false })) ?? [],
+            })}
+          >   
+              <TabbedForm.Tab label="Informations">
+                  <TextInput source="address" label="Adresse"/>
+                  <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                      <Box flex={1} display="flex" alignItems="center">
+                          <TextInput source="zipcode" label="Code postal"/>
+                      </Box>
+                      <Box flex={2}>
+                          <TextInput source="city" label="Ville"/>
+                      </Box>
+                  </Box>
+                  <TextInput source="email" label="Adresse email"/>
+                  <TextInput source="phone" label="N° de téléphone"/>
+                  <TextInput source="website" label="Site web"/>
+                  <BooleanInput source="active" label="Utilisateur actif" />    
+              </TabbedForm.Tab>
+              <TabbedForm.Tab label="Dashboard">
+                  <ColorPreview/>
+                  <SelectInput source="timezone" choices={ timezones }/>   
+                  <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                      <Box flex={1}>
+                          <NumberInput source="lat" label="Latitude" fullWidth />
+                      </Box>
+                      <Box flex={1}>
+                          <NumberInput source="lng" label="Longitude" fullWidth />
+                      </Box>
+                  </Box>
+                  <NumberInput source="zoom" label="Zoom" min={ 1 } max={ 15 }/>    
+                  <ArrayInput source="airportCodes" label="Codes des aéroports">
+                      <SimpleFormIterator inline disableReordering>
+                          <TextInput source="code"/>
+                          <TextInput source="nom"/>
+                          <BooleanInput source="meteo" sx={{marginTop: '1em'}}/>
+                      </SimpleFormIterator>
+                  </ArrayInput>
+                  <ArrayInput source="camIds" label="Caméras Windy">
+                      <SimpleFormIterator inline disableReordering>
+                          <TextInput source="id"/>
+                          <TextInput source="nom"/>
+                      </SimpleFormIterator>
+                  </ArrayInput>
+              </TabbedForm.Tab>
+              <TabbedForm.Tab label="Images">
+                  <FileInput label="Logo" source="logo" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }
+                            format={(value) => {
+                              if (typeof value === 'string') {
+                                  return [{ src: value, title: value.split('/').pop() }];
+                              }
+                              return value;
+                          }}
+                  >
+                      <FileField source="src" title="title" />
+                  </FileInput> 
+                  <FileInput label="Icone GPS" source="mapIcon" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }
+                            format={(value) => {
+                              if (typeof value === 'string') {
+                                  return [{ src: value, title: value.split('/').pop() }];
+                              }
+                              return value;
+                          }}
+                  >
+                      <FileField source="src" title="title" />
+                  </FileInput> 
+                  <FileInput label="Favicon" source="favicon" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }
+                            format={(value) => {
+                              if (typeof value === 'string') {
+                                  return [{ src: value, title: value.split('/').pop() }];
+                              }
+                              return value;
+                          }}
+                  >
+                      <FileField source="src" title="title" />
+                  </FileInput>
+                  <FileInput label="Image de la page de remerciement" source="thanksImage" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }
+                            format={(value) => {
+                              if (typeof value === 'string') {
+                                  return [{ src: value, title: value.split('/').pop() }];
+                              }
+                              return value;
+                          }}
+                  >
+                      <FileField source="src" title="title" />
+                  </FileInput>
+                  <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                      <Box flex={2}>
+                          <FileInput label="Arrière plan PDF" source="pdfBackground" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }
+                                    format={(value) => {
+                                      if (typeof value === 'string') {
+                                          return [{ src: value, title: value.split('/').pop() }];
+                                      }
+                                      return value;
+                                  }}
+                          >
+                              <FileField source="src" title="title" />
+                          </FileInput>
+                      </Box>
+                      <Box flex={1} display="flex" alignItems="center" pt={2}>
+                          <NumberInput source="opacity" label="Opacité" min={ 0 } max={ 1 } fullWidth />
+                      </Box>
+                  </Box>
+              </TabbedForm.Tab>
+              <TabbedForm.Tab label="Options">
+                  <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                      <Box flex={1}>
+                        <BooleanInput source="hasReservation" label="Réservations" fullWidth/>
+                      </Box>
+                      <Box flex={1}>
+                          <BooleanInput source="hasOptions" label="Options" fullWidth/>
+                      </Box>
+                  </Box>
+                  <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                      <Box flex={1}>
+                          <BooleanInput source="hasPartners" label="Partenariat" fullWidth/>
+                      </Box>
+                      <Box flex={1}>
+                          <BooleanInput source="hasGifts" label="Cadeaux" fullWidth/>
+                      </Box> 
+                  </Box>
+                  {/* <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                      <Box flex={1}>
+                          <BooleanInput source="hasOriginContact" label="Origine du contact" fullWidth/>
+                      </Box>
+                      <Box flex={1}>
+                          <BooleanInput source="hasPassengerRegistration" label="Enregistrement des passagers" fullWidth/>
+                      </Box>
+                  </Box> */}
+                  <BooleanInput source="hasOriginContact" label="Origine du contact" fullWidth/>
+                  <BooleanInput source="hasPassengerRegistration" label="Enregistrement des passagers" fullWidth/>
+                  <ThanksOptions/>
+              </TabbedForm.Tab>
+          </TabbedForm>
+      </Edit>
+    </div>
   )
 };

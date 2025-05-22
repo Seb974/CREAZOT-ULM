@@ -8,8 +8,9 @@ import { PlusForm } from "../../../admin/prestation/Form/PlusForm";
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
 import { CombinaisonForm } from '../../../admin/prestation/Form/CombinaisonForm';
+import { clientWithOptions } from '../../../../app/lib/client';
 
-export const RegisterModal = ({ visible, setVisible, slot, reservations, setReservations }) => {
+export const RegisterModal = ({ visible, setVisible, slot, reservations, setReservations, client }) => {
 
     const dataProvider = useDataProvider();
     const timeOptions = { hour: "2-digit", minute: "2-digit" };
@@ -56,11 +57,11 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
             quantite,
             circuit: selectedCircuit.id,
             fin: endTime,
-            contact: isDefinedAndNotVoid(selectedInitialContact) ? selectedInitialContact.map(c => c['@id']) : [],
-            origine: isDefinedAndNotVoid(selectedOriginContact) ? selectedOriginContact.map(o => o['@id']) : [],
+            contact: clientWithOriginContact(client) && isDefinedAndNotVoid(selectedInitialContact) ? selectedInitialContact.map(c => c['@id']) : [],
+            origine: clientWithPartners(client) && isDefinedAndNotVoid(selectedOriginContact) ? selectedOriginContact.map(o => o['@id']) : [],
         }
         for (let i = 0; i < quantite; i++) {
-            const option = isDefined(selectedOptions[i]) ? selectedOptions[i]['@id'] : null;
+            const option = clientWithOptions(client) && isDefined(selectedOptions[i]) ? selectedOptions[i]['@id'] : null;
             const prix = getFinalPrice(selectedCircuit, selectedOptions[i], selectedOriginContact);
             const newReservation = await dataProvider.create('reservations', {data: {...reservation, option, prix}});
             newReservations = !isDefined(newReservation.data) || (isDefined(newReservation.data.statut) && newReservation.data.statut.includes('CANCEL')) ? 
@@ -115,7 +116,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     };
 
     const getSelectedOptions = (combinaison, quantite) => {
-        if (combinaison !== "") {
+        if (clientWithOptions(client) && combinaison !== "") {
             let selectedOptions = combinaison.options.map(o => options.find(option => o['@id'] === option['@id']));
             const missingInputs = quantite - selectedOptions.length;
             if (missingInputs > 0) {
@@ -263,11 +264,13 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                                         getOnlyId={ false }
                                     /> 
                                 </div>
-                                <CombinaisonForm 
-                                    selectedCombinaison={ selectedCombinaison }
-                                    setSelectedCombinaison={ setSelectedCombinaison }
-                                    quantite={ consumer.quantite }
-                                />
+                                { clientWithOptions(client) && 
+                                    <CombinaisonForm 
+                                        selectedCombinaison={ selectedCombinaison }
+                                        setSelectedCombinaison={ setSelectedCombinaison }
+                                        quantite={ consumer.quantite }
+                                    />
+                                }
                             </div>
                             }
                             { section === "details" && 
@@ -280,6 +283,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                                     setSelectedOriginContact={ setSelectedOriginContact }
                                     previousPaidValue={ previousPaidValue }
                                     setPreviousPaidValue={ setPreviousPaidValue }
+                                    client={ client }
                                 /> 
                             }
                             <div className="flex justify-between items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">

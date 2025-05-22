@@ -7,6 +7,7 @@ namespace App\Entity;
 use App\Dto\ClientInput;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\ClientRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -165,6 +166,42 @@ class Client
     #[ORM\Column(length: 100, nullable: true)]
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?string $city = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?string $website = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasReservation = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasPassengerRegistration = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasOptions = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasPartners = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasGifts = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?string $thanksTitle = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?string $thanksMessage = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasOriginContact = null;
 
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
@@ -456,6 +493,114 @@ class Client
     public function setThanksImage(?string $thanksImage): static
     {
         $this->thanksImage = $thanksImage;
+
+        return $this;
+    }
+
+    public function getWebsite(): ?string
+    {
+        return $this->website;
+    }
+
+    public function setWebsite(?string $website): static
+    {
+        $this->website = $website;
+
+        return $this;
+    }
+
+    public function getHasPassengerRegistration(): ?bool
+    {
+        return $this->hasPassengerRegistration;
+    }
+
+    public function setHasPassengerRegistration(?bool $hasPassengerRegistration): static
+    {
+        $this->hasPassengerRegistration = $hasPassengerRegistration;
+
+        return $this;
+    }
+
+    public function getHasOptions(): ?bool
+    {
+        return $this->hasOptions;
+    }
+
+    public function setHasOptions(?bool $hasOptions): static
+    {
+        $this->hasOptions = $hasOptions;
+
+        return $this;
+    }
+
+    public function getHasPartners(): ?bool
+    {
+        return $this->hasPartners;
+    }
+
+    public function setHasPartners(?bool $hasPartners): static
+    {
+        $this->hasPartners = $hasPartners;
+
+        return $this;
+    }
+
+    public function getHasGifts(): ?bool
+    {
+        return $this->hasGifts;
+    }
+
+    public function setHasGifts(?bool $hasGifts): static
+    {
+        $this->hasGifts = $hasGifts;
+
+        return $this;
+    }
+
+    public function getThanksTitle(): ?string
+    {
+        return $this->thanksTitle;
+    }
+
+    public function setThanksTitle(?string $thanksTitle): static
+    {
+        $this->thanksTitle = $thanksTitle;
+
+        return $this;
+    }
+
+    public function getThanksMessage(): ?string
+    {
+        return $this->thanksMessage;
+    }
+
+    public function setThanksMessage(?string $thanksMessage): static
+    {
+        $this->thanksMessage = $thanksMessage;
+
+        return $this;
+    }
+
+    public function getHasReservation(): ?bool
+    {
+        return $this->hasReservation;
+    }
+
+    public function setHasReservation(?bool $hasReservation): static
+    {
+        $this->hasReservation = $hasReservation;
+
+        return $this;
+    }
+
+    public function getHasOriginContact(): ?bool
+    {
+        return $this->hasOriginContact;
+    }
+
+    public function setHasOriginContact(?bool $hasOriginContact): static
+    {
+        $this->hasOriginContact = $hasOriginContact;
 
         return $this;
     }

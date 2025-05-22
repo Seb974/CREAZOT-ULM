@@ -8,7 +8,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import "../../../../css/calendar.css";
 import WarningIcon from '@mui/icons-material/Warning';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
-import { getRandomColor, isDefined, isDefinedAndNotVoid, getDaysArray, groupRappelsByDate } from "../../../../app/lib/utils";
+import { getRandomColor, isDefined, isDefinedAndNotVoid, getDaysArray, groupRappelsByDate, getDefaultDatesFromDate } from "../../../../app/lib/utils";
 import { useSession } from 'next-auth/react';
 
 const DOW = 1;
@@ -18,7 +18,7 @@ moment.locale('fr', { week: { dow: DOW, doy: 1 } });
 
 const localizer = momentLocalizer (moment);
 
-export const CalendarView = ({ events, setEvents, selection, setSelection, slot, setSlot, visible, setVisible, reservations, setReservations, rappelVisible, setRappelVisible, rappels, setRappels, rappelSelection, setRappelSelection }) => {
+export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisible, reservations, setReservations, setRappelVisible, setRappelSelection, isSmall, dates, setDates }) => {
 
   const now = new Date();
   const session = useSession();
@@ -27,55 +27,60 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
   const authorizedProfiles = ['pro', 'instructeur'];
   const min = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0);
   const max = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30);
-  const defaultDates = useState({start: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0), end: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 0) });
   const [profile, setProfile] = useState(null);
-  const [dates, setDates] = useState(defaultDates);
-  const [view, setView] = useState(Views.DAY);        // Views.WEEK
+  const [view, setView] = useState(Views.DAY);
 
   useEffect(() => getUserProfile(user), [user]);
 
   useEffect(() => {
-    console.log(profile);
-    console.log(isAuthorized(profile));
-  }, [profile]);
-
-  useEffect(() => {
-    const {start, end} = Array.isArray(dates) ? dates[0] : dates;
-    getReservations(start, end);
-    getRappels(start, end);
-  }, [dates])
-
-  useEffect(() => getEvents(reservations, rappels), [reservations, rappels, view]);
-
-  const getReservations = (start, end) => {
-    dataProvider
-      .getList('reservations', {
-        filter: {'debut[after]': (new Date(start)).toISOString(), 'debut[before]': (new Date(end)).toISOString(), 'cancel': false, 'pagination': false},
-        sort: {id: 'ASC' },
-        pagination: {}
-      })
-      .then(({ data }) => setReservations(data));
-  };
-
-  const getRappels = (start, end) => {
-    const filters = getRappelsFilter(start, end);
-    dataProvider
-      .getList('rappels', {
-        filter: filters,
-        sort: {id: 'ASC' },
-        pagination: {}
-      })
-      .then(({ data }) => setRappels(data));
-  };
+    let isStale = false;
+  
+    const fetchAndBuildEvents = async () => {
+      const { start, end } = Array.isArray(dates) ? dates[0] : dates;
+      try {
+  
+        const [resasRes, rappelsRes] = await Promise.all([
+          dataProvider.getList('reservations', {
+            filter: {
+              'debut[after]': new Date(start).toISOString(),
+              'debut[before]': new Date(end).toISOString(),
+              cancel: false,
+              pagination: false
+            },
+            sort: { id: 'ASC' },
+            pagination: {}
+          }),
+          dataProvider.getList('rappels', {
+            filter: getRappelsFilter(start, end),
+            sort: { id: 'ASC' },
+            pagination: {}
+          })
+        ]);
+  
+        if (isStale) return;
+  
+        const reservationEvents = getEventsFromReservations(resasRes.data);
+        const rappelEvents = getEventsFromRappels(rappelsRes.data);
+        setEvents([...reservationEvents, ...rappelEvents]);
+  
+      } catch (e) {
+        if (!isStale) 
+          console.error("❌ Erreur lors du chargement des données", e);
+      }
+    };
+  
+    if (dates)
+      fetchAndBuildEvents();
+  
+    return () => isStale = true;
+  
+  }, [dates, view]);
 
   const getUserProfile = user => {
     if (isDefined(user)) {
       dataProvider
         .getList('profil_pilotes',{ filter: { 'pilote.email': user.email }, sort: {id: 'ASC' } })
-        .then(({ data }) => {
-          console.log(data);
-          setProfile(data[0]);
-        });
+        .then(({ data }) => setProfile(data[0]));
     }
   };
 
@@ -88,12 +93,6 @@ export const CalendarView = ({ events, setEvents, selection, setSelection, slot,
         'periode[jours][]': [...new Set(dayNumbers)],
         'pagination': false
     }; 
-  };
-
-  const getEvents = (reservations, rappels) => {
-    const reservationEvents = getEventsFromReservations(reservations);
-    const rappelEvents = getEventsFromRappels(rappels);
-    setEvents([...reservationEvents, ...rappelEvents]);
   };
 
   const getEventsFromReservations = reservations => {
@@ -282,8 +281,15 @@ const onEventClick = (event) => {
 
 const onSelecting = useCallback((slotInfo) => { 
   if (isDefined(session) && isDefined(user) && user.roles.find(r => r === "admin")) {
+    if (!isSmall) {
       setSlot({ start: new Date(slotInfo.start), end: new Date(slotInfo.end)});
       slotInfo.slots.length === 2 ? setVisible(true) : setRappelVisible(true);
+    } else {
+      setTimeout(() => {
+        window.location.hash = `#/reservations/create?debut=${encodeURIComponent(slotInfo.start.toISOString())}`;
+        window.scrollTo(0, 0);
+      }, 0);
+    }
   }
 }, []);
 
@@ -308,7 +314,9 @@ const isAuthorized = profile => {
                     views={['week', 'day']}   // 'month',
                     culture="fr"
                     view={ view }
-                    defaultDate={ new Date() }
+                    // defaultDate={ new Date() }
+                    date={ dates.start }
+                    onNavigate={date => setDates(getDefaultDatesFromDate(date))}
                     localizer={ localizer }
                     onView={ onView }
                     onRangeChange={ range => onRangeChange(range, view) }

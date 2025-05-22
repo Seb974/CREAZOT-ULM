@@ -10,8 +10,9 @@ import { getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../../app/
 import { PlusForm } from "../../../admin/prestation/Form/PlusForm";
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
+import { clientWithGifts, clientWithOptions, clientWithOriginContact, clientWithPartners } from '../../../../app/lib/client';
 
-export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservations }) => {
+export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservations, client }) => {
 
     const dataProvider = useDataProvider();
     const defaultCadeau = {['@id']: 0, name: " "};
@@ -121,17 +122,17 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
     const onSubmit = async e => {
         e.preventDefault();
         const prix = getFinalPrice(selectedCircuit, selectedOption, selectedOriginContact);
-        const selectedCadeau = consumer.cadeau['@id'] !== defaultCadeau['@id'] ? consumer.cadeau['@id'] : null;
+        const selectedCadeau = clientWithGifts(client) && (consumer.cadeau['@id'] !== defaultCadeau['@id']) ? consumer.cadeau['@id'] : null;
         const reservation = {
             ...consumer,
             circuit: selectedCircuit['@id'],
-            option: selectedOption !== "" ? selectedOption['@id'] : null,
+            option: clientWithOptions(client) && selectedOption !== "" ? selectedOption['@id'] : null,
             pilote: selectedPilot !== "" ? selectedPilot['@id'] : null,
             avion: selectedAircraft !== "" ? selectedAircraft['@id'] : null,
             fin: getEndTime(consumer.debut, selectedCircuit),
-            contact: isDefinedAndNotVoid(selectedInitialContact) ? selectedInitialContact.map(c => c['@id']) : [],
-            origine: isDefinedAndNotVoid(selectedOriginContact) ? selectedOriginContact.map(o => o['@id']) : [],
-            paid: isDefined(selectedCadeau) ? true : consumer.paid,
+            contact: clientWithOriginContact(client) && isDefinedAndNotVoid(selectedInitialContact) ? selectedInitialContact.map(c => c['@id']) : [],
+            origine: clientWithPartners(client) && isDefinedAndNotVoid(selectedOriginContact) ? selectedOriginContact.map(o => o['@id']) : [],
+            paid: clientWithGifts(client) && isDefined(selectedCadeau) ? true : consumer.paid,
             cadeau: selectedCadeau,
             prix
         };
@@ -332,33 +333,37 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                                     setSelectedOriginContact={ setSelectedOriginContact }
                                     previousPaidValue={ previousPaidValue }
                                     setPreviousPaidValue={ setPreviousPaidValue }
+                                    client={ client }
                                 /> 
                             }
                             { section === "options" &&
                                 <div>
-                                    <div className="mb-2">
-                                        <label className="mb-2 block text-sm font-medium text-black dark:text-white">
-                                            Bon cadeau
-                                        </label>
-                                        <select
-                                            value={ consumer.cadeau['@id'] }
-                                            onChange={ onBonCadeauChange }
-                                            className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-4 py-2 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white h-[41px]`}
-                                        >
-                                            { validCadeaux.map((cadeau, i) => (
-                                                <option key={ i } value={ cadeau['@id'] } className="text-body dark:text-bodydark">
-                                                    { cadeau.name }
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <OptionForm 
-                                        selectedOption={ selectedOption } 
-                                        setSelectedOption={ setSelectedOption }
-                                        isUpdate={ true }
-                                        reservation={ toUpdate }
-                                    /> 
-                                    
+                                    { clientWithGifts(client) &&
+                                        <div className="mb-2">
+                                            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                                                Bon cadeau
+                                            </label>
+                                            <select
+                                                value={ consumer.cadeau['@id'] }
+                                                onChange={ onBonCadeauChange }
+                                                className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-4 py-2 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white h-[41px]`}
+                                            >
+                                                { validCadeaux.map((cadeau, i) => (
+                                                    <option key={ i } value={ cadeau['@id'] } className="text-body dark:text-bodydark">
+                                                        { cadeau.name }
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    }
+                                    { clientWithOptions(client) && 
+                                        <OptionForm 
+                                            selectedOption={ selectedOption } 
+                                            setSelectedOption={ setSelectedOption }
+                                            isUpdate={ true }
+                                            reservation={ toUpdate }
+                                        /> 
+                                    }
                                     <ProfilPiloteForm 
                                         selectedPilot={ selectedPilot } 
                                         setSelectedPilot={ setSelectedPilot }

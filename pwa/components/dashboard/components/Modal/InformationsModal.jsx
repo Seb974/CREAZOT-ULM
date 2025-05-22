@@ -2,10 +2,12 @@ import React from "react";
 import { useDataProvider } from "react-admin";
 import { isDefined } from "../../../../app/lib/utils";
 import { useSession } from "next-auth/react";
+import { useRedirect } from 'react-admin';
 
-export const InformationsModal = ({ selectedReservation, setSelectedReservation, reservations, setReservations, toUpdate, setToUpdate }) => {
+export const InformationsModal = ({ selectedReservation, setSelectedReservation, reservations, setReservations, setToUpdate, isSmall }) => {
 
     const session = useSession();
+    const redirect = useRedirect();
     const dataProvider = useDataProvider();
 
     const user = session.data.user;
@@ -21,8 +23,17 @@ export const InformationsModal = ({ selectedReservation, setSelectedReservation,
     };
 
     const onUpdate = () => {
-        setToUpdate({...selectedReservation});
-        setSelectedReservation(null);
+        if (!isSmall) {
+            setToUpdate({...selectedReservation});
+            setSelectedReservation(null);
+        } else {
+            const id = selectedReservation.id;
+            setSelectedReservation(null);
+            setTimeout(() => {
+                if (id)
+                    redirect('edit', 'reservations', id, {}, { state: { origin: 'calendar' } });
+            }, 100);
+        }
     }
 
     const getStatusInformation = () => {

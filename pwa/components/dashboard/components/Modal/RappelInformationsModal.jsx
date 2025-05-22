@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useDataProvider } from "react-admin";
 import { isDefined, formatDate } from "../../../../app/lib/utils";
 import { useSession } from "next-auth/react";
@@ -34,7 +34,7 @@ export const RappelInformationsModal = ({ selectedRappel, setSelectedRappel, rap
                         setSelectedRappel(newSelectedRappel)
                     } else {
                         setSelectedRappel(null);
-                        setEvents(events.filter(e => e.id !== newSelectedRappel.id))
+                        setEvents(events.filter(e => e.id !== newSelectedRappel.id), "onDeleteRappel from RappelInformationsModal")
                     }
                     setRappels(newRappels);
                 });

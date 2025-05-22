@@ -50,6 +50,15 @@ class ClientInputDataTransformer implements ProcessorInterface
         $client->setAddress($data->address);
         $client->setZipcode($data->zipcode);
         $client->setCity($data->city);
+        $client->setWebsite($data->website);
+        $client->setHasReservation($data->hasReservation);
+        $client->setHasPassengerRegistration($data->hasPassengerRegistration);
+        $client->setHasOriginContact($data->hasOriginContact);
+        $client->setHasOptions($data->hasOptions);
+        $client->setHasPartners($data->hasPartners);
+        $client->setHasGifts($data->hasGifts);
+        $client->setThanksTitle($data->thanksTitle);
+        $client->setThanksMessage($data->thanksMessage);
 
         // Uploads de fichiers
         if ($data->logo instanceof UploadedFile) {

@@ -24,6 +24,9 @@ class CreateClientController extends AbstractController
         $dto->address = $request->request->get('address');
         $dto->zipcode = $request->request->get('zipcode');
         $dto->city = $request->request->get('city');
+        $dto->website = $request->request->get('website');
+        $dto->thanksTitle = $request->request->get('thanksTitle');
+        $dto->thanksMessage = $request->request->get('thanksMessage');
 
         // Champs Number/ Boolean
         $dto->lat = $this->getFloat($request, 'lat');
@@ -31,6 +34,12 @@ class CreateClientController extends AbstractController
         $dto->zoom = $this->getInt($request, 'zoom');
         $dto->opacity = $this->getFloat($request, 'opacity');
         $dto->active = $this->getBool($request, 'active');
+        $dto->hasReservation = $this->getBool($request, 'hasReservation');
+        $dto->hasPassengerRegistration = $this->getBool($request, 'hasPassengerRegistration');
+        $dto->hasOriginContact = $this->getBool($request, 'hasOriginContact');
+        $dto->hasOptions = $this->getBool($request, 'hasOptions');
+        $dto->hasPartners = $this->getBool($request, 'hasPartners');
+        $dto->hasGifts = $this->getBool($request, 'hasGifts');
 
         // Fichiers
         $dto->logo = $request->files->get('logo');

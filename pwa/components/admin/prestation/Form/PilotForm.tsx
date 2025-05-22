@@ -6,12 +6,11 @@ import { useDataProvider } from "react-admin";
 import { isDefined } from "../../../../app/lib/utils";
 
 // @ts-ignore
-export const PilotForm: React.FC = ({ selectedPilot, setSelectedPilot, setEncadrants, autoSelect = true}) => {
+export const PilotForm: React.FC = ({ selectedPilot, setSelectedPilot, pilots, setPilots, setEncadrants, autoSelect = true}) => {
 
   const dataProvider = useDataProvider();
   const changeTextColor = () => setIsPilotSelected(true);
 
-  const [pilots, setPilots] = useState([]);
   const [isPilotSelected, setIsPilotSelected] = useState<boolean>(false);
 
   useEffect(() => getProfiles(), []);

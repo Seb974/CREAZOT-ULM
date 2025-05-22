@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { isDefined } from "../../../../app/lib/utils";
 
 // @ts-ignore
 export const FlightTimeForm: React.FC = ({ aircrafts, selectedAircraft, selectedCircuits, selectedFlightTime, setSelectedFlightTime }) => {
@@ -57,6 +58,13 @@ export const FlightTimeForm: React.FC = ({ aircrafts, selectedAircraft, selected
                       value={ selectedFlightTime || 0 }
                       onChange={ e => HandleChange(e) }
                     />
+                    { isDefined(selectedAircraft) && isDefined(selectedAircraft.horametre) &&
+                        <p className="mt-1 text-xs text-right bg-gray-50 italic">
+                            {`Démarrage à ${ 
+                              selectedAircraft.decimal ? selectedAircraft.horametre : selectedAircraft.horametre.toFixed(2) 
+                            }`}
+                        </p>
+                    }
                 </div>
             </div>
         </div>

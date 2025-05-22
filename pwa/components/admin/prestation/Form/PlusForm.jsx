@@ -8,8 +8,9 @@ import DoneIcon from '@mui/icons-material/Done';
 import ClearIcon from '@mui/icons-material/Clear';
 import Select from 'react-select';
 import { useDataProvider } from "react-admin";
+import { clientWithOriginContact, clientWithPartners } from '../../../../app/lib/client';
 
-export const PlusForm = ({ consumer, setConsumer, selectedInitialContact, setSelectedInitialContact, selectedOriginContact, setSelectedOriginContact, previousPaidValue, setPreviousPaidValue }) => {
+export const PlusForm = ({ consumer, setConsumer, selectedInitialContact, setSelectedInitialContact, selectedOriginContact, setSelectedOriginContact, previousPaidValue, setPreviousPaidValue, client }) => {
 
   const dataProvider = useDataProvider();
   const changeTextColor = () => setIsStatusSelected(true);
@@ -70,46 +71,50 @@ export const PlusForm = ({ consumer, setConsumer, selectedInitialContact, setSel
 
   return (
       <div className="space-y-4" style={{ zIndex: 3000 }}>
-        <div>
-            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
-              Contact initial
-            </label>
-            <Select
-              closeMenuOnSelect={false}
-              className="basic-multi-select z-50"
-              value={ selectedInitialContact }
-              isMulti
-              options={ contacts }
-              onChange={ e => setSelectedInitialContact(e) }
-              styles={{
-                control: (baseStyles, state) => ({
-                  ...baseStyles,
-                  minHeight: '41px',
-                  zIndex: 999
-                }),
-              }}
-            />
-        </div>
-        <div>
-            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
-              Origine du contact
-            </label>
-            <Select
-              closeMenuOnSelect={false}
-              className="basic-multi-select z-40"
-              value={ selectedOriginContact }
-              isMulti
-              options={ origines }
-              onChange={ e => setSelectedOriginContact(e) }
-              styles={{
-                control: (baseStyles, state) => ({
-                  ...baseStyles,
-                  minHeight: '41px',
-                  zIndex: 990
-                }),
-              }}
-            />
-        </div>
+        { clientWithOriginContact(client) && 
+          <div>
+              <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                Contact initial
+              </label>
+              <Select
+                closeMenuOnSelect={false}
+                className="basic-multi-select z-50"
+                value={ selectedInitialContact }
+                isMulti
+                options={ contacts }
+                onChange={ e => setSelectedInitialContact(e) }
+                styles={{
+                  control: (baseStyles, state) => ({
+                    ...baseStyles,
+                    minHeight: '41px',
+                    zIndex: 999
+                  }),
+                }}
+              />
+          </div>
+        }
+        { clientWithPartners(client) &&
+          <div>
+              <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                Origine du contact
+              </label>
+              <Select
+                closeMenuOnSelect={false}
+                className="basic-multi-select z-40"
+                value={ selectedOriginContact }
+                isMulti
+                options={ origines }
+                onChange={ e => setSelectedOriginContact(e) }
+                styles={{
+                  control: (baseStyles, state) => ({
+                    ...baseStyles,
+                    minHeight: '41px',
+                    zIndex: 990
+                  }),
+                }}
+              />
+          </div>
+        }
         <div className="mb-2">
           <label className="mb-2 block text-sm font-medium text-black dark:text-white">
             Statut
