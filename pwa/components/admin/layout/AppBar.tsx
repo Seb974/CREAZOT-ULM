@@ -8,6 +8,7 @@ import Reservation from "./Reservation";
 import { isDefined } from "../../../app/lib/utils";
 import { useClient } from '../../admin/ClientProvider';
 import GlobalLoader from "../../admin/layout/GlobalLoader";
+import Oidc from "./Oidc";
 
 const CustomAppBar = () => {
 
@@ -27,6 +28,8 @@ const CustomAppBar = () => {
             {/* @ts-ignore  */}
             { (isDefined(client) && isDefined(client.hasReservation) && client.hasReservation) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") && <Reservation /> }
             <Flight />
+            {/* @ts-ignore  */}
+            { (isDefined(client) && isDefined(client.hasReservation) && client.hasReservation) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") && <Oidc /> }
             <Logout />
           </UserMenu>
         }
