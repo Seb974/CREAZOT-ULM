@@ -20,10 +20,7 @@ interface Props {
 
 export default function Page({ searchParams }: Props) {
 
-  const defaultImage = "/images/Thanks.png";
   const [client, setClient] = useState(null);
-  const [clientName, setClientName] = useState('')
-  const [source, setSource] = useState(defaultImage);
   const [loading, setLoading] = useState(false);
   const name = isDefined(searchParams) && isDefined(searchParams['firstname']) ?  String(searchParams['firstname']).charAt(0).toUpperCase() + String(searchParams['firstname']).slice(1) : '';
 
@@ -46,15 +43,35 @@ export default function Page({ searchParams }: Props) {
     fetchClient();
   }, []);
 
-  useEffect(() => {
-    if (isDefined(client)) {
-      if (isDefined(client.thanksImage)) 
-        setSource(`${client.thanksImage}?v=${Date.now()}`);
-      if (isDefined(client.name))
-        setClientName(client.name);
-    }
-  }, [client]);
+  const renderWithImageAlignment = (html: string): string => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
 
+    doc.querySelectorAll('img').forEach((img) => {
+        const url = new URL(img.src);
+        const align = url.searchParams.get('align');
+
+        img.classList.remove('img-align-left', 'img-align-center', 'img-align-right');
+
+        if (!isDefined(align) || align === 'center') {
+            const wrapper = doc.createElement('div');
+            wrapper.className = 'img-align-center-wrapper';
+            img.classList.add('img-align-center');
+            img.parentNode.insertBefore(wrapper, img);
+            wrapper.appendChild(img);
+        } else if (align === 'right') {
+            img.classList.add('img-align-right');
+        } else if (align === 'left') {
+            img.classList.add('img-align-left');
+        }
+    });
+
+    return renderWithVariables(doc.body.innerHTML);
+}
+
+const renderWithVariables = (html) => {
+  return html.replace(/{{FIRSTNAME}}/g, name);
+}
 
   return loading ? 
       <div className="mt-6 flex justify-center items-center w-full h-full">
@@ -62,23 +79,9 @@ export default function Page({ searchParams }: Props) {
       </div>
     :
     <div className="text-center mx-2">
-        <h2 className="mt-6 mb-4 text-6xl font-semibold text-red-500">Merci { name } !</h2>
-        <p className="mb-6 text-lg text-gray-600">Bon vol à vous{ clientName !== '' ? ' avec ' +  clientName : ''}.</p>
-        <p className="text-sm"><i>Profitez pleinement du moment, nous nous occupons de <a href="https://drive.google.com/drive/u/3/folders/0BzOWcOCzePzTSzRLTmFVMDFPOHM?resourcekey=0-iLj4-YqX5cggqazBJQxd7A" className="text-blue-500" target="_blank" rel="noopener noreferrer">vos souvenirs de l'Île intense vue du ciel</a>.</i><br/><br/><br/><br/></p>
-
-        <div className="animate-bounce flex justify-center mt-6">
-          <Image
-              className="text-center"
-              src={ source || defaultImage }
-              alt={ clientName + " Aircraft" }
-              width={556}
-              height={356}
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = defaultImage;
-              }}
-            />
-        </div>
-        <p className="mt-4 text-gray-600">Votre vol vous a plu ? <br/>Faites-le savoir sur <a href="https://www.tripadvisor.fr/Attraction_Review-g298471-d3558149-Reviews-Planetair974-Saint_Pierre_Arrondissement_of_Saint_Pierre.html" className="text-blue-500" target="_blank" rel="noopener noreferrer">TripAdvisor</a> et sur <a href="https://www.google.com/maps/place/Planetair974/@-21.3190806,55.4261019,17z/data=!3m1!4b1!4m6!3m5!1s0x2182a13f4362468b:0x725ef4e733adb25d!8m2!3d-21.3190806!4d55.4261019!16s%2Fg%2F1ptwhwyvy?entry=ttu&g_ep=EgoyMDI1MDMwOC4wIKXMDSoASAFQAw%3D%3D" className="text-blue-500" target="_blank" rel="noopener noreferrer">Google</a>!</p>
+        {/* <h2 className="mt-6 mb-4 text-6xl font-semibold text-red-500">Merci { name } !</h2> */}
+        { isDefined(client) && isDefined(client.thanksMessage) &&
+          <div dangerouslySetInnerHTML={{ __html: renderWithImageAlignment(client.thanksMessage) }} />
+        }
     </div>
 }

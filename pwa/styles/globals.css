@@ -55,3 +55,30 @@ html, body {
     width: 100%;
     overflow-x: hidden;
 }
+
+.RaRichTextInput-editorContent img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 100%; /* Pour éviter les débordements */
+  }
+
+  .img-align-left {
+    float: left;
+    margin-right: 10px;
+}
+
+.img-align-right {
+    float: right;
+    margin-left: 10px;
+}
+
+.img-align-center-wrapper {
+    text-align: center;
+}
+
+.img-align-center {
+    display: inline-block;
+    margin: 1em auto;
+}
+

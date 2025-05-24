@@ -54,8 +54,8 @@ export default function Page() {
     !isDefined(client) || !client.hasPassengerRegistration ? 
       <></> 
       : 
-      <FormLayout>
-        <Form />
+      <FormLayout client={ client }>
+        <Form/>
       </FormLayout>
 
 };

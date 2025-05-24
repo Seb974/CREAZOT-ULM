@@ -13,9 +13,18 @@ export const ThanksOptions = () => {
           Enregistrement des passagers
       </Typography>
         <TextInput source="thanksTitle" label="Titre du formulaire"/>
-        <RichTextInput 
-          source="thanksMessage" 
-          label="Contenu de la page de redirection"
-        />
+        {/* <div className="flex">
+            <div className="relative z-20 bg-white dark:bg-form-input mt-2 w-full">   */}
+                <RichTextInput 
+                source="thanksMessage" 
+                label="Contenu de la page de redirection"
+                />
+                <div className="w-full">
+                    <p className="mt-0 pt-0 text-xs text-right bg-gray-50 italic ">
+                        Écrire { <span className="text-red-700">{ '{{FIRSTNAME}} ' }</span> } pour utiliser le prénom du formulaire
+                    </p>
+                </div>
+            {/* </div>
+        </div> */}
     </>
 };
