@@ -199,3 +199,7 @@ export const clientWithOriginContact = client => {
 export const clientWithPartners = client => {
     return isDefined(client) && isDefined(client.hasPartners) && client.hasPartners;
 };
+
+export const clientWithEmailConfirmation = client => {
+    return isDefined(client) && isDefined(client.hasEmailConfirmation) && client.hasEmailConfirmation;
+};

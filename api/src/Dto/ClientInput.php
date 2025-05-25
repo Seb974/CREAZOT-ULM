@@ -109,4 +109,22 @@ final class ClientInput
 
     #[Groups(['Client:write'])]
     public ?string $thanksMessage = null;
+
+    #[Groups(['Client:write'])]
+    public ?bool $hasLandingManagement = null;
+
+    #[Groups(['Client:write'])]
+    public ?bool $hasEmailConfirmation = null;
+
+    #[Groups(['Client:write'])]
+    public ?string $emailServer = null;
+
+    #[Groups(['Client:write'])]
+    public ?string $confirmationMessage = null;
+
+    #[Groups(['Client:write'])]
+    public ?string $emailAddressSender = null;
+
+    #[Groups(['Client:write'])]
+    public ?string $confirmationSubject = null;
 }

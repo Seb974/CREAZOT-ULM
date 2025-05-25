@@ -11,14 +11,18 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Mime\Email;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
+use App\Service\DynamicMailerFactory;
+use App\Service\ClientGetter;
 
 final class PassagerEmailSubscriber implements EventSubscriberInterface
 {
-    private $mailer;
+    private DynamicMailerFactory $dynamicMailerFactory;
+    private ClientGetter $clientGetter;
 
-    public function __construct(MailerInterface $mailer)
+    public function __construct(DynamicMailerFactory $dynamicMailerFactory, ClientGetter $clientGetter)
     {
-        $this->mailer = $mailer;
+        $this->dynamicMailerFactory = $dynamicMailerFactory;
+        $this->clientGetter = $clientGetter;
     }
 
     public static function getSubscribedEvents()
@@ -32,20 +36,28 @@ final class PassagerEmailSubscriber implements EventSubscriberInterface
     {   
         $passager = $event->getControllerResult();
         $method = $event->getRequest()->getMethod();
+        $client = $this->clientGetter->get();
 
-        if (!$passager instanceof Passager || Request::METHOD_POST !== $method) {
+        if (!$passager instanceof Passager || Request::METHOD_POST !== $method || !$passager->getEmail() || !$client->getEmailServer() || 
+            !$client->getEmailAddressSender() || !$client->hasEmailConfirmation() || empty($client->getConfirmationMessage())) 
+        {
             return;
         }
 
-        $message = (new TemplatedEmail())
-            ->from('contact@planetair974.com')
-            ->to($passager->getEmail())
-            ->subject('Photos & vidéos')
-            ->htmlTemplate('emails/link.html.twig')
-            ->context([
-                'user' => $passager->getPrenom(),
-            ]);
+        try {
+            $subject = empty($client->getConfirmationSubject()) ? '' : $client->getConfirmationSubject();
+            $bodyHtml = str_replace('{{FIRSTNAME}}', $passager->getPrenom(), $client->getConfirmationMessage());
 
-        $this->mailer->send($message);
+            $mailer = $this->dynamicMailerFactory->getMailerForUniqueClient();
+            $message = (new Email())
+                ->from($client->getEmailAddressSender())
+                ->to($passager->getEmail())
+                ->subject($subject)
+                ->html($bodyHtml);
+    
+            $mailer->send($message);
+        } catch (\Throwable $e) {
+            return;
+        }
     }
 }

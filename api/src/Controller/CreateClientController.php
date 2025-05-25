@@ -27,6 +27,10 @@ class CreateClientController extends AbstractController
         $dto->website = $request->request->get('website');
         $dto->thanksTitle = $request->request->get('thanksTitle');
         $dto->thanksMessage = $request->request->get('thanksMessage');
+        $dto->emailServer = $request->request->get('emailServer');
+        $dto->confirmationMessage = $request->request->get('confirmationMessage');
+        $dto->emailAddressSender = $request->request->get('emailAddressSender');
+        $dto->confirmationSubject = $request->request->get('confirmationSubject');
 
         // Champs Number/ Boolean
         $dto->lat = $this->getFloat($request, 'lat');
@@ -40,6 +44,8 @@ class CreateClientController extends AbstractController
         $dto->hasOptions = $this->getBool($request, 'hasOptions');
         $dto->hasPartners = $this->getBool($request, 'hasPartners');
         $dto->hasGifts = $this->getBool($request, 'hasGifts');
+        $dto->hasLandingManagement = $this->getBool($request, 'hasLandingManagement');
+        $dto->hasEmailConfirmation = $this->getBool($request, 'hasEmailConfirmation');
 
         // Fichiers
         $dto->logo = $request->files->get('logo');

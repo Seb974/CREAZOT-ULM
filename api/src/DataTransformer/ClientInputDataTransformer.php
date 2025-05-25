@@ -59,6 +59,12 @@ class ClientInputDataTransformer implements ProcessorInterface
         $client->setHasGifts($data->hasGifts);
         $client->setThanksTitle($data->thanksTitle);
         $client->setThanksMessage($data->thanksMessage);
+        $client->setHasLandingManagement($data->hasLandingManagement);
+        $client->setHasEmailConfirmation($data->hasEmailConfirmation);
+        $client->setEmailServer($data->emailServer);
+        $client->setConfirmationMessage($data->confirmationMessage);
+        $client->setEmailAddressSender($data->emailAddressSender);
+        $client->setConfirmationSubject($data->confirmationSubject);
 
         // Uploads de fichiers
         if ($data->logo instanceof UploadedFile) {

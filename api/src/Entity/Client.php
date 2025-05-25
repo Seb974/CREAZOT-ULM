@@ -203,6 +203,30 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?bool $hasOriginContact = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasLandingManagement = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasEmailConfirmation = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?string $emailServer = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?string $confirmationMessage = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?string $emailAddressSender = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?string $confirmationSubject = null;
+
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
@@ -601,6 +625,78 @@ class Client
     public function setHasOriginContact(?bool $hasOriginContact): static
     {
         $this->hasOriginContact = $hasOriginContact;
+
+        return $this;
+    }
+
+    public function getHasLandingManagement(): ?bool
+    {
+        return $this->hasLandingManagement;
+    }
+
+    public function setHasLandingManagement(?bool $hasLandingManagement): static
+    {
+        $this->hasLandingManagement = $hasLandingManagement;
+
+        return $this;
+    }
+
+    public function getHasEmailConfirmation(): ?bool
+    {
+        return $this->hasEmailConfirmation;
+    }
+
+    public function setHasEmailConfirmation(?bool $hasEmailConfirmation): static
+    {
+        $this->hasEmailConfirmation = $hasEmailConfirmation;
+
+        return $this;
+    }
+
+    public function getEmailServer(): ?string
+    {
+        return $this->emailServer;
+    }
+
+    public function setEmailServer(?string $emailServer): static
+    {
+        $this->emailServer = $emailServer;
+
+        return $this;
+    }
+
+    public function getConfirmationMessage(): ?string
+    {
+        return $this->confirmationMessage;
+    }
+
+    public function setConfirmationMessage(?string $confirmationMessage): static
+    {
+        $this->confirmationMessage = $confirmationMessage;
+
+        return $this;
+    }
+
+    public function getEmailAddressSender(): ?string
+    {
+        return $this->emailAddressSender;
+    }
+
+    public function setEmailAddressSender(?string $emailAddressSender): static
+    {
+        $this->emailAddressSender = $emailAddressSender;
+
+        return $this;
+    }
+
+    public function getConfirmationSubject(): ?string
+    {
+        return $this->confirmationSubject;
+    }
+
+    public function setConfirmationSubject(?string $confirmationSubject): static
+    {
+        $this->confirmationSubject = $confirmationSubject;
 
         return $this;
     }

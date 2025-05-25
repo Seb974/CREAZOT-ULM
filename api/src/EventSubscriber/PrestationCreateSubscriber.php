@@ -14,14 +14,18 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Mime\Email;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
+use App\Service\DynamicMailerFactory;
+use App\Service\ClientGetter;
 
 final class PrestationCreateSubscriber implements EventSubscriberInterface
 {
-    private $mailer;
+    private DynamicMailerFactory $dynamicMailerFactory;
+    private ClientGetter $clientGetter;
 
-    public function __construct(MailerInterface $mailer)
+    public function __construct(DynamicMailerFactory $dynamicMailerFactory, ClientGetter $clientGetter)
     {
-        $this->mailer = $mailer;
+        $this->dynamicMailerFactory = $dynamicMailerFactory;
+        $this->clientGetter = $clientGetter;
     }
 
     public static function getSubscribedEvents()
@@ -35,8 +39,11 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
     {   
         $prestation = $event->getControllerResult();
         $method = $event->getRequest()->getMethod();
+        $client = $this->clientGetter->get();
 
-        if (!$prestation instanceof Prestation || Request::METHOD_POST !== $method) {
+        if (!$prestation instanceof Prestation || Request::METHOD_POST !== $method ||
+            !$client->getEmailServer() || !$client->getEmailAddressSender()) 
+        {
             return;
         }
 
@@ -45,11 +52,14 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
 
         if ( \is_null($aeronef->getSeuilAlerte()) )
             $aeronef->setSeuilAlerte(10);
+
+        $mailer = $this->dynamicMailerFactory->getMailerForUniqueClient();
         
         if ( ($aeronef->getEntretien() - $aeronef->getHorametre()) < $aeronef->getSeuilAlerte() && !$aeronef->isAlerteEnvoyee()) {
-            $message = (new TemplatedEmail())
-                ->from('contact@planetair974.com')
-                ->to('planetair974@gmail.com')
+            try {
+                $message = (new TemplatedEmail())
+                ->from($client->getEmailAddressSender())
+                ->to($client->getEmail())
                 ->subject('Entretien proche sur ' . $aeronef->getImmatriculation())
                 ->htmlTemplate('emails/maintenance.html.twig')
                 ->context([
@@ -59,27 +69,35 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
                     'time' => $this->getRemainingTime($aeronef, 'ENTRETIEN'),
                     'introduction' => $aeronef->getHorametre() > $aeronef->getEntretien() ? 'dépassée de' : 'programmée dans'
                 ]);
-
-            $this->mailer->send($message);
+    
+            $mailer->send($message);
             $aeronef->setAlerteEnvoyee(true);
+
+            } catch (\Throwable $e) {
+                return;
+            }
         }
 
         if ( ($aeronef->getChangementMoteur() - $aeronef->getHorametre()) < $aeronef->getSeuilAlerteChangementMoteur() && !$aeronef->isAlerteMoteurEnvoyee()) {
-            $message = (new TemplatedEmail())
-                ->from('contact@planetair974.com')
-                ->to('planetair974@gmail.com')
-                ->subject('Changement moteur proche sur ' . $aeronef->getImmatriculation())
-                ->htmlTemplate('emails/changement_moteur.html.twig')
-                ->context([
-                    'immatriculation' => $aeronef->getImmatriculation(),
-                    'horametre' => $aeronef->getHorametre(),
-                    'entretien' => $aeronef->getEntretien(),
-                    'time' => $this->getRemainingTime($aeronef, 'MOTEUR'),
-                    'introduction' => $aeronef->getHorametre() > $aeronef->getEntretien() ? 'dépassé de' : 'programmé dans'
-                ]);
-
-            $this->mailer->send($message);
-            $aeronef->setAlerteEnvoyee(true);
+            try {
+                $message = (new TemplatedEmail())
+                    ->from('contact@planetair974.com')
+                    ->to('planetair974@gmail.com')
+                    ->subject('Changement moteur proche sur ' . $aeronef->getImmatriculation())
+                    ->htmlTemplate('emails/changement_moteur.html.twig')
+                    ->context([
+                        'immatriculation' => $aeronef->getImmatriculation(),
+                        'horametre' => $aeronef->getHorametre(),
+                        'entretien' => $aeronef->getEntretien(),
+                        'time' => $this->getRemainingTime($aeronef, 'MOTEUR'),
+                        'introduction' => $aeronef->getHorametre() > $aeronef->getEntretien() ? 'dépassé de' : 'programmé dans'
+                    ]);
+    
+                $mailer->send($message);
+                $aeronef->setAlerteEnvoyee(true);
+            } catch (\Throwable $e) {
+                return;
+            }
         }
     }
 

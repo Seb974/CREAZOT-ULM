@@ -55,6 +55,8 @@ export const ClientsEdit = () => {
                   <TextInput source="email" label="Adresse email"/>
                   <TextInput source="phone" label="N° de téléphone"/>
                   <TextInput source="website" label="Site web"/>
+                  <TextInput source="emailServer" label="Serveur d'email SendGrid"/>
+                  <TextInput source="emailAddressSender" label="Adresse email d'envoi"/>
                   <BooleanInput source="active" label="Utilisateur actif" />    
               </TabbedForm.Tab>
               <TabbedForm.Tab label="Dashboard">
