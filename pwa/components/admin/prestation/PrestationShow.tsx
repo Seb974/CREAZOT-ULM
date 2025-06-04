@@ -1,14 +1,40 @@
 import { useSession } from 'next-auth/react';
 import { Show, SimpleShowLayout, TextField, DateField, NumberField, Datagrid, ArrayField, FunctionField, EditButton, TopToolbar } from 'react-admin';
 import { isDefined } from '../../../app/lib/utils';
-import { useClient } from '../../admin/ClientProvider';
+import { useClient } from '../ClientProvider';
 import { clientWithOptions } from "../../../app/lib/client";
+import { FC } from 'react';
+import { useRecordContext } from 'react-admin';
 
 const ListActions = () => (
     <TopToolbar>
         <EditButton/>
     </TopToolbar>
   );
+
+const LandingDetails: FC = () => {
+    const record = useRecordContext();
+    if (!record || !record.landings || record.landings.length === 0) return null;
+
+    return (
+        <div className="p-2">
+            <p className="font-semibold mb-2 text-sm text-gray-700">✈️ Atterrissages</p>
+            <Datagrid
+                isRowSelectable={record => false} rowClick={false} bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': { backgroundColor: '#ededed', fontWeight: "lighter" } }} className="text-xs italic"
+                data={record.landings}
+                total={record.landings.length}
+            >
+                <FunctionField
+                    source="airportCode"
+                    label="Aéroport"
+                    render={record => <p>{record.airportCode} - <span className="text-xs italic">{record.airportName}</span></p>}
+                />
+                <NumberField source="complets" label="Complet(s)" />
+                <NumberField source="touches" label="Touché(s)" />
+            </Datagrid>
+        </div>
+    );
+};
 
 export const PrestationShow = () => {
 
@@ -72,17 +98,31 @@ export const PrestationShow = () => {
                     textAlign="right"
                 />
                 <ArrayField source="vols">
-                    <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}} className="text-xs italic">
-                        <NumberField source="quantite" label="Nb vol(s)"/>
+                    <Datagrid
+                        optimized
+                        expand={<LandingDetails />}
+                        bulkActionButtons={false}
+                        sx={{
+                            '& .RaDatagrid-headerCell': { backgroundColor: '#ededed', fontWeight: 'lighter' },
+                            '& .RaDatagrid-rowCell': { verticalAlign: 'top' },
+                        }}
+                    >
+                        <NumberField source="quantite" label="Nb vol(s)" />
                         <FunctionField
-                        source="circuit"
-                        render={record => <p>{record.circuit.code} - <span className="text-xs italic">{record.circuit.nom}</span></p>}
+                            source="circuit"
+                            render={record =>
+                                isDefined(record.circuit) && isDefined(record.circuit.code) && isDefined(record.circuit.nom) ?
+                                <p>{record.circuit.code} - <span className="text-xs italic">{record.circuit.nom}</span></p> : ""
+                            }
                         />
                         <FunctionField
-                        source="nature"
-                        render={record => <p>{record.circuit.nature.code} - <span className="text-xs italic">{record.circuit.nature.label}</span></p>}
+                            source="nature"
+                            render={record =>
+                                isDefined(record.circuit) && isDefined(record.circuit.nature) && isDefined(record.circuit.nature.code) && isDefined(record.circuit.nature.label) ?
+                                <p>{record.circuit.nature.code} - <span className="text-xs italic">{record.circuit.nature.label}</span></p> : ""
+                            }
                         />
-                        <OptionField/>
+                        <OptionField />
                     </Datagrid>
                 </ArrayField>
                 <TextField source="remarques" label="Remarques"/>

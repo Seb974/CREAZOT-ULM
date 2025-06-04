@@ -11,7 +11,6 @@ const DefaultLayout = (props: React.JSX.IntrinsicAttributes & LayoutProps) => {
   if (loading) return <GlobalLoader />;
 
   return (
-    <ClientProvider>
       <Layout 
         {...props} 
         appBar={AppBar} 
@@ -29,7 +28,6 @@ const DefaultLayout = (props: React.JSX.IntrinsicAttributes & LayoutProps) => {
           }
       }}
       />
-    </ClientProvider>
   );
 }
 

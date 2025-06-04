@@ -34,7 +34,7 @@ const ClickOutside: React.FC<Props> = ({
       if (!clickedInside) onClick();
     };
 
-    document.addEventListener("mousedown", handleClickListener);
+    document.addEventListener("mousedown", handleClickListener, { passive: true });
 
     return () => {
       document.removeEventListener("mousedown", handleClickListener);

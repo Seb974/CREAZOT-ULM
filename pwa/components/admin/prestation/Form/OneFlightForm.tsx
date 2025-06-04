@@ -8,6 +8,7 @@ import NoPhotographyIcon from '@mui/icons-material/NoPhotography';
 import { Button } from '../../../common/ui/button';
 import { useClient } from '../../../admin/ClientProvider';
 import { clientWithOptions } from "../../../../app/lib/client";
+import { isDefined } from "../../../../app/lib/utils";
 
 // @ts-ignore
 export const OneFlightForm: React.FC = ({ circuits, options, selectedCircuit, selectedCircuits, handleCircuitChange, handleQuantityChange, handleDeleteCircuit, handleOptionChange, disableOption }) => {
@@ -43,7 +44,7 @@ export const OneFlightForm: React.FC = ({ circuits, options, selectedCircuit, se
                                 key={ circuit.id } 
                                 value={ circuit.id } 
                                 className="text-body dark:text-bodydark"
-                                disabled={ !circuit.prixFixe && disableOption }
+                                disabled={ disableOption && (!circuit.prixFixe || circuit.requireLandingDeclaration)}
                               >
                                 { circuit.code }
                              </option>
@@ -94,7 +95,7 @@ export const OneFlightForm: React.FC = ({ circuits, options, selectedCircuit, se
                       placeholder="Quantité"
                       className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                       value={ selectedCircuit.quantite }
-                      disabled={ !selectedCircuit.circuit.prixFixe }
+                      disabled={ !selectedCircuit.circuit.prixFixe || selectedCircuit.circuit.requireLandingDeclaration }
                       onChange={ e => handleQuantityChange(selectedCircuit, e) }
                     />
                     <span className="absolute right-4 top-1/2 z-10 -translate-y-1/2 pr-2">

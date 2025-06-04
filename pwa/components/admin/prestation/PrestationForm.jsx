@@ -5,15 +5,16 @@ import React, { useState } from "react";
 import { PilotForm } from "./Form/PilotForm";
 import { AircraftForm } from "./Form/AircraftForm";
 import { FlightForm } from "./Form/FlightForm";
+import { AirportsForm } from "./Form/AirportsForm";
 import { FlightTimeForm } from "./Form/FlightTimeForm";
 import {SubmitButton} from "./Form/SubmitButton";
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
-import { useRedirect, useNotify, useCreate } from 'react-admin';
-import { getCircuitDuration, getTotalPrice, getRealDuration, getCircuitPrice, isDefined, isValidDuration } from '../../../app/lib/utils';
+import { useRedirect, useNotify, useCreate, useDataProvider } from 'react-admin';
+import { getCircuitDuration, getTotalPrice, getRealDuration, getCircuitPrice, isDefined, isValidDuration, isDefinedAndNotVoid } from '../../../app/lib/utils';
 import { EncadrantForm } from './Form/EncadrantForm';
 import { useClient } from '../../admin/ClientProvider';
-import { clientWithOptions } from "../../../app/lib/client";
+import { clientWithLandingManagement, clientWithOptions, getDefaultLanding } from "../../../app/lib/client";
 
 export const PrestationForm = () => {
 
@@ -21,10 +22,12 @@ export const PrestationForm = () => {
     const redirect = useRedirect();
     const [create] = useCreate();
     const { client } = useClient();
+    const defaultLanding = getDefaultLanding(client);
     const [pilots, setPilots] = useState([]);
     const [encadrants, setEncadrants] = useState([]);
     const [date, setDate] = useState(new Date((new Date()).setHours(12, 0, 0)));
     const [aircrafts, setAircrafts] = useState([]);
+    const [landings, setLandings] = useState([defaultLanding]);
     const [selectedPilot, setSelectedPilot] = useState("");
     const [selectedEncadrant, setSelectedEncadrant] = useState("");
     const [selectedAircraft, setSelectedAircraft] = useState("");
@@ -35,22 +38,35 @@ export const PrestationForm = () => {
     const isObject = obj => Object.prototype.toString.call(obj) === '[object Object]';
 
     const handleSubmit = async e => {
+        let landingAssigned = false;
         const prestation = {
             aeronef: selectedAircraft.id,
             pilote: isDefined(selectedPilot) && isObject(selectedPilot) ? (selectedPilot['@id'] || selectedPilot.id) : selectedPilot,
-            encadrant: isDefined(selectedEncadrant) && isObject(selectedEncadrant) ? (selectedEncadrant['@id'] || selectedEncadrant.id) : selectedEncadrant,
+            encadrant: isDefined(selectedEncadrant) && isObject(selectedEncadrant) ? (selectedEncadrant['@id'] || selectedEncadrant.id) : (typeof selectedEncadrant === 'string' && selectedEncadrant === '' ? null : selectedEncadrant),
             horametreDepart: selectedAircraft.horametre,
             horametreFin: typeof selectedFlightTime === 'string' ? parseFloat(selectedFlightTime.replace(',','.')) : selectedFlightTime,
             duree: getRealDuration(selectedFlightTime, selectedAircraft),
             turnover: getTotalPrice(selectedFlightTime, selectedAircraft, selectedCircuits),
             vols: selectedCircuits.map(c => {
-                return {
+                const formattedVol = {
                     circuit: c.circuit.id,
                     quantite: parseInt(c.quantite),
                     duree: c.circuit.prixFixe ? getCircuitDuration(selectedAircraft, c.circuit, c.quantite) : getRealDuration(selectedFlightTime, selectedAircraft),
                     option: clientWithOptions(client) && c.option.id !== 0 ? c.option.id : null,
                     prix: parseInt(c.quantite) * getCircuitPrice(c.circuit, c.option, selectedFlightTime, selectedAircraft)
+                };
+                if (clientWithLandingManagement(client)) {   
+                    if (isDefined(c.circuit.requireLandingDeclaration) && c.circuit.requireLandingDeclaration && landings.length > 0 && !landingAssigned) {
+                        landingAssigned = true;
+                        return {...formattedVol, landings: landings.map(({id, ...l}) => ({...l, complets: parseInt(l.complets, 10), touches: parseInt(l.touches, 10)}))}
+                    } else {
+                        const {id, ...defaultLand} = defaultLanding;
+                        return isDefined(c.circuit.hadDefaultLanding) && c.circuit.hadDefaultLanding ?
+                            {...formattedVol, landings: [{...defaultLand, complets: parseInt(defaultLand.complets, 10), touches: parseInt(defaultLand.touches, 10)}]}
+                          : {...formattedVol, landings: []}
+                    }
                 }
+                return formattedVol;
             }),
             date,
             remarques
@@ -121,6 +137,14 @@ export const PrestationForm = () => {
                 selectedCircuits={ selectedCircuits }
                 autoSelect={ true }
             />
+            { clientWithLandingManagement(client) && selectedCircuits.find(({circuit}) => circuit.requireLandingDeclaration) !== undefined && isDefinedAndNotVoid(client.airportCodes) && 
+                <AirportsForm
+                    client={ client }
+                    landings={ landings }
+                    setLandings={ setLandings } 
+                    defaultLanding={ defaultLanding }
+                />
+            }
             <div className="mt-7">
                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">
                   Remarque(s)

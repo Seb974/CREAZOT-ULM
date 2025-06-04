@@ -1,9 +1,8 @@
 import { type NextPage } from "next";
+import React from 'react';
 import {
   Datagrid,
   List,
-  TextInput,
-  BooleanInput,
   CreateButton,
   ExportButton,
   TopToolbar,
@@ -11,7 +10,6 @@ import {
   ShowButton,
   SimpleList,
   FunctionField,
-  FilterButton
 } from "react-admin";
 import Chip from '@mui/material/Chip';
 import { type Circuit } from "../../../types/Circuit";
@@ -27,18 +25,10 @@ export interface Props {
 
 const ListActions = () => (
   <TopToolbar>
-      <FilterButton/> 
       <CreateButton/>
       <ExportButton/>
   </TopToolbar>
 );
-
-const filters = [
-  <TextInput source="pilote.firstName" key="pilote" label="Pilote"/>,
-  <BooleanInput source="isEleve" key="isEleve" label="En formation"/>,
-  <BooleanInput source="isPro" key="isPro" label="Professionnel"/>,
-  <BooleanInput source="isInstructeur" key="isInstructeur" label="Instructeur"/>
-];
 
 export const ProfilesList: NextPage<Props> = ({ data, hubURL, page }) => {
 
@@ -57,7 +47,11 @@ export const ProfilesList: NextPage<Props> = ({ data, hubURL, page }) => {
   const getPilotStatus = ({ qualifications }) => <span className="text-right flex flex-end">{ qualifications.map((q, i) => <Chip key={i} label={q.slug} size="small" sx={ getShipStyle(q) }/>) }</span>
 
   return (
-    <List resource="profil_pilotes" actions={<ListActions/>} filters={ filters } pagination={false}>
+    <List 
+      resource="profil_pilotes" 
+      actions={<ListActions/>} 
+      pagination={false}
+    >
         { isSmall ? 
             <SimpleList
               primaryText={ record => isDefined(record.pilote) && isDefined(record.pilote.firstName) ? record.pilote.firstName.charAt(0).toUpperCase() + record.pilote.firstName.slice(1) : '' }

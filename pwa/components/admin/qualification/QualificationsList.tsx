@@ -2,10 +2,7 @@ import { type NextPage } from "next";
 import {
   Datagrid,
   List,
-  TextInput,
-  TextField,
   FunctionField,
-  BooleanInput,
   CreateButton,
   ExportButton,
   TopToolbar,
@@ -13,7 +10,6 @@ import {
   ShowButton,
   BooleanField,
   SimpleList,
-  FilterButton
 } from "react-admin";
 import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
@@ -29,18 +25,10 @@ export interface Props {
 
 const ListActions = () => (
   <TopToolbar>
-      <FilterButton/> 
       <CreateButton/>
       <ExportButton/>
   </TopToolbar>
 );
-
-const filters = [
-  <TextInput source="pilote.firstName" key="pilote" label="Pilote"/>,
-  <BooleanInput source="isEleve" key="isEleve" label="En formation"/>,
-  <BooleanInput source="isPro" key="isPro" label="Professionnel"/>,
-  <BooleanInput source="isInstructeur" key="isInstructeur" label="Instructeur"/>
-];
 
 export const QualificationsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
@@ -49,7 +37,7 @@ export const QualificationsList: NextPage<Props> = ({ data, hubURL, page }) => {
   const getEncadrantText = ({ encadrant }) => isDefined(encadrant) && encadrant ? <span className="text-sm italic">{ "Encadrant" }</span> : '';
 
   return (
-    <List resource="qualifications" actions={<ListActions/>} filters={ filters }>
+    <List resource="qualifications" actions={<ListActions/>}>   
         { isSmall ? 
             <SimpleList
               primaryText={ record => getNameText(record) }

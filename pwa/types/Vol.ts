@@ -2,6 +2,7 @@ import { Circuit } from "./Circuit";
 import { type Item } from "./item";
 import { Prestation } from "./Prestation";
 import { Option } from "./option";
+import { Landing } from "./Landing";
 
 
 export class Vol implements Item {
@@ -15,7 +16,8 @@ export class Vol implements Item {
     public prestation?: Prestation,
     public duree?: number,
     public prix?: number,
-    public option?: Option
+    public option?: Option,
+    public landings?: Landing[],
 
   ) {
     this["@id"] = _id;

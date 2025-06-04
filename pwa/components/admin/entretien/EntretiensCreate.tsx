@@ -60,7 +60,7 @@ export const EntretiensCreate = () => {
         <ReferenceArrayInput source="intervenants" reference="users" />
         <TextInput source="intervention" label="Détail de l'intervention" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
         <BooleanInput source="changementMoteur" label="Changement du moteur" defaultValue={ false }/>
-        <NumberInput key={ isDefined(selectedAeronef) ? selectedAeronef.id : 0 } source="horametreNextIntervention" label="Prochaine intervention"/>
+        <NumberInput key={ isDefined(selectedAeronef) ? selectedAeronef.id : 0 } source="horametreNextIntervention" label="Prochaine intervention" helperText={isDefined(selectedAeronef) && isDefined(selectedAeronef.horametre) ? `Horamètre actuel : ${ selectedAeronef.horametre.toFixed(2) }h` : ''}/>
         <AeronefWatcher setSelectedAeronef={ setSelectedAeronef } setIsChangementMoteur={ setIsChangementMoteur }/>
       </SimpleForm>
     </Create>

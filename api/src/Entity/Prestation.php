@@ -34,7 +34,9 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
             filters: [
                 'app.filter.prestation.pilote',
                 'app.filter.prestation.aeronef',
-                'app.filter.prestation.date'
+                'app.filter.prestation.date',
+                'app.filter.prestation.piloteName',
+                'app.filter.prestation.aeronefImmatriculation:'
             ],
         ),
         new Post(
@@ -68,15 +70,15 @@ class Prestation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Prestation:write', 'Prestation:read'])]
+    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Landing:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read'])]
+    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read', 'Landing:read'])]
     private ?Aeronef $aeronef = null;
 
     #[ORM\ManyToOne]
-    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read'])]
+    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read', 'Landing:read'])]
     private ?User $pilote = null;
 
     /**
@@ -87,7 +89,7 @@ class Prestation
     private Collection $vols;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read'])]
+    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read', 'Landing:read'])]
     private ?\DateTimeInterface $date = null;
 
     #[ORM\Column(nullable: true)]
@@ -111,12 +113,30 @@ class Prestation
     private ?string $remarques = null;
 
     #[ORM\ManyToOne]
-    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read'])]
+    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read', 'Landing:read'])]
     private ?User $encadrant = null;
 
     public function __construct()
     {
         $this->vols = new ArrayCollection();
+    }
+
+    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read', 'Landing:read'])]
+    public function getAeronefImmatriculation(): ?string
+    {
+        return !is_null($this->aeronef) ? $this->aeronef->getImmatriculation() : '';
+    }
+
+    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read', 'Landing:read'])]
+    public function getPilotName(): ?string
+    {
+        return !is_null($this->pilote) ? ucfirst($this->pilote->firstName) : '';
+    }
+
+    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read', 'Landing:read'])]
+    public function getEncadrantName(): ?string
+    {
+        return !is_null($this->encadrant) ? ucfirst($this->encadrant->firstName) : '';
     }
 
     public function getId(): ?int

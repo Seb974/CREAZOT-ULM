@@ -9,12 +9,14 @@ import { isDefined } from "../../../app/lib/utils";
 import { useClient } from '../../admin/ClientProvider';
 import GlobalLoader from "../../admin/layout/GlobalLoader";
 import Oidc from "./Oidc";
+import { useState } from "react";
 
 const CustomAppBar = () => {
 
   const session = useSession();
   const user = session.data.user;
   const { client, loading } = useClient();
+  const [fallback, setFallback] = useState(false);
 
   const logoSrc = isDefined(client) && isDefined(client.logo) ? `${client.logo}?v=${Date.now()}` : "/images/logo.png";
 
@@ -37,16 +39,17 @@ const CustomAppBar = () => {
         <TitlePortal />
         <div className="flex-1">
           <Link to="/">
-            <Image
-              alt={ "logo " + client.name }
-              src={ logoSrc || "/images/logo.png"}
-              width={60}
-              height={60}
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = "/images/logo.png";
-              }}
-            />
+            <div style={{ position: "relative", width: 50, height: 50 }}>
+              <Image
+                alt={"logo " + client.name}
+                src={fallback ? "/images/logo.png" : (logoSrc || "/images/logo.png")}
+                fill
+                sizes="50px" 
+                onError={() => setFallback(true)}
+                className="object-contain"
+              />
+            </div>
+
           </Link>
           
         </div>

@@ -9,6 +9,8 @@ import dynamic from 'next/dynamic';
 import { useClient } from '../../../admin/ClientProvider';
 import GlobalLoader from "../../../admin/layout/GlobalLoader";
 import { isDefined } from "../../../../app/lib/utils";
+import { AppBar, Dialog, IconButton, Toolbar, Typography } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
 
 const MapView = dynamic(() => import('./MapView'), { ssr: false });
 
@@ -18,8 +20,9 @@ const Dashboard = () => {
   const [isSmall, setIsSmall] = useState(true);
   const [showGraphic, setShowGraphic] = useState(true);
   const [showMetarMobile, setShowMetarMobile] = useState(true);
-
-  const [appli, setAppli] = useState("W");  
+  const [selectedBalise, setSelectedBalise] = useState('none');
+  const [showFullMap, setShowFullMap] = useState(false);
+  const [appli, setAppli] = useState("W"); 
 
   const onWSelect = () => setAppli("W");
   const onMSelect = () => setAppli("M");
@@ -36,10 +39,11 @@ const Dashboard = () => {
 
   return loading ? <GlobalLoader/> : 
     isDefined(client) && (
+      <>
       <div className="overflow-x-hidden w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full" >
           <MetarView showGraphic={ showGraphic } setShowGraphic={ setShowGraphic } switchToMap={() => setShowMetarMobile(false)} hidden={ isSmall && !showMetarMobile } client={ client }/>
-          <MapView isSmall={ isSmall } switchToMetar={() => setShowMetarMobile(true)} hidden={ isSmall && showMetarMobile } client={ client }/>
+          <MapView isSmall={ isSmall } switchToMetar={() => setShowMetarMobile(true)} hidden={ isSmall && showMetarMobile } client={ client } setShowFullMap={ setShowFullMap } selectedBalise={ selectedBalise } setSelectedBalise={ setSelectedBalise } fullScreen={ false } />
         </div>
         <div className="col-span-12 mt-6">
           <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -92,6 +96,20 @@ const Dashboard = () => {
         </div>
           { isDefined(client.hasReservation) && client.hasReservation &&  <CalendarWidget isSmall={ isSmall } client={ client }/> }
       </div>
+      <Dialog fullScreen open={showFullMap} onClose={() => setShowFullMap(false)}>
+        <AppBar position="static" style={{ backgroundColor: client.color || 'primary' }}>
+          <Toolbar>
+            <IconButton edge="start" color="inherit" onClick={() => setShowFullMap(false)}>
+              <CloseIcon />
+            </IconButton>
+            <Typography variant="h6" sx={{ ml: 2 }}>
+              Carte en plein écran
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <MapView isSmall={ isSmall } switchToMetar={() => setShowMetarMobile(true)} hidden={ isSmall && showMetarMobile } client={ client } setShowFullMap={ setShowFullMap } selectedBalise={ selectedBalise } setSelectedBalise={ setSelectedBalise } fullScreen={ true }/>
+      </Dialog>
+      </>
   );
 };
 

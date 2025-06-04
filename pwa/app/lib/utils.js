@@ -142,3 +142,23 @@ export const isSameDates = (date1, date2) => {
   }
   return false;
 };
+
+export const getFormattedValueForBackEnd = (value, additionalCondition = true) => {
+  if (additionalCondition && isDefined(value)) {
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      if ('@id' in value && isDefined(value['@id']))
+        return value['@id'];
+    }
+    if (typeof value === 'string' && value !== '') {
+      return value;
+    }
+  }
+  return null;
+};
+
+export const toLocalDateString = (date) => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};

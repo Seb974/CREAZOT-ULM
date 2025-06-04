@@ -43,7 +43,9 @@ export const ClientsCreate = () => {
                     hasGifts: false,
                     hasReservation: false,
                     hasOriginContact: false,
-                    airportCodes: record?.airportCodes?.map(code => ({ ...code, meteo: code.meteo ?? false })) ?? [],
+                    hasLandingManagement: false,
+                    hasEmailConfirmation: false,
+                    airportCodes: record?.airportCodes?.map(code => ({ ...code, meteo: code.meteo ?? false, main: code.main ?? false })) ?? [],
                 })}
             >
                 <TabbedForm.Tab label="Informations">
@@ -81,6 +83,7 @@ export const ClientsCreate = () => {
                             <TextInput source="code"/>
                             <TextInput source="nom"/>
                             <BooleanInput source="meteo" parse={(value) => value === undefined ? false : value} sx={{marginTop: '1em'}}/>
+                            <BooleanInput source="main" label="principal" parse={(value) => value === undefined ? false : value} sx={{marginTop: '1em'}}/>
                         </SimpleFormIterator>
                     </ArrayInput>
                     <ArrayInput source="camIds" label="Caméras Windy">
@@ -131,15 +134,14 @@ export const ClientsCreate = () => {
                             <BooleanInput source="hasGifts" label="Cadeaux" fullWidth/>
                         </Box> 
                     </Box>
-                        {/* <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                    <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
                         <Box flex={1}>
                             <BooleanInput source="hasOriginContact" label="Origine du contact" fullWidth/>
                         </Box>
                         <Box flex={1}>
-                            <BooleanInput source="hasPassengerRegistration" label="Enregistrement des passagers" fullWidth/>
+                            <BooleanInput source="hasLandingManagement" label="Gestion des atterrissages" fullWidth/>
                         </Box>
-                    </Box> */}
-                    <BooleanInput source="hasOriginContact" label="Origine du contact" fullWidth/>
+                    </Box>
                     <BooleanInput source="hasPassengerRegistration" label="Enregistrement des passagers" fullWidth/>
                     <ThanksOptions/>
                 </TabbedForm.Tab>

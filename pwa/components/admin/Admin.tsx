@@ -2,7 +2,8 @@
 
 import Head from "next/head";
 import { useRef } from "react";
-import { type DataProvider, defaultTheme } from "react-admin";
+import { type DataProvider, defaultTheme, CustomRoutes } from "react-admin";
+import { Route } from 'react-router-dom';
 import { signIn, useSession } from "next-auth/react";
 import SyncLoader from "react-spinners/SyncLoader";
 import { fetchHydra, HydraAdmin, hydraDataProvider, ResourceGuesser } from "@api-platform/admin";
@@ -30,6 +31,8 @@ import qualificationResourceProps from "./qualification";
 import natureResourceProps from "./nature";
 import optionResourceProps from "./option";
 import clientResourceProps from "./client";
+import landingResourceProps from "./landing";
+import { LandingsList } from "./landing/LandingsList";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -139,6 +142,10 @@ const AdminWithOIDC = () => {
         <ResourceGuesser name="users" {...userResourceProps}/>
         <ResourceGuesser name="profil_pilotes" {...profileResourceProps}/>
         <ResourceGuesser name="reservations" {...reservationResourceProps}/>
+        {/* <ResourceGuesser name="landings" {...landingResourceProps}/> */}
+        <CustomRoutes>
+          <Route path="/landings" element={<LandingsList />} />
+        </CustomRoutes>
       </AdminAdapter>
   );
 };

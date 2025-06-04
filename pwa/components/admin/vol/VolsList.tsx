@@ -1,5 +1,6 @@
 import { type NextPage } from "next";
-import { TableRow, TableCell } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { TableRow, TableCell, TableFooter, Box } from '@mui/material';
 import {
   TextInput,
   FunctionField,
@@ -8,19 +9,21 @@ import {
   List,
   TextField,
   ExportButton,
-  FilterButton,
   TopToolbar,
   DateField,
   NumberField,
   DateInput,
   SimpleList,
-  useListContext
+  useListContext,
+  Button,
+  Form
 } from "react-admin";
 import { Fragment } from 'react';
 import { type Vol } from "../../../types/Vol";
+import FilterListIcon from '@mui/icons-material/FilterList';
 import { type PagedCollection } from "../../../types/collection";
 import { useSession } from "next-auth/react";
-import { isDefined } from "../../../app/lib/utils";
+import { isDefined, toLocalDateString } from "../../../app/lib/utils";
 import { useMediaQuery, Theme } from '@mui/material';
 import { useClient } from '../../admin/ClientProvider';
 import { clientWithOptions } from "../../../app/lib/client";
@@ -31,20 +34,95 @@ export interface Props {
   page: number;
 }
 
-const ListActions = () => (
+const CustomListActions = ({ showMore, setShowMore }) => (
   <TopToolbar>
-      <FilterButton/> 
-      <ExportButton/>
+    <CustomFilterButton showMore={showMore} setShowMore={setShowMore}/>
+    <ExportButton />
   </TopToolbar>
 );
 
-const filters = [
-  <TextInput source="prestation.aeronef.immatriculation" key="Aeronef" label="Aéronef"/>,
-  <TextInput source="prestation.pilote.firstName" key="Pilote" label="Pilote" />,
-  <TextInput source="circuit.code" key="Circuit" label="Circuit" />,
-  <DateInput source="prestation.date[after]"  key="DateMin" label="Date Min"/>,
-  <DateInput source="prestation.date[before]"  key="DateMax" label="Date Max"/>,
-];
+const CustomFilterBar = ({ showMore, isSmall }) => {
+
+  const { filterValues, setFilters } = useListContext();
+  const [formValues, setFormValues] = useState({
+      'prestation.date[after]': filterValues['prestation.date[after]'] ? toLocalDateString(new Date(filterValues['prestation.date[after]'])) : '',
+      'prestation.date[before]': filterValues['prestation.date[before]'] ? toLocalDateString(new Date(filterValues['prestation.date[before]'])) : '',
+      'prestation.pilote.firstName': filterValues['prestation.pilote.firstName'] || '',
+      'prestation.aeronef.immatriculation': filterValues['prestation.aeronef.immatriculation'] || '',
+      'circuit.code': filterValues['circuit.code'] || ''
+  });
+
+  useEffect(() => {
+      setFormValues({
+          'prestation.date[after]': filterValues['prestation.date[after]'] ? toLocalDateString(new Date(filterValues['prestation.date[after]'])) : '',
+          'prestation.date[before]': filterValues['prestation.date[before]'] ? toLocalDateString(new Date(filterValues['prestation.date[before]'])) : '',
+          'prestation.pilote.firstName': filterValues['prestation.pilote.firstName'] || '',
+          'prestation.aeronef.immatriculation': filterValues['prestation.aeronef.immatriculation'] || '',
+          'circuit.code': filterValues['circuit.code'] || ''
+      });
+  }, [filterValues]);
+
+  const handleChange = (e) => {
+      const { name, value } = e.target;
+      const newValues = { ...formValues, [name]: value };
+      setFormValues(newValues);
+      setFilters(newValues); 
+  };
+
+  return !showMore ? <></> :
+    <Form>
+        <Box display="flex" flexWrap="wrap" columnGap={isSmall ? 6 : 2} rowGap={0.5} mt={1} alignItems="flex-end">
+            <TextInput
+                source="prestation.pilote.firstName"
+                label="Pilote"
+                onChange={handleChange}
+                defaultValue={formValues['prestation.pilote.firstName']}
+                sx={{ width: isSmall ? '100%' : 200 }}
+            />
+            <TextInput
+                source="prestation.aeronef.immatriculation"
+                label="Aéronef"
+                onChange={handleChange}
+                defaultValue={formValues['prestation.aeronef.immatriculation']}
+                sx={{ width: isSmall ? '100%' : 200 }}
+            />
+            <TextInput
+                source="circuit.code"
+                label="Circuit"
+                onChange={handleChange}
+                defaultValue={formValues['circuit.code']}
+                sx={{ width: isSmall ? '100%' : 200 }}
+            />
+            <DateInput
+                source="prestation.date[after]"
+                label="Date Min"
+                onChange={handleChange}
+                defaultValue={formValues['prestation.date[after]']}
+                sx={{ width: isSmall ? '100%' : 200 }}
+            />
+            <DateInput
+                source="prestation.date[before]"
+                label="Date Max"
+                onChange={handleChange}
+                defaultValue={formValues['prestation.date[before]']}
+                sx={{ width: isSmall ? '100%' : 200 }}
+            />
+        </Box>
+    </Form>
+};
+
+const CustomFilterButton = ({ showMore, setShowMore }) => {
+  return (
+    <Button
+      size="small"
+      color="primary"
+      onClick={() => setShowMore(!showMore)}
+      startIcon={<FilterListIcon />}
+    >
+      <FilterListIcon />
+    </Button>
+  );
+};
 
 const CustomBody = (props) => {
 
@@ -62,23 +140,25 @@ const CustomBody = (props) => {
     return (
       <Fragment>
         <DatagridBody {...props} />
-        <TableRow sx={{ backgroundColor: '#ededed' }}>
-            <TableCell colSpan={4} sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
-              Totaux
-            </TableCell>
-            <TableCell style={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'right' }}>
-              <strong>{totalVols}</strong>
-            </TableCell>
-            <TableCell colSpan={3}/>
-            <TableCell style={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'right' }}>
-              <strong>{totalCoutPilote.toFixed(2)} €</strong>
-            </TableCell>
-            { hasAdminAccess(user) && 
-              <TableCell style={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'right' }}>
-                <strong>{totalCA.toFixed(2)} €</strong>
+        <TableFooter>
+          <TableRow sx={{ backgroundColor: '#ededed', fontStyle: 'italic', fontWeight: 'bold', color: '#555'  }}>
+              <TableCell colSpan={4} sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
+                Totaux
               </TableCell>
-            }
-        </TableRow>
+              <TableCell style={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'right' }}>
+                <strong>{totalVols}</strong>
+              </TableCell>
+              <TableCell colSpan={3}/>
+              <TableCell style={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'right' }}>
+                <strong>{totalCoutPilote.toFixed(2)} €</strong>
+              </TableCell>
+              { hasAdminAccess(user) && 
+                <TableCell style={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'right' }}>
+                  <strong>{totalCA.toFixed(2)} €</strong>
+                </TableCell>
+              }
+            </TableRow>
+          </TableFooter>
       </Fragment>
     );
 };
@@ -101,11 +181,14 @@ const CustomDatagrid = () => {
             <TextField source="prestation.aeronef.immatriculation" label="Aéronef" sortable={ true }/>
             <FunctionField
                 label="Pilote"
-                source="prestation.pilote.firstName"
+                source="prestation.pilotName"
                 sortable={ true }
-                render={(record) => isDefined(record.prestation) && isDefined(record.prestation.pilote) && isDefined(record.prestation.pilote.firstName) ?
-                    record.prestation.pilote.firstName.charAt(0).toUpperCase() + record.prestation.pilote.firstName.slice(1) : ''
-                }
+                render={(record) => (
+                    <>
+                      { isDefined(record.prestation) && isDefined(record.prestation.pilotName) && record.prestation.pilotName !== '' ? record.prestation.pilotName : '' } 
+                      { (<span className="text-gray-500 italic text-xs">{isDefined(record.prestation) && isDefined(record.prestation.encadrantName) && record.prestation.encadrantName !== '' ? <span><br/>{record.prestation.encadrantName}</span> : ''}</span>) }
+                    </>
+                )}
             />
             <NumberField source="quantite" label="Nombre de vol(s)"/>
             <TextField source="circuit.code" label="Circuit" sortable={ true }/>
@@ -125,14 +208,27 @@ export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
   const user = session.data.user;
   const options = { year: "numeric", month: "numeric", day: "numeric" };
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
+  const defaultFilters = {}; 
+  const [showMore, setShowMore] = useState(false);
+  const [filters, setFilters] = useState(defaultFilters);
 
   const hasAdminAccess = user => isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin");
 
   return (
-    <List resource="vols" actions={<ListActions/>} filters={ filters } filter={ !hasAdminAccess(user) ? { "prestation.pilote.email": user.email } : null}> 
+    <List 
+      resource="vols" 
+      actions={<CustomListActions showMore={showMore} setShowMore={setShowMore}/>}
+      filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>}
+      filter={ !hasAdminAccess(user) ? { "prestation.pilote.email": user.email } : null}
+      // @ts-ignore
+      filterValues={filters}
+      // onFilterChange={setFilters}
+      filterDefaultValues={defaultFilters}
+      disableSyncWithLocation
+    > 
         { isSmall ? 
             <SimpleList
-              primaryText={ record => record.prestation.aeronef.immatriculation + ' | ' +  (isDefined(record.prestation) && isDefined(record.prestation.pilote) && isDefined(record.prestation.pilote.firstName) ? record.prestation.pilote.firstName.charAt(0).toUpperCase() + record.prestation.pilote.firstName.slice(1) : '') }
+              primaryText={ record => record.prestation.aeronefImmatriculation + ' | ' +  (isDefined(record.prestation) && isDefined(record.prestation.pilotName) && record.prestation.pilotName !== '' ? record.prestation.pilotName : '') }
               // @ts-ignore
               secondaryText={ record => `${ (new Date(record.prestation.date)).toLocaleDateString("fr-FR", options) } `}
               tertiaryText={ record => record.quantite + ' x ' + record.circuit.code }

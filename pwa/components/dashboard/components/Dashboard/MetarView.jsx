@@ -14,7 +14,7 @@ export const MetarView = ({ showGraphic, setShowGraphic, switchToMap, hidden, cl
 
     useEffect(() => {
         const clientMeteoStations = getMeteoStations(client);
-        const defaultStation = isDefined(clientMeteoStations[0]) ? clientMeteoStations[0].code : null;
+        const defaultStation = getMainAirport(clientMeteoStations);
         setMeteoStations(clientMeteoStations);
         setSelectedCode(defaultStation);
     }, [client]);
@@ -24,6 +24,14 @@ export const MetarView = ({ showGraphic, setShowGraphic, switchToMap, hidden, cl
     const getMeteoStations = ({ airportCodes }) => {
         return isDefinedAndNotVoid(airportCodes) ? airportCodes.filter(a => a.meteo) : []
     };
+
+    const getMainAirport = airports => {
+        if (isDefinedAndNotVoid(airports)) {
+            const mainAirport = airports.find(airport => isDefined(airport.main) && airport.main === true);
+            return isDefined(mainAirport) ? mainAirport.code : airports[0].code;
+        }
+        return null;
+    }
 
     return (
         <div className={`w-full mt-6 overflow-hidden ${ hidden ? 'hidden' : ''}`}>

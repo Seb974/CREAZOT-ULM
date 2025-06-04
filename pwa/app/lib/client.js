@@ -1,4 +1,4 @@
-import { isDefined } from "./utils";
+import { isDefined, isDefinedAndNotVoid } from "./utils";
 
 export const colors = [
     // Prédéfinies de MUI / React-Admin
@@ -203,3 +203,21 @@ export const clientWithPartners = client => {
 export const clientWithEmailConfirmation = client => {
     return isDefined(client) && isDefined(client.hasEmailConfirmation) && client.hasEmailConfirmation;
 };
+
+export const clientWithLandingManagement = client => {
+    return isDefined(client) && isDefined(client.hasLandingManagement) && client.hasLandingManagement;
+};
+
+export const getDefaultLanding = client => {
+    if (isDefined(client) && isDefinedAndNotVoid(client.airportCodes) && clientWithLandingManagement(client)) {
+        const mainAirport = client.airportCodes.find(airport => airport.main);
+        const { code, nom, ...airport } = isDefined(mainAirport) ? mainAirport : client.airportCodes[0];
+        return {id: +new Date(), airportCode: code, airportName: nom, complets: 1, touches: 0};
+    }
+    return [];
+};
+
+export const getAirportName = (client, code) => {
+    const selectedAirport = client.airportCodes.find(a => a.code === code);
+    return isDefined(selectedAirport) ? selectedAirport.nom : "";
+  };

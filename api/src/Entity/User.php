@@ -59,7 +59,7 @@ class User implements UserInterface
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\CustomIdGenerator(class: UuidGenerator::class)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[Groups(groups: ['Profil_pilote:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read'])]
     #[ORM\Id]
     private ?Uuid $id = null;
 
@@ -74,7 +74,7 @@ class User implements UserInterface
      * @see https://schema.org/givenName
      */
     #[ApiProperty(types: ['https://schema.org/givenName'])]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read', 'Landing:read'])]
     #[ORM\Column]
     public ?string $firstName = null;
 
@@ -82,7 +82,7 @@ class User implements UserInterface
      * @see https://schema.org/familyName
      */
     #[ApiProperty(types: ['https://schema.org/familyName'])]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read', 'Landing:read'])]
     #[ORM\Column]
     public ?string $lastName = null;
 
@@ -112,7 +112,7 @@ class User implements UserInterface
      * @see https://schema.org/name
      */
     #[ApiProperty(iris: ['https://schema.org/name'])]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read' ])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Landing:read'])]
     public function getName(): ?string
     {
         if (!$this->firstName && !$this->lastName) {

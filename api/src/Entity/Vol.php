@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Entity\Landing;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\VolRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\ApiProperty;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
@@ -21,7 +25,6 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     uriTemplate: '/vols{._format}',
     operations: [
         new GetCollection(
-            itemUriTemplate: '/vols/{id}{._format}',
             paginationClientItemsPerPage: true,
             filters: [
                 'app.filter.vol.pilote',
@@ -31,9 +34,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
                 'app.filter.vol.pilote.email'
             ],
         ),
-        new Post(
-            itemUriTemplate: '/vols/{id}{._format}'
-        ),
+        new Post(),
         new Get(
             uriTemplate: '/vols/{id}{._format}'
         ),
@@ -61,19 +62,19 @@ class Vol
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Vol:write', 'Prestation:write', 'Vol:read', 'Prestation:read'])]
+    #[Groups(groups: ['Vol:write', 'Prestation:write', 'Vol:read', 'Prestation:read', 'Landing:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[Groups(groups: ['Vol:write', 'Prestation:write', 'Vol:read', 'Prestation:read'])]
+    #[Groups(groups: ['Vol:write', 'Prestation:write', 'Vol:read', 'Prestation:read', 'Landing:read'])]
     private ?Circuit $circuit = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Vol:write', 'Prestation:write', 'Vol:read', 'Prestation:read'])]
+    #[Groups(groups: ['Vol:write', 'Prestation:write', 'Vol:read', 'Prestation:read', 'Landing:read'])]
     private ?int $quantite = null;
 
     #[ORM\ManyToOne(inversedBy: 'vols')]
-    #[Groups(groups: ['Vol:read'])]
+    #[Groups(groups: ['Vol:read', 'Landing:read'])]
     private ?Prestation $prestation = null;
 
     #[ORM\Column(nullable: true)]
@@ -87,6 +88,15 @@ class Vol
     #[ORM\ManyToOne]
     #[Groups(groups: ['Vol:write', 'Prestation:write', 'Vol:read', 'Prestation:read'])]
     private ?Option $option = null;
+
+    #[ORM\OneToMany(targetEntity: Landing::class, mappedBy: 'vol', cascade: ['persist', 'remove'])]
+    #[Groups(groups: ['Vol:write', 'Prestation:write', 'Prestation:read', 'Vol:read'])]
+    private Collection $landings;
+
+    public function __construct()
+    {
+        $this->landings = new ArrayCollection();
+    }
 
     #[Groups(groups: ['Vol:write', 'Prestation:write', 'Vol:read', 'Prestation:read'])]
     public function getCout(): float
@@ -104,7 +114,6 @@ class Vol
                 return $localeResult;
             }
         }
-            
     }
 
     public function getId(): ?int
@@ -183,4 +192,47 @@ class Vol
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Landing>
+     */
+    public function getLandings(): Collection
+    {
+        return $this->landings;
+    }
+
+    public function addLanding(Landing $landing): static
+    {
+        if (!$this->landings->contains($landing)) {
+            $this->landings->add($landing);
+            $landing->setVol($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLanding(Landing $landing): static
+    {
+        if ($this->landings->removeElement($landing)) {
+            // set the owning side to null (unless already changed)
+            if ($landing->getVol() === $this) {
+                $landing->setVol(null);
+            }
+        }
+
+        return $this;
+    }
+
+    // public function getLandings()
+    // {
+    //     return $this->landings;
+    // }
+
+
+    // public function setLandings($landings)
+    // {
+    //     $this->landings = $landings;
+
+    //     return $this;
+    // }
 }

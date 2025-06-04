@@ -32,7 +32,6 @@ export const ClientProvider = ({ children }) => {
             dataProvider
                 .getList('clients',{pagination: { page: 1, perPage: 1 }, sort: { field: 'id', order: 'ASC' }})
                 .then(({ data }) => {
-                    console.log(data);
                     setClient(data[0]);
                     sessionStorage.setItem('client', JSON.stringify(data[0]));
                     setLoading(false);

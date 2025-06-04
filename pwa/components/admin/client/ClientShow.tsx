@@ -1,6 +1,7 @@
-import { Show, TabbedShowLayout, TextField, DateField, BooleanField, FunctionField, ArrayField, Datagrid } from 'react-admin';
+import { Show, TabbedShowLayout, TextField, DateField, BooleanField, FunctionField, RichTextField, ArrayField, Datagrid } from 'react-admin';
 import { getColor } from '../../../app/lib/client';
 import { isDefined } from '../../../app/lib/utils';
+import { Box } from "@mui/material";
 
 export const ClientShow = () => {
 
@@ -12,7 +13,6 @@ export const ClientShow = () => {
 
     return (
         <Show>
-            {/* <SimpleShowLayout> */}
             <TabbedShowLayout>
                 <TabbedShowLayout.Tab label="Informations">
                     <TextField source="name" label="Nom"/>
@@ -74,14 +74,21 @@ export const ClientShow = () => {
                         }
                     />
                 </TabbedShowLayout.Tab>
-                
-                
-                
-                
-                
-                
+                <TabbedShowLayout.Tab label="Options">
+                    <BooleanField source="hasReservation" label="Réservations" textAlign="center"/>
+                    <BooleanField source="hasOptions" label="Options" textAlign="center"/>
+                    <BooleanField source="hasPartners" label="Partenariat" textAlign="center"/>
+                    <BooleanField source="hasGifts" label="Cadeaux" textAlign="center"/>
+                    <BooleanField source="hasOriginContact" label="Origine du contact" textAlign="center"/>
+                    <BooleanField source="hasLandingManagement" label="Gestion des atterrissages" textAlign="center"/>
+                    <BooleanField source="hasPassengerRegistration" label="Enregistrement des passagers" textAlign="center"/>
+                    <TextField source="thanksTitle" label="Titre du formulaire"/>
+                    <RichTextField source="thanksMessage" label="Contenu de la page de redirection"/>
+                    <BooleanField source="hasEmailConfirmation" label="Email de confirmation" textAlign="center"/>
+                    <TextField source="confirmationSubject" label="Objet de l'email"/>
+                    <RichTextField source="confirmationMessage" label="Contenu de l'email de confirmation"/>
+                </TabbedShowLayout.Tab>     
             </TabbedShowLayout>
-            {/* </SimpleShowLayout> */}
         </Show>
     )
 }

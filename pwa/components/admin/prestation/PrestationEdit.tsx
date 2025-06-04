@@ -1,13 +1,15 @@
-import { ArrayInput, DateInput, Edit, NumberInput, ReferenceInput, SimpleForm, SimpleFormIterator, TextInput, SelectInput, useDataProvider } from "react-admin";
-import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { ArrayInput, DateInput, Edit, NumberInput, ReferenceInput, SimpleForm, SimpleFormIterator, TextInput, SelectInput, useDataProvider, useEditController } from "react-admin";
+import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { useClient } from '../../admin/ClientProvider';
-import { clientWithOptions } from "../../../app/lib/client";
+import { clientWithLandingManagement, clientWithOptions, getAirportName, getDefaultLanding } from "../../../app/lib/client";
 import { useWatch, useFormContext } from "react-hook-form";
 import { useEffect, useState } from "react";
+import { Box } from "@mui/material";
 
 const FilteredPiloteInput = ({ pilotes }) => {
   const vols = useWatch({ name: "vols" });
   const { setValue, getValues } = useFormContext();
+  const selectedPiloteId = getValues("pilote.@id");
   
   let needsEncadrant = false;
   let qualificationsRequises = [];
@@ -26,12 +28,12 @@ const FilteredPiloteInput = ({ pilotes }) => {
   );
 
   useEffect(() => {
-    const selectedPiloteId = getValues("pilote.@id");
-    const stillEligible = pilotesEligibles.some(p => p['@id'] === selectedPiloteId);
-    if (!stillEligible) {
-      setValue("pilote.@id", null);
+    if (isDefinedAndNotVoid(pilotes) && isDefined(selectedPiloteId)) {
+      const stillEligible = pilotesEligibles.some(p => p['@id'] === selectedPiloteId);
+      if (!stillEligible)
+        setValue("pilote.@id", null);
     }
-  }, [vols]);
+  }, [vols, pilotesEligibles, selectedPiloteId]);
   
   return (
     <SelectInput
@@ -61,11 +63,61 @@ const EncadrantInput = ({ pilotes }) => {
     );
 };
 
+const LandingsInput = ({ client }) => {
+    const vols = useWatch({ name: "vols" });
+    const airportList = client.airportCodes.map(a =>({...a, airportCode: a.code, airportName: a.nom}));
+
+    const requireLandingsDeclaration = vols => {
+        return vols.map(vol => vol.circuit).find(({requireLandingDeclaration}) => isDefined(requireLandingDeclaration) && requireLandingDeclaration) !== undefined;
+    };
+
+    const validateLandings = (value) => {
+      const codes = new Set();
+      for (const l of value || []) {
+        if (codes.has(l.airportCode)) {
+          return 'Un même aéroport ne peut être déclaré plusieurs fois.';
+        }
+        if (l.touches === 0 && l.complets === 0) {
+          return 'Au moins un toucher ou un complet doit être déclaré.';
+        }
+        codes.add(l.airportCode);
+      }
+      return undefined;
+    };
+
+    if (!clientWithLandingManagement(client) || !isDefinedAndNotVoid(client.airportCodes) || !vols || !Array.isArray(vols) )   // || !requireLandingsDeclaration(vols)
+        return null;
+
+    return (
+      <ArrayInput source="landings" label="Atterrissages" validate={validateLandings}>
+          <SimpleFormIterator inline disableReordering> 
+              <SelectInput
+                  source="airportCode"
+                  label="Aéroport"
+                  choices={ airportList }
+                  optionText={(a) => a.airportCode + ' - ' + a.airportName}
+                  optionValue="airportCode"
+                  />
+              <NumberInput source="touches" label="Touchés" min="0" defaultValue={ 0 }/>
+              <NumberInput source="complets" label="Complets" min="0" defaultValue={ 1 }/>
+          </SimpleFormIterator>
+      </ArrayInput>
+    );
+};
+
+const OptionInput = ({ client }) => {
+  return !clientWithOptions(client) ? null :
+      <Box flex={1}>
+        <ReferenceInput reference="options" source="option.@id" label="Option" />
+      </Box>
+};
+
 export const PrestationEdit = () => {
 
     const { client } = useClient();
     const dataProvider = useDataProvider();
     const [pilotes, setPilotes] = useState([]);
+    const defaultLanding = getDefaultLanding(client);
 
     useEffect(() => getProfilPilotes(), []);
 
@@ -85,24 +137,51 @@ export const PrestationEdit = () => {
     };
 
     const transform = ({date, aeronef, pilote, encadrant, vols, ...data}) => {
-        const newData = ({
-          ...data, 
-          date: new Date((new Date(date)).setHours(12, 0, 0)),
-          pilote: isDefined(pilote) && isDefined(pilote['@id']) ? pilote['@id'] : null,
-          encadrant: isDefined(encadrant) && isDefined(encadrant['@id']) ? encadrant['@id'] : null,
-          aeronef: isDefined(aeronef) && isDefined(aeronef['@id']) ? aeronef['@id'] : null,
-          vols: vols.map(vol => ({
-              ...vol,
-              circuit: isDefined(vol.circuit) && isDefined(vol.circuit['@id']) ? vol.circuit['@id'] : null,
-              option: clientWithOptions(client) && (isDefined(vol.option) && isDefined(vol.option['@id'])) ? vol.option['@id'] : null,
-          }))
-        });
-        return newData;
-    };
+        const transformedVols = [];
+        let landingAssigned = false;
 
-    const OptionInput = () => {
-      return !clientWithOptions(client) ? null :
-        <ReferenceInput reference="options" source="option.@id" label="Option" />
+        for (const vol of vols) {
+          const transformedVol = {
+            ...vol,
+            circuit: getFormattedValueForBackEnd(vol.circuit),
+            option: getFormattedValueForBackEnd(vol.option, clientWithOptions(client)),
+          };
+      
+          if (clientWithLandingManagement(client)) {
+            if (!landingAssigned && vol.circuit?.requireLandingDeclaration && isDefinedAndNotVoid(vol.landings)) {
+              // @ts-ignore
+              transformedVol.landings = vol.landings.map(({id, airportCode, ...l}) => {
+                const formattedLanding =  {...l, airportCode, airportName: getAirportName(client, airportCode), complets: parseInt(l.complets ?? 0, 10), touches: parseInt(l.touches ?? 0, 10)};
+                return '@id' in formattedLanding && isDefined(formattedLanding['@id']) ? {...formattedLanding, id} : formattedLanding;
+              }
+              );
+              landingAssigned = true;
+            } else {
+                if (isDefined(vol.circuit?.hadDefaultLanding) && vol.circuit?.hadDefaultLanding) {
+                  // @ts-ignore
+                  const { id, ...defaultLand} = defaultLanding;
+                  // @ts-ignore
+                  transformedVol.landings = [{...defaultLand, complets: parseInt(defaultLand.complets ?? 1, 10), touches: parseInt(defaultLand.touches ?? 0, 10)}];
+                }
+            }
+          } else {
+            if (isDefinedAndNotVoid(vol.landings)) {
+                const oldLandings = vol.landings.filter(l => l && l['@id']).map(l => l['@id']);
+                transformedVol.landings = oldLandings;
+            }
+          }
+          transformedVols.push(transformedVol);
+        }
+        const newData = {
+            ...data,
+            date: new Date((new Date(date)).setHours(12, 0, 0)),
+            pilote: getFormattedValueForBackEnd(pilote),
+            encadrant: getFormattedValueForBackEnd(encadrant),
+            aeronef: getFormattedValueForBackEnd(aeronef),
+            vols: transformedVols,
+        };
+        console.log(newData);
+        return newData;
     };
 
     return (
@@ -114,10 +193,19 @@ export const PrestationEdit = () => {
             <FilteredPiloteInput pilotes={ pilotes }/>
             <EncadrantInput pilotes={ pilotes }/>
             <ArrayInput source="vols">
-                <SimpleFormIterator inline disableReordering>
-                    <ReferenceInput reference="circuits" source="circuit.@id" label="Circuit" />
-                    <OptionInput/>
-                    <NumberInput source="quantite" />
+                <SimpleFormIterator disableReordering>
+                  <Box display="flex" gap={ !clientWithOptions(client) ? 2 : 3 } flexWrap="wrap">
+                    <Box flex={1}>
+                      <ReferenceInput reference="circuits" source="circuit.@id" label="Circuit" />
+                    </Box>
+                    <OptionInput client={ client }/>
+                    <Box flex={1}>
+                      <NumberInput source="quantite" />
+                    </Box>
+                  </Box>
+                  <Box>
+                    <LandingsInput client={client} />
+                  </Box>
                 </SimpleFormIterator>
             </ArrayInput>
             <NumberInput source="horametreDepart" />

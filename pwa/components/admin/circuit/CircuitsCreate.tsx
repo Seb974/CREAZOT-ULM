@@ -2,7 +2,8 @@ import { DateTimeInput, ReferenceInput, SimpleForm, TextInput, NumberInput, Bool
 import { Create } from "react-admin";
 import { useWatch } from "react-hook-form";
 import { useClient } from '../../admin/ClientProvider';
-import { clientWithOptions } from "../../../app/lib/client";
+import { clientWithLandingManagement, clientWithOptions } from "../../../app/lib/client";
+import { Box } from "@mui/material";
 
 export const CircuitsCreate = () => {
 
@@ -15,7 +16,17 @@ export const CircuitsCreate = () => {
 
   const OptionsInput = () => {
     return !clientWithOptions(client) ? null :
-      <BooleanInput source="avecOptions" label="Options disponibles" defaultValue={ false }/>
+      <BooleanInput source="avecOptions" label="Options disponibles" defaultValue={ false } fullWidth/>
+  };
+
+  const LandingsInput = () => {
+    return !clientWithLandingManagement(client) ? null : 
+      <BooleanInput source="requireLandingDeclaration" label="Déclaration atterrissages" defaultValue={ false } fullWidth/>
+  };
+
+  const AddDefaultLandingInput = () => {
+    return !clientWithLandingManagement(client) ? null : 
+      <BooleanInput source="hadDefaultLanding" label="Ajouter un attérrissage par défaut" defaultValue={ false } fullWidth/>
   };
 
   return (
@@ -32,9 +43,23 @@ export const CircuitsCreate = () => {
                 <ReferenceInput reference="qualifications" source="@id" label="Qualifications" />
             </SimpleFormIterator>
           </ArrayInput>
-          <BooleanInput source="needsEncadrant" label="Pilote encadrant requis" defaultValue={ false }/>
-          <BooleanInput source="prixFixe" label="Tarif non lié à la durée" defaultValue={ false }/>
-          <OptionsInput/>
+          <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+              <Box flex={1} display="flex" alignItems="center">
+                <BooleanInput source="prixFixe" label="Tarif non lié à la durée" defaultValue={ false } fullWidth/>
+              </Box>
+              <Box flex={2}>
+                <OptionsInput/>
+              </Box>
+          </Box>
+          <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+              <Box flex={1} display="flex" alignItems="center">
+                <LandingsInput/>
+              </Box>
+              <Box flex={2}>
+                <AddDefaultLandingInput/>
+              </Box>
+          </Box>
+          <BooleanInput source="needsEncadrant" label="Encadrant requis" defaultValue={ false } fullWidth/>
         </SimpleForm>
       </Create>
   )

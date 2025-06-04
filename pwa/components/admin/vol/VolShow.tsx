@@ -1,5 +1,5 @@
-import { Show, SimpleShowLayout, TextField, DateField, NumberField, FunctionField } from 'react-admin';
-import { TopToolbar, ShowButton, ListButton } from 'react-admin';
+import { Show, SimpleShowLayout, TextField, DateField, NumberField, FunctionField, Datagrid, ArrayField } from 'react-admin';
+import { TopToolbar, ListButton } from 'react-admin';
 import { isDefined } from '../../../app/lib/utils';
 import { useClient } from '../../admin/ClientProvider';
 import { clientWithOptions } from "../../../app/lib/client";
@@ -36,6 +36,23 @@ export const VolShow = () => {
                 <TextField source="circuit.nom" label="Circuit"/>
                 <TextField source="circuit.nature.label" label="Nature"/>
                 <OptionField/> 
+                <ArrayField source="landings" label="Atterrissages">
+                    <Datagrid
+                        isRowSelectable={record => false} 
+                        rowClick={false} 
+                        bulkActionButtons={false} 
+                        sx={{ '& .RaDatagrid-headerCell': { backgroundColor: '#ededed', fontWeight: "lighter" } }} 
+                        className="text-xs italic"
+                    >
+                        <FunctionField
+                            source="airportCode"
+                            label="Aéroport"
+                            render={record => <p>{record.airportCode} - <span className="text-xs italic">{record.airportName}</span></p>}
+                        />
+                        <NumberField source="complets" label="Complet(s)" />
+                        <NumberField source="touches" label="Touché(s)" />
+                    </Datagrid>
+                </ArrayField>
                 <NumberField source="prix" label="C.A." options={{ style: 'currency', currency: 'EUR' }}/>
             </SimpleShowLayout>
         </Show>

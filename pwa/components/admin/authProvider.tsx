@@ -57,10 +57,16 @@ const authProvider: AuthProvider = {
   getPermissions: () => Promise.resolve(),
   getIdentity: async () => {
     const session = getSession();
-
     // @ts-ignore
-    return session ? Promise.resolve(session.user) : Promise.reject();
+    return isDefined(session) && isDefined(session.user) ? session.user : null;
   },
+  // getIdentity: async () => {
+  //   const session = getSession();
+
+  //   // @ts-ignore
+  //   return session ? Promise.resolve(session.user) : Promise.reject();
+  // },
+
   // Nothing to do here, this function will never be called
   handleCallback: () => Promise.resolve(),
 };

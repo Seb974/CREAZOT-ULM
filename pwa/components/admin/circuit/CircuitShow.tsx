@@ -35,9 +35,11 @@ export const CircuitShow = () => {
                   label="Qualifications"
                   render={record => record.qualifications?.map((q, i) => <Chip key={i} label={q.slug} size="small" sx={ getShipStyle(q) }/>)}
                 />
-                <BooleanField source="needsEncadrant" label="Pilote encadrant requis"/>
-                <BooleanField source="prixFixe" label="Prix indépendant de la durée"/>
+                <BooleanField source="prixFixe" label="Tarif non lié à la durée"/>
                 <OptionsField/>
+                <BooleanField source="requireLandingDeclaration" label="Déclaration atterrissages"/>
+                <BooleanField source="hadDefaultLanding" label="Attérrissage par défaut"/>
+                <BooleanField source="needsEncadrant" label="Encadrant requis"/>
             </SimpleShowLayout>
         </Show>
     )

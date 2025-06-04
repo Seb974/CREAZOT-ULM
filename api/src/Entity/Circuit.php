@@ -57,15 +57,15 @@ class Circuit
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'Landing:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'Landing:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 10, nullable: true)]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'Landing:read'])]
     private ?string $code = null;
 
     #[ORM\Column(nullable: true)]
@@ -103,12 +103,20 @@ class Circuit
     #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
     private ?bool $needsEncadrant = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read', 'Landing:read'])]
+    private ?bool $requireLandingDeclaration = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read', 'Landing:read'])]
+    private ?bool $hadDefaultLanding = null;
+
     public function __construct()
     {
         $this->qualifications = new ArrayCollection();
     }
 
-    #[Groups(groups: ['Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'Landing:read'])]
     public function getName(): ?string
     {
         return $this->code;
@@ -247,6 +255,30 @@ class Circuit
     public function setNeedsEncadrant(?bool $needsEncadrant): static
     {
         $this->needsEncadrant = $needsEncadrant;
+
+        return $this;
+    }
+
+    public function isRequireLandingDeclaration(): ?bool
+    {
+        return $this->requireLandingDeclaration;
+    }
+
+    public function setRequireLandingDeclaration(?bool $requireLandingDeclaration): static
+    {
+        $this->requireLandingDeclaration = $requireLandingDeclaration;
+
+        return $this;
+    }
+
+    public function isHadDefaultLanding(): ?bool
+    {
+        return $this->hadDefaultLanding;
+    }
+
+    public function setHadDefaultLanding(?bool $hadDefaultLanding): static
+    {
+        $this->hadDefaultLanding = $hadDefaultLanding;
 
         return $this;
     }

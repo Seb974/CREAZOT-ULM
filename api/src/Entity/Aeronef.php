@@ -54,11 +54,11 @@ class Aeronef
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read'])]
+    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Landing:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 6, nullable: true)]
-    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read'])]
+    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Landing:read'])]
     private ?string $immatriculation = null;
 
     #[ORM\Column(nullable: true)]
@@ -97,7 +97,7 @@ class Aeronef
     #[Groups(groups: ['Aeronef:write', 'Aeronef:read'])]
     private ?string $codeBalise = null;
 
-    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read'])]
+    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Landing:read'])]
     public function getName(): ?string
     {
         return $this->immatriculation;

@@ -9,30 +9,23 @@ import { SelectBalise } from './Map/SelectBalise';
 import { LeafletControl } from './Map/LeafletControl';
 import { useBalisePositions } from './Map/useBalisePositions';
 import { isDefined, isDefinedAndNotVoid } from '../../../../app/lib/utils';
-import { CircularProgress, Box } from '@mui/material';
+import { CircularProgress, Box, Fab } from '@mui/material';
 import { LeafletTrackingMarker } from 'react-leaflet-tracking-marker';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
 
-const customIcon = L.divIcon({
-    className: 'custom-icon',
-    html: `<img src="/images/FlightIcon.png" style="width: 40px; height: 40px;"/>`,
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
-    popupAnchor: [0, -20],
-});
-
-const ForceResize = ({ hidden }) => {
+const ForceResize = ({ hidden, fullScreen }) => {
     const map = useMap();
 
     useEffect(() => {
       const handleVisibilityChange = () => {
-        if (document.visibilityState === 'visible'  && !hidden)
+        if (document.visibilityState === 'visible'  && (!hidden || fullScreen))
           setTimeout(() => setTimeout(() => map.invalidateSize(), 300), 300);
       };
 
       document.addEventListener('visibilitychange', handleVisibilityChange);
       return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
 
-    }, [map, hidden]);
+    }, [map, hidden, fullScreen]);
 
   return null;
 };
@@ -49,7 +42,21 @@ const AutoCenter = ({ position, zoom = null }) => {
     return null;
 };
 
-const MapView = ({ isSmall, switchToMetar, hidden, client }) => {
+const MapEffect = ({ isSmall, hidden, fullScreen }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!hidden || fullScreen) {
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 300);
+    }
+  }, [isSmall, hidden, fullScreen, map]);
+
+  return null;
+}
+
+const MapView = ({ isSmall, switchToMetar, hidden, client, setShowFullMap, selectedBalise, setSelectedBalise, fullScreen = false }) => {
 
     const mapRef = useRef(null);
     const pollingInterval = 20000;
@@ -58,19 +65,18 @@ const MapView = ({ isSmall, switchToMetar, hidden, client }) => {
     const [isChange, setIsChange] = useState(false);
     const [aeronefs, setAeronefs] = useState([]);
     const [prevPos, setPrevPos] = useState({});
-    const [selectedBalise, setSelectedBalise] = useState('none');
     const [hasInitializedBalise, setHasInitializedBalise] = useState(false);
     const { positions, error} = useBalisePositions((hasInitializedBalise ? selectedBalise : null), aeronefs, pollingInterval, isChange, setIsChange, hidden);
 
     useEffect(() => {
-      if (!hidden) {
+      if (!hidden || fullScreen) {
           const stored = localStorage.getItem('selectedBalise');
           if (stored)
               setSelectedBalise(stored);
 
-          setHasInitializedBalise(true);
+          setHasInitializedBalise(true);  
       }
-    }, [hidden]);
+    }, [hidden, fullScreen]);
     
     useEffect(() => {
         const newPrev = {};
@@ -107,14 +113,15 @@ const MapView = ({ isSmall, switchToMetar, hidden, client }) => {
     };
   
     return (
-        <div className={`block w-full mt-6 ${ hidden ? 'hidden' : ''}`}>
+        <div className={`block w-full mt-6 ${ hidden && !fullScreen ? 'hidden' : ''}`}>
             <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark h-full flex flex-col">
-              <div className="flex-grow min-h-[420px]">
+              <div className={`flex-grow ${fullScreen ? (isSmall ? 'min-h-[520px]' : 'min-h-[680px]') : 'min-h-[420px]'}`} style={{ height: '100%', minHeight: fullScreen ? (isSmall ? '520px' : '680px') : '420px' }}
+              >
                 <MapContainer center={ [client.lat, client.lng] } zoom={ client.zoom + (isSmall ? 0 : 1) } whenCreated={map => (mapRef.current = map)} style={{ height: '100%', width: '100%'}}>      {/*  minHeight: '420px'  */}
-                    <ForceResize hidden={ hidden } setIsChange={ setIsChange }/>
-                    { selectedBalise === 'all' || selectedBalise === 'none' ?
-                          <AutoCenter position={{lat: client.lat, lng: client.lng}} zoom={ client.zoom + (isSmall ? 0 : 1) }/>
-                      : positions.length === 1 && <AutoCenter position={ positions[0] } /> 
+                    <ForceResize hidden={ hidden } fullScreen={ fullScreen }/>
+                    <MapEffect isSmall={ isSmall } hidden={ hidden } fullScreen={ fullScreen } />
+                    { selectedBalise === 'none' ? <AutoCenter position={{lat: client.lat, lng: client.lng}} zoom={ client.zoom + (isSmall ? 0 : 1) }/> :
+                      selectedBalise !== 'all' && positions.length === 1 && <AutoCenter position={ positions[0] } /> 
                     }
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                     <LeafletControl position="topright">
@@ -150,7 +157,15 @@ const MapView = ({ isSmall, switchToMetar, hidden, client }) => {
                               previousPosition={ prevPos[pos.nombalise] || [pos.lat, pos.lng] }
                               rotationAngle={parseFloat(pos.cap) || 0}
                               duration={20000}
-                              icon={customIcon}
+                              icon={
+                                L.divIcon({
+                                  className: 'custom-icon',
+                                  html: `<img src="${ isDefined(client.mapIcon) && client.mapIcon !== '' ? client.mapIcon : '/images/FlightIcon.png' }" style="width: 40px; height: 40px;"/>`,
+                                  iconSize: [40, 40],
+                                  iconAnchor: [20, 20],
+                                  popupAnchor: [0, -20],
+                              })
+                              }
                             >
                               <Popup>
                                 { pos.nombalise || 'Balise' } <span className={`text-[9px] italic ${ pos.mode === 'SLEEPING' ? 'text-zinc-500' : 'text-lime-500'}`}>{ pos.mode }</span><br />
@@ -162,13 +177,31 @@ const MapView = ({ isSmall, switchToMetar, hidden, client }) => {
                             </LeafletTrackingMarker>
                         );
                     })}
+                    { !fullScreen && !isSmall &&
+                      <Fab
+                        color={ client.color || 'primary' }
+                        size="medium"
+                        onClick={() => setShowFullMap(true)}
+                        sx={{
+                          position: 'absolute',
+                          bottom: 16,
+                          right: 16,
+                          zIndex: 1500,
+                        }}
+                        aria-label="Afficher plein écran"
+                      >
+                        <FullscreenIcon />
+                      </Fab>
+                    }
                 </MapContainer>
               </div>
-                <div className="mt-4 text-left md:hidden">
-                    <a href="#" onClick={ switchToMetar } className="inline-flex items-center text-sm gap-1 px-3 py-1 rounded border border-gray-800 text-gray-800 hover:text-red-600 hover:border-red-600 hover:bg-red-50 transition-all md:hidden">
-                        <><CloudIcon className="mr-2" />{ "METAR & TAF" }</>
-                    </a>
-              </div>
+              { !fullScreen &&
+                  <div className="mt-4 text-left md:hidden">
+                      <a href="#" onClick={ switchToMetar } className="inline-flex items-center text-sm gap-1 px-3 py-1 rounded border border-gray-800 text-gray-800 hover:text-red-600 hover:border-red-600 hover:bg-red-50 transition-all md:hidden">
+                          <><CloudIcon className="mr-2" />{ "METAR & TAF" }</>
+                      </a>
+                </div>
+              }
             </div>
         </div>
     );
