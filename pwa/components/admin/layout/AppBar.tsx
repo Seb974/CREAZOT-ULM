@@ -31,7 +31,8 @@ const CustomAppBar = () => {
             {/* @ts-ignore  */}
             { (isDefined(client) && isDefined(client.hasReservation) && client.hasReservation) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") && <Reservation /> }
             <Flight />
-            <Payment />
+            {/* @ts-ignore  */}
+            { (isDefined(client) && isDefined(client.hasPaymentManagement) && client.hasPaymentManagement) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") && <Payment /> }
             {/* @ts-ignore  */}
             { (isDefined(client) && isDefined(client.hasReservation) && client.hasReservation) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") && <Oidc /> }
             <Logout />
