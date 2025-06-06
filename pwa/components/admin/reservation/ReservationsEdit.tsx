@@ -11,7 +11,7 @@ import {
   SimpleFormIterator
 } from "react-admin";
 import { useWatch, useFormContext } from "react-hook-form";
-import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { generateSafeCode, isDefined, isDefinedAndNotVoid, isNotBlank } from "../../../app/lib/utils";
 import { status, positions } from "../../../app/lib/reservation";
 import { useEffect, useState } from "react";
 import { useClient } from '../../admin/ClientProvider';
@@ -114,6 +114,7 @@ export const ReservationsEdit = () => {
     const selectedOrigines = clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === o['@id']))) : [];
     const formattedCadeau = clientWithGifts(client) && isDefined(cadeau) && isDefined(cadeau['@id']) ? cadeau['@id'] : null;
     return {...data,
+        code: isNotBlank(data.code) ? data.code : generateSafeCode('RESA'),
         fin: getEnd(debut, selectedCircuit),
         prix: getTotalPrice(selectedCircuit, selectedOption, selectedOrigines),
         circuit: isDefined(circuit) ? circuit['@id'] : null,

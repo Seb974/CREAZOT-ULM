@@ -166,6 +166,14 @@ class Reservation
     #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
     private ?Cadeau $cadeau = null;
 
+    #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
+    private ?string $code = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
+    private ?string $paymentReference = null;
+
     public function __construct()
     {
         $this->contact = new ArrayCollection();
@@ -449,6 +457,30 @@ class Reservation
     public function setCadeau(?Cadeau $cadeau): static
     {
         $this->cadeau = $cadeau;
+
+        return $this;
+    }
+
+    public function getCode(): ?string
+    {
+        return $this->code;
+    }
+
+    public function setCode(?string $code): static
+    {
+        $this->code = $code;
+
+        return $this;
+    }
+
+    public function getPaymentReference(): ?string
+    {
+        return $this->paymentReference;
+    }
+
+    public function setPaymentReference(?string $paymentReference): static
+    {
+        $this->paymentReference = $paymentReference;
 
         return $this;
     }

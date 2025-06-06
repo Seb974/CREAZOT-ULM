@@ -17,7 +17,7 @@ import {
 } from "react-admin";
 import { useLocation } from 'react-router-dom';
 import { useWatch, useFormContext } from 'react-hook-form';
-import { getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { generateSafeCode, getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { useEffect, useState } from "react";
 import { status } from "../../../app/lib/reservation";
 import { useClient } from '../../admin/ClientProvider';
@@ -94,7 +94,8 @@ export const ReservationsCreate = () => {
         color: getRandomColor(),
         report: false,
         contact: clientWithOriginContact(client) && isDefinedAndNotVoid(contact) ? contact.map(c => c['@id']) : [],
-        origine: clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : []
+        origine: clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : [],
+        code: generateSafeCode('RESA')
       };
       for (let i = 0; i < data.quantite; i++) {
         const option = isDefinedAndNotVoid(selectedOptions) && isDefined(selectedOptions[i]) ? selectedOptions[i]['@id'] : null;

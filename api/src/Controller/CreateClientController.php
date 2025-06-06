@@ -46,6 +46,7 @@ class CreateClientController extends AbstractController
         $dto->hasGifts = $this->getBool($request, 'hasGifts');
         $dto->hasLandingManagement = $this->getBool($request, 'hasLandingManagement');
         $dto->hasEmailConfirmation = $this->getBool($request, 'hasEmailConfirmation');
+        $dto->hasPaymentManagement = $this->getBool($request, 'hasPaymentManagement');
 
         // Fichiers
         $dto->logo = $request->files->get('logo');

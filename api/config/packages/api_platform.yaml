@@ -268,3 +268,48 @@ services:
         arguments:
             $properties:  {isInstructeur: ~ } # ]
         tags: [ 'api_platform.filter' ]
+
+    app.filter.payment.name:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { name: 'iword_start' } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.payment.date:
+        parent: 'api_platform.doctrine.orm.date_filter'
+        arguments:
+            $properties: { date: ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.payment.reservation:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { reservationCode: 'iword_start' } # ]
+        tags: [ 'api_platform.filter' ]
+    
+    app.filter.payment.reference:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { reference: 'iword_start' } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.payment.mode:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { details.mode: 'iword_start' } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.payment.label:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { label: 'iword_start' } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.payment.intitule:
+        class: 'App\Doctrine\Orm\Filter\NameOrLabelFilter'
+        arguments:
+            $managerRegistry: '@doctrine'
+            $logger: '@logger'
+            $nameConverter: '@?api_platform.name_converter'
+            $properties: { intitule:  ~ } # ]
+        tags: [ 'api_platform.filter' ]

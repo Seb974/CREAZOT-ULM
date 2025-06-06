@@ -41,6 +41,7 @@ export const ClientsEdit = () => {
               hasReservation: false,
               hasLandingManagement: false,
               hasEmailConfirmation: false,
+              hasPaymentManagement: false,
               airportCodes: record?.airportCodes?.map(code => ({ ...code, meteo: code.meteo ?? false, main: code.main ?? false })) ?? [],
             })}
           >   
@@ -172,7 +173,14 @@ export const ClientsEdit = () => {
                             <BooleanInput source="hasLandingManagement" label="Gestion des atterrissages" fullWidth/>
                         </Box>
                     </Box>
-                    <BooleanInput source="hasPassengerRegistration" label="Enregistrement des passagers" fullWidth/>
+                    <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                        <Box flex={1}>
+                            <BooleanInput source="hasPaymentManagement" label="Gestion des paiements" fullWidth/>
+                        </Box>
+                        <Box flex={1}>
+                            <BooleanInput source="hasPassengerRegistration" label="Enregistrement des passagers" fullWidth/>
+                        </Box>
+                    </Box>
                   <ThanksOptions/>
               </TabbedForm.Tab>
           </TabbedForm>

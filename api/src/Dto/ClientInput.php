@@ -127,4 +127,7 @@ final class ClientInput
 
     #[Groups(['Client:write'])]
     public ?string $confirmationSubject = null;
+
+    #[Groups(groups: ['Client:write'])]
+    public ?bool $hasPaymentManagement = null;
 }

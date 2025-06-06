@@ -23,6 +23,7 @@ import StoreIcon from '@mui/icons-material/Store';
 import PersonIcon from '@mui/icons-material/Person';
 import CollectionsIcon from '@mui/icons-material/Collections';
 import FlightLandIcon from '@mui/icons-material/FlightLand';
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 
 const CustomMenu = () => {
 
@@ -69,6 +70,14 @@ const CustomMenu = () => {
           to="/landings"
           primaryText="Atterrissages"
           leftIcon={<FlightLandIcon />}
+        />
+      }
+      {/* @ts-ignore */}
+      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") && isDefined(client) && isDefined(client.hasPaymentManagement) && client.hasPaymentManagement &&
+        <Menu.Item
+          to="/payments"
+          primaryText="Paiements"
+          leftIcon={<PointOfSaleIcon />}
         />
       }
       { isDefined(client) && isDefined(client.hasPassengerRegistration) && client.hasPassengerRegistration && 

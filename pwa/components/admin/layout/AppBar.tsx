@@ -10,6 +10,7 @@ import { useClient } from '../../admin/ClientProvider';
 import GlobalLoader from "../../admin/layout/GlobalLoader";
 import Oidc from "./Oidc";
 import { useState } from "react";
+import Payment from "./Payment";
 
 const CustomAppBar = () => {
 
@@ -30,6 +31,7 @@ const CustomAppBar = () => {
             {/* @ts-ignore  */}
             { (isDefined(client) && isDefined(client.hasReservation) && client.hasReservation) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") && <Reservation /> }
             <Flight />
+            <Payment />
             {/* @ts-ignore  */}
             { (isDefined(client) && isDefined(client.hasReservation) && client.hasReservation) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") && <Oidc /> }
             <Logout />

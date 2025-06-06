@@ -6,7 +6,7 @@ import { ProfilPiloteForm } from '../../../admin/prestation/Form/ProfilPiloteFor
 import { CircuitForm } from "../../../admin/prestation/Form/CircuitForm";
 import { AircraftForm } from "../../../admin/prestation/Form/AircraftForm";
 import { OptionForm } from "../../../admin/prestation/Form/OptionForm";
-import { getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../../app/lib/utils";
+import { generateSafeCode, getRandomColor, isDefined, isDefinedAndNotVoid, isNotBlank } from "../../../../app/lib/utils";
 import { PlusForm } from "../../../admin/prestation/Form/PlusForm";
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
@@ -133,6 +133,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
             contact: clientWithOriginContact(client) && isDefinedAndNotVoid(selectedInitialContact) ? selectedInitialContact.map(c => c['@id']) : [],
             origine: clientWithPartners(client) && isDefinedAndNotVoid(selectedOriginContact) ? selectedOriginContact.map(o => o['@id']) : [],
             paid: clientWithGifts(client) && isDefined(selectedCadeau) ? true : consumer.paid,
+            code: isNotBlank(consumer.code) ? consumer.code : generateSafeCode('RESA'),
             cadeau: selectedCadeau,
             prix
         };

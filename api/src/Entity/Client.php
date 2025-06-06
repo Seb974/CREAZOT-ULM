@@ -227,6 +227,10 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?string $confirmationSubject = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasPaymentManagement = null;
+
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
@@ -697,6 +701,18 @@ class Client
     public function setConfirmationSubject(?string $confirmationSubject): static
     {
         $this->confirmationSubject = $confirmationSubject;
+
+        return $this;
+    }
+
+    public function getHasPaymentManagement(): ?bool
+    {
+        return $this->hasPaymentManagement;
+    }
+
+    public function setHasPaymentManagement(?bool $hasPaymentManagement): static
+    {
+        $this->hasPaymentManagement = $hasPaymentManagement;
 
         return $this;
     }

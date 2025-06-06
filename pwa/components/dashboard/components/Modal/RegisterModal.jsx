@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import DoneIcon from '@mui/icons-material/Done';
 import { useDataProvider } from "react-admin";
 import { CircuitForm } from "../../../admin/prestation/Form/CircuitForm";
-import { getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../../app/lib/utils";
+import { generateSafeCode, getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../../app/lib/utils";
 import { PlusForm } from "../../../admin/prestation/Form/PlusForm";
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
@@ -59,6 +59,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
             fin: endTime,
             contact: clientWithOriginContact(client) && isDefinedAndNotVoid(selectedInitialContact) ? selectedInitialContact.map(c => c['@id']) : [],
             origine: clientWithPartners(client) && isDefinedAndNotVoid(selectedOriginContact) ? selectedOriginContact.map(o => o['@id']) : [],
+            code: generateSafeCode('RESA')
         }
         for (let i = 0; i < quantite; i++) {
             const option = clientWithOptions(client) && isDefined(selectedOptions[i]) ? selectedOptions[i]['@id'] : null;

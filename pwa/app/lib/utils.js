@@ -162,3 +162,26 @@ export const toLocalDateString = (date) => {
   const day = date.getDate().toString().padStart(2, '0');
   return `${year}-${month}-${day}`;
 };
+
+export const generateSafeCode = (prefix = 'PAY') => {
+  const timestamp = Date.now();
+  const randomPart = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return `${prefix}-${timestamp}-${randomPart}`;
+};
+
+export const isNotBlank = variable => isDefined(variable) && variable !== '';
+
+export const matchesStartOfWord = (value, search) => {
+  const regex = new RegExp(`\\b${search}`, 'i');
+  return regex.test(value);
+};
+
+export const getShipStyle = ({ color }) => ({
+  backgroundColor: color + '33',
+  color: color,
+  border: '1px solid',
+  borderColor: color,
+  marginRight: '4px',
+  marginBottom: '2px',
+  marginTop: '2px'
+})

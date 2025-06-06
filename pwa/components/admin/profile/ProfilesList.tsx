@@ -15,7 +15,7 @@ import Chip from '@mui/material/Chip';
 import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
 import { useMediaQuery, Theme } from '@mui/material';
-import { isDefined } from "../../../app/lib/utils";
+import { getShipStyle, isDefined } from "../../../app/lib/utils";
 
 export interface Props {
   data: PagedCollection<Circuit> | null;
@@ -33,16 +33,6 @@ const ListActions = () => (
 export const ProfilesList: NextPage<Props> = ({ data, hubURL, page }) => {
 
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
-
-  const getShipStyle = ({ color }) => ({
-    backgroundColor: color + '33',
-    color: color,
-    border: '1px solid',
-    borderColor: color,
-    marginRight: '4px',
-    marginBottom: '2px',
-    marginTop: '2px'
-  })
 
   const getPilotStatus = ({ qualifications }) => <span className="text-right flex flex-end">{ qualifications.map((q, i) => <Chip key={i} label={q.slug} size="small" sx={ getShipStyle(q) }/>) }</span>
 

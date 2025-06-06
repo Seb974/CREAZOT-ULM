@@ -208,6 +208,10 @@ export const clientWithLandingManagement = client => {
     return isDefined(client) && isDefined(client.hasLandingManagement) && client.hasLandingManagement;
 };
 
+export const clientWithPaymentManagement = client => {
+    return isDefined(client) && isDefined(client.hasPaymentManagement) && client.hasPaymentManagement;
+};
+
 export const getDefaultLanding = client => {
     if (isDefined(client) && isDefinedAndNotVoid(client.airportCodes) && clientWithLandingManagement(client)) {
         const mainAirport = client.airportCodes.find(airport => airport.main);
@@ -220,4 +224,12 @@ export const getDefaultLanding = client => {
 export const getAirportName = (client, code) => {
     const selectedAirport = client.airportCodes.find(a => a.code === code);
     return isDefined(selectedAirport) ? selectedAirport.nom : "";
-  };
+};
+
+export const paymentMode = [
+    { id: 'cb', name: 'CB', color: '#fb923c' },                 // Orange
+    { id: 'especes', name: 'Espèces', color: '#34d399' },       // Teal            
+    { id: 'web', name: 'Site Web', color: '#38bdf8' },          // Sky
+    { id: 'virement', name: 'Virement', color: '#a78bfa' },     // Violet
+    { id: 'cheque', name: 'Chèque', color: '#f87171' },         // Red
+];

@@ -39,6 +39,7 @@ export const ReservationShow = () => {
                 <DateField source="debut" label="Date" sortable={ true } />
                 <DateField source="debut" label="Heure" showTime showDate={false} options={{ hour: '2-digit', minute: '2-digit' }}/>
                 <TextField source="nom" label="Passager" sortable={ true }/>
+                <TextField source="code" label="Code de réservation"/>
                 <TextField source="telephone" label="Téléphone" />
                 <TextField source="email" label="Adresse email" />
                 <FunctionField

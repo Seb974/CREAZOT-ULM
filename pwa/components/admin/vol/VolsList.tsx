@@ -176,7 +176,7 @@ const CustomDatagrid = () => {
     };
 
     return (
-      <Datagrid body={<CustomBody />}  sx={{'& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
+      <Datagrid body={<CustomBody />} sx={{'& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
             <DateField source="prestation.date" label="Date" sortable={ true }/>
             <TextField source="prestation.aeronef.immatriculation" label="Aéronef" sortable={ true }/>
             <FunctionField
@@ -222,7 +222,6 @@ export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
       filter={ !hasAdminAccess(user) ? { "prestation.pilote.email": user.email } : null}
       // @ts-ignore
       filterValues={filters}
-      // onFilterChange={setFilters}
       filterDefaultValues={defaultFilters}
       disableSyncWithLocation
     > 
