@@ -6,18 +6,22 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use Twig\Environment;
 use App\Entity\Cadeau;
+use App\Service\ClientGetter;
 
 class PdfGenerator
 {
     private Environment $twig;
+    private ClientGetter $clientGetter;
 
-    public function __construct(Environment $twig)
+    public function __construct(Environment $twig, ClientGetter $clientGetter)
     {
         $this->twig = $twig;
+        $this->clientGetter = $clientGetter;
     }
 
     public function generate(Cadeau $data): string
     {
+        $client = $this->clientGetter->get();
         $dompdf = new Dompdf();
 
         // Options
@@ -31,6 +35,7 @@ class PdfGenerator
         $html = $this->twig->render('bon_cadeau/pdf.html.twig', [
             'cadeau' => $data,
             'encoded_image' => $this->getEncodedImage(),
+            'client' => $client
         ]);
 
         $dompdf->loadHtml($html);

@@ -66,7 +66,7 @@
 <body>
     <div class="overlay">
     <div class="overlay {% if encoded_image is not null %}with-bg{% endif %}">
-        <h1>PLANETAIR 974</h1>
+        <h1>{{ client.name }}</h1>
         <h2>Bon Cadeau pour un Circuit {{ cadeau.circuit.nom }} {{ cadeau.option is not null ? 'avec ' ~ cadeau.option.nom : '' }}</h2>
 
         <p>
@@ -84,11 +84,10 @@
         </div>
 
         <div class="info">
-            PLANETAIR974<br/>
-            ULM - ÎLE DE LA RÉUNION<br/>
-            TEL: +262 (0)6 92 61 92 04<br/>
-            <a href="mailto:planetair974@gmail.com">planetair974@gmail.com</a><br/>
-            <a href="https://www.planetair974.fr">www.planetair974.fr</a>
+            {{ client.name }}<br/>
+            TEL: {{ client.phone }}<br/>
+            <a href="mailto:{{ client.email }}">{{ client.email }}</a><br/>
+            <a href="{{ client.website }}">{{ client.website|replace({'https://': '', 'http://': ''}) }}</a>
         </div>
     </div>
 </body>

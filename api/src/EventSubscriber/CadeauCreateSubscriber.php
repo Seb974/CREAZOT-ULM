@@ -61,7 +61,7 @@ class CadeauCreateSubscriber implements EventSubscriberInterface
                     ->to($cadeau->getEmail())
                     ->bcc($client->getEmail())
                     ->subject('Un vol magique vous attend dans ce bon cadeau 🎁🌤️')
-                    ->html($this->twig->render('emails/cadeau.html.twig', ['cadeau' => $cadeau]))
+                    ->html($this->twig->render('emails/cadeau.html.twig', ['cadeau' => $cadeau, 'client' => $client]))
                     ->attach($pdfContent, 'bon-cadeau.pdf', 'application/pdf');
         
                 $mailer->send($email);

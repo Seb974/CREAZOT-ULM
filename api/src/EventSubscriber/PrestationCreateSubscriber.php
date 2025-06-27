@@ -67,7 +67,8 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
                     'horametre' => $aeronef->getHorametre(),
                     'entretien' => $aeronef->getEntretien(),
                     'time' => $this->getRemainingTime($aeronef, 'ENTRETIEN'),
-                    'introduction' => $aeronef->getHorametre() > $aeronef->getEntretien() ? 'dépassée de' : 'programmée dans'
+                    'introduction' => $aeronef->getHorametre() > $aeronef->getEntretien() ? 'dépassée de' : 'programmée dans',
+                    'client' => $client
                 ]);
     
             $mailer->send($message);
@@ -81,8 +82,8 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
         if ( ($aeronef->getChangementMoteur() - $aeronef->getHorametre()) < $aeronef->getSeuilAlerteChangementMoteur() && !$aeronef->isAlerteMoteurEnvoyee()) {
             try {
                 $message = (new TemplatedEmail())
-                    ->from('contact@planetair974.com')
-                    ->to('planetair974@gmail.com')
+                    ->from($client->getEmailAddressSender())
+                    ->to($client->getEmail())
                     ->subject('Changement moteur proche sur ' . $aeronef->getImmatriculation())
                     ->htmlTemplate('emails/changement_moteur.html.twig')
                     ->context([
@@ -90,7 +91,8 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
                         'horametre' => $aeronef->getHorametre(),
                         'entretien' => $aeronef->getEntretien(),
                         'time' => $this->getRemainingTime($aeronef, 'MOTEUR'),
-                        'introduction' => $aeronef->getHorametre() > $aeronef->getEntretien() ? 'dépassé de' : 'programmé dans'
+                        'introduction' => $aeronef->getHorametre() > $aeronef->getEntretien() ? 'dépassé de' : 'programmé dans', 
+                        'client' => $client
                     ]);
     
                 $mailer->send($message);

@@ -4,8 +4,7 @@
 <br/>
 <br/>
 <p>
-    PLANETAIR974<br/>
-    ULM - ÎLE DE LA RÉUNION<br/>
-    TEL: +262 (0)6 92 61 92 04<br/>
-    <a href="mailto:planetair974@gmail.com">Nous écrire</a> - <a href="https://www.planetair974.fr">Planetair974.fr</a>
+    {{ client.name }}<br/>
+    TEL: {{ client.phone }}<br/>
+    <a href="mailto:{{ client.email }}">Nous écrire</a> - <a href="{{ client.website }}">{{ client.website|replace({'https://': '', 'http://': ''}) }}</a>
 </p>
