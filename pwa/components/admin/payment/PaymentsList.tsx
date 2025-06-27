@@ -16,10 +16,10 @@ import {
   Form,
   TextInput,
   DateInput,
-  Button,
   ArrayField,
   NumberField
 } from "react-admin";
+import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { Fragment, useEffect, useState } from 'react';
@@ -43,9 +43,9 @@ const rowSx = (record, index) => ({
   fontWeight: "lighter"
 });
 
-const CustomListActions = ({ showMore, setShowMore }) => (
+const CustomListActions = ({ showMore, setShowMore, isSmall }) => (
   <TopToolbar>
-    <CustomFilterButton showMore={showMore} setShowMore={setShowMore}/>
+    <CustomFilterButton showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>
     <CreateButton/>
     <ExportButton />
   </TopToolbar>
@@ -112,15 +112,15 @@ const CustomFilterBar = ({ showMore, isSmall }) => {
     </Form>
 };
 
-const CustomFilterButton = ({ showMore, setShowMore }) => {
+const CustomFilterButton = ({ showMore, setShowMore, isSmall }) => {
   return (
     <Button
       size="small"
       color="primary"
       onClick={() => setShowMore(!showMore)}
-      startIcon={<FilterListIcon />}
+      startIcon={<FilterListIcon className={`${isSmall && 'mb-3'}`}/>}
     >
-      <FilterListIcon />
+      {!isSmall && 'FILTRER'}
     </Button>
   );
 };
@@ -195,8 +195,8 @@ const CustomDatagrid = () => {
         <FunctionField
           source="name"
           label="Intitulé"
-          render={ ({ name, label, details }) =>  <p>{ isNotBlank(name) ? name : (isNotBlank(label) ? label : '') }<br/>
-            { getModeList(details) }</p>
+          render={ ({ name, label, details }) =>  <div>{ isNotBlank(name) ? name : (isNotBlank(label) ? label : '') }<br/>
+            { getModeList(details) }</div>
           }
         />
         <FunctionField
@@ -226,7 +226,7 @@ export const PaymentsList: NextPage<Props> = ({ data, hubURL, page }) => {
     <List 
       title="Paiements"
       resource="payments" 
-      actions={<CustomListActions showMore={showMore} setShowMore={setShowMore}/>}
+      actions={<CustomListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>}
       filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>}
       // @ts-ignore
       filterValues={filters}
@@ -237,7 +237,7 @@ export const PaymentsList: NextPage<Props> = ({ data, hubURL, page }) => {
             <SimpleList
               primaryText={({ name, label }) =>  isNotBlank(name) ? name : (isNotBlank(label) ? label : '')}
               // @ts-ignore
-              secondaryText={({ details, date }) => <p>{ getModeList(details) }<br/>{ `${ (new Date(date)).toLocaleDateString("fr-FR", options) } ` }</p>}
+              secondaryText={({ details, date }) => <div>{ getModeList(details) }<br/>{ `${ (new Date(date)).toLocaleDateString("fr-FR", options) } ` }</div>}
               tertiaryText={({ details }) => (details.reduce((sum, current) => sum += current.amount, 0)).toFixed(2) + "€" }
               linkType="show"
             /> 

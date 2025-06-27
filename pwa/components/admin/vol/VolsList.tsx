@@ -15,9 +15,9 @@ import {
   DateInput,
   SimpleList,
   useListContext,
-  Button,
   Form
 } from "react-admin";
+import Button from '@mui/material/Button';
 import { Fragment } from 'react';
 import { type Vol } from "../../../types/Vol";
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -34,9 +34,9 @@ export interface Props {
   page: number;
 }
 
-const CustomListActions = ({ showMore, setShowMore }) => (
+const CustomListActions = ({ showMore, setShowMore, isSmall }) => (
   <TopToolbar>
-    <CustomFilterButton showMore={showMore} setShowMore={setShowMore}/>
+    <CustomFilterButton showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>
     <ExportButton />
   </TopToolbar>
 );
@@ -111,15 +111,15 @@ const CustomFilterBar = ({ showMore, isSmall }) => {
     </Form>
 };
 
-const CustomFilterButton = ({ showMore, setShowMore }) => {
+const CustomFilterButton = ({ showMore, setShowMore, isSmall }) => {
   return (
     <Button
       size="small"
       color="primary"
       onClick={() => setShowMore(!showMore)}
-      startIcon={<FilterListIcon />}
+      startIcon={<FilterListIcon className={`${isSmall && 'mb-3'}`}/>}
     >
-      <FilterListIcon />
+      {!isSmall && 'FILTRER'}
     </Button>
   );
 };
@@ -217,7 +217,7 @@ export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
   return (
     <List 
       resource="vols" 
-      actions={<CustomListActions showMore={showMore} setShowMore={setShowMore}/>}
+      actions={<CustomListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>}
       filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>}
       filter={ !hasAdminAccess(user) ? { "prestation.pilote.email": user.email } : null}
       // @ts-ignore

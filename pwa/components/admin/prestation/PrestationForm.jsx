@@ -44,7 +44,7 @@ export const PrestationForm = () => {
             pilote: isDefined(selectedPilot) && isObject(selectedPilot) ? (selectedPilot['@id'] || selectedPilot.id) : selectedPilot,
             encadrant: isDefined(selectedEncadrant) && isObject(selectedEncadrant) ? (selectedEncadrant['@id'] || selectedEncadrant.id) : (typeof selectedEncadrant === 'string' && selectedEncadrant === '' ? null : selectedEncadrant),
             horametreDepart: selectedAircraft.horametre,
-            horametreFin: typeof selectedFlightTime === 'string' ? parseFloat(selectedFlightTime.replace(',','.')) : selectedFlightTime,
+            horametreFin: typeof selectedFlightTime === 'string' ? parseFloat(selectedFlightTime.replace(/[, :]/g, '.')) : selectedFlightTime,
             duree: getRealDuration(selectedFlightTime, selectedAircraft),
             turnover: getTotalPrice(selectedFlightTime, selectedAircraft, selectedCircuits),
             vols: selectedCircuits.map(c => {

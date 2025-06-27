@@ -1,5 +1,5 @@
 import 'flatpickr/dist/themes/material_red.css';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDataProvider } from "react-admin";
 import DoneIcon from '@mui/icons-material/Done';
 import { ProfilPiloteForm } from '../../../admin/prestation/Form/ProfilPiloteForm';
@@ -14,6 +14,7 @@ import { clientWithGifts, clientWithOptions, clientWithOriginContact, clientWith
 
 export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservations, client }) => {
 
+    const isOperating = useRef(false);
     const dataProvider = useDataProvider();
     const defaultCadeau = {['@id']: 0, name: " "};
     const timeOptions = { hour: "2-digit", minute: "2-digit" };
@@ -41,7 +42,6 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
 
     useEffect(() => {
         if (isDefined(toUpdate)) {
-            // setSelectedPilot(toUpdate.pilote || "");
             setSelectedCircuit(toUpdate.circuit || "");
             setSelectedOption(toUpdate.option || "");
             setSelectedAircraft(toUpdate.avion || "");
@@ -121,29 +121,37 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
 
     const onSubmit = async e => {
         e.preventDefault();
-        const prix = getFinalPrice(selectedCircuit, selectedOption, selectedOriginContact);
-        const selectedCadeau = clientWithGifts(client) && (consumer.cadeau['@id'] !== defaultCadeau['@id']) ? consumer.cadeau['@id'] : null;
-        const reservation = {
-            ...consumer,
-            circuit: selectedCircuit['@id'],
-            option: clientWithOptions(client) && selectedOption !== "" ? selectedOption['@id'] : null,
-            pilote: selectedPilot !== "" ? selectedPilot['@id'] : null,
-            avion: selectedAircraft !== "" ? selectedAircraft['@id'] : null,
-            fin: getEndTime(consumer.debut, selectedCircuit),
-            contact: clientWithOriginContact(client) && isDefinedAndNotVoid(selectedInitialContact) ? selectedInitialContact.map(c => c['@id']) : [],
-            origine: clientWithPartners(client) && isDefinedAndNotVoid(selectedOriginContact) ? selectedOriginContact.map(o => o['@id']) : [],
-            paid: clientWithGifts(client) && isDefined(selectedCadeau) ? true : consumer.paid,
-            code: isNotBlank(consumer.code) ? consumer.code : generateSafeCode('RESA'),
-            cadeau: selectedCadeau,
-            prix
-        };
-        const updatedReservation = await dataProvider.update('reservations', {id: reservation.id, data: reservation});
-        const updatedReservations = reservations
-                                        .map(r => r['@id'] === updatedReservation.data['@id'] ? updatedReservation.data : r)
-                                        .filter(r => isDefined(r.statut) && !r.statut.includes("CANCEL"));
-        setReservations(updatedReservations);
-        reinitializeData();
-        setToUpdate(null);
+        if (isOperating.current) return;
+        isOperating.current = true;
+        try {
+            const prix = getFinalPrice(selectedCircuit, selectedOption, selectedOriginContact);
+            const selectedCadeau = clientWithGifts(client) && (consumer.cadeau['@id'] !== defaultCadeau['@id']) ? consumer.cadeau['@id'] : null;
+            const reservation = {
+                ...consumer,
+                circuit: selectedCircuit['@id'],
+                option: clientWithOptions(client) && selectedOption !== "" ? selectedOption['@id'] : null,
+                pilote: selectedPilot !== "" ? selectedPilot['@id'] : null,
+                avion: selectedAircraft !== "" ? selectedAircraft['@id'] : null,
+                fin: getEndTime(consumer.debut, selectedCircuit),
+                contact: clientWithOriginContact(client) && isDefinedAndNotVoid(selectedInitialContact) ? selectedInitialContact.map(c => c['@id']) : [],
+                origine: clientWithPartners(client) && isDefinedAndNotVoid(selectedOriginContact) ? selectedOriginContact.map(o => o['@id']) : [],
+                paid: clientWithGifts(client) && isDefined(selectedCadeau) ? true : consumer.paid,
+                code: isNotBlank(consumer.code) ? consumer.code : generateSafeCode('RESA'),
+                cadeau: selectedCadeau,
+                prix
+            };
+            const updatedReservation = await dataProvider.update('reservations', {id: reservation.id, data: reservation});
+            const updatedReservations = reservations
+                                            .map(r => r['@id'] === updatedReservation.data['@id'] ? updatedReservation.data : r)
+                                            .filter(r => isDefined(r.statut) && !r.statut.includes("CANCEL"));
+            setReservations(updatedReservations);
+            reinitializeData();
+            setToUpdate(null);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            isOperating.current = false;
+        }
     };
 
     const getFinalPrice = (selectedCircuit, selectedOption, selectedOriginContact) => {
@@ -170,6 +178,8 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
         setSelectedAircraft("");
         setConsumer({nom:"", telephone: "", email: "", quantite:1, statut: "VALIDATED", remarques: "", report: false, paid: false, upsell: false, debut: new Date((new Date()).setHours(8, 0, 0)), color: getRandomColor(), position: "-"});
         setSection("contact");
+        setSelectedInitialContact([]);
+        setSelectedOriginContact([]);
     };
 
     const onBackClick = (e) => {

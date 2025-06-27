@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { List, useListContext, TopToolbar, ExportButton, TextInput, DateInput, Form, Button, SimpleList } from 'react-admin';
+import { List, useListContext, TopToolbar, ExportButton, TextInput, DateInput, Form, SimpleList } from 'react-admin';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Collapse, IconButton, TableFooter } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import Button from '@mui/material/Button';
 import { groupLandingsByDateAirportAndAeronef } from '../../../app/lib/landing';
 import { isDefinedAndNotVoid, toLocalDateString } from '../../../app/lib/utils';
 import { useMediaQuery, Theme, Box } from '@mui/material';
@@ -129,22 +130,22 @@ const RowWithExpand = ({ row, isExpanded, toggleExpand }) => (
     </React.Fragment>
 );
 
-const CustomListActions = ({ showMore, setShowMore }) => (
+const CustomListActions = ({ showMore, setShowMore, isSmall }) => (
   <TopToolbar>
-    <CustomFilterButton showMore={showMore} setShowMore={setShowMore}/>
+    <CustomFilterButton showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>
     <ExportButton />
   </TopToolbar>
 );
 
-const CustomFilterButton = ({ showMore, setShowMore }) => {
+const CustomFilterButton = ({ showMore, setShowMore, isSmall }) => {
   return (
     <Button
       size="small"
       color="primary"
       onClick={() => setShowMore(!showMore)}
-      startIcon={<FilterListIcon />}
+      startIcon={<FilterListIcon className={`${isSmall && 'mb-3'}`}/>}
     >
-      <FilterListIcon />
+      {!isSmall && 'FILTRER'}
     </Button>
   );
 };
@@ -274,7 +275,7 @@ export const LandingsList = (props) => {
             resource="prestations"
             pagination={false}
             title="Attérrissages"
-            actions={<CustomListActions showMore={showMore} setShowMore={setShowMore}/>}
+            actions={<CustomListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>}
             filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>}
             filterDefaultValues={defaultFilters}
             filterValues={filters}

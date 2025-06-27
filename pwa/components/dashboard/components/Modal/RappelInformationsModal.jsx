@@ -34,7 +34,7 @@ export const RappelInformationsModal = ({ selectedRappel, setSelectedRappel, rap
                         setSelectedRappel(newSelectedRappel)
                     } else {
                         setSelectedRappel(null);
-                        setEvents(events.filter(e => e.id !== newSelectedRappel.id), "onDeleteRappel from RappelInformationsModal")
+                        setEvents(events.filter(e => e.id !== newSelectedRappel.id))
                     }
                     setRappels(newRappels);
                 });

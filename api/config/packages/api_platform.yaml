@@ -132,6 +132,12 @@ services:
             $properties: { cancel: 'ipartial' } # ]
         tags: [ 'api_platform.filter' ]
 
+    app.filter.reservation.paid:
+        parent: 'api_platform.doctrine.orm.boolean_filter'
+        arguments:
+            $properties:  {paid: ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
     app.filter.review.admin.user:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:

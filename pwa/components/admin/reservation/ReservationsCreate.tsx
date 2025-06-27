@@ -17,8 +17,8 @@ import {
 } from "react-admin";
 import { useLocation } from 'react-router-dom';
 import { useWatch, useFormContext } from 'react-hook-form';
-import { generateSafeCode, getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
-import { useEffect, useState } from "react";
+import { generateSafeCode, getRandomColor, isDefined, isDefinedAndNotVoid, isNotBlank } from "../../../app/lib/utils";
+import { useEffect, useRef, useState } from "react";
 import { status } from "../../../app/lib/reservation";
 import { useClient } from '../../admin/ClientProvider';
 import { clientWithOptions, clientWithOriginContact, clientWithPartners } from "../../../app/lib/client";
@@ -40,6 +40,7 @@ export const ReservationsCreate = () => {
   const { client } = useClient();
   const location = useLocation();
   const dataProvider = useDataProvider();
+  const isOperating = useRef(false);
   const [options, setOptions] = useState([]);
   const [circuits, setCircuits] = useState([]);
   const [origines, setOrigines] = useState([]);
@@ -83,6 +84,8 @@ export const ReservationsCreate = () => {
   };
     
   const onSubmit = async ({option, origine, contact, remarques, ...data}) => {
+    if (isOperating.current) return;
+    isOperating.current = true;
     try {
       const selectedCircuit = circuits.find(c => c['@id'] === data.circuit);
       const selectedOrigines = clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === o['@id']))) : [];
@@ -120,6 +123,8 @@ export const ReservationsCreate = () => {
         window.location.href = `/admin#/?scroll=calendar&date=${new Date(data.debut).toJSON().slice(0, 10) || ''}`;
       else
         redirect('list', 'reservations'); 
+    } finally {
+      isOperating.current = false;
     }
   };
 
@@ -142,34 +147,37 @@ export const ReservationsCreate = () => {
   };
 
   const getSelectedOptions = (selection, quantite, bddOptions) => {
-    const selectedCombinaison = combinaisons.find(c => c['@id'] === (!isDefined(selection) || typeof selection === 'string' ? selection : selection['@id']));
-    let options = selectedCombinaison.options.map(o => bddOptions.find(option => option['@id'] === o['@id']));
-
-    const missingInputs = quantite - options.length;
-    if (missingInputs > 0) {
-      for (let i = 0; i < missingInputs; i++) {
-        options.unshift(null);
+    if (isNotBlank(selection)) {
+      const selectedCombinaison = combinaisons.find(c => c['@id'] === (!isDefined(selection) || typeof selection === 'string' ? selection : selection['@id']));
+      let options = selectedCombinaison.options.map(o => bddOptions.find(option => option['@id'] === o['@id']));
+  
+      const missingInputs = quantite - options.length;
+      if (missingInputs > 0) {
+        for (let i = 0; i < missingInputs; i++) {
+          options.unshift(null);
+        }
       }
+      return options;
     }
-    return options;
+    return [];
   };
 
-   const OptionInput = () => !clientWithOptions(client) ? null : 
-      <SelectInput key={ selectedQuantite }  source="option" choices={ enabledCombinaisons } label="Option" />
+  const OptionInput = () => !clientWithOptions(client) ? null : 
+    <SelectInput key={ selectedQuantite }  source="option" choices={ enabledCombinaisons } label="Option" />
     
-    const OriginContactInput = () => !clientWithOriginContact(client) ? null : 
-      <ArrayInput source="contact" label="Contact initial">
-        <SimpleFormIterator inline disableReordering>
-            <ReferenceInput reference="contacts" source="@id" label="Contact initial" />
-        </SimpleFormIterator>
-      </ArrayInput>
+  const OriginContactInput = () => !clientWithOriginContact(client) ? null : 
+    <ArrayInput source="contact" label="Contact initial">
+      <SimpleFormIterator inline disableReordering>
+          <ReferenceInput reference="contacts" source="@id" label="Contact initial" />
+      </SimpleFormIterator>
+    </ArrayInput>
     
-    const PartnersInput = () => !clientWithPartners(client) ? null : 
-      <ArrayInput source="origine" label="Origine de l'appel">
-        <SimpleFormIterator inline disableReordering>
-            <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
-        </SimpleFormIterator>
-      </ArrayInput>
+  const PartnersInput = () => !clientWithPartners(client) ? null : 
+    <ArrayInput source="origine" label="Origine de l'appel">
+      <SimpleFormIterator inline disableReordering>
+          <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
+      </SimpleFormIterator>
+    </ArrayInput>
 
   return (
     <Create redirect="list">

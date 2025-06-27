@@ -56,7 +56,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     denormalizationContext: [
         AbstractNormalizer::GROUPS => ['Payment:write'],
     ],
-    order: ['id' => 'ASC'],
+    order: ['date' => 'DESC', 'id' => 'ASC'],
     collectDenormalizationErrors: true,
     security: 'is_granted("OIDC_USER")',
     mercure: true

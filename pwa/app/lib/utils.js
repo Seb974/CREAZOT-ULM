@@ -19,7 +19,7 @@ export const getCircuitDuration = (aircraft, circuit, quantite) => {
 
 export const getRealDuration = (selectedFlightTime, aircraft) => {
 
-    const flightTime = typeof selectedFlightTime === 'string'? parseFloat(selectedFlightTime.replace(',','.')) : selectedFlightTime;
+    const flightTime = typeof selectedFlightTime === 'string'? parseFloat(selectedFlightTime.replace(/[, :]/g, '.')) : selectedFlightTime;
     if (aircraft.decimal) 
       return Number((flightTime - aircraft.horametre).toFixed(2));
     else {
@@ -184,4 +184,13 @@ export const getShipStyle = ({ color }) => ({
   marginRight: '4px',
   marginBottom: '2px',
   marginTop: '2px'
-})
+});
+
+export const formatDisplayDate = (date) => date.toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+  
+export const getHour = (isoString) => new Date(isoString).getHours();
+  
+export const isSameDay = (d1, d2) =>
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate();

@@ -4,65 +4,62 @@ namespace App\EventSubscriber;
 
 use App\Entity\Payment;
 use App\Repository\ReservationRepository;
-use Doctrine\ORM\Events;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpKernel\Event\ViewEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\HttpFoundation\Request;
+use ApiPlatform\Symfony\EventListener\EventPriorities;
+use Doctrine\ORM\EntityManagerInterface;
 
 class PaymentSubscriber implements EventSubscriberInterface
 {
     private ReservationRepository $reservationRepository;
+    private EntityManagerInterface $em;
 
-    public function __construct(ReservationRepository $reservationRepository)
+    public function __construct(ReservationRepository $reservationRepository, EntityManagerInterface $em)
     {
         $this->reservationRepository = $reservationRepository;
+        $this->em = $em;
     }
 
-    public static function getSubscribedEvents(): array
+    public static function getSubscribedEvents()
     {
-        return [Events::postPersist];
+        return [KernelEvents::VIEW => ['onPostWrite', EventPriorities::POST_WRITE],];
     }
 
-    public function postPersist(LifecycleEventArgs $args): void
+    public function onPostWrite(ViewEvent $event): void
     {
-        $entity = $args->getObject();
+        $payment = $event->getControllerResult();
+        $method = $event->getRequest()->getMethod();
 
-        if (!$entity instanceof Payment) {
+        if (!$payment instanceof Payment || $method !== Request::METHOD_POST)
             return;
-        }
 
-        $entityManager = $args->getObjectManager();
-        $reservationCode = $entity->getReservationCode();
+        $reservationCode = $payment->getReservationCode();
         $reservations = [];
 
         if ($reservationCode) {
-            // Cas 1 : recherche par code de réservation
-            $reservations = $entityManager->getRepository(Reservation::class)->findBy([
-                'reservationCode' => $reservationCode
-            ]);
+            $reservations = $this->reservationRepository->findBy(['code' => $reservationCode]);
         } else {
-            // Cas 2 : fallback sur name + date
-            $name = $entity->getName();
-            $date = $entity->getDate();
+            $name = $payment->getName();
+            $date = $payment->getDate();
 
-            // Si l'un des deux est manquant, on sort
-            if (!$name || !$date) {
+            if (!$name || !$date)
                 return;
-            }
 
-            $reservations = $entityManager->getRepository(Reservation::class)->findBy([
-                'name' => $name,
-                'date' => $date,
-            ]);
+            $reservations = $this->reservationRepository->findByNameAndDate($name, $date);
         }
 
         foreach ($reservations as $reservation) {
             $reservation->setPaid(true);
-            $reservation->setPaymentReference($entity->getCode());
-            $entityManager->persist($reservation);
+            $reservation->setPaymentReference($payment->getReference());
         }
 
-        if (count($reservations) > 0) {
-            $entityManager->flush();
+        if (!empty($reservations)) {
+            if (!$this->em)
+                throw new \RuntimeException('Impossible de récupérer l\'EntityManager.');
+
+            $this->em->flush();
         }
     }
 }

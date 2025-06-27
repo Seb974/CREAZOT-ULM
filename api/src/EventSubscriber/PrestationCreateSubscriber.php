@@ -41,19 +41,19 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
         $method = $event->getRequest()->getMethod();
         $client = $this->clientGetter->get();
 
-        if (!$prestation instanceof Prestation || Request::METHOD_POST !== $method ||
-            !$client->getEmailServer() || !$client->getEmailAddressSender()) 
-        {
+        if (!$prestation instanceof Prestation || Request::METHOD_POST !== $method) 
             return;
-        }
-
+        
         $aeronef = $prestation->getAeronef();
         $aeronef->setHorametre($prestation->getHorametreFin());
 
         if ( \is_null($aeronef->getSeuilAlerte()) )
             $aeronef->setSeuilAlerte(10);
 
-        $mailer = $this->dynamicMailerFactory->getMailerForUniqueClient();
+        if (!$client->getEmailServer() || !$client->getEmailAddressSender()) 
+            return;
+
+        $mailer = $this->dynamicMailerFactory->getMailerForClient();
         
         if ( ($aeronef->getEntretien() - $aeronef->getHorametre()) < $aeronef->getSeuilAlerte() && !$aeronef->isAlerteEnvoyee()) {
             try {

@@ -15,11 +15,10 @@ import {
   ShowButton,
   BooleanField,
   SimpleList,
-  FilterButton,
   Form, 
-  Button,
   useListContext
 } from "react-admin";
+import Button from '@mui/material/Button';
 import { useMercure } from "../../../utils/mercure";
 import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
@@ -33,23 +32,23 @@ export interface Props {
   page: number;
 }
 
-const CustomListActions = ({ showMore, setShowMore }) => (
+const CustomListActions = ({ showMore, setShowMore, isSmall }) => (
   <TopToolbar>
-    <CustomFilterButton showMore={showMore} setShowMore={setShowMore}/>
+    <CustomFilterButton showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>
     <CreateButton/>
     <ExportButton />
   </TopToolbar>
 );
 
-const CustomFilterButton = ({ showMore, setShowMore }) => {
+const CustomFilterButton = ({ showMore, setShowMore, isSmall }) => {
   return (
     <Button
       size="small"
       color="primary"
       onClick={() => setShowMore(!showMore)}
-      startIcon={<FilterListIcon />}
+      startIcon={<FilterListIcon className={`${isSmall && 'mb-3'}`}/>}
     >
-      <FilterListIcon />
+      {!isSmall && 'FILTRER'}
     </Button>
   );
 };
@@ -122,7 +121,7 @@ export const EntretiensList: NextPage<Props> = ({ data, hubURL, page }) => {
   return (
     <List 
       resource="entretiens" 
-      actions={<CustomListActions showMore={showMore} setShowMore={setShowMore}/>}
+      actions={<CustomListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>}
       filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>}
       // @ts-ignore
       filterValues={filters}

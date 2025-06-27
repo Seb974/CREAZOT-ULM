@@ -16,8 +16,9 @@ const MapView = dynamic(() => import('./MapView'), { ssr: false });
 
 const Dashboard = () => {
 
+  const desktopSize = 800;    // 768;
   const { client, loading } = useClient();
-  const [isSmall, setIsSmall] = useState(true);
+  const [isSmall, setIsSmall] = useState(() => isDefined(window) ? window.innerWidth < desktopSize : true);
   const [showGraphic, setShowGraphic] = useState(true);
   const [showMetarMobile, setShowMetarMobile] = useState(true);
   const [selectedBalise, setSelectedBalise] = useState('none');
@@ -30,7 +31,7 @@ const Dashboard = () => {
   const onMBSelect = () => setAppli("MB");
 
   useEffect(() => {
-    const handleResize = () => setIsSmall(window.innerWidth < 768);
+    const handleResize = () => setIsSmall(window.innerWidth < desktopSize);
 
     handleResize(); 
     window.addEventListener("resize", handleResize);
@@ -84,7 +85,7 @@ const Dashboard = () => {
                   : appli === "M" ?
                     <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} _ngcontent-serverapp-c135101453="" id="radarIframe" allow="web-share" src={`https://radar.wo-cloud.com/pwa/?zoom=${ client.zoom }&layer=WetterRadar&center=${ client.lat + ',' + client.lng }&tz=Indian/Reunion&tf=HH:mm&windunit=kmh&lang=fr-FR&desktop=true&fadeTop=false`} title="Carte radar météo"></iframe>
                   :
-                  <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src={`https://www.meteoblue.com/fr/meteo/cartes/widget?windAnimation=0&gust=0&satellite=1&cloudsAndPrecipitation=1&temperature=1&sunshine=1&extremeForecastIndex=1&geoloc=detect&tempunit=C&windunit=km%252Fh&lengthunit=metric&zoom=${ client.zoom - 1 }&autowidth=auto`}  frameborder="0" scrolling="NO" allowtransparency="true" sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>
+                  <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src={`https://www.meteoblue.com/fr/meteo/cartes/widget?windAnimation=0&gust=0&satellite=1&cloudsAndPrecipitation=1&temperature=1&sunshine=1&extremeForecastIndex=1&geoloc=detect&tempunit=C&windunit=km%252Fh&lengthunit=metric&zoom=${ client.zoom - 1 }&autowidth=auto`}  frameBorder="0" scrolling="NO" allowtransparency="true" sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>
               : 
               <></>
               }

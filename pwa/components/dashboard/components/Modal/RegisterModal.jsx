@@ -1,5 +1,5 @@
 import 'flatpickr/dist/themes/material_red.css';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import DoneIcon from '@mui/icons-material/Done';
 import { useDataProvider } from "react-admin";
 import { CircuitForm } from "../../../admin/prestation/Form/CircuitForm";
@@ -8,10 +8,11 @@ import { PlusForm } from "../../../admin/prestation/Form/PlusForm";
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
 import { CombinaisonForm } from '../../../admin/prestation/Form/CombinaisonForm';
-import { clientWithOptions } from '../../../../app/lib/client';
+import { clientWithOptions, clientWithOriginContact, clientWithPartners } from '../../../../app/lib/client';
 
 export const RegisterModal = ({ visible, setVisible, slot, reservations, setReservations, client }) => {
 
+    const isOperating = useRef(false);
     const dataProvider = useDataProvider();
     const timeOptions = { hour: "2-digit", minute: "2-digit" };
     const dateOptions = { year: 'numeric', month: 'long', day: 'numeric'};
@@ -49,27 +50,36 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
 
     const onSubmit = async e => {
         e.preventDefault();
-        let newReservations = [];
-        const endTime = getEndTime(consumer.debut, selectedCircuit);
-        const quantite = parseInt(consumer.quantite);
-        const reservation = {
-            ...consumer,
-            quantite,
-            circuit: selectedCircuit.id,
-            fin: endTime,
-            contact: clientWithOriginContact(client) && isDefinedAndNotVoid(selectedInitialContact) ? selectedInitialContact.map(c => c['@id']) : [],
-            origine: clientWithPartners(client) && isDefinedAndNotVoid(selectedOriginContact) ? selectedOriginContact.map(o => o['@id']) : [],
-            code: generateSafeCode('RESA')
-        }
-        for (let i = 0; i < quantite; i++) {
-            const option = clientWithOptions(client) && isDefined(selectedOptions[i]) ? selectedOptions[i]['@id'] : null;
-            const prix = getFinalPrice(selectedCircuit, selectedOptions[i], selectedOriginContact);
-            const newReservation = await dataProvider.create('reservations', {data: {...reservation, option, prix}});
-            newReservations = !isDefined(newReservation.data) || (isDefined(newReservation.data.statut) && newReservation.data.statut.includes('CANCEL')) ? 
-            newReservations : [...newReservations, newReservation.data];
-        }
-        setReservations([...reservations, ...newReservations]);
-        reinitializeData();
+        if (isOperating.current) return;
+        isOperating.current = true;
+        try {
+            let newReservations = [];
+            const endTime = getEndTime(consumer.debut, selectedCircuit);
+            const quantite = parseInt(consumer.quantite);
+            const reservation = {
+                ...consumer,
+                quantite,
+                circuit: selectedCircuit.id,
+                fin: endTime,
+                contact: clientWithOriginContact(client) && isDefinedAndNotVoid(selectedInitialContact) ? selectedInitialContact.map(c => c['@id']) : [],
+                origine: clientWithPartners(client) && isDefinedAndNotVoid(selectedOriginContact) ? selectedOriginContact.map(o => o['@id']) : [],
+                code: generateSafeCode('RESA')
+            }
+            for (let i = 0; i < quantite; i++) {
+                const option = clientWithOptions(client) && isDefined(selectedOptions[i]) ? selectedOptions[i]['@id'] : null;
+                const prix = getFinalPrice(selectedCircuit, selectedOptions[i], selectedOriginContact);
+                const newReservation = await dataProvider.create('reservations', {data: {...reservation, option, prix}});
+                newReservations = !isDefined(newReservation.data) || (isDefined(newReservation.data.statut) && newReservation.data.statut.includes('CANCEL')) ? 
+                newReservations : [...newReservations, newReservation.data];
+            }
+            setReservations([...reservations, ...newReservations]);
+            reinitializeData();
+        } catch (error) {
+            console.log(error);
+        } 
+        finally {
+            isOperating.current = false;
+        }        
     };
 
     const getFinalPrice = (selectedCircuit, selectedOption, selectedOriginContact) => {
@@ -97,6 +107,8 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
         setSection("contact");
         setVisible(false);
         setIsUpToDate(false);
+        setSelectedInitialContact([]);
+        setSelectedOriginContact([]);
     };
 
     const onBackClick = (e) => {

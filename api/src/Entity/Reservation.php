@@ -34,7 +34,8 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
                 'app.filter.reservation.circuit',
                 'app.filter.reservation.date',
                 'app.filter.reservation.client',
-                'app.filter.reservation.validated'
+                'app.filter.reservation.validated',
+                'app.filter.reservation.paid'
             ],
         ),
         new Post(

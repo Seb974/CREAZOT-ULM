@@ -10,6 +10,14 @@ const ReservationField = ({ choices = [], isLoading = false }) => {
     const { control } = useFormContext();
     const selectedReservation = useWatch({ control, name: 'reservation' });
 
+    const selectedChoice = useMemo(() => {
+        return choices.find(choice => choice.id === selectedReservation);
+    }, [selectedReservation, choices]);
+
+    const helperText = selectedReservation && selectedChoice?.prix
+        ? <><b>{ `${selectedChoice.prix.toFixed(2)} €` }</b>{`  - Attention aux upsells et options.`}</>
+        : undefined;
+
     return (
         <>
             <AutocompleteInput
@@ -17,11 +25,13 @@ const ReservationField = ({ choices = [], isLoading = false }) => {
                 source="reservation"
                 choices={[...choices, { id: 'autre', name: 'Autre...' }]}
                 isLoading={isLoading}
+                defaultValue={'autre'}
+                helperText={selectedReservation && selectedReservation !== 'autre' ? helperText : ''}
             />
             { selectedReservation === 'autre' &&
                 <TextInput
                     source="label"
-                    label="Description de la réservation"
+                    label="Détail du paiement"
                     validate={required()}
                     fullWidth
                 />
@@ -52,37 +62,47 @@ export const PaymentsCreate = () => {
     });
 
     useMemo(() => {
-        if (reservations) {
+        if (reservations)
             setReservationsMemo(reservations);
-        }
     }, [reservations]);
 
-    const filteredReservations = useMemo(() => {
-        const seen = new Set();
-        return isDefinedAndNotVoid(reservations) ? reservations.filter(r => {
-            const code = r.codeReservation || r.nom;
-            if (seen.has(code)) return false;
-            seen.add(code);
-            return true;
-        }) : [];
+    const groupedReservations = useMemo(() => {
+        if (!Array.isArray(reservations)) return [];
+    
+        const groups = reservations.reduce((acc, resa) => {
+            const key = resa.codeReservation || `${resa.nom}_${resa.debut}`;
+            if (!acc[key]) {
+                acc[key] = {
+                    ids: [],
+                    nom: resa.nom,
+                    debut: resa.debut,
+                    prix: 0,
+                };
+            }
+            acc[key].ids.push(resa['@id']);
+            acc[key].prix += resa.prix || 0;
+            return acc;
+        }, {});
+    
+        return Object.entries(groups).map(([key, value]) => ({
+            // @ts-ignore
+            id: value.ids[0],
+            // @ts-ignore
+            name: `${value.nom} - ${new Date(value.debut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+            // @ts-ignore
+            prix: value.prix
+        }));
     }, [reservations]);
-
-    const choices = filteredReservations
-        ?.slice()
-        .sort((a, b) => new Date(a.debut).getTime() - new Date(b.debut).getTime())
-        .map((r: any) => ({
-            id: r['@id'],
-            name: `${r.nom} - ${new Date(r.debut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
-        })) || [];
+    
 
     const onSubmit = async (values: any) => {
         const {reservation, label, ...formData} = values;
         const selectedResa = reservationsMemo.find(r => r['@id'] === reservation);
 
         const extra = {
-            name: isDefined(selectedResa) ? selectedResa.nom : '',
-            reservationCode: isDefined(selectedResa) ? (isDefined(selectedResa.reservationCode) ? selectedResa.reservationCode : selectedResa['@id']) : '',
-            label: !isDefined(selectedResa) && isDefined(label) ? label : '',
+            name: isDefined(selectedResa) ? selectedResa.nom : null,
+            reservationCode: isDefined(selectedResa) && isDefined(selectedResa.reservationCode) ? selectedResa.reservationCode : null,
+            label: !isDefined(selectedResa) && isDefined(label) ? label : null,
             reference: generateSafeCode('PAY'),
         };
         const data = {...formData, ...extra };            
@@ -110,8 +130,8 @@ export const PaymentsCreate = () => {
                             setSelectedDate(newDate);
                     }} 
                 />
-                <ReservationField choices={choices} isLoading={isLoading} />
-                <Typography variant="h6" gutterBottom>Modes de paiement</Typography>
+                <ReservationField choices={groupedReservations} isLoading={isLoading} />
+                <Typography className="mt-4" variant="h6" gutterBottom>Modes de paiement</Typography>
                 <ArrayInput source="details" label="" defaultValue={[{ mode: '', montant: '' }]}>
                     <SimpleFormIterator inline disableAdd={false} disableRemove={false}>
                         <SelectInput

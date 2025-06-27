@@ -11,7 +11,7 @@ export const PaymentsEdit = () => {
           <DateInput source="date" label="Date du paiement" />
           <TextInput source="reservationCode" label="Code de réservation"/>
           <TextInput source="name" label="Nom de la réservation"/>
-          <TextInput source="label" label="Description (si pas de réservation)"/>
+          <TextInput source="label" label="Détail (si pas de réservation)"/>
           <ArrayInput source="details" label="" defaultValue={[{ mode: '', montant: '' }]}>
               <SimpleFormIterator inline disableAdd={false} disableRemove={false}>
                   <SelectInput

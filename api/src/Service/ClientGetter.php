@@ -14,7 +14,7 @@ class ClientGetter
 
     public function get(): ?Client
     {
-        $clients = $this->em->getRepository(Client::class)->findAll();
+        $clients = $this->em->getRepository(Client::class)->findBy([], ['id' => 'ASC']);
 
         if (empty($clients))
             throw new \RuntimeException("Aucun client trouvé en base de données.");

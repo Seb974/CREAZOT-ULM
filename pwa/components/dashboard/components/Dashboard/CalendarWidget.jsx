@@ -61,6 +61,8 @@ export const CalendarWidget = ({ isSmall, client }) => {
                     setVisible={ setVisible }
                     reservations={ reservations }
                     setReservations={ setReservations }
+                    rappels={ rappels }
+                    setRappels={ setRappels }
                     setRappelVisible={ setRappelVisible }
                     setRappelSelection={ setRappelSelection }
                     isSmall={ isSmall }

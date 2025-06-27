@@ -19,9 +19,9 @@ import {
   SimpleList,
   FunctionField,
   useListContext,
-  Form,
-  Button
+  Form
 } from "react-admin";
+import Button from '@mui/material/Button';
 import { Fragment } from 'react';
 import { useSession } from "next-auth/react";
 import { isDefined, toLocalDateString } from "../../../app/lib/utils";
@@ -38,9 +38,9 @@ export interface Props {
   page: number;
 }
 
-const CustomListActions = ({ showMore, setShowMore }) => (
+const CustomListActions = ({ showMore, setShowMore, isSmall }) => (
   <TopToolbar>
-    <CustomFilterButton showMore={showMore} setShowMore={setShowMore}/>
+    <CustomFilterButton showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>
     <CreateButton />
     <ExportButton />
   </TopToolbar>
@@ -147,15 +147,15 @@ const VolsExpansion = ({ client }) => {
   );
 };
 
-const CustomFilterButton = ({ showMore, setShowMore }) => {
+const CustomFilterButton = ({ showMore, setShowMore, isSmall }) => {
   return (
     <Button
       size="small"
       color="primary"
       onClick={() => setShowMore(!showMore)}
-      startIcon={<FilterListIcon />}
+      startIcon={<FilterListIcon className={`${isSmall && 'mb-3'}`}/>}
     >
-      <FilterListIcon />
+      {!isSmall && 'FILTRER'}
     </Button>
   );
 };
@@ -272,7 +272,7 @@ export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
     <List
       key="prestations-list"
       resource="prestations"
-      actions={<CustomListActions showMore={showMore} setShowMore={setShowMore}/>}
+      actions={<CustomListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>}
       filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>}
       // @ts-ignore
       filterValues={filters}
