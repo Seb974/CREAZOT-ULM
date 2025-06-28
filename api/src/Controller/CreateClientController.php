@@ -25,6 +25,7 @@ class CreateClientController extends AbstractController
         $dto->zipcode = $request->request->get('zipcode');
         $dto->city = $request->request->get('city');
         $dto->website = $request->request->get('website');
+        $dto->url = $request->request->get('url');
         $dto->thanksTitle = $request->request->get('thanksTitle');
         $dto->thanksMessage = $request->request->get('thanksMessage');
         $dto->emailServer = $request->request->get('emailServer');

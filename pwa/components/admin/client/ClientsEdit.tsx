@@ -11,18 +11,17 @@ export const ClientsEdit = () => {
   const session = useSession();
 
   const transform = async data => {
-    const sanitizedData = sanitizeData(data);
+    const cachedClient = sessionStorage.getItem("client");
+    const previousData = cachedClient ? JSON.parse(cachedClient) : null;
+
+    const sanitizedData = sanitizeData(data, previousData);
     const images = await uploadImages(sanitizedData, session);
     // @ts-ignore
     const updatedClient = { ...sanitizedData, ...Object.fromEntries(images.map(img => [img.name, img.path || null])) };
 
-    const cachedClient = sessionStorage.getItem("client");
-    if (cachedClient) {
-      const parsedClient = JSON.parse(cachedClient);
-      if (parsedClient.id === updatedClient.id) {
-        sessionStorage.setItem("client", JSON.stringify(updatedClient)); 
-      }
-    }
+    if (previousData && previousData.id === updatedClient.id)
+        sessionStorage.setItem("client", JSON.stringify(updatedClient));
+
     return updatedClient;
   };
 
@@ -58,7 +57,8 @@ export const ClientsEdit = () => {
                   <TextInput source="email" label="Adresse email"/>
                   <TextInput source="phone" label="N° de téléphone"/>
                   <TextInput source="website" label="Site web"/>
-                  <TextInput source="emailServer" label="Serveur d'email SendGrid"/>
+                  <TextInput source="url" label="URL"/>
+                  <TextInput source="emailParams" label="Serveur d'email SendGrid"/>
                   <TextInput source="emailAddressSender" label="Adresse email d'envoi"/>
                   <BooleanInput source="active" label="Utilisateur actif" />    
               </TabbedForm.Tab>

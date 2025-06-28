@@ -212,7 +212,7 @@ class Client
     private ?bool $hasEmailConfirmation = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Client:write', 'Client:read'])]
+    #[Groups(groups: ['Client:write'])]
     private ?string $emailServer = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -230,6 +230,22 @@ class Client
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?bool $hasPaymentManagement = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?string $url = null;
+
+    #[Groups(groups: ['Client:read'])]
+    public function getEmailParams(): string
+    {
+        if (!$this->emailServer) {
+            return '';
+        }
+
+        $hidden = str_repeat('*', 12);
+        return "sendgrid+api://{$hidden}@default";
+    }
+
 
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
@@ -713,6 +729,18 @@ class Client
     public function setHasPaymentManagement(?bool $hasPaymentManagement): static
     {
         $this->hasPaymentManagement = $hasPaymentManagement;
+
+        return $this;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->url;
+    }
+
+    public function setUrl(?string $url): static
+    {
+        $this->url = $url;
 
         return $this;
     }

@@ -51,6 +51,7 @@ class ClientInputDataTransformer implements ProcessorInterface
         $client->setZipcode($data->zipcode);
         $client->setCity($data->city);
         $client->setWebsite($data->website);
+        $client->setUrl($data->url);
         $client->setHasReservation($data->hasReservation);
         $client->setHasPassengerRegistration($data->hasPassengerRegistration);
         $client->setHasOriginContact($data->hasOriginContact);

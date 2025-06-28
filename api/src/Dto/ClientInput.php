@@ -130,4 +130,7 @@ final class ClientInput
 
     #[Groups(groups: ['Client:write'])]
     public ?bool $hasPaymentManagement = null;
+
+    #[Groups(groups: ['Client:write'])]
+    public ?string $url = null;
 }

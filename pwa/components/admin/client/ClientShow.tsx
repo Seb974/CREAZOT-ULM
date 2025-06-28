@@ -23,6 +23,10 @@ export const ClientShow = () => {
                     />
                     <TextField source="phone" label="N° de téléphone"/>
                     <TextField source="email" label="Adresse email"/>
+                    <TextField source="website" label="Site web"/>
+                    <TextField source="url" label="URL"/>
+                    <TextField source="emailParams" label="Serveur d'email SendGrid"/>
+                    <TextField source="emailAddressSender" label="Adresse email d'envoi"/>
                     <DateField source="createdAt" label="Créé le"/>
                     <DateField source="updatedAt" label="Dernière mise à jour, le"/>
                     <BooleanField source="active" label="Compte activé" textAlign="center"/>

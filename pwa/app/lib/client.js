@@ -175,13 +175,20 @@ export const uploadImages = async (data, session) => {
     return await Promise.all(uploadPromises);
 };
 
-export const sanitizeData = data => {
+export const sanitizeData = (data, previousData) => {
     const registrationPax = data.hasPassengerRegistration;
-    return {
+    const sanitized = {
         ...data, 
         thanksTitle: registrationPax && isDefined(data.thanksTitle) ? data.thanksTitle : '',
         thanksMessage: registrationPax && isDefined(data.thanksMessage) ? data.thanksMessage : ''
-    }
+    };
+
+    if (isDefined(data.emailParams) && data.emailParams !== previousData?.emailParams)
+        sanitized.emailServer = data.emailParams;
+
+    delete sanitized.emailParams;
+
+    return sanitized;
 };
 
 export const clientWithOptions = client => {
