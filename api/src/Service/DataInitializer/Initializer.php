@@ -2,14 +2,19 @@
 
 namespace App\Service\DataInitializer;
 
+use App\Entity\Client;
 use App\Entity\Nature;
 use App\Entity\Option;
+use App\Entity\Contact;
+use App\Entity\Origine;
+use App\Entity\Qualification;
 use App\Service\DataInitializer\Data;
 use Doctrine\ORM\EntityManagerInterface;
 
 class Initializer
 {
     protected $data;
+    protected $manager;
 
     public function __construct(Data $data, EntityManagerInterface $manager)
     {
@@ -17,42 +22,46 @@ class Initializer
         $this->manager = $manager;
     }
 
-    public function loadData()
+    public function initialize(): void
     {
-        $this->loadNatures();
-        $this->loadOptions();
-    }
+        $this->initEntity(Client::class, [$this->data->getClient()]);
+        $this->initEntity(Nature::class, $this->data->getNatures());
+        $this->initEntity(Option::class, $this->data->getOptions());
+        $this->initEntity(Contact::class, $this->data->getContacts());
+        $this->initEntity(Origine::class, $this->data->getOrigines());
+        $this->initEntity(Qualification::class, $this->data->getQualifications());
 
-    public function loadNatures()
-    {
-        $natures = $this->data->getNatures();
-        for($i = 0; $i < count($natures); $i++)
-        {
-            $nature = new Nature();
-            $nature->setCode($this->getCurrentValue($natures[$i], 'code'))
-                   ->setLabel($this->getCurrentValue($natures[$i], 'label'));
-
-            $this->manager->persist($nature);
-        }
         $this->manager->flush();
     }
 
-    public function loadOptions()
+    private function initEntity(string $entityClass, array $items): void
     {
-        $options = $this->data->getOptions();
-        for($i = 0; $i < count($options); $i++)
-        {
-            $option = new Option();
-            $option->setNom($this->getCurrentValue($options[$i], 'nom'))
-                   ->setPrix($this->getCurrentValue($options[$i], 'prix'));
+        $repo = $this->manager->getRepository($entityClass);
 
-            $this->manager->persist($option);
+        if ($repo->count([]) > 0) {
+            return;
         }
-        $this->manager->flush();
+
+        foreach ($items as $itemData) {
+            $entity = new $entityClass();
+            $this->hydrateEntity($entity, $itemData);
+            $this->manager->persist($entity);
+        }
     }
 
-    private function getCurrentValue($data, $variable)
+    private function hydrateEntity(object $entity, array $data): void
     {
-        return array_key_exists($variable, $data) ? (is_string($data[$variable]) ? trim($data[$variable]) : $data[$variable]) : null;
+        foreach ($data as $key => $value) {
+            $method = 'set' . ucfirst($key);
+            if (!method_exists($entity, $method)) {
+                continue;
+            }
+    
+            if (is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}/', $value)) {
+                $value = new \DateTimeImmutable($value);
+            }
+    
+            $entity->$method($value);
+        }
     }
 }

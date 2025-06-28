@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Command;
 
 use App\Service\DataInitializer\Initializer;
@@ -14,27 +12,22 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'app:init-data',
-    description: 'Initialise les données nécessaires en base',
+    name: 'app:data:initialize',
+    description: 'Populate database with initial data if tables are empty.',
 )]
-class DataInitializeCommand extends Command
+class InitializeDataCommand extends Command
 {
-    protected $initializer;
-
-    public function __construct(Initializer $initializer)
+    public function __construct(private readonly Initializer $initializer)
     {
         parent::__construct();
-        $this->initializer = $initializer;
     }
-
-    protected function configure(): void {}
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         try {
-            $this->initializer->loadData();
-            $io->success("Les données ont bien été importées.");
+            $this->initializer->initialize();
+            $io->success("Les données ont été initialisées avec succès.");
         } catch (\Exception $e) {
             $io->error("Une erreur est survenue. Veuillez réessayer ultérieurement.");
             return Command::FAILURE;

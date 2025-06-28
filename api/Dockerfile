@@ -29,6 +29,7 @@ RUN apt-get update; \
 		git \
 		zip \
 		libmagickwand-dev \
+		postgresql-client \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
