@@ -29,7 +29,6 @@ class Data
         'hasOriginContact' => true,
         'hasLandingManagement' => true,
         'hasEmailConfirmation' => true,
-        // 'emailServer' => 'sendgrid+api://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@default',
         'emailAddressSender' => 'contact@planetair974.com',
         'confirmationSubject' => 'Vos souvenirs de l\’île intense vous attendent 📸✨',
         'hasPaymentManagement' => true
