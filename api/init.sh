@@ -16,8 +16,8 @@ done
 echo "✅ PostgreSQL est prêt."
 
 # ⚙️ Exécuter les migrations
-# echo "📦 Lancement des migrations Doctrine..."
-# php bin/console doctrine:migrations:migrate --no-interaction
+echo "📦 Lancement des migrations Doctrine..."
+php bin/console doctrine:migrations:migrate --no-interaction
 
 # 🌱 Initialiser les données si la base est vide
 echo "🌱 Initialisation des données de référence..."
