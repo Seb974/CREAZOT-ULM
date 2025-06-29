@@ -5,9 +5,12 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     microtrak.api_key: '%env(MICROTRAK_API_KEY)%'
-    image.client_dir: '%kernel.project_dir%/public/images/client'
-    image.shared_dir: '%kernel.project_dir%/public/images'
-    image.public_dir: '%kernel.project_dir%/public'
+    image.client_dir: '/srv/api/public/images/client'
+    image.shared_dir: '/srv/api/public/images'
+    image.public_dir: '/srv/api/public'
+    # image.client_dir: '%kernel.project_dir%/public/images/client'
+    # image.shared_dir: '%kernel.project_dir%/public/images'
+    # image.public_dir: '%kernel.project_dir%/public'
 
 services:
     # default configuration for services in *this* file

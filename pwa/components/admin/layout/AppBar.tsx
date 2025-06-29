@@ -24,7 +24,14 @@ const CustomAppBar = () => {
   const [profile, setProfile] = useState(null);
   const [fallback, setFallback] = useState(false);
 
-  const logoSrc = isDefined(client) && isDefined(client.logo) ? `${client.logo}?v=${Date.now()}` : "/images/logo.png";
+  const baseUrl = client?.url?.replace(/\/+$/, "") ?? "";
+  const logoPath = client?.logo?.startsWith("/") ? client.logo : `/${client?.logo ?? "images/logo.png"}`;
+  const logoSrc = `${baseUrl}${logoPath}`;   // ?v=${Date.now()}`;
+
+  const getLogoUrl = () => {
+    const defaultLogo = `${baseUrl}/images/logo.png`;
+    return fallback ? defaultLogo : (logoSrc || defaultLogo);
+  };
 
   useEffect(() => getProfile(), []);
 
@@ -77,11 +84,12 @@ const CustomAppBar = () => {
             <div style={{ position: "relative", width: 50, height: 50 }}>
               <Image
                 alt={"logo " + client.name}
-                src={fallback ? "/images/logo.png" : (logoSrc || "/images/logo.png")}
+                src={getLogoUrl()}
                 fill
                 sizes="50px" 
                 onError={() => setFallback(true)}
                 className="object-contain"
+                unoptimized
               />
             </div>
 

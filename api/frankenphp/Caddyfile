@@ -27,6 +27,12 @@
 	}
 
 	root * /app/public
+	
+	handle /images/* {
+		root * /srv/api/public
+		file_server
+	}
+
 	encode {
 		zstd
 		br
