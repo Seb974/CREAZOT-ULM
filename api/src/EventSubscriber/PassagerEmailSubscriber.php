@@ -13,16 +13,19 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use App\Service\DynamicMailerFactory;
 use App\Service\ClientGetter;
+use Psr\Log\LoggerInterface;
 
 final class PassagerEmailSubscriber implements EventSubscriberInterface
 {
     private DynamicMailerFactory $dynamicMailerFactory;
     private ClientGetter $clientGetter;
+    private LoggerInterface $logger;
 
-    public function __construct(DynamicMailerFactory $dynamicMailerFactory, ClientGetter $clientGetter)
+    public function __construct(DynamicMailerFactory $dynamicMailerFactory, ClientGetter $clientGetter, LoggerInterface $logger)
     {
         $this->dynamicMailerFactory = $dynamicMailerFactory;
         $this->clientGetter = $clientGetter;
+        $this->logger = $logger;
     }
 
     public static function getSubscribedEvents()
@@ -39,7 +42,7 @@ final class PassagerEmailSubscriber implements EventSubscriberInterface
         $client = $this->clientGetter->get();
 
         if (!$passager instanceof Passager || Request::METHOD_POST !== $method || !$passager->getEmail() || !$client->getEmailServer() || 
-            !$client->getEmailAddressSender() || !$client->hasEmailConfirmation() || empty($client->getConfirmationMessage())) 
+            !$client->getEmailAddressSender() || !$client->getHasEmailConfirmation() || empty($client->getConfirmationMessage())) 
         {
             return;
         }
@@ -57,6 +60,9 @@ final class PassagerEmailSubscriber implements EventSubscriberInterface
     
             $mailer->send($message);
         } catch (\Throwable $e) {
+            $this->logger->error('Erreur lors de l\'envoi du mail : ' . $e->getMessage(), [
+                'exception' => $e,
+            ]);
             return;
         }
     }
