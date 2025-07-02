@@ -115,7 +115,6 @@ export const ReservationsCreate = () => {
         const dateStr = new Date(data.debut).toISOString().slice(0, 10);
         await new Promise(resolve => setTimeout(resolve, 300));
         window.location.href = `/admin#/?scroll=calendar&date=${dateStr}`;
-        // setTimeout(() => window.location.href = `/admin#/?scroll=calendar&date=${dateStr}`, 200);    // &refresh=true
       } else {
         redirect('list', 'reservations'); 
       }

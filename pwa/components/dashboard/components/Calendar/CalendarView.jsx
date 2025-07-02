@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import 'moment/locale/fr';
-import { useLocation } from 'react-router-dom';
 import { useDataProvider } from "react-admin";
 import { Calendar, Views, momentLocalizer } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
@@ -25,21 +24,16 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
 
   const now = new Date();
   const lastSetDates = useRef(null);
-  const hasRefreshedRef = useRef(false);
   const session = useSession();
   const dataProvider = useDataProvider();
-  const location = useLocation();
   const user = session.data.user;
   const authorizedProfiles = ['pro', 'instructeur'];
-  const searchParams = new URLSearchParams(location.search);
   const min = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0);
   const max = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30);
-  const refreshParam = searchParams.get('refresh');
 
   const [profile, setProfile] = useState(null);
   const [view, setView] = useState(Views.DAY);
   const [isInitializing, setIsInitializing] = useState(false);
-  const [hasRefreshed, setHasRefreshed] = useState(false);
 
   const safeSetDates = (newDates) => {
     const last = lastSetDates.current;
@@ -74,42 +68,12 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
 
   useEffect(() => getUserProfile(user), [user]);
 
-  // useEffect(() => console.log("📆 Valeur de `dates` :", dates), [dates]);
-
   useEffect(() => {
     let isStale = false;
-    // if (refreshParam !== 'true')
-      fetchAndBuildEvents(() => isStale);
+    fetchAndBuildEvents(() => isStale);
   
     return () => isStale = true;
   }, [dates, view]);
-
-  // useEffect(() => {
-  //   if (refreshParam === 'true' && !hasRefreshed && dates) {   // && dates
-  //     setHasRefreshed(true);    
-  //     fetchAndBuildEvents()
-  //       .then(() => {
-  //         const newSearch = new URLSearchParams(location.search);
-  //         newSearch.delete('refresh');
-  //         const newPath = location.pathname + (newSearch.toString() ? `?${newSearch.toString()}` : '');
-  //         window.history.replaceState(null, '', newPath);
-  //       });
-  //   }
-  // }, [refreshParam, hasRefreshed, dates]);   // , dates
-
-  // useEffect(() => {
-  //   if (refreshParam === 'true' && !hasRefreshedRef.current && dates) {
-  //     hasRefreshedRef.current = true;
-  //     fetchAndBuildEvents()
-  //       .then(() => {
-  //         const newSearch = new URLSearchParams(location.search);
-  //         newSearch.delete('refresh');
-  //         const newPath = location.pathname + (newSearch.toString() ? `?${newSearch.toString()}` : '');
-  //         window.history.replaceState(null, '', newPath);
-  //       });
-  //   }
-  // }, [refreshParam, dates]);
-
 
   const fetchAndBuildEvents = async (isStaleFn = () => false) => {
     if (!dates) {

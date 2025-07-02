@@ -162,7 +162,7 @@ export const ReservationsEdit = () => {
       </SimpleFormIterator>
     </ArrayInput>
 
-  return (                                                                                    // &refresh=true
+  return (
   <Edit transform={transform} mutationMode="pessimistic" redirect={ origin === 'calendar' ? `/?scroll=calendar&date=${recordDate.toJSON().slice(0, 10) || ''}` : 'list' }>
       <SimpleForm>
           <DateTimeInput source="debut" defaultValue={ new Date((new Date()).setHours(8, 0, 0)) } label="Date"/>
