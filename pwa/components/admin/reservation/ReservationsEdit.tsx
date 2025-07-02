@@ -114,6 +114,7 @@ export const ReservationsEdit = () => {
     const selectedOrigines = clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === o['@id']))) : [];
     const formattedCadeau = clientWithGifts(client) && isDefined(cadeau) && isDefined(cadeau['@id']) ? cadeau['@id'] : null;
     return {...data,
+        debut: new Date(debut),
         code: isNotBlank(data.code) ? data.code : generateSafeCode('RESA'),
         fin: getEnd(debut, selectedCircuit),
         prix: getTotalPrice(selectedCircuit, selectedOption, selectedOrigines),
@@ -161,8 +162,8 @@ export const ReservationsEdit = () => {
       </SimpleFormIterator>
     </ArrayInput>
 
-  return (
-  <Edit transform={transform} redirect={ origin === 'calendar' ? `/?scroll=calendar&date=${recordDate.toJSON().slice(0, 10) || ''}` : 'list' }>
+  return (                                                                                    // &refresh=true
+  <Edit transform={transform} mutationMode="pessimistic" redirect={ origin === 'calendar' ? `/?scroll=calendar&date=${recordDate.toJSON().slice(0, 10) || ''}` : 'list' }>
       <SimpleForm>
           <DateTimeInput source="debut" defaultValue={ new Date((new Date()).setHours(8, 0, 0)) } label="Date"/>
           <TextInput source="nom" label="Nom & prénom du passager"/>

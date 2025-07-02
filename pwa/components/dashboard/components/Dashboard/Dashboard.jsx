@@ -16,9 +16,11 @@ const MapView = dynamic(() => import('./MapView'), { ssr: false });
 
 const Dashboard = () => {
 
-  const desktopSize = 800;    // 768;
+  const tabletSize = 768;
+  const desktopSize = 800;
   const { client, loading } = useClient();
-  const [isSmall, setIsSmall] = useState(() => isDefined(window) ? window.innerWidth < desktopSize : true);
+  const [isSmall, setIsSmall] = useState(() => isDefined(window) ? window.innerWidth < tabletSize : true);
+  const [isTabletOrMobile, setIsTabletOrMobile]  = useState(() => isDefined(window) ? window.innerWidth < desktopSize : true);
   const [showGraphic, setShowGraphic] = useState(true);
   const [showMetarMobile, setShowMetarMobile] = useState(true);
   const [selectedBalise, setSelectedBalise] = useState('none');
@@ -31,7 +33,10 @@ const Dashboard = () => {
   const onMBSelect = () => setAppli("MB");
 
   useEffect(() => {
-    const handleResize = () => setIsSmall(window.innerWidth < desktopSize);
+    const handleResize = () => {
+      setIsSmall(window.innerWidth < tabletSize);
+      setIsTabletOrMobile(window.innerWidth < desktopSize)
+    };
 
     handleResize(); 
     window.addEventListener("resize", handleResize);
@@ -95,7 +100,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-          { isDefined(client.hasReservation) && client.hasReservation &&  <CalendarWidget isSmall={ isSmall } client={ client }/> }
+          { isDefined(client.hasReservation) && client.hasReservation &&  <CalendarWidget isSmall={ isTabletOrMobile } client={ client }/> }
       </div>
       <Dialog fullScreen open={showFullMap} onClose={() => setShowFullMap(false)}>
         <AppBar position="static" style={{ backgroundColor: client.color || 'primary' }}>

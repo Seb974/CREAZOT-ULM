@@ -27,7 +27,9 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
             paginationClientItemsPerPage: true,
             filters: [
                 'app.filter.rappel.date',
-                'app.filter.rappel.periode'            ],
+                'app.filter.rappel.titre',
+                'app.filter.rappel.periode'            
+            ],
         ),
         new Post(
             itemUriTemplate: '/rappels/{id}{._format}'

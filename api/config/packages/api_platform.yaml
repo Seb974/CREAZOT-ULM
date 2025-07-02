@@ -224,6 +224,12 @@ services:
             $properties: { valid: 'iexact' } # ]
         tags: [ 'api_platform.filter' ]
 
+    app.filter.rappel.titre:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { titre: 'iword_start' } # ]
+        tags: [ 'api_platform.filter' ]
+
     app.filter.rappel.date:
         parent: 'api_platform.doctrine.orm.date_filter'
         arguments:

@@ -106,19 +106,22 @@ export const ReservationsCreate = () => {
         const prix = getTotalPrice(selectedCircuit, bddOption, selectedOrigines);
         const newData = {...data, option, prix };
         if (i < data.quantite - 1)
-          create('reservations', {data: newData});
+          await create('reservations', {data: newData});
         else
           await create('reservations', {data: newData});
       }
       notify('La réservation a bien été enregistrée.', { type: 'info' });
-      if (debut)
-        window.location.href = `/admin#/?scroll=calendar&date=${new Date(data.debut).toJSON().slice(0, 10) || ''}`;
-      else
+      if (debut) {
+        const dateStr = new Date(data.debut).toISOString().slice(0, 10);
+        await new Promise(resolve => setTimeout(resolve, 300));
+        window.location.href = `/admin#/?scroll=calendar&date=${dateStr}`;
+        // setTimeout(() => window.location.href = `/admin#/?scroll=calendar&date=${dateStr}`, 200);    // &refresh=true
+      } else {
         redirect('list', 'reservations'); 
-
+      }
     } catch (error) {
       notify(`Une erreur bloque l\'enregistrement de la réservation.`, { type: 'error' });
-      console.log(error);
+      console.error(error);
       if (debut)
         window.location.href = `/admin#/?scroll=calendar&date=${new Date(data.debut).toJSON().slice(0, 10) || ''}`;
       else
@@ -180,7 +183,8 @@ export const ReservationsCreate = () => {
     </ArrayInput>
 
   return (
-    <Create redirect="list">
+    // @ts-ignore
+    <Create redirect="list" mutationMode="pessimistic">
       <SimpleForm onSubmit={onSubmit} defaultValues={{ debut }}>
         <DateTimeInput source="debut" defaultValue={ new Date((new Date()).setHours(7,0,0)) } label="Décollage" validate={required()}/>
         <TextInput source="nom" label="Nom & prénom du passager" validate={required()}/>

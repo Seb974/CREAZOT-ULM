@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import 'moment/locale/fr';
+import { useLocation } from 'react-router-dom';
 import { useDataProvider } from "react-admin";
 import { Calendar, Views, momentLocalizer } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
@@ -23,15 +24,30 @@ const localizer = momentLocalizer (moment);
 export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisible, reservations, setReservations, rappels, setRappels, setRappelVisible, setRappelSelection, isSmall, dates, setDates }) => {
 
   const now = new Date();
+  const lastSetDates = useRef(null);
+  const hasRefreshedRef = useRef(false);
   const session = useSession();
   const dataProvider = useDataProvider();
+  const location = useLocation();
   const user = session.data.user;
   const authorizedProfiles = ['pro', 'instructeur'];
+  const searchParams = new URLSearchParams(location.search);
   const min = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0);
   const max = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30);
+  const refreshParam = searchParams.get('refresh');
+
   const [profile, setProfile] = useState(null);
   const [view, setView] = useState(Views.DAY);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [hasRefreshed, setHasRefreshed] = useState(false);
+
+  const safeSetDates = (newDates) => {
+    const last = lastSetDates.current;
+    if (!last || last.start.getTime() !== newDates.start.getTime() || last.end.getTime() !== newDates.end.getTime()) {
+      lastSetDates.current = newDates;
+      setDates(newDates);
+    }
+};
 
   const formats = {
     eventTimeRangeFormat: ({ start, end }, culture, localizer) => {
@@ -58,52 +74,85 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
 
   useEffect(() => getUserProfile(user), [user]);
 
+  // useEffect(() => console.log("📆 Valeur de `dates` :", dates), [dates]);
+
   useEffect(() => {
     let isStale = false;
-  
-    const fetchAndBuildEvents = async () => {
-      const { start, end } = Array.isArray(dates) ? dates[0] : dates;
-      try {
-        setIsInitializing(true);
-        const [resasRes, rappelsRes] = await Promise.all([
-          dataProvider.getList('reservations', {
-            filter: {
-              'debut[after]': new Date(start).toISOString(),
-              'debut[before]': new Date(end).toISOString(),
-              cancel: false,
-              pagination: false
-            },
-            sort: { id: 'ASC' },
-            pagination: {}
-          }),
-          dataProvider.getList('rappels', {
-            filter: getRappelsFilter(start, end),
-            sort: { id: 'ASC' },
-            pagination: {}
-          })
-        ]);
-  
-        if (isStale) return;
-        setReservations(resasRes.data);
-        setRappels(rappelsRes.data);
-        const reservationEvents = getEventsFromReservations(resasRes.data);
-        const rappelEvents = getEventsFromRappels(rappelsRes.data);
-        setEvents([...reservationEvents, ...rappelEvents]);
-  
-      } catch (e) {
-        if (!isStale) 
-          console.error("❌ Erreur lors du chargement des données", e);
-      } finally {
-        setIsInitializing(false);
-      }
-    };
-  
-    if (dates)
-      fetchAndBuildEvents();
+    // if (refreshParam !== 'true')
+      fetchAndBuildEvents(() => isStale);
   
     return () => isStale = true;
-  
   }, [dates, view]);
+
+  // useEffect(() => {
+  //   if (refreshParam === 'true' && !hasRefreshed && dates) {   // && dates
+  //     setHasRefreshed(true);    
+  //     fetchAndBuildEvents()
+  //       .then(() => {
+  //         const newSearch = new URLSearchParams(location.search);
+  //         newSearch.delete('refresh');
+  //         const newPath = location.pathname + (newSearch.toString() ? `?${newSearch.toString()}` : '');
+  //         window.history.replaceState(null, '', newPath);
+  //       });
+  //   }
+  // }, [refreshParam, hasRefreshed, dates]);   // , dates
+
+  // useEffect(() => {
+  //   if (refreshParam === 'true' && !hasRefreshedRef.current && dates) {
+  //     hasRefreshedRef.current = true;
+  //     fetchAndBuildEvents()
+  //       .then(() => {
+  //         const newSearch = new URLSearchParams(location.search);
+  //         newSearch.delete('refresh');
+  //         const newPath = location.pathname + (newSearch.toString() ? `?${newSearch.toString()}` : '');
+  //         window.history.replaceState(null, '', newPath);
+  //       });
+  //   }
+  // }, [refreshParam, dates]);
+
+
+  const fetchAndBuildEvents = async (isStaleFn = () => false) => {
+    if (!dates) {
+      console.warn("fetchAndBuildEvents appelé sans dates définies");
+      return;
+    }
+
+    const { start, end } = Array.isArray(dates) ? dates[0] : dates;
+    try {
+      setIsInitializing(true);
+      const [resasRes, rappelsRes] = await Promise.all([
+        dataProvider.getList('reservations', {
+          filter: {
+            'debut[after]': new Date(start).toISOString(),
+            'debut[before]': new Date(end).toISOString(),
+            cancel: false,
+            pagination: false
+          },
+          sort: { id: 'ASC' },
+          pagination: {}
+        }),
+        dataProvider.getList('rappels', {
+          filter: getRappelsFilter(start, end),
+          sort: { id: 'ASC' },
+          pagination: {}
+        })
+      ]);
+
+      if (isStaleFn()) return;
+
+      setReservations(resasRes.data);
+      setRappels(rappelsRes.data);
+      const reservationEvents = getEventsFromReservations(resasRes.data);
+      const rappelEvents = getEventsFromRappels(rappelsRes.data);
+      setEvents([...reservationEvents, ...rappelEvents]);
+
+    } catch (e) {
+      if (!isStaleFn())
+        console.error("❌ Erreur lors du chargement des données", e);
+    } finally {
+      setIsInitializing(false);
+    }
+  };
 
   useEffect(() => {
     if (isInitializing) return;
@@ -217,7 +266,7 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
       const newView = Array.isArray(range) ? range.length === 1 ? Views.DAY : Views.WEEK : Views.MONTH;
       const date = newView === Views.DAY || newView === Views.WEEK ? range[0] : range.start;
       const newDates = getLimits(date, newView);
-      setDates(newDates);
+      safeSetDates(newDates);
   }, []);
     
   const moveEvent = useCallback(({ event, start, end, isAllDay: droppedOnAllDaySlot = false }) => {
@@ -238,7 +287,7 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
             const newReservations = initialReservations.map(r => r['@id'] === data['@id'] ? data : r);
             setReservations(newReservations);
           })
-          .catch(error => console.log(error));
+          .catch(error => console.error(error));
       }
   },
   [setEvents, reservations, setReservations]);
@@ -321,11 +370,27 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
         setSlot({ start: new Date(slotInfo.start), end: new Date(slotInfo.end)});
         slotInfo.slots.length === 2 ? setVisible(true) : setRappelVisible(true);
       } else {
+        const target = slotInfo.slots.length === 2 ? 'reservations' : 'rappels';
         setTimeout(() => {
-          window.location.hash = `#/reservations/create?debut=${encodeURIComponent(slotInfo.start.toISOString())}`;
+          window.location.hash = `#/${ target }/create?debut=${encodeURIComponent(slotInfo.start.toISOString())}`;
           window.scrollTo(0, 0);
         }, 0);
       }
+
+      // if (slotInfo.slots.length === 2) {
+      //   if (!isSmall) {
+      //     setSlot({ start: new Date(slotInfo.start), end: new Date(slotInfo.end)});
+      //     setVisible(true)
+      //   } else {
+      //     setTimeout(() => {
+      //       window.location.hash = `#/reservations/create?debut=${encodeURIComponent(slotInfo.start.toISOString())}`;
+      //       window.scrollTo(0, 0);
+      //     }, 0);
+      //   }
+      // } else {
+      //   setSlot({ start: new Date(slotInfo.start), end: new Date(slotInfo.end)});
+      //   setRappelVisible(true);
+      // }
     }
   }, [isSmall]);
 
@@ -416,7 +481,7 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
                 view={ view }
                 // defaultDate={ new Date() }
                 date={ dates.start }
-                onNavigate={date => setDates(getDefaultDatesFromDate(date))}
+                onNavigate={date => safeSetDates(getDefaultDatesFromDate(date))}
                 localizer={ localizer }
                 onView={ onView }
                 onRangeChange={ range => onRangeChange(range, view) }
