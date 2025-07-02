@@ -51,7 +51,7 @@ final class PassagerEmailSubscriber implements EventSubscriberInterface
             $subject = empty($client->getConfirmationSubject()) ? '' : $client->getConfirmationSubject();
             $bodyHtml = str_replace('{{FIRSTNAME}}', $passager->getPrenom(), $client->getConfirmationMessage());
 
-            $mailer = $this->dynamicMailerFactory->getMailerForUniqueClient();
+            $mailer = $this->dynamicMailerFactory->getMailerForClient();
             $message = (new Email())
                 ->from($client->getEmailAddressSender())
                 ->to($passager->getEmail())

@@ -55,7 +55,7 @@ class CadeauCreateSubscriber implements EventSubscriberInterface
             try {
                 
                 $pdfContent = $this->pdfGenerator->generate($cadeau);
-                $mailer = $this->dynamicMailerFactory->getMailerForUniqueClient();
+                $mailer = $this->dynamicMailerFactory->getMailerForClient();
                 $email = (new Email())
                     ->from($client->getEmailAddressSender())
                     ->to($cadeau->getEmail())
