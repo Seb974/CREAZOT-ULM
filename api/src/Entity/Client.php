@@ -242,8 +242,8 @@ class Client
             return '';
         }
 
-        $hidden = str_repeat('*', 12);
-        return "sendgrid+api://{$hidden}@default";
+        $hidden = str_repeat('*', 6);
+        return "mailjet+api://{$hidden}:{$hidden}@default";
     }
 
 
