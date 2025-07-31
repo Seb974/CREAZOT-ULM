@@ -252,8 +252,8 @@ export const LandingsList = (props) => {
     const isSmall = useMediaQuery('(max-width:600px)');
 
     const defaultFilters = {
-        "date[after]": toLocalDateString(firstDayOfMonth),
-        "date[before]": toLocalDateString(today),
+        "date[after]": firstDayOfMonth.toISOString().split('T')[0],
+        "date[before]": today.toISOString().split('T')[0],
         aeronef: '',
         airport: ''
     };
