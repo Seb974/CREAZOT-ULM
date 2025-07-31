@@ -1,4 +1,4 @@
-import { ArrayInput, DateInput, Edit, SelectInput, SimpleFormIterator } from "react-admin";
+import { ArrayInput, DateInput, Edit, ReferenceInput, SelectInput, SimpleFormIterator } from "react-admin";
 import { SimpleForm, TextInput, NumberInput } from "react-admin";
 import { paymentMode } from "../../../app/lib/client";
 
@@ -20,6 +20,7 @@ export const PaymentsEdit = () => {
                       choices={ paymentMode }
                   />
                   <NumberInput source="amount" label="Montant (€)"/>
+                  <TextInput source="prepayment.code" label="Prépaiement" readOnly/>
               </SimpleFormIterator>
           </ArrayInput>
           <TextInput source="remarques" label="Remarques" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '80px!important'} }}/>

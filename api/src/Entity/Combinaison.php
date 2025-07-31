@@ -58,11 +58,11 @@ class Combinaison
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Combinaison:write', 'Combinaison:read'])]
+    #[Groups(groups: ['Combinaison:write', 'Combinaison:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Combinaison:write', 'Combinaison:read'])]
+    #[Groups(groups: ['Combinaison:write', 'Combinaison:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(nullable: true)]
@@ -70,14 +70,14 @@ class Combinaison
     private ?int $minPassager = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Combinaison:write', 'Combinaison:read'])]
+    #[Groups(groups: ['Combinaison:write', 'Combinaison:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?float $prix = null;
 
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['Combinaison:write', 'Combinaison:read'])]
     private ?array $options = null;
 
-    #[Groups(groups: ['Combinaison:write', 'Combinaison:read'])]
+    #[Groups(groups: ['Combinaison:write', 'Combinaison:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     public function getName(): ?string
     {
         return $this->nom;

@@ -133,6 +133,16 @@ const DetailsExpansion = () => {
           source="mode"
           render={({mode}) => getChipMode(mode)}
         />
+         <FunctionField
+          source="prepayment"
+          render={({prepayment}) => isDefined(prepayment) ? 
+            <span className="text-xs italic">
+              <span>{ `${ prepayment.paymentId.startsWith('#') ? prepayment.paymentId : `#${ prepayment.paymentId }` } - ${ prepayment.offreur }` }<br/></span>
+              <span className="text-grey-500">{(new Date(prepayment.date)).toLocaleDateString()}</span>
+            </span>
+            : ''
+          }
+        />
         <NumberField source="amount" label="Montant" options={{ style: 'currency', currency: 'EUR' }}/>
       </Datagrid>
     </ArrayField>

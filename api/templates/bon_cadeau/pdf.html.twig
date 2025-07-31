@@ -67,7 +67,7 @@
     <div class="overlay">
     <div class="overlay {% if encoded_image is not null %}with-bg{% endif %}">
         <h1>{{ client.name }}</h1>
-        <h2>Bon Cadeau pour un Circuit {{ cadeau.circuit.nom }} {{ cadeau.option is not null ? 'avec ' ~ cadeau.option.nom : '' }}</h2>
+        <h2>Bon Cadeau pour {{ cadeau.quantite is not null ? cadeau.quantite : 'un' }} Circuit {{ cadeau.circuit.nom }} {{ cadeau.options is not null ? 'avec ' ~ cadeau.options.nom : '' }} {{ cadeau.option is not null ? 'avec ' ~ cadeau.option.nom : '' }}</h2>
 
         <p>
             Offert à : <strong>{{ cadeau.beneficiaire }}</strong><br/>

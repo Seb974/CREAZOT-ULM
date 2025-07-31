@@ -64,67 +64,95 @@ class Cadeau
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?string $code = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?string $beneficiaire = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?string $offreur = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?\DateTimeInterface $fin = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?string $paymentId = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?bool $used = null;
 
     #[ORM\ManyToOne]
-    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?Circuit $circuit = null;
 
     #[ORM\ManyToOne]
-    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?Option $option = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?float $cout = null;
 
     /**
      * @var Collection<int, Origine>
      */
     #[ORM\ManyToMany(targetEntity: Origine::class)]
-    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private Collection $origine;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?string $email = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?string $message = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?bool $sendEmail = null;
+
+    #[ORM\OneToMany(mappedBy: 'cadeau', targetEntity: Reservation::class)]
+    private Collection $reservations;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
+    private ?int $quantite = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
+    private ?\DateTimeInterface $date = null;
+
+    #[ORM\ManyToOne]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
+    private ?Combinaison $options = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
+    private ?float $prix = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
+    private ?bool $gift = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
+    private ?string $telephone = null;
 
     public function __construct()
     {
         $this->origine = new ArrayCollection();
+        $this->reservations = new ArrayCollection();
     }
 
     #[Groups(groups: ['Cadeau:write', 'Cadeau:read', 'Reservation:read'])]
@@ -270,6 +298,39 @@ class Cadeau
         return $this;
     }
 
+    public function getReservations(): Collection
+    {
+        return $this->reservations;
+    }
+
+    public function addReservation(Reservation $reservation): static
+    {
+        if ($this->reservations->contains($reservation)) {
+            return $this;
+        }
+
+        $this->reservations[] = $reservation;
+
+        if ($reservation->getCadeau() !== $this) {
+            $reservation->setCadeau($this);
+        }
+        $this->updateUsedStatus();
+
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): static
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            if ($reservation->getCadeau() === $this) {
+                $reservation->setCadeau(null);
+            }
+            $this->updateUsedStatus();
+        }
+
+        return $this;
+    }
+
     public function getEmail(): ?string
     {
         return $this->email;
@@ -302,6 +363,83 @@ class Cadeau
     public function setSendEmail(?bool $sendEmail): static
     {
         $this->sendEmail = $sendEmail;
+
+        return $this;
+    }
+
+    public function getQuantite(): ?int
+    {
+        return $this->quantite;
+    }
+
+    public function setQuantite(?int $quantite): static
+    {
+        $this->quantite = $quantite;
+
+        return $this;
+    }
+
+    public function getDate(): ?\DateTimeInterface
+    {
+        return $this->date;
+    }
+
+    public function setDate(?\DateTimeInterface $date): static
+    {
+        $this->date = $date;
+
+        return $this;
+    }
+
+    private function updateUsedStatus(): void
+    {
+        $this->used = $this->reservations->count() >= $this->quantite;
+    }
+
+    public function getOptions(): ?Combinaison
+    {
+        return $this->options;
+    }
+
+    public function setOptions(?Combinaison $options): static
+    {
+        $this->options = $options;
+
+        return $this;
+    }
+
+    public function getPrix(): ?float
+    {
+        return $this->prix;
+    }
+
+    public function setPrix(?float $prix): static
+    {
+        $this->prix = $prix;
+
+        return $this;
+    }
+
+    public function isGift(): ?bool
+    {
+        return $this->gift;
+    }
+
+    public function setGift(?bool $gift): static
+    {
+        $this->gift = $gift;
+
+        return $this;
+    }
+
+    public function getTelephone(): ?string
+    {
+        return $this->telephone;
+    }
+
+    public function setTelephone(?string $telephone): static
+    {
+        $this->telephone = $telephone;
 
         return $this;
     }

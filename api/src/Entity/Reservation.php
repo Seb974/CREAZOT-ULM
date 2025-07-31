@@ -35,7 +35,8 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
                 'app.filter.reservation.date',
                 'app.filter.reservation.client',
                 'app.filter.reservation.validated',
-                'app.filter.reservation.paid'
+                'app.filter.reservation.paid',
+                'app.filter.reservation.reference'
             ],
         ),
         new Post(
@@ -163,7 +164,8 @@ class Reservation
     #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
     private Collection $origine;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(targetEntity: Cadeau::class, inversedBy: 'reservations')]
+    #[JoinColumn(onDelete: 'SET NULL')] 
     #[Groups(groups: ['Reservation:write', 'Reservation:read'])]
     private ?Cadeau $cadeau = null;
 
@@ -457,7 +459,19 @@ class Reservation
 
     public function setCadeau(?Cadeau $cadeau): static
     {
+        if ($this->cadeau === $cadeau) {
+            return $this;
+        }
+
+        if ($this->cadeau !== null) {
+            $this->cadeau->removeReservation($this);
+        }
+
         $this->cadeau = $cadeau;
+
+        if ($cadeau !== null && !$cadeau->getReservations()->contains($this)) {
+            $cadeau->addReservation($this);
+        }
 
         return $this;
     }

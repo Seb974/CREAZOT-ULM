@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Datagrid,
   List,
   TextInput,
-  TextField,
   BooleanInput,
   CreateButton,
   ExportButton,
@@ -15,8 +14,8 @@ import { Datagrid,
   BooleanField,
   SimpleList,
   Form, 
-  // Button,
-  useListContext
+  useListContext,
+  FunctionField
 } from "react-admin";
 import Button from '@mui/material/Button';
 import DownloadGiftButton from "./DownloadGiftButton";
@@ -24,7 +23,7 @@ import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { useMediaQuery, Theme, Box } from '@mui/material';
-import { isDefined, toLocalDateString } from "../../../app/lib/utils";
+import { isDefined, isDefinedAndNotVoid, toLocalDateString } from "../../../app/lib/utils";
 
 export interface Props {
   data: PagedCollection<Circuit> | null;
@@ -132,10 +131,18 @@ export const CadeauxList: NextPage<Props> = ({ data, hubURL, page }) => {
   const [showMore, setShowMore] = useState(false);
   const [filters, setFilters] = useState(defaultFilters);
 
+  const getDiscountSource = origine => {
+    if (isDefinedAndNotVoid(origine)) {
+      const maxDiscount = origine.reduce((max, current) => max = current.discount > max.discount ? current : max, origine[0]);
+      return maxDiscount.discount > 0 ? `${maxDiscount.discount}% ${maxDiscount.value}` : '';
+    }
+    return '';
+  };
+
   return (
     <List 
       resource="cadeaux" 
-      title="Bons cadeaux"
+      title="Prépaiements"
       actions={<CustomListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>}
       filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>}
       // @ts-ignore
@@ -148,15 +155,28 @@ export const CadeauxList: NextPage<Props> = ({ data, hubURL, page }) => {
             <SimpleList
               primaryText={ record => record.beneficiaire }
               secondaryText={ record => record.code + ' - ' + record.offreur }
-              tertiaryText={ record => record.circuit.code + (isDefined(record.option) ? (' + option') : '') }
+              tertiaryText={ record => (isDefined(record.quantite) ? record.quantite : 1) + " x " + record.circuit.code + (isDefined(record.option) ? (' + option') : '') }
               linkType="show"
             /> 
             : 
             <Datagrid rowClick={ false } sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
-                <TextField source="code" label="N° de bon"/>
-                <TextField source="beneficiaire" label="Bénéficiaire" sortable={ true }/>
-                <TextField source="offreur" label="Personne offrante" sortable={ true }/>
-                <DateField source="fin" label="Date d'expiration" sortable={ true } />
+                <FunctionField
+                  label="Code"
+                  render={({code, fin}) => <><span>{code}</span><br/></> }
+                />
+                <FunctionField
+                  label="Personne(s)"
+                  render={({beneficiaire, offreur}) => <><span>{beneficiaire}</span><br/>{offreur !== beneficiaire ? <span className="text-gray-500 text-xs italic">{ offreur }</span> : <></> }</> }
+                />
+                <FunctionField
+                  label="Circuit"
+                  render={({quantite, circuit, origine}) => <><span>{isDefined(quantite) ? quantite : 1 } x { circuit.code }</span><br/><span className="text-gray-500 text-xs italic">{ getDiscountSource(origine) }</span></> }
+                />
+                 <FunctionField
+                  label="Prix"
+                  render={({prix, cout}) => <><span>{`${(isDefined(prix) ? prix : isDefined(cout) ? cout : 0).toFixed(2)} €`}</span></> }
+                />
+                <DateField source="fin" label="Expiration" sortable={ true } />
                 <BooleanField source="used" label="utilisé" textAlign="center"/>
                 <DownloadGiftButton/>
                 <p className="text-right">

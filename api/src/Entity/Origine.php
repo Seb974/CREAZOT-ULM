@@ -54,24 +54,24 @@ class Origine
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Origine:write', 'Origine:read', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Origine:write', 'Origine:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Origine:write', 'Origine:read', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Origine:write', 'Origine:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?string $name = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Origine:write', 'Origine:read', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Origine:write', 'Origine:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?float $discount = null;
 
-    #[Groups(groups: ['Origine:write', 'Origine:read', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Origine:write', 'Origine:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     public function getLabel(): ?string
     {
         return $this->name;
     }
 
-    #[Groups(groups: ['Origine:write', 'Origine:read', 'Cadeau:read', 'Reservation:read'])]
+    #[Groups(groups: ['Origine:write', 'Origine:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     public function getValue(): ?string
     {
         return $this->name;

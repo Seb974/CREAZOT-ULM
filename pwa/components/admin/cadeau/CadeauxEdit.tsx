@@ -1,79 +1,62 @@
-import { SimpleForm, DateInput, Edit, TextInput, ReferenceInput, ArrayInput, SimpleFormIterator, BooleanInput, useDataProvider } from "react-admin";
-import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
-import { useEffect, useState } from "react";
+import { SimpleForm, DateInput, Edit, TextInput, ReferenceInput, ArrayInput, SimpleFormIterator, BooleanInput, NumberInput  } from "react-admin";
+import { Box } from "@mui/material";
+import { DateExpirationInput } from "./DateExpirationInput";
+import { PersonsInput } from "./PersonsInput";
+import { MessageInput } from "./MessageInput";
+import { PrixInput } from "./PrixInput";
+import { SendEmailInput } from "./SendEmailInput";
+import { isDefinedAndNotVoid } from "../../../app/lib/utils";
 
 export const CadeauxEdit = () => {
 
-  const dataProvider = useDataProvider();
-  const [options, setOptions] = useState([]);
-  const [circuits, setCircuits] = useState([]);
-  const [origines, setOrigines] = useState([]);
-
-  useEffect(() => {
-      getCircuits();
-      getOptions();
-      getOrigines();
-  }, []);
-
-  const getCircuits = () => {
-    dataProvider
-      .getList("circuits", {})
-      .then(({ data }) => setCircuits(data));
+  const transform = (data) => {
+    const formattedData = {
+        ...data,
+        date: new Date(data.date),
+        fin: new Date(data.fin),
+        sendEmail: data.gift && data.sendEmail,
+        offreur: data.gift ? data.offreur : data.beneficiaire,
+        origine: isDefinedAndNotVoid(data.origine) ? data.origine.map(o => o['@id']) : []
+    };
+    console.log(formattedData);
+    return formattedData;
   };
-
-  const getOptions = () => {
-    dataProvider
-      .getList("options", {})
-      .then(({ data }) => setOptions(data));
-  };
-
-  const getOrigines = () => {
-    dataProvider
-        .getList("origines", {})
-        .then(({ data }) => setOrigines(data));
-  };
-
-  const transform = ({circuit, option, origine, ...data}) => {
-    const circuitId = isDefined(circuit) ? (typeof circuit === 'string' ? circuit : circuit['@id']) : null;
-    const optionId = isDefined(option) ? (typeof option === 'string' ? option : option['@id']) : null;
-    const selectedCircuit = isDefined(circuit) && isDefined(circuitId) ? circuits.find(c => c['@id'] === circuitId) : null;
-    const selectedOption = isDefined(option) && isDefined(optionId) ? options.find(c => c['@id'] === optionId) : null;
-    const selectedOrigines = isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === o['@id']))) : [];
-    return {...data,
-        circuit: circuitId,
-        option: optionId,
-        origine: isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : [],
-        cout: getTotalPrice(selectedCircuit, selectedOption, selectedOrigines)
-    }
-  };
-
-  const getTotalPrice = (circuit, option, origines) => {
-    const maxOriginDiscount = isDefinedAndNotVoid(origines) ? getMaxDiscountFromOrigin(origines) : 0;
-    return (isDefined(circuit) && isDefined(circuit.prix) ? circuit.prix : 0) * (1 - (maxOriginDiscount / 100)) + (isDefined(option) && isDefined(option.prix) ? option.prix : 0);
-};
-      
-const getMaxDiscountFromOrigin = origines =>  origines.map(o => o.discount).reduce((max, current) => current > max ? current : max, 0);
 
   return (
-  <Edit redirect="list" transform={transform}>
-     <SimpleForm>
-        <TextInput source="code" label="N° du bon cadeau" disabled/>
-        <TextInput source="beneficiaire" label="Nom du bénéficiaire" />
-        <TextInput source="offreur" label="Nom de la personne offrante" />
-        <TextInput source="email" label="Adresse email de la personne offrante"/>
-        <ReferenceInput reference="circuits" source="circuit.@id" label="Circuit"/>
-        <ReferenceInput reference="options" source="option.@id" label="Option" />
-        <ArrayInput source="origine" label="Origine de l'appel">
-            <SimpleFormIterator inline disableReordering>
-                <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
-            </SimpleFormIterator>
-          </ArrayInput>
-        <TextInput source="paymentId" label="N° du paiement"/>
-        <DateInput source="fin" label="Date d'expiration"/>
-        <TextInput source="message" label="Message" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
-        <BooleanInput source="sendEmail" label="Envoi du bon cadeau par email"/>
-        <BooleanInput source="used" label="Bon déjà utilisé"/>
-      </SimpleForm>
-  </Edit>
+    <Edit redirect="list" transform={transform} title="Modifier le prépaiement">
+      <SimpleForm>
+          <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+            <Box flex={1}>
+                <DateInput source="date" label="Date d'achat"/>
+            </Box>
+            <Box flex={1}>
+              <DateExpirationInput />
+            </Box>
+          </Box>
+          <TextInput source="code" label="N° du bon cadeau" readOnly/>
+          <PersonsInput />
+          <TextInput source="email" label="Adresse email"/>
+          <TextInput source="telephone" label="N° de téléphone"/>
+          <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+              <Box flex={1} display="flex" alignItems="center">
+                <NumberInput source="quantite" label="Quantité" />
+              </Box>
+              <Box flex={2}>
+                <ReferenceInput reference="circuits" source="circuit.@id" label="Circuit"/>
+              </Box>
+          </Box>
+          <ReferenceInput reference="combinaisons" source="options.@id" label="Option" />
+          <ArrayInput source="origine" label="Origine de l'appel">
+              <SimpleFormIterator inline disableReordering>
+                  <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
+              </SimpleFormIterator>
+            </ArrayInput>
+          <TextInput source="paymentId" label="N° du paiement"/>
+          <MessageInput />
+          <PrixInput />
+          <SendEmailInput />
+          <BooleanInput source="used" label="Bon déjà utilisé"/>
+        </SimpleForm>
+    </Edit>
   )
 };

@@ -69,6 +69,10 @@ class PaymentDetail
     #[Groups(groups: ['PaymentDetail:read'])]
     private ?Payment $payment = null;
 
+    #[ORM\ManyToOne]
+    #[Groups(groups: ['PaymentDetail:write', 'Payment:write', 'PaymentDetail:read', 'Payment:read'])]
+    private ?Cadeau $prepayment = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -106,6 +110,18 @@ class PaymentDetail
     public function setPayment(?Payment $payment): static
     {
         $this->payment = $payment;
+
+        return $this;
+    }
+
+    public function getPrepayment(): ?Cadeau
+    {
+        return $this->prepayment;
+    }
+
+    public function setPrepayment(?Cadeau $prepayment): static
+    {
+        $this->prepayment = $prepayment;
 
         return $this;
     }

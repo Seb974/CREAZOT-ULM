@@ -24,6 +24,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import CollectionsIcon from '@mui/icons-material/Collections';
 import FlightLandIcon from '@mui/icons-material/FlightLand';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
+import CreditScoreIcon from '@mui/icons-material/CreditScore';
 
 const CustomMenu = () => {
 
@@ -91,8 +92,8 @@ const CustomMenu = () => {
       { (isDefined(client) && isDefined(client.hasGifts) && client.hasGifts) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
         <Menu.Item
           to="/cadeaux"
-          primaryText="Bons cadeaux"
-          leftIcon={<RedeemIcon />}
+          primaryText="Prépaiements"
+          leftIcon={<CreditScoreIcon />}
         />
       }
       {/* @ts-ignore */}

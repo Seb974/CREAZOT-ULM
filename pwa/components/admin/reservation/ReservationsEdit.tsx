@@ -146,7 +146,7 @@ export const ReservationsEdit = () => {
     <ReferenceInput reference="options" source="option.@id" label="Option" />
   
   const GiftInput = () => !clientWithGifts(client) ? null : 
-    <ReferenceInput reference="cadeaux" source="cadeau.@id" label="Bon cadeau" filter={{ "fin['after']": new Date()  }}/>
+    <ReferenceInput reference="cadeaux" source="cadeau.@id" label="Prépaiement" filter={{ "fin['after']": new Date()  }}/>
   
   const OriginContactInput = () => !clientWithOriginContact(client) ? null : 
     <ArrayInput source="contact" label="Contact initial">

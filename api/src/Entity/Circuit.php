@@ -57,23 +57,23 @@ class Circuit
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'Landing:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'Landing:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'Landing:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'Landing:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 10, nullable: true)]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'Landing:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'Landing:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?string $code = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?float $prix = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Cadeau:read', 'Prestation:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?float $cout = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]

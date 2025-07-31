@@ -11,12 +11,15 @@ import { PlusForm } from "../../../admin/prestation/Form/PlusForm";
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
 import { clientWithGifts, clientWithOptions, clientWithOriginContact, clientWithPartners } from '../../../../app/lib/client';
+import CreditCardOffIcon from '@mui/icons-material/CreditCardOff';
+import CreditScoreIcon from '@mui/icons-material/CreditScore';
+import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 
 export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservations, client }) => {
 
     const isOperating = useRef(false);
     const dataProvider = useDataProvider();
-    const defaultCadeau = {['@id']: 0, name: " "};
+    const defaultCadeau = {['@id']: 0, name: "Aucun"};
     const timeOptions = { hour: "2-digit", minute: "2-digit" };
     const dateOptions = { year: 'numeric', month: 'long', day: 'numeric'};
     const [pilots, setPilots] = useState([]);
@@ -112,7 +115,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
             if (isDefined(consumer)) {
                 dataProvider
                     .getList('cadeaux', {filter: { valid: isDefined(consumer.cadeau) && consumer.cadeau['@id'] !== defaultCadeau['@id'] ? consumer.cadeau : 'null' }})
-                    .then(({ data }) => setValidCadeaux([...data, defaultCadeau]));
+                    .then(({ data }) => setValidCadeaux([defaultCadeau, ...data]));
             }
         } catch (e) {
             console.log(e);
@@ -352,19 +355,26 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                                     { clientWithGifts(client) &&
                                         <div className="mb-2">
                                             <label className="mb-2 block text-sm font-medium text-black dark:text-white">
-                                                Bon cadeau
+                                                Prépaiement
                                             </label>
-                                            <select
-                                                value={ consumer.cadeau['@id'] }
-                                                onChange={ onBonCadeauChange }
-                                                className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-4 py-2 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white h-[41px]`}
-                                            >
-                                                { validCadeaux.map((cadeau, i) => (
-                                                    <option key={ i } value={ cadeau['@id'] } className="text-body dark:text-bodydark">
-                                                        { cadeau.name }
-                                                    </option>
-                                                ))}
-                                            </select>
+                                            <div className="relative z-20 bg-white dark:bg-form-input">
+                                                { consumer.cadeau['@id'] === defaultCadeau['@id'] ? 
+                                                    <CreditCardOffIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/> :
+                                                    <CreditScoreIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/>
+                                                }
+                                                <select
+                                                    value={ consumer.cadeau['@id'] }
+                                                    onChange={ onBonCadeauChange }
+                                                    className={`relative z-20 w-full appearance-none rounded-lg border border-stroke bg-transparent pl-12 pr-4 py-2 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white h-[41px]`}
+                                                >
+                                                    { validCadeaux.map((cadeau, i) => (
+                                                        <option key={ i } value={ cadeau['@id'] } className="text-body dark:text-bodydark">
+                                                            { cadeau.name }
+                                                        </option>
+                                                    ))}
+                                                </select>
+
+                                            </div>
                                         </div>
                                     }
                                     { clientWithOptions(client) && 
@@ -396,29 +406,32 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                                         <label className="mb-2 block text-sm font-medium text-black dark:text-white">
                                             Position
                                         </label>
-                                        <select
-                                            value={ consumer.position }
-                                            onChange={(e) => {
-                                            setConsumer({...consumer, position: e.target.value});
-                                            }}
-                                            className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-4 py-2 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white h-[41px]`}
-                                        >
-                                            <option value="Leader" className="text-body dark:text-bodydark">
-                                                Leader
-                                            </option>
-                                            <option value="2"  className="text-body dark:text-bodydark">
-                                                2
-                                            </option>
-                                            <option value="3" className="text-body dark:text-bodydark">
-                                                3
-                                            </option>
-                                            <option value="4" className="text-body dark:text-bodydark">
-                                                4
-                                            </option>
-                                            <option value="-" className="text-body dark:text-bodydark">
-                                                -
-                                            </option>
-                                        </select>
+                                        <div className="relative z-20 bg-white dark:bg-form-input">
+                                            <MilitaryTechIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/>
+                                            <select
+                                                value={ consumer.position }
+                                                onChange={(e) => {
+                                                setConsumer({...consumer, position: e.target.value});
+                                                }}
+                                                className={`relative z-20 w-full appearance-none rounded-lg border border-stroke bg-transparent pl-12 pr-4 py-2 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white h-[41px]`}
+                                            >
+                                                <option value="Leader" className="text-body dark:text-bodydark">
+                                                    Leader
+                                                </option>
+                                                <option value="2"  className="text-body dark:text-bodydark">
+                                                    2
+                                                </option>
+                                                <option value="3" className="text-body dark:text-bodydark">
+                                                    3
+                                                </option>
+                                                <option value="4" className="text-body dark:text-bodydark">
+                                                    4
+                                                </option>
+                                                <option value="-" className="text-body dark:text-bodydark">
+                                                    -
+                                                </option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             }
