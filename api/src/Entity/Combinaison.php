@@ -74,7 +74,7 @@ class Combinaison
     private ?float $prix = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Combinaison:write', 'Combinaison:read'])]
+    #[Groups(groups: ['Combinaison:write', 'Combinaison:read', 'Cadeau:read'])]
     private ?array $options = null;
 
     #[Groups(groups: ['Combinaison:write', 'Combinaison:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]

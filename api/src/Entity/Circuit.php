@@ -77,7 +77,7 @@ class Circuit
     private ?float $cout = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
-    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?\DateTimeInterface $duree = null;
 
     #[ORM\ManyToOne(targetEntity: Nature::class)]

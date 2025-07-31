@@ -34,6 +34,7 @@ import clientResourceProps from "./client";
 import paymentResourceProps from "./payment";
 import { LandingsList } from "./landing/LandingsList";
 import rappelResourceProps from "./rappel";
+import { ReservationCreate } from "./cadeau/ReservationCreate";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -147,6 +148,7 @@ const AdminWithOIDC = () => {
         <ResourceGuesser name="payments" {...paymentResourceProps}/>
         <CustomRoutes>
           <Route path="/landings" element={<LandingsList />} />
+          <Route path="/convert" element={<ReservationCreate />} />
         </CustomRoutes>
       </AdminAdapter>
   );

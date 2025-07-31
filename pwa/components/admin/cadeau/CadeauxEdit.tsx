@@ -5,9 +5,13 @@ import { PersonsInput } from "./PersonsInput";
 import { MessageInput } from "./MessageInput";
 import { PrixInput } from "./PrixInput";
 import { SendEmailInput } from "./SendEmailInput";
+import { useClient } from '../../admin/ClientProvider';
 import { isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { clientWithPartners } from "../../../app/lib/client";
 
 export const CadeauxEdit = () => {
+
+  const { client } = useClient();
 
   const transform = (data) => {
     const formattedData = {
@@ -21,6 +25,13 @@ export const CadeauxEdit = () => {
     console.log(formattedData);
     return formattedData;
   };
+
+  const PartnersInput = () => !clientWithPartners(client) ? null : 
+      <ArrayInput source="origine" label="Origine de l'appel">
+        <SimpleFormIterator inline disableReordering>
+            <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
+        </SimpleFormIterator>
+      </ArrayInput>
 
   return (
     <Edit redirect="list" transform={transform} title="Modifier le prépaiement">
@@ -46,11 +57,7 @@ export const CadeauxEdit = () => {
               </Box>
           </Box>
           <ReferenceInput reference="combinaisons" source="options.@id" label="Option" />
-          <ArrayInput source="origine" label="Origine de l'appel">
-              <SimpleFormIterator inline disableReordering>
-                  <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
-              </SimpleFormIterator>
-            </ArrayInput>
+          <PartnersInput/>
           <TextInput source="paymentId" label="N° du paiement"/>
           <MessageInput />
           <PrixInput />

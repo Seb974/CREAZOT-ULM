@@ -4,14 +4,17 @@ import { PrixInput } from "./PrixInput";
 import { PersonsInput } from "./PersonsInput";
 import { MessageInput } from "./MessageInput";
 import { SendEmailInput } from "./SendEmailInput";
+import { useClient } from '../../admin/ClientProvider';
 import { DateExpirationInput } from "./DateExpirationInput";
 import { isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { clientWithPartners } from "../../../app/lib/client";
 
 export const CadeauxCreate = () => {
 
   const notify = useNotify();
   const redirect = useRedirect();
   const [create] = useCreate();
+  const { client } = useClient();
 
   const onSubmit = async (data) => {
     try {
@@ -38,6 +41,13 @@ export const CadeauxCreate = () => {
 
   const getUniqueCode = () => Date.now().toString(36).substr(6) + Math.random().toString(36).substr(2);
 
+  const PartnersInput = () => !clientWithPartners(client) ? null : 
+      <ArrayInput source="origine" label="Origine de l'appel">
+        <SimpleFormIterator inline disableReordering>
+            <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
+        </SimpleFormIterator>
+      </ArrayInput>
+
   return (
     <Create redirect="list" title="Créer un prépaiement">
       <SimpleForm onSubmit={ onSubmit }>
@@ -61,11 +71,7 @@ export const CadeauxCreate = () => {
             </Box>
         </Box>
         <ReferenceInput reference="combinaisons" source="options" label="Option" />
-        <ArrayInput source="origine" label="Origine de l'appel">
-            <SimpleFormIterator inline disableReordering>
-                <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
-            </SimpleFormIterator>
-          </ArrayInput>
+        <PartnersInput/>
         <TextInput source="paymentId" label="N° du paiement"/>
         <MessageInput />
         <PrixInput />
