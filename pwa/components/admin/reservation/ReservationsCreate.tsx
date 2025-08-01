@@ -21,7 +21,29 @@ import { generateSafeCode, getRandomColor, isDefined, isDefinedAndNotVoid, isNot
 import { useEffect, useRef, useState } from "react";
 import { status } from "../../../app/lib/reservation";
 import { useClient } from '../../admin/ClientProvider';
-import { clientWithOptions, clientWithOriginContact, clientWithPartners } from "../../../app/lib/client";
+import { clientWithGifts, clientWithOptions, clientWithOriginContact, clientWithPartners } from "../../../app/lib/client";
+import { Link } from 'react-router-dom';
+import { Typography } from '@mui/material';
+import { Box } from "@mui/material";
+import { Toolbar, SaveButton } from 'react-admin';
+import { Button } from '@mui/material';
+import CreditScoreIcon from '@mui/icons-material/CreditScore';
+
+const CustomToolbar = () => {
+  const redirect = useRedirect();
+  const { client } = useClient();
+
+  return (
+    <Toolbar>
+      <SaveButton />
+      { !clientWithGifts(client) ? null : 
+        <Button onClick={() => redirect('/reservations')} sx={{ ml: 'auto'}}>
+          <CreditScoreIcon className="mr-2"/> Convertir un prépaiement
+        </Button>
+      }
+    </Toolbar>
+  );
+};
 
 const QuantiteWatcher = ({ setSelectedQuantite }) => {
   const { control } = useFormContext();
@@ -181,10 +203,20 @@ export const ReservationsCreate = () => {
       </SimpleFormIterator>
     </ArrayInput>
 
+  const ConversionLink = () => !clientWithGifts(client) ? null : 
+    <Box display="flex" gap={2} flexWrap="nowrap" width="100%" sx={{ marginBottom: '1em'}}>
+        <Box flex={1} display="flex" alignItems="right" justifyContent={"end"}>
+          <Link to="/convert" style={{ textDecoration: 'none', textAlign: 'right' }}>
+            <Typography color="primary">Créer à partir d'un prépaiement</Typography>
+          </Link>
+        </Box>
+    </Box>
+
   return (
     // @ts-ignore
     <Create redirect="list" mutationMode="pessimistic">
-      <SimpleForm onSubmit={onSubmit} defaultValues={{ debut }}>
+      <SimpleForm onSubmit={onSubmit} defaultValues={{ debut }} toolbar={<CustomToolbar />}>
+        <ConversionLink />
         <DateTimeInput source="debut" defaultValue={ new Date((new Date()).setHours(7,0,0)) } label="Décollage" validate={required()}/>
         <TextInput source="nom" label="Nom & prénom du passager" validate={required()}/>
         <TextInput source="telephone" label="N° de téléphone" validate={required()}/>

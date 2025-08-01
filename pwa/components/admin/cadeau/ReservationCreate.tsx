@@ -1,11 +1,12 @@
-import { DateTimeInput, ReferenceInput, SimpleForm, Create, required, useDataProvider, useCreate, useUpdate, useRedirect, useNotify, SelectInput, FunctionField } from "react-admin";
-import { useLocation } from 'react-router-dom';
-import { generateSafeCode, getRandomColor, isDefined, isDefinedAndNotVoid, isNotBlank } from "../../../app/lib/utils";
+import { DateTimeInput, ReferenceInput, SimpleForm, Create, required, useDataProvider, useCreate, useUpdate, useRedirect, useNotify, SelectInput } from "react-admin";
+import { useLocation, useParams } from 'react-router-dom';
+import { generateSafeCode, getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { useClient } from '../../admin/ClientProvider';
 import { status } from "../../../app/lib/reservation";
 import { useWatch } from 'react-hook-form';
 import { clientWithOptions, clientWithPartners } from "../../../app/lib/client";
+
 
 const PrepaymentHelperText = ({ prepayments }) => {
     const selectedId = useWatch({ name: 'prepayment' });
@@ -29,20 +30,29 @@ export const ReservationCreate = () => {
   const isOperating = useRef(false);
   const [options, setOptions] = useState([]);
   const [prepayments, setPrepayments] = useState([]);
-
   const searchParams = new URLSearchParams(location.search);
   const debut = searchParams.get('debut');
+  const { id: prepaymentIdFromUrl } = useParams();
+  const [defaultValues, setDefaultValues] = useState({ debut: debut || new Date(), prepayment: '' });
+
+  useEffect(() => getOptions(), []);
 
   useEffect(() => {
-      getPrepayments();
-      getOptions();
-  }, []);
-
-  const getPrepayments = () => {
-    dataProvider
-        .getList("cadeaux", {})
-        .then(({ data }) => setPrepayments(data));
+  const fetchPrepayment = async () => {
+    const { data } = await dataProvider.getList('cadeaux', { pagination: { page: 1, perPage: 100 }, sort: { field: 'id', order: 'ASC' } });
+    if (prepaymentIdFromUrl) {
+      const selected = data.find(p => String(p.originId) === String(prepaymentIdFromUrl));
+      if (selected) {
+        setDefaultValues({
+          debut: debut || new Date(),
+          prepayment: selected['@id'],
+        });
+      }
+    }
   };
+
+  fetchPrepayment();
+}, [prepaymentIdFromUrl])
 
   const getOptions = () => {
     dataProvider
@@ -154,7 +164,8 @@ export const ReservationCreate = () => {
   return (
     // @ts-ignore
     <Create resource="reservations" redirect="list" mutationMode="pessimistic">
-      <SimpleForm onSubmit={onSubmit} defaultValues={{ debut }}>
+      {/* @ts-ignore */}
+      <SimpleForm onSubmit={onSubmit} defaultValues={defaultValues}>
         <DateTimeInput source="debut" defaultValue={ new Date((new Date()).setHours(7,0,0)) } label="Décollage" validate={required()}/>
         <ReferenceInput reference="cadeaux" source="prepayment" label="Prépaiement" filter={{ used: false }}>
           <SelectInput optionText="name" helperText={<PrepaymentHelperText prepayments={ prepayments }/>} label="Prépaiement" validate={required()}/>

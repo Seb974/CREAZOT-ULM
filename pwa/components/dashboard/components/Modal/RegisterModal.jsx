@@ -284,7 +284,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                                         quantite={ consumer.quantite }
                                     />
                                 }
-                            </div>
+                            </div> 
                             }
                             { section === "details" && 
                                 <PlusForm 

@@ -149,6 +149,7 @@ const AdminWithOIDC = () => {
         <CustomRoutes>
           <Route path="/landings" element={<LandingsList />} />
           <Route path="/convert" element={<ReservationCreate />} />
+          <Route path="/convert/:id" element={<ReservationCreate />} />
         </CustomRoutes>
       </AdminAdapter>
   );
