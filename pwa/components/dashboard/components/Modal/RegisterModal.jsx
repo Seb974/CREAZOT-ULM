@@ -8,15 +8,34 @@ import { PlusForm } from "../../../admin/prestation/Form/PlusForm";
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
 import { CombinaisonForm } from '../../../admin/prestation/Form/CombinaisonForm';
-import { clientWithOptions, clientWithOriginContact, clientWithPartners } from '../../../../app/lib/client';
+import { clientWithGifts, clientWithOptions, clientWithOriginContact, clientWithPartners } from '../../../../app/lib/client';
+import NoteAltIcon from '@mui/icons-material/NoteAlt';
+import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
+import CreditScoreIcon from '@mui/icons-material/CreditScore';
+import HourglassTopIcon from '@mui/icons-material/HourglassTop';
+import UpdateIcon from '@mui/icons-material/Update';
+import ClearIcon from '@mui/icons-material/Clear';
+
+const status = [
+    {value:"VALIDATED", label: "Validé"},
+    {value:"WAITING", label: "En attente de confirmation"},
+    {value:"WEATHER_REPORT", label: "Report météo"},
+    {value:"PASSENGER_REPORT", label: "Report client"},
+    {value:"INTERN_REPORT", label: "Report interne"},
+    {value:"WEATHER_CANCEL", label: "Annulation météo"},
+    {value:"PASSENGER_CANCEL", label: "Annulation client"},
+    {value:"INTERN_CANCEL", label: "Annulation interne"}
+  ];
 
 export const RegisterModal = ({ visible, setVisible, slot, reservations, setReservations, client }) => {
 
     const isOperating = useRef(false);
     const dataProvider = useDataProvider();
+    const defaultPrepayment = {['@id']: 0, name: "Aucun"};
     const timeOptions = { hour: "2-digit", minute: "2-digit" };
     const dateOptions = { year: 'numeric', month: 'long', day: 'numeric'};
     const [options, setOptions] = useState([]);
+    const [prepayments, setPrepayments] = useState([]);
     const [selectedCircuit, setSelectedCircuit] = useState("");
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [selectedCombinaison, setSelectedCombinaison] = useState("");
@@ -25,9 +44,14 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     const [previousPaidValue, setPreviousPaidValue] = useState(false);
     const [selectedInitialContact, setSelectedInitialContact] = useState([]);
     const [selectedOriginContact, setSelectedOriginContact] = useState([]);
+    const [creationMode, setCreationMode] = useState('declaration');
+    const [selectedPrepayment, setSelectedPrepayment] = useState(defaultPrepayment);
     const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, paid: false, upsell: false, debut: new Date(slot.start), color: getRandomColor()});
 
-    useEffect(() => getOptions(), []);
+    useEffect(() => {
+        getOptions();
+        getPrepayments();
+    }, []);
     
     useEffect(() => {
         if (visible && !isUpToDate) {
@@ -43,6 +67,12 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
             .getList('options', {})
             .then(({ data }) => setOptions(data))
       };
+
+    const getPrepayments = () => {
+        dataProvider
+            .getList('cadeaux', {filter: { used: false }})
+            .then(({ data }) => setPrepayments([defaultPrepayment, ...data]))
+    };
 
     const onConsumerChange = e => setConsumer({...consumer, [e.target.name]: e.target.value});
 
@@ -76,15 +106,84 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
             reinitializeData();
         } catch (error) {
             console.log(error);
-        } 
-        finally {
+        } finally {
             isOperating.current = false;
         }        
     };
 
+    const onSubmitConversion = async e => {
+        e.preventDefault();
+        if (isOperating.current) return;
+        isOperating.current = true;
+        try {
+            let newReservations = [];
+            const { debut, color, statut } = consumer;
+            const { telephone, email, quantite, beneficiaire, circuit, origine } = selectedPrepayment;
+            const optionsSelected = clientWithOptions(client) ? getOptionsArray(selectedPrepayment.options, quantite ?? 1, options) : [];
+            const data = {
+                    telephone: telephone ?? '',
+                    email: email ?? '',
+                    quantite: quantite ?? 1, 
+                    debut: new Date(debut),
+                    fin: getEndTime(new Date(debut), circuit),
+                    nom: beneficiaire,
+                    color,
+                    paid: true,
+                    upsell: false,
+                    report: false,
+                    contact: [],
+                    remarques: '',
+                    statut,
+                    circuit: circuit['@id'],
+                    cadeau: selectedPrepayment['@id'],
+                    origine: clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : [],
+                    code: generateSafeCode('RESA')
+                };
+            for (let i = 0; i < data.quantite; i++) {
+                const option = clientWithOptions(client) && isDefinedAndNotVoid(optionsSelected) && isDefined(optionsSelected[i]) ? optionsSelected[i]['@id'] : null;
+                const prix = getFinalPrice(circuit, option, origine);
+                const newReservation = await dataProvider.create('reservations', {data: {...data, option, prix }});
+                newReservations = !isDefined(newReservation.data) || (isDefined(newReservation.data.statut) && newReservation.data.statut.includes('CANCEL')) ? 
+                newReservations : [...newReservations, newReservation.data];
+            }
+            const usedPrepayment = getFormattedUsedPrepayment(selectedPrepayment)
+            await dataProvider.update('cadeaux', { id: selectedPrepayment.id, data: usedPrepayment});
+            setReservations([...reservations, ...newReservations]);
+            setPrepayments(prepayments.filter(p => p.id !== usedPrepayment.id));
+            reinitializeData();
+        } catch (error) {
+            console.log(error);
+        } finally {
+            isOperating.current = false;
+        }        
+    };
+
+    const getOptionsArray = (selectedOptions, quantite, bddOptions) => {
+        let options = isDefined(selectedOptions) && isDefinedAndNotVoid(selectedOptions.options) ? selectedOptions.options.map(o => bddOptions.find(option => option['@id'] === o['@id'])) : [];
+        const missingInputs = quantite - options.length;
+        if (missingInputs > 0) {
+        for (let i = 0; i < missingInputs; i++) {
+            options.unshift(null);
+        }
+        }
+        return options;
+    };
+
+    const getFormattedUsedPrepayment = prepayment => {
+        const { circuit, options, option, origine } = prepayment; 
+        return {
+            ...prepayment, 
+            circuit: isDefined(circuit) ? typeof circuit === 'string' ? circuit : circuit['@id'] : null,
+            options: isDefined(options) ? typeof options === 'string' ? options : options['@id'] : null,
+            option: isDefined(option) ? typeof option === 'string' ? option : option['@id'] : null,
+            origine: isDefinedAndNotVoid(origine) ? origine.map(o => typeof o === 'string' ? o : o['@id']) : [], 
+            used: true
+        };
+    };
+
     const getFinalPrice = (selectedCircuit, selectedOption, selectedOriginContact) => {
         const maxOriginDiscount = isDefinedAndNotVoid(selectedOriginContact) ? getMaxDiscountFromOrigin(selectedOriginContact) : 0;
-        return selectedCircuit.prix * (1 - (maxOriginDiscount / 100)) + (isDefined(selectedOption) && isDefined(selectedOption.prix) ? selectedOption.prix : 0);
+        return (isDefined(selectedCircuit) && isDefined(selectedCircuit.prix) ? selectedCircuit.prix : 0) * (1 - (maxOriginDiscount / 100)) + (isDefined(selectedOption) && isDefined(selectedOption.prix) ? selectedOption.prix : 0);
     };
 
     const getMaxDiscountFromOrigin = selectedOriginContact =>  selectedOriginContact.map(o => o.discount).reduce((max, current) => current > max ? current : max, 0);
@@ -109,6 +208,8 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
         setIsUpToDate(false);
         setSelectedInitialContact([]);
         setSelectedOriginContact([]);
+        setCreationMode('declaration');
+        setSelectedPrepayment(defaultPrepayment);
     };
 
     const onBackClick = (e) => {
@@ -126,6 +227,18 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     const onChangeColor = e => {
         e.preventDefault();
         setConsumer({...consumer, color: getRandomColor()});
+    };
+
+    const onPrepaymentChange = e => {
+        const newSelection = prepayments.find(c => c['@id'] === e.target.value);
+        const newPrepayment = isDefined(newSelection) ? newSelection : defaultPrepayment;
+        setSelectedPrepayment(newPrepayment);
+    };
+
+    const switchCreationMode = e => {
+        e.preventDefault();
+        const newValue = creationMode === 'declaration' ? 'conversion' : 'declaration';
+        setCreationMode(newValue)
     };
 
     const getSelectedOptions = (combinaison, quantite) => {
@@ -175,17 +288,25 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                                     </a>
                                 </li>
                                 <li className="me-2">
-                                    <a href="#" id="details" onClick={ onSectionChange }
-                                        className={ section === "details" ? 
-                                          "inline-flex items-center justify-center p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500 group" :
-                                          "inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group"
-                                        }
-                                    >
-                                        <svg className={section === "details" ? "w-4 h-4 me-2 text-blue-600 dark:text-blue-500" : "w-4 h-4 me-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300"} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z"/>
-                                        </svg>Détails
-                                    </a>
-                                </li>
+                                    { creationMode === 'declaration' ? 
+                                        <a href="#" id="details" onClick={ onSectionChange }
+                                            className={ section === "details" ? 
+                                            "inline-flex items-center justify-center p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500 group" :
+                                            "inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group"
+                                            }
+                                        >
+                                            <svg className={section === "details" ? "w-4 h-4 me-2 text-blue-600 dark:text-blue-500" : "w-4 h-4 me-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300"} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z"/>
+                                            </svg>Détails
+                                        </a>
+                                        :
+                                        <a id="details" className="inline-flex p-4 text-gray-400 rounded-t-lg cursor-not-allowed dark:text-gray-500">
+                                            <svg className={section === "details" ? "w-4 h-4 me-2 text-blue-600 dark:text-blue-500" : "w-4 h-4 me-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300"} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z"/>
+                                            </svg>Détails
+                                        </a>
+                                    }
+                                </li>  
                                 <li className="me-2">
                                     <a id="options" className="inline-flex p-4 text-gray-400 rounded-t-lg cursor-not-allowed dark:text-gray-500">
                                         <svg className={section === "options" ? "w-4 h-4 me-2 text-blue-600 dark:text-blue-500" : "w-4 h-4 me-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300"} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
@@ -198,91 +319,175 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                         <form className="space-y-4">
                         { section === "contact" && 
                             <div className="space-y-4" style={{ zIndex: 3000 }}>
-                                <div>
-                                    <label htmlFor="debut" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date et heure de décollage</label>
-                                    <Flatpickr
-                                        name="debut"
-                                        value={ consumer.debut }
-                                        onChange={ onDateChange }
-                                        className="form-control form-control-sm border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                                        options={{
-                                            enableTime: true,
-                                            time_24hr: true,
-                                            dateFormat: "d/m/Y - H:i",
-                                            mode: "single",
-                                            minDate: new Date(consumer.debut) < new Date((new Date).setHours(6, 0, 0)) ? new Date(consumer.debut) : new Date((new Date).setHours(6, 0, 0)),
-                                            minTime:"06:00",
-                                            maxTime:"18:00",
-                                            locale: French,
-                                            static: true
-                                        }}
-                                        style={{ height: "41px" }}
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="nom" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du contact</label>
-                                    <input 
-                                        type="text" 
-                                        name="nom" 
-                                        id="nom"
-                                        value={ consumer.nom }
-                                        onChange={ onConsumerChange }
-                                        className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
-                                        placeholder="Nom"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="telephone" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">N° de téléphone</label>
-                                    <input 
-                                        type="text" 
-                                        name="telephone" 
-                                        id="telephone"
-                                        value={ consumer.telephone }
-                                        onChange={ onConsumerChange }
-                                        className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
-                                        placeholder="N° de téléphone" 
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Adresse email</label>
-                                    <input 
-                                        type="email" 
-                                        name="email" 
-                                        id="email"
-                                        value={ consumer.email }
-                                        onChange={ onConsumerChange }
-                                        className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
-                                        placeholder="Email"
-                                        required
-                                    />
-                                </div>
-                                <div className="mt-6 flex justify-between items-center">
-                                    <div className="relative z-20 bg-white dark:bg-form-input mr-2 w-1/3">
-                                        <label htmlFor="nom" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantité</label>
-                                        <input
-                                            type="number"
-                                            name="quantite"
-                                            min="1"
-                                            placeholder="Quantité"
-                                            className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary h-[41px]"
-                                            value={ consumer.quantite }
-                                            onChange={ onConsumerChange }
-                                        />
+                                { creationMode === 'declaration' ? 
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label htmlFor="debut" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date et heure de décollage</label>
+                                            <Flatpickr
+                                                name="debut"
+                                                value={ consumer.debut }
+                                                onChange={ onDateChange }
+                                                className="form-control form-control-sm border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                options={{
+                                                    enableTime: true,
+                                                    time_24hr: true,
+                                                    dateFormat: "d/m/Y - H:i",
+                                                    mode: "single",
+                                                    minDate: new Date(consumer.debut) < new Date((new Date).setHours(6, 0, 0)) ? new Date(consumer.debut) : new Date((new Date).setHours(6, 0, 0)),
+                                                    minTime:"06:00",
+                                                    maxTime:"18:00",
+                                                    locale: French,
+                                                    static: true
+                                                }}
+                                                style={{ height: "41px" }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="nom" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du contact</label>
+                                            <input 
+                                                type="text" 
+                                                name="nom" 
+                                                id="nom"
+                                                value={ consumer.nom }
+                                                onChange={ onConsumerChange }
+                                                className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
+                                                placeholder="Nom"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="telephone" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">N° de téléphone</label>
+                                            <input 
+                                                type="text" 
+                                                name="telephone" 
+                                                id="telephone"
+                                                value={ consumer.telephone }
+                                                onChange={ onConsumerChange }
+                                                className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
+                                                placeholder="N° de téléphone" 
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Adresse email</label>
+                                            <input 
+                                                type="email" 
+                                                name="email" 
+                                                id="email"
+                                                value={ consumer.email }
+                                                onChange={ onConsumerChange }
+                                                className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
+                                                placeholder="Email"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="mt-6 flex justify-between items-center">
+                                            <div className="relative z-20 bg-white dark:bg-form-input mr-2 w-1/3">
+                                                <label htmlFor="nom" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantité</label>
+                                                <input
+                                                    type="number"
+                                                    name="quantite"
+                                                    min="1"
+                                                    placeholder="Quantité"
+                                                    className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary h-[41px]"
+                                                    value={ consumer.quantite }
+                                                    onChange={ onConsumerChange }
+                                                />
+                                            </div>
+                                            <CircuitForm 
+                                                selectedCircuit={ selectedCircuit } 
+                                                setSelectedCircuit={ setSelectedCircuit }
+                                                getOnlyId={ false }
+                                            /> 
+                                        </div>
+                                        { clientWithOptions(client) && 
+                                            <CombinaisonForm 
+                                                selectedCombinaison={ selectedCombinaison }
+                                                setSelectedCombinaison={ setSelectedCombinaison }
+                                                quantite={ consumer.quantite }
+                                            />
+                                        }
                                     </div>
-                                    <CircuitForm 
-                                        selectedCircuit={ selectedCircuit } 
-                                        setSelectedCircuit={ setSelectedCircuit }
-                                        getOnlyId={ false }
-                                    /> 
-                                </div>
-                                { clientWithOptions(client) && 
-                                    <CombinaisonForm 
-                                        selectedCombinaison={ selectedCombinaison }
-                                        setSelectedCombinaison={ setSelectedCombinaison }
-                                        quantite={ consumer.quantite }
-                                    />
+                                : 
+                                    <div>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label htmlFor="debut" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date et heure de décollage</label>
+                                                <Flatpickr
+                                                    name="debut"
+                                                    value={ consumer.debut }
+                                                    onChange={ onDateChange }
+                                                    className="form-control form-control-sm border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                    options={{
+                                                        enableTime: true,
+                                                        time_24hr: true,
+                                                        dateFormat: "d/m/Y - H:i",
+                                                        mode: "single",
+                                                        minDate: new Date(consumer.debut) < new Date((new Date).setHours(6, 0, 0)) ? new Date(consumer.debut) : new Date((new Date).setHours(6, 0, 0)),
+                                                        minTime:"06:00",
+                                                        maxTime:"18:00",
+                                                        locale: French,
+                                                        static: true
+                                                    }}
+                                                    style={{ height: "41px" }}
+                                                />
+                                            </div>
+                                            <div className="my-2">
+                                                <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                                                    Prépaiement
+                                                </label>
+                                                <div className="relative z-20 bg-white dark:bg-form-input">
+                                                    <CreditScoreIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80 "/>
+                                                    <select
+                                                        value={ selectedPrepayment['@id'] }
+                                                        onChange={ onPrepaymentChange }
+                                                        className={`relative z-20 w-full appearance-none rounded-lg border border-stroke bg-transparent pl-12 pr-4 py-2 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white h-[41px]`}
+                                                    >
+                                                        { prepayments.map((prepayment, i) => (
+                                                            <option key={ i } value={ prepayment['@id'] } className="text-body dark:text-bodydark">
+                                                                { prepayment.name }
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    
+                                                </div>
+                                                <p className="w-full flex justify-end text-xs italic pr-2 pt-1">
+                                                        { selectedPrepayment['@id'] === defaultPrepayment['@id'] ? '' :
+                                                          `${selectedPrepayment.quantite ?? 1} ${ selectedPrepayment.circuit?.nom } ${ isDefined(selectedPrepayment.options) ? ` avec ${ selectedPrepayment.options.nom }` : ''}`
+                                                        }
+                                                    </p>
+                                            </div>
+                                            <div>
+                                                <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                                                Statut
+                                                </label>
+                                                <div className="relative z-20 bg-white dark:bg-form-input">
+                                                    { consumer.statut === "VALIDATED" ? 
+                                                        <DoneIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80 text-green-500"/> :
+                                                        consumer.statut === "WAITING" ?
+                                                        <HourglassTopIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80 text-yellow-400"/> :
+                                                        consumer.statut.includes("REPORT") ?
+                                                        <UpdateIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80 text-blue-500"/> :
+                                                        <ClearIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80 text-red-500"/>
+                                                        }
+                                                    <select
+                                                        value={ consumer.statut }
+                                                        onChange={(e) => setConsumer({...consumer, statut: e.target.value})}
+                                                        className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-12 py-2 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input h-[41px]`}
+                                                    >
+                                                        { status.map(({value, label}, i) => <option key={i} value={ value } className="text-body dark:text-bodydark">{ label }</option> )}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                { clientWithGifts(client) && 
+                                    <div className="flex justify-end">
+                                        <a href="#" onClick={ switchCreationMode } className="text-xs italic text-teal-700">
+                                            { creationMode === 'declaration' ? <><ChangeCircleIcon className="mr-1"/><span>Via un prépaiement</span></> : <><NoteAltIcon className="mr-1"/><span>Saisir manuellement</span></> }
+                                        </a>
+                                    </div>
                                 }
                             </div> 
                             }
@@ -303,7 +508,11 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                                  <button onClick={ onChangeColor } className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center" style={{ height: "44px" }}>
                                     <span className="flex justify-between items-center"><div className="border-solid rounded-lg mr-2" style={{ height: "20px", width: "40px", backgroundColor: consumer.color }}></div>{ "Changer" }</span>
                                 </button>
-                                <button onClick={ onSubmit } className="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                                <button 
+                                    onClick={ creationMode === 'declaration' ? onSubmit : onSubmitConversion }
+                                    className="text-white bg-green-700 hover:bg-green-800 disabled:bg-green-900 focus:ring-4 focus:outline-none cursor-pointer disabled:cursor-default focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                                    disabled={ creationMode !== 'declaration' && selectedPrepayment['@id'] === defaultPrepayment['@id'] }
+                                >
                                     <><DoneIcon className="mr-2"/>{ "Réserver" }</>
                                 </button>
                             </div>
