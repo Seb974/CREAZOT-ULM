@@ -6,7 +6,7 @@ import { MessageInput } from "./MessageInput";
 import { SendEmailInput } from "./SendEmailInput";
 import { useClient } from '../../admin/ClientProvider';
 import { DateExpirationInput } from "./DateExpirationInput";
-import { isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { clientWithPartners } from "../../../app/lib/client";
 
 export const CadeauxCreate = () => {
@@ -26,9 +26,11 @@ export const CadeauxCreate = () => {
             fin: new Date(data.fin),
             sendEmail: data.gift && data.sendEmail,
             offreur: data.gift ? data.offreur : data.beneficiaire,
-            origine: isDefinedAndNotVoid(data.origine) ? data.origine.map(o => o['@id']) : [] 
+            origine: isDefinedAndNotVoid(data.origine) ? data.origine.map(o => o['@id']) : [],
+            circuit: isDefined(data.circuit) ? typeof data.circuit === 'string' ? data.circuit : data.circuit['@id'] : null,
+            options: isDefined(data.options) ? typeof data.options === 'string' ? data.options : data.options['@id'] : null,
+            option: isDefined(data.option) ? typeof data.option === 'string' ? data.option : data.option['@id'] : null,
         };
-        console.log(data);
         create('cadeaux', { data });
         notify('Le bon cadeau a bien été enregistré.', { type: 'info' });
         redirect('list', 'cadeaux');

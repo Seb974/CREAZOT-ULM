@@ -1,12 +1,11 @@
 import { DateTimeInput, ReferenceInput, SimpleForm, Create, required, useDataProvider, useCreate, useUpdate, useRedirect, useNotify, SelectInput } from "react-admin";
-import { useLocation, useParams } from 'react-router-dom';
 import { generateSafeCode, getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { useLocation, useParams } from 'react-router-dom';
 import { useEffect, useRef, useState } from "react";
 import { useClient } from '../../admin/ClientProvider';
 import { status } from "../../../app/lib/reservation";
 import { useWatch } from 'react-hook-form';
 import { clientWithOptions, clientWithPartners } from "../../../app/lib/client";
-
 
 const PrepaymentHelperText = ({ prepayments }) => {
     const selectedId = useWatch({ name: 'prepayment' });
@@ -15,7 +14,7 @@ const PrepaymentHelperText = ({ prepayments }) => {
     if (!data) return null;
     const {quantite, circuit, options } = data;
 
-    return `${quantite ?? 1} ${ circuit.nom } ${ isDefined(options) ? ` avec ${ options.nom }` : ''}`;
+    return `${quantite ?? 1} ${ circuit?.nom } ${ isDefined(options) ? ` avec ${ options.nom }` : ''}`;
 };
 
 export const ReservationCreate = () => {
@@ -40,6 +39,7 @@ export const ReservationCreate = () => {
   useEffect(() => {
   const fetchPrepayment = async () => {
     const { data } = await dataProvider.getList('cadeaux', { pagination: { page: 1, perPage: 100 }, sort: { field: 'id', order: 'ASC' } });
+    setPrepayments(data);
     if (prepaymentIdFromUrl) {
       const selected = data.find(p => String(p.originId) === String(prepaymentIdFromUrl));
       if (selected) {
@@ -50,7 +50,6 @@ export const ReservationCreate = () => {
       }
     }
   };
-
   fetchPrepayment();
 }, [prepaymentIdFromUrl])
 
@@ -164,11 +163,10 @@ export const ReservationCreate = () => {
   return (
     // @ts-ignore
     <Create resource="reservations" redirect="list" mutationMode="pessimistic">
-      {/* @ts-ignore */}
       <SimpleForm onSubmit={onSubmit} defaultValues={defaultValues}>
         <DateTimeInput source="debut" defaultValue={ new Date((new Date()).setHours(7,0,0)) } label="Décollage" validate={required()}/>
         <ReferenceInput reference="cadeaux" source="prepayment" label="Prépaiement" filter={{ used: false }}>
-          <SelectInput optionText="name" helperText={<PrepaymentHelperText prepayments={ prepayments }/>} label="Prépaiement" validate={required()}/>
+          <SelectInput optionText="name" label="Prépaiement" validate={required()} helperText={ <PrepaymentHelperText prepayments={ prepayments }/> }/>
         </ReferenceInput>
         <SelectInput source="statut" choices={ status } defaultValue={ status[0].id } validate={required()}/>
       </SimpleForm>

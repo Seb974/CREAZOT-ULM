@@ -4,6 +4,16 @@ import { useSession } from "next-auth/react";
 import { useState } from 'react';
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
+import { useMediaQuery } from '@mui/material';
+import { isDefined } from '../../../app/lib/utils';
+
+const disabledStyle = {
+  pointerEvents: 'none',
+  color: 'gray',
+  opacity: 0.6,
+  textDecoration: 'none',
+  cursor: 'default'
+};
 
 // Animation de pulsation
 const pulse = keyframes`
@@ -23,6 +33,14 @@ const DownloadGiftButton = () => {
     const record = useRecordContext();
     const session = useSession();
     const [loading, setLoading] = useState(false);
+    // @ts-ignore
+    const isSmall = useMediaQuery(theme => theme.breakpoints.down('sm'));
+
+    const enabledStyle = { 
+        textDecoration: 'none', 
+        pointerEvents: loading ? 'none' : 'auto', 
+        opacity: loading ? 0.6 : 1
+    }
 
     if (!record || !record.id) return null;
 
@@ -50,9 +68,12 @@ const DownloadGiftButton = () => {
         }
     };
 
+    const isDisabled = !isDefined(record) || record.used || (isDefined(record.gift) && !record.gift);
+
     return (
-        <a href="#" onClick={handleDownload} style={{ pointerEvents: loading ? 'none' : 'auto', opacity: loading ? 0.6 : 1 }} title={loading ? "Génération en cours..." : "Télécharger le bon cadeau"}>
-            {loading ? <PulsingIcon /> : <PictureAsPdfIcon />}
+        // @ts-ignore
+        <a href="#" onClick={handleDownload} style={isDisabled ? disabledStyle : enabledStyle } title={loading ? "Génération en cours..." : "Télécharger le bon cadeau"} className="text-red-700">
+            { loading ? <PulsingIcon /> : <PictureAsPdfIcon /> }
         </a>
     );
 };

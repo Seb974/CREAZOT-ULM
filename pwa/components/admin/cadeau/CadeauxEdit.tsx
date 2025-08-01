@@ -6,7 +6,7 @@ import { MessageInput } from "./MessageInput";
 import { PrixInput } from "./PrixInput";
 import { SendEmailInput } from "./SendEmailInput";
 import { useClient } from '../../admin/ClientProvider';
-import { isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { clientWithPartners } from "../../../app/lib/client";
 
 export const CadeauxEdit = () => {
@@ -20,9 +20,12 @@ export const CadeauxEdit = () => {
         fin: new Date(data.fin),
         sendEmail: data.gift && data.sendEmail,
         offreur: data.gift ? data.offreur : data.beneficiaire,
-        origine: isDefinedAndNotVoid(data.origine) ? data.origine.map(o => o['@id']) : []
+        origine: isDefinedAndNotVoid(data.origine) ? data.origine.map(o => o['@id']) : [],
+        circuit: isDefined(data.circuit) ? typeof data.circuit === 'string' ? data.circuit : data.circuit['@id'] : null,
+        options: isDefined(data.options) ? typeof data.options === 'string' ? data.options : data.options['@id'] : null,
+        option: isDefined(data.option) ? typeof data.option === 'string' ? data.option : data.option['@id'] : null,
+
     };
-    console.log(formattedData);
     return formattedData;
   };
 

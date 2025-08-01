@@ -23,6 +23,7 @@ import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { useMediaQuery, Theme, Box } from '@mui/material';
+import { ConversionLink } from './ConversionLink';
 import { isDefined, isDefinedAndNotVoid, toLocalDateString } from "../../../app/lib/utils";
 
 export interface Props {
@@ -154,7 +155,7 @@ export const CadeauxList: NextPage<Props> = ({ data, hubURL, page }) => {
         { isSmall ? 
             <SimpleList
               primaryText={ record => record.beneficiaire }
-              secondaryText={ record => record.code + ' - ' + record.offreur }
+              secondaryText={ record => <><div>{record.code + ' - ' + record.offreur}</div><div className="flex mt-1"><div className="mr-2"><DownloadGiftButton/></div><div className="ml-2"><ConversionLink/></div></div></> }
               tertiaryText={ record => (isDefined(record.quantite) ? record.quantite : 1) + " x " + record.circuit.code + (isDefined(record.option) ? (' + option') : '') }
               linkType="show"
             /> 
@@ -179,6 +180,7 @@ export const CadeauxList: NextPage<Props> = ({ data, hubURL, page }) => {
                 <DateField source="fin" label="Expiration" sortable={ true } />
                 <BooleanField source="used" label="utilisé" textAlign="center"/>
                 <DownloadGiftButton/>
+                <ConversionLink/>
                 <p className="text-right">
                     <ShowButton />
                     <EditButton />
