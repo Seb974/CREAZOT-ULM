@@ -749,7 +749,7 @@ class Client
         return $this;
     }
 
-    public function hasMicrotrakTag(): ?bool
+    public function getHasMicrotrakTag(): ?bool
     {
         return $this->hasMicrotrakTag;
     }
