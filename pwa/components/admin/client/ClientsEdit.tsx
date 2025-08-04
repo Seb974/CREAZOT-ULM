@@ -41,6 +41,7 @@ export const ClientsEdit = () => {
               hasLandingManagement: false,
               hasEmailConfirmation: false,
               hasPaymentManagement: false,
+              hasMicrotrakTag: false,
               airportCodes: record?.airportCodes?.map(code => ({ ...code, meteo: code.meteo ?? false, main: code.main ?? false })) ?? [],
             })}
           >   
@@ -58,7 +59,7 @@ export const ClientsEdit = () => {
                   <TextInput source="phone" label="N° de téléphone"/>
                   <TextInput source="website" label="Site web"/>
                   <TextInput source="url" label="URL"/>
-                  <TextInput source="emailParams" label="Serveur d'email SendGrid"/>
+                  <TextInput source="emailParams" label="Serveur d'email"/>
                   <TextInput source="emailAddressSender" label="Adresse email d'envoi"/>
                   <BooleanInput source="active" label="Utilisateur actif" />    
               </TabbedForm.Tab>
@@ -179,6 +180,11 @@ export const ClientsEdit = () => {
                         </Box>
                         <Box flex={1}>
                             <BooleanInput source="hasPassengerRegistration" label="Enregistrement des passagers" fullWidth/>
+                        </Box>
+                    </Box>
+                    <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                        <Box flex={1}>
+                            <BooleanInput source="hasMicrotrakTag" label="Balise(s) Microtrak" fullWidth/>
                         </Box>
                     </Box>
                   <ThanksOptions/>

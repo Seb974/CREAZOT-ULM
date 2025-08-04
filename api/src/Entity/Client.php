@@ -235,6 +235,10 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?string $url = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasMicrotrakTag = null;
+
     #[Groups(groups: ['Client:read'])]
     public function getEmailParams(): string
     {
@@ -243,7 +247,7 @@ class Client
         }
 
         $hidden = str_repeat('*', 6);
-        return "mailjet+api://{$hidden}:{$hidden}@default";
+        return "transporter+api://{$hidden}:{$hidden}@default";
     }
 
 
@@ -741,6 +745,18 @@ class Client
     public function setUrl(?string $url): static
     {
         $this->url = $url;
+
+        return $this;
+    }
+
+    public function hasMicrotrakTag(): ?bool
+    {
+        return $this->hasMicrotrakTag;
+    }
+
+    public function setHasMicrotrakTag(?bool $hasMicrotrakTag): static
+    {
+        $this->hasMicrotrakTag = $hasMicrotrakTag;
 
         return $this;
     }

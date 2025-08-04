@@ -48,6 +48,7 @@ class CreateClientController extends AbstractController
         $dto->hasLandingManagement = $this->getBool($request, 'hasLandingManagement');
         $dto->hasEmailConfirmation = $this->getBool($request, 'hasEmailConfirmation');
         $dto->hasPaymentManagement = $this->getBool($request, 'hasPaymentManagement');
+        $dto->hasMicrotrakTag = $this->getBool($request, 'hasMicrotrakTag');
 
         // Fichiers
         $dto->logo = $request->files->get('logo');

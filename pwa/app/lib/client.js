@@ -219,6 +219,10 @@ export const clientWithPaymentManagement = client => {
     return isDefined(client) && isDefined(client.hasPaymentManagement) && client.hasPaymentManagement;
 };
 
+export const clientWithMicrotrakTags = client => {
+    return isDefined(client) && isDefined(client.hasMicrotrakTag) && client.hasMicrotrakTag;
+};
+
 export const getDefaultLanding = client => {
     if (isDefined(client) && isDefinedAndNotVoid(client.airportCodes) && clientWithLandingManagement(client)) {
         const mainAirport = client.airportCodes.find(airport => airport.main);

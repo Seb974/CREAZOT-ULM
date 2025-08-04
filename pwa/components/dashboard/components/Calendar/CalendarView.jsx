@@ -183,7 +183,12 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
       return (
         <>
           <b className="text-sm">
-            { isDefined(statut) && statut === "WAITING" &&  <HourglassTopIcon className="text-xs mr-2"/> }{`${ circuit.code }` }{ report && <span className="text-xs italic font-normal">{"  (REPORT)"}</span> }
+            { isDefined(statut) && statut === "WAITING" &&  
+              <span style={{ marginLeft: '-6px' }}>
+                <HourglassTopIcon style={{ width: '0.8rem', height: '0.8rem' }}/>
+              </span>
+            }
+            {`${ circuit.code }`}{ report && <span className="text-xs italic font-normal">{"  (REPORT)"}</span> }
           </b><i className="text-xs">{`${ isDefined(option) ? " + " + option.nom  : "" }` }</i>
           <br/>
           <b className="text-xs">{`${ nom }` }</b> <span className="text-xs"><i>{`${ telephone }` }</i></span>
@@ -212,14 +217,21 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
         </>
       );
     else 
-      return getVerticalName(circuit.code);
+      return getVerticalName(circuit.code, statut);
   };
 
-  const getVerticalName = name => {
+  const getVerticalName = (name, statut) => {
     const arrayName = name.split('');
     return (
-        <span className="text-sm">
-            { arrayName.map((n, i) => <span key={ i }>{ n }<br/></span> )}
+        <span className="text-sm text-left mx-0">
+            { isDefined(statut) && statut === "WAITING" &&  
+              <>
+                <span style={{ marginLeft: '-6px' }}>
+                  <HourglassTopIcon style={{ width: '0.8rem', height: '0.8rem' }}/>
+                </span>
+                <br/>
+              </> }
+            { arrayName.map((n, i) => <span key={ i } className="left-0 mx-[-4px]">{ n }<br/></span> )}
         </span>
     );
   };
@@ -340,21 +352,6 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
           window.scrollTo(0, 0);
         }, 0);
       }
-
-      // if (slotInfo.slots.length === 2) {
-      //   if (!isSmall) {
-      //     setSlot({ start: new Date(slotInfo.start), end: new Date(slotInfo.end)});
-      //     setVisible(true)
-      //   } else {
-      //     setTimeout(() => {
-      //       window.location.hash = `#/reservations/create?debut=${encodeURIComponent(slotInfo.start.toISOString())}`;
-      //       window.scrollTo(0, 0);
-      //     }, 0);
-      //   }
-      // } else {
-      //   setSlot({ start: new Date(slotInfo.start), end: new Date(slotInfo.end)});
-      //   setRappelVisible(true);
-      // }
     }
   }, [isSmall]);
 
