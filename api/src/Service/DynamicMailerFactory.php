@@ -20,9 +20,6 @@ class DynamicMailerFactory
         if (!$dsn)
             throw new \RuntimeException("Le client n’a pas de DSN MailJet configuré.");
 
-        if (!str_starts_with($dsn, 'mailjet'))
-            throw new \InvalidArgumentException("Le DSN du client n'est pas un DSN MailJet valide.");
-
         $transport = Transport::fromDsn($dsn);
         return new Mailer($transport);
     }
