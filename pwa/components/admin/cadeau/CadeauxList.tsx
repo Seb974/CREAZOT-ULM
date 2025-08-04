@@ -154,16 +154,16 @@ export const CadeauxList: NextPage<Props> = ({ data, hubURL, page }) => {
     >
         { isSmall ? 
             <SimpleList
-              primaryText={ record => record.beneficiaire }
-              secondaryText={ record => <><div>{record.code + ' - ' + record.offreur}</div><div className="flex mt-1"><div className="mr-2"><DownloadGiftButton/></div><div className="ml-2"><ConversionLink/></div></div></> }
-              tertiaryText={ record => (isDefined(record.quantite) ? record.quantite : 1) + " x " + record.circuit.code + (isDefined(record.option) ? (' + option') : '') }
+              primaryText={ record => (record?.beneficiaire ?? '') }
+              secondaryText={ record => <><div>{(record?.code ?? '') + ' - ' + (record?.offreur ?? '')}</div><div className="flex mt-1"><div className="mr-2"><DownloadGiftButton/></div><div className="ml-2"><ConversionLink/></div></div></> }
+              tertiaryText={ record => (isDefined(record.quantite) ? record.quantite : 1) + " x " + (record?.circuit?.code ?? '') + (isDefined(record.option) ? (' + option') : '') }
               linkType="show"
             /> 
             : 
             <Datagrid rowClick={ false } sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
                 <FunctionField
                   label="Code"
-                  render={({code, fin}) => <><span>{code}</span><br/></> }
+                  render={({code, fin}) => <><span>{code ?? ''}</span><br/></> }
                 />
                 <FunctionField
                   label="Personne(s)"
@@ -171,7 +171,7 @@ export const CadeauxList: NextPage<Props> = ({ data, hubURL, page }) => {
                 />
                 <FunctionField
                   label="Circuit"
-                  render={({quantite, circuit, origine}) => <><span>{isDefined(quantite) ? quantite : 1 } x { circuit.code }</span><br/><span className="text-gray-500 text-xs italic">{ getDiscountSource(origine) }</span></> }
+                  render={({quantite, circuit, origine}) => <><span>{isDefined(quantite) ? quantite : 1 } x { circuit?.code ?? '' }</span><br/><span className="text-gray-500 text-xs italic">{ getDiscountSource(origine) }</span></> }
                 />
                  <FunctionField
                   label="Prix"
