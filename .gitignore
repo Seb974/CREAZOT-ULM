@@ -9,3 +9,8 @@
 /compoze.(dev).yaml
 /compoze.(prod).yaml
 ###< Compose/Prod Compose with env secret vars ###
+
+/API_ARCHIVES/
+/app/
+/components/
+/types/
