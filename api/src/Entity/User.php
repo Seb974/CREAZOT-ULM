@@ -86,6 +86,9 @@ class User implements UserInterface
     #[ORM\Column]
     public ?string $lastName = null;
 
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
+
     public function getId(): ?Uuid
     {
         return $this->id;
@@ -98,10 +101,18 @@ class User implements UserInterface
     /**
      * @return array<int, string>
      */
-    public function getRoles(): array
+   public function getRoles(): array
     {
-        return ['ROLE_USER'];
+        $roles = $this->roles;
+
+        // garantit qu'un utilisateur a toujours au moins ROLE_USER
+        if (!in_array('ROLE_USER', $roles)) {
+            $roles[] = 'ROLE_USER';
+        }
+
+        return array_unique($roles);
     }
+
 
     public function getUserIdentifier(): string
     {
@@ -129,8 +140,11 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @param array<int, string> $roles
+     */
     public function setRoles(array $roles): self
-    {  
+    {
         $this->roles = $roles;
 
         return $this;
