@@ -159,8 +159,6 @@ const Admin = () => {
 
   const { client } = useClient();
   
-  console.log(client);
-
   return (
   <>
     <Head>
