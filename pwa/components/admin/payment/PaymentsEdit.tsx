@@ -1,11 +1,25 @@
-import { ArrayInput, DateInput, Edit, ReferenceInput, SelectInput, SimpleFormIterator } from "react-admin";
+import { ArrayInput, DateInput, Edit, SelectInput, SimpleFormIterator } from "react-admin";
 import { SimpleForm, TextInput, NumberInput } from "react-admin";
 import { paymentMode } from "../../../app/lib/client";
+import { isDefined } from "../../../app/lib/utils";
 
 export const PaymentsEdit = () => {
 
+   const transform = ({details, ...data}) => {
+    return {
+      ...data,
+      details: details.map((d) => {
+        return {
+        ...d, 
+        prepayment: isDefined(d.prepayment) && isDefined(d.prepayment.code) ? 
+            typeof d.prepayment === 'string' ? d.prepayment : d.prepayment['@id'] :
+            null}
+      })
+    };
+  };
+
   return (
-    <Edit>
+    <Edit transform={transform}>
         <SimpleForm>
           <TextInput source="reference" label="Code du paiement" disabled={ true }/>
           <DateInput source="date" label="Date du paiement" />
