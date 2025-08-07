@@ -11,7 +11,7 @@ import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import { CircularProgress, IconButton, Button, Box } from '@mui/material';
 import { ChevronLeft, ChevronRight, CalendarMonth, ViewWeek, Today } from '@mui/icons-material';
 import { getRandomColor, isDefined, isDefinedAndNotVoid, getDaysArray, groupRappelsByDate, getDefaultDatesFromDate } from "../../../../app/lib/utils";
-import { useSession } from 'next-auth/react';
+import { useSessionContext } from "../../../admin/SessionContextProvider";
 
 const DOW = 1;
 const DragAndDropCalendar = withDragAndDrop(Calendar);
@@ -24,9 +24,9 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
 
   const now = new Date();
   const lastSetDates = useRef(null);
-  const session = useSession();
+  const { session } = useSessionContext();
+  const user = session?.user;
   const dataProvider = useDataProvider();
-  const user = session.data.user;
   const authorizedProfiles = ['pro', 'instructeur'];
   const min = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0);
   const max = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30);
@@ -437,10 +437,9 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
                 className="c-d-sm-down-none"
                 events={ events }
                 eventPropGetter={ eventStyleGetter }
-                views={['week', 'day']}   // 'month',
+                views={['week', 'day']} 
                 culture="fr"
                 view={ view }
-                // defaultDate={ new Date() }
                 date={ dates.start }
                 onNavigate={date => safeSetDates(getDefaultDatesFromDate(date))}
                 localizer={ localizer }

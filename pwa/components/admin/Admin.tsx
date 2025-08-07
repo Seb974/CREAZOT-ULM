@@ -4,7 +4,7 @@ import Head from "next/head";
 import { useRef } from "react";
 import { type DataProvider, defaultTheme, CustomRoutes } from "react-admin";
 import { Route } from 'react-router-dom';
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import SyncLoader from "react-spinners/SyncLoader";
 import { fetchHydra, HydraAdmin, hydraDataProvider, ResourceGuesser } from "@api-platform/admin";
 import { parseHydraDocumentation } from "@api-platform/api-doc-parser";
@@ -35,6 +35,8 @@ import paymentResourceProps from "./payment";
 import { LandingsList } from "./landing/LandingsList";
 import rappelResourceProps from "./rappel";
 import { ReservationCreate } from "./cadeau/ReservationCreate";
+import { useSessionContext, SessionContextProvider } from "../admin/SessionContextProvider";
+import { useClient } from "../admin/ClientProvider";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -98,7 +100,6 @@ const AdminAdapter = ({
       dashboard={ Dashboard }
       darkTheme={ null }
       layout={Layout}
-      // theme={ myTheme }
     >
       {!!children && children}      
     </HydraAdmin>
@@ -106,8 +107,7 @@ const AdminAdapter = ({
 };
 
 const AdminWithOIDC = () => {
-  // Can't use next-auth/middleware because of https://github.com/nextauthjs/next-auth/discussions/7488
-  const { data: session, status } = useSession();
+  const { session, status } = useSessionContext();
 
   if (status === "loading") {
     return <SyncLoader size={8} color="#46B6BF" />;
@@ -155,16 +155,24 @@ const AdminWithOIDC = () => {
   );
 };
 
-const Admin = () => (
+const Admin = () => {
+
+  const { client } = useClient();
+  
+  console.log(client);
+
+  return (
   <>
     <Head>
-      <title>PLANETAIR974 - Administration</title>
-    </Head>
+      <title>{client?.name ?? "Administration"}</title>
+    </Head>  
 
+    <SessionContextProvider>
       {/*@ts-ignore*/}
       <AdminWithOIDC />
+    </SessionContextProvider>
 
   </>
-);
+)};
 
 export default Admin;

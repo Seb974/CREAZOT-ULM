@@ -1,11 +1,11 @@
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { useRecordContext } from 'react-admin';
-import { useSession } from "next-auth/react";
 import { useState } from 'react';
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useMediaQuery } from '@mui/material';
 import { isDefined } from '../../../app/lib/utils';
+import { useSessionContext } from "../../admin/SessionContextProvider";
 
 const disabledStyle = {
   pointerEvents: 'none',
@@ -31,7 +31,7 @@ const PulsingIcon = styled(PictureAsPdfIcon)`
 const DownloadGiftButton = () => {
 
     const record = useRecordContext();
-    const session = useSession();
+    const { session } = useSessionContext();
     const [loading, setLoading] = useState(false);
     // @ts-ignore
     const isSmall = useMediaQuery(theme => theme.breakpoints.down('sm'));
@@ -54,7 +54,7 @@ const DownloadGiftButton = () => {
             const response = await fetch(`/admin/bons-cadeaux/${record.originId}/download`, {
                 method: 'GET',
                 // @ts-ignore
-                headers: new Headers({'Authorization': `Bearer ${session?.data.accessToken}`})
+                headers: new Headers({'Authorization': `Bearer ${session?.data?.accessToken}`})
             })
             const blob = await response.blob();
             const link = document.createElement('a');

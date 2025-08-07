@@ -1,10 +1,10 @@
-import { useSession } from 'next-auth/react';
 import { Show, SimpleShowLayout, TextField, DateField, NumberField, Datagrid, ArrayField, FunctionField, EditButton, TopToolbar } from 'react-admin';
 import { isDefined } from '../../../app/lib/utils';
 import { useClient } from '../ClientProvider';
 import { clientWithOptions } from "../../../app/lib/client";
 import { FC } from 'react';
 import { useRecordContext } from 'react-admin';
+import { useSessionContext } from "../../admin/SessionContextProvider";
 
 const ListActions = () => (
     <TopToolbar>
@@ -38,8 +38,8 @@ const LandingDetails: FC = () => {
 
 export const PrestationShow = () => {
 
-    const session = useSession();
-    const user = session.data.user;
+    const { session } = useSessionContext();
+    const user = session?.user;
     const { client } = useClient();
 
     const getFormattedDuration = ({ aeronef, duree }) => {

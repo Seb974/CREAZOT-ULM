@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Toaster } from "react-hot-toast";
+import { ClientProvider, useClient } from "../../components/admin/ClientProvider";
 
 const Admin = dynamic(() => import("../../components/admin/Admin"), {
   ssr: false,
@@ -10,7 +11,9 @@ const Admin = dynamic(() => import("../../components/admin/Admin"), {
 const AdminPage = () => (
   <>
     <Toaster position="top-right" />
-    <Admin />
+    <ClientProvider>
+      <Admin />
+    </ClientProvider>
     <style jsx global>
       {`
       body {

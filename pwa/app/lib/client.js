@@ -147,7 +147,7 @@ export const uploadImages = async (data, session) => {
               method: 'POST',
               body: formData,
               // @ts-ignore
-              headers: { Authorization: `Bearer ${session.data.accessToken}` },
+              headers: { Authorization: `Bearer ${session?.data?.accessToken}` },
             });
     
             const jsonResponse = await response.json();

@@ -1,16 +1,16 @@
 "use client";
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-
+import { useSessionContext } from "../admin/SessionContextProvider";
 import { NEXT_PUBLIC_OIDC_SERVER_URL } from "../../config/keycloak";
 
 export const Header = () => {
   const pathname = usePathname();
-  const { data: session, status } = useSession();
+    const { session, status } = useSessionContext();
 
   if (pathname === "/" || pathname.match(/^\/admin/) || pathname.match(/^\/thanks/)) return <></>;
 
@@ -33,7 +33,7 @@ export const Header = () => {
               e.preventDefault();
               signOut({
                 // @ts-ignore
-                callbackUrl: `${NEXT_PUBLIC_OIDC_SERVER_URL}/protocol/openid-connect/logout?id_token_hint=${session.idToken}&post_logout_redirect_uri=${window.location.origin}/books`,
+                callbackUrl: `${NEXT_PUBLIC_OIDC_SERVER_URL}/protocol/openid-connect/logout?id_token_hint=${session?.idToken}&post_logout_redirect_uri=${window.location.origin}/books`,
               });
             }}>
               Sign out

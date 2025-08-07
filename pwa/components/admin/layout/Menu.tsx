@@ -7,11 +7,9 @@ import BadgeIcon from '@mui/icons-material/Badge';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import PublicIcon from '@mui/icons-material/Public';
 import BuildIcon from '@mui/icons-material/Build';
-import RedeemIcon from '@mui/icons-material/Redeem';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import CropOriginalIcon from '@mui/icons-material/CropOriginal';
-import { useSession } from "next-auth/react";
 import { useClient } from '../../admin/ClientProvider';
 import { isDefined } from "../../../app/lib/utils";
 import PermPhoneMsgIcon from '@mui/icons-material/PermPhoneMsg';
@@ -25,12 +23,13 @@ import CollectionsIcon from '@mui/icons-material/Collections';
 import FlightLandIcon from '@mui/icons-material/FlightLand';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import CreditScoreIcon from '@mui/icons-material/CreditScore';
+import { useSessionContext } from "../../admin/SessionContextProvider";
 
 const CustomMenu = () => {
 
-  const session = useSession();
-  const user = session.data.user;
-  const { client, loading } = useClient();
+  const { session } = useSessionContext();
+  const user = session?.user;
+  const { client } = useClient();
   const [superAdminOpen, setSuperAdminOpen] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [openSidebar] = useSidebarState();
@@ -131,7 +130,6 @@ const CustomMenu = () => {
       {/* @ts-ignore */}
       { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
         <Menu.Item
-          // to="/users"
           to="/profil_pilotes"
           primaryText="Pilotes"
           leftIcon={<BadgeIcon />}

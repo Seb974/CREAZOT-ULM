@@ -1,16 +1,17 @@
 import React from "react";
 import { useDataProvider } from "react-admin";
 import { isDefined } from "../../../../app/lib/utils";
-import { useSession } from "next-auth/react";
 import { useRedirect } from 'react-admin';
+import { useSessionContext } from "../../../admin/SessionContextProvider";
 
 export const InformationsModal = ({ selectedReservation, setSelectedReservation, reservations, setReservations, setToUpdate, isSmall }) => {
 
-    const session = useSession();
+    const { session } = useSessionContext();
+    const user = session?.user;
+
     const redirect = useRedirect();
     const dataProvider = useDataProvider();
 
-    const user = session.data.user;
     const timeOptions = { hour: "2-digit", minute: "2-digit" };
     const dateOptions = { year: 'numeric', month: 'numeric', day: 'numeric'};
 

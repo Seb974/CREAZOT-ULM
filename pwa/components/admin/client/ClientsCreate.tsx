@@ -5,19 +5,21 @@ import { Box } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { ColorPreview } from './ColorPreview';
 import { ThanksOptions } from './ThanksOptions';
+import { useSessionContext } from "../../admin/SessionContextProvider";
 
 export const ClientsCreate = () => {
 
     const notify = useNotify();
     const redirect = useRedirect();
-    const session = useSession();
+    // const session = useSession();
+    const { session } = useSessionContext();
 
     const onSubmit = async data => {
         const sanitizedData = sanitizeData(data);
         const formData = objectToFormData(sanitizedData);
         try {
             // @ts-ignore
-            const response = await fetch('/clients', { method: 'POST', body: formData, headers: {'Authorization': `Bearer ${session.data.accessToken}`}});
+            const response = await fetch('/clients', { method: 'POST', body: formData, headers: {'Authorization': `Bearer ${session?.data?.accessToken}`}});
         
             if (!response.ok) throw new Error('Erreur lors de l’envoi');
             notify('Le client a bien été enregistré.', { type: 'success' });

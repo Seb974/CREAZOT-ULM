@@ -3,7 +3,6 @@ import { useDataProvider } from "react-admin";
 import Logout from "./Logout";
 import Flight from "./Flight";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
 import { Link } from 'react-router-dom';
 import Reservation from "./Reservation";
 import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
@@ -12,11 +11,12 @@ import GlobalLoader from "../../admin/layout/GlobalLoader";
 import Oidc from "./Oidc";
 import { useEffect, useState } from "react";
 import Payment from "./Payment";
+import { useSessionContext } from "../../admin/SessionContextProvider";
 
 const CustomAppBar = () => {
 
-  const session = useSession();
-  const user = session.data.user;
+  const { session } = useSessionContext();
+  const user = session?.user;
   const dataProvider = useDataProvider();
   const { client, loading } = useClient();
   const authorizedProfiles = ['pro', 'instructeur', 'secretariat'];
@@ -26,7 +26,7 @@ const CustomAppBar = () => {
 
   const baseUrl = client?.url?.replace(/\/+$/, "") ?? "";
   const logoPath = client?.logo?.startsWith("/") ? client.logo : `/${client?.logo ?? "images/logo.png"}`;
-  const logoSrc = `${baseUrl}${logoPath}`;   // ?v=${Date.now()}`;
+  const logoSrc = `${baseUrl}${logoPath}`;
 
   const getLogoUrl = () => {
     const defaultLogo = `${baseUrl}/images/logo.png`;
@@ -63,7 +63,6 @@ const CustomAppBar = () => {
   return loading || profileLoading ? <GlobalLoader/> : 
     isDefined(client) && (
       <AppBar
-        // color={"error"}
         sx={{ backgroundColor: client.color || 'primary' }}
         userMenu={
           <UserMenu>

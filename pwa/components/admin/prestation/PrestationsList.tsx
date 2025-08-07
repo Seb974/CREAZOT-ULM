@@ -23,7 +23,6 @@ import {
 } from "react-admin";
 import Button from '@mui/material/Button';
 import { Fragment } from 'react';
-import { useSession } from "next-auth/react";
 import { isDefined, toLocalDateString } from "../../../app/lib/utils";
 import { useMediaQuery, Theme } from '@mui/material';
 import { useClient } from '../ClientProvider';
@@ -31,6 +30,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { clientWithOptions } from "../../../app/lib/client";
 import { type Prestation } from "../../../types/Prestation";
 import { type PagedCollection } from "../../../types/collection";
+import { useSessionContext } from "../../admin/SessionContextProvider";
 
 export interface Props {
   data: PagedCollection<Prestation> | null;
@@ -258,9 +258,9 @@ const ListContent = ({ isSmall, isAdmin, client }) => {
 
 export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
   const { client } = useClient();
-  const session = useSession();
+  const { session } = useSessionContext();
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
-  const user = session.data?.user;
+  const user = session?.user;
   // @ts-ignore
   const isAdmin = isDefined(session) && isDefined(user) && user?.roles.includes("admin");
   const defaultFilters = {};
@@ -276,7 +276,6 @@ export const PrestationsList: NextPage<Props> = ({ data, hubURL, page }) => {
       filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>}
       // @ts-ignore
       filterValues={filters}
-      // onFilterChange={setFilters}
       filterDefaultValues={defaultFilters}
       disableSyncWithLocation
     >

@@ -27,6 +27,7 @@ import { isDefined, toLocalDateString } from "../../../app/lib/utils";
 import { useMediaQuery, Theme } from '@mui/material';
 import { useClient } from '../../admin/ClientProvider';
 import { clientWithOptions } from "../../../app/lib/client";
+import { useSessionContext } from "../../admin/SessionContextProvider";
 
 export interface Props {
   data: PagedCollection<Vol> | null;
@@ -127,8 +128,10 @@ const CustomFilterButton = ({ showMore, setShowMore, isSmall }) => {
 const CustomBody = (props) => {
 
     const { data, isLoading } = useListContext();
-    const session = useSession();
-    const user = session.data.user;
+    // const session = useSession();
+    const { session } = useSessionContext();
+    // const user = session?.data?.user;
+    const user = session?.user;
     const hasAdminAccess = user => isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin");
   
     if (isLoading || !data) return null;
@@ -166,8 +169,10 @@ const CustomBody = (props) => {
 const CustomDatagrid = () => {
 
     const { client } = useClient();
-    const session = useSession();
-    const user = session.data.user;
+    // const session = useSession();
+    const { session } = useSessionContext();
+    // const user = session?.data?.user;
+    const user = session?.user;
     const hasAdminAccess = user => isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin");
 
     const OptionField = () => {
@@ -204,8 +209,10 @@ const CustomDatagrid = () => {
 
 export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
-  const session = useSession();
-  const user = session.data.user;
+  // const session = useSession();
+  const { session } = useSessionContext();
+  // const user = session?.data?.user;
+  const user = session?.user;
   const options = { year: "numeric", month: "numeric", day: "numeric" };
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
   const defaultFilters = {}; 

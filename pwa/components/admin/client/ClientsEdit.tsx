@@ -5,10 +5,12 @@ import { Box } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { ColorPreview } from './ColorPreview';
 import { ThanksOptions } from './ThanksOptions';
+import { useSessionContext } from "../../admin/SessionContextProvider";
 
 export const ClientsEdit = () => {
 
-  const session = useSession();
+  // const session = useSession();
+  const { session } = useSessionContext();
 
   const transform = async data => {
     const cachedClient = sessionStorage.getItem("client");

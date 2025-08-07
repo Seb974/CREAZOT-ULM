@@ -1,12 +1,12 @@
 import { Layout, type LayoutProps } from "react-admin";
 import AppBar from "./AppBar";
 import Menu from "./Menu";
-import { ClientProvider, useClient } from "../ClientProvider";
+import { useClient } from "../ClientProvider";
 import GlobalLoader from './GlobalLoader';
 
 const DefaultLayout = (props: React.JSX.IntrinsicAttributes & LayoutProps) => {
 
-  const { client, loading, error } = useClient();
+  const { loading } = useClient();
 
   if (loading) return <GlobalLoader />;
 
@@ -32,11 +32,7 @@ const DefaultLayout = (props: React.JSX.IntrinsicAttributes & LayoutProps) => {
 }
 
 const MyLayout = ({ children }) => {
-  return (
-    <ClientProvider>
-      <DefaultLayout>{children}</DefaultLayout>
-    </ClientProvider>
-  );
+  return <DefaultLayout>{children}</DefaultLayout>
 };
 
 export default MyLayout;

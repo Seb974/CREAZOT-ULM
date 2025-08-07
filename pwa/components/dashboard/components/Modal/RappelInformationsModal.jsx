@@ -1,14 +1,15 @@
 import React from "react";
 import { useDataProvider } from "react-admin";
 import { isDefined, formatDate } from "../../../../app/lib/utils";
-import { useSession } from "next-auth/react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import WarningIcon from '@mui/icons-material/Warning';
 import DoneIcon from '@mui/icons-material/Done';
+import { useSessionContext } from "../../../admin/SessionContextProvider";
 
 export const RappelInformationsModal = ({ selectedRappel, setSelectedRappel, rappels, setRappels, events, setEvents }) => {
 
-    const session = useSession();
+    const { session } = useSessionContext();
+    const user = session?.user;
     const dataProvider = useDataProvider();
 
     const disabledStyle = {
@@ -17,7 +18,6 @@ export const RappelInformationsModal = ({ selectedRappel, setSelectedRappel, rap
         'textDecoration': 'none'
     };
 
-    const user = session.data.user;
     const dateOptions = { year: 'numeric', month: 'long', day: 'numeric'};
 
     const onClose = () => setSelectedRappel(null);
