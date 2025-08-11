@@ -1,14 +1,18 @@
 #!/bin/bash
 
-# Variables d'environnement (tu peux les adapter ou les mettre dans un .env)
+# Se placer dans le dossier du script, puis dans le dossier racine du projet
+cd "$(dirname "$0")" || exit 1
+cd ../.. || exit 1
+
+# Variables d'environnement
 PGUSER="${POSTGRES_USER:-app}"
 PGPASSWORD="${POSTGRES_PASSWORD:-!ChangeMe!}"
-PGHOST="localhost"  # Pas utilisé par docker exec, donc peu important ici
-PGPORT=5432         # idem
+PGHOST="localhost"
+PGPORT=5432
 PGDATABASE="${POSTGRES_DB:-app}"
 
-# Répertoire local sur la machine hôte pour stocker les dumps
-LOCAL_DUMP_DIR="../dump"
+# Répertoire local pour stocker les dumps (chemin absolu)
+LOCAL_DUMP_DIR="$(pwd)/dump"
 
 # Crée le dossier si besoin
 mkdir -p "$LOCAL_DUMP_DIR"
@@ -21,8 +25,7 @@ FILENAME="dump_data_$(date +'%Y%m%d_%H%M%S').sql"
 
 echo "Début du dump dans $LOCAL_DUMP_DIR/$FILENAME"
 
-# Exécute pg_dump dans le container 'database' via docker compose exec,
-# et redirige la sortie vers le fichier sur la machine hôte
+# Exécute pg_dump dans le container 'database'
 docker compose exec database pg_dump -U "$PGUSER" -d "$PGDATABASE" --data-only > "$LOCAL_DUMP_DIR/$FILENAME"
 
 # Vérification du succès
@@ -32,4 +35,3 @@ else
   echo "Erreur lors du dump des données."
   exit 1
 fi
-
