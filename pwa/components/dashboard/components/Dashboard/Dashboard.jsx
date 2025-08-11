@@ -91,7 +91,7 @@ const Dashboard = () => {
             <div className={` ${ appli !== "C" ? "visible" : "invisible"} w-full`}>
               { appli !== "C" ? 
                   appli === "W" ?
-                    <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src={`https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=default&zoom=${ client.zoom } &overlay=clouds&product=ecmwf&level=surface&lat=${ client.lat }&lon=${ client.lng }&message=true`}></iframe>
+                    <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} src={`https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=default&zoom=${ client.zoom }&overlay=clouds&product=ecmwf&level=surface&lat=${ client.lat }&lon=${ client.lng }&message=true`}></iframe>
                   : appli === "M" ?
                     <iframe className="w-full h-96 rounded-sm flex justify-center" style={{ border: 'none' }} _ngcontent-serverapp-c135101453="" id="radarIframe" allow="web-share" src={`https://radar.wo-cloud.com/pwa/?zoom=${ client.zoom }&layer=WetterRadar&center=${ client.lat + ',' + client.lng }&tz=Indian/Reunion&tf=HH:mm&windunit=kmh&lang=fr-FR&desktop=true&fadeTop=false`} title="Carte radar météo"></iframe>
                   :

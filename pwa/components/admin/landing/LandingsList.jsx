@@ -273,6 +273,7 @@ export const LandingsList = (props) => {
             {...props}
             key="landings-list"
             resource="prestations"
+            perPage={1000}
             pagination={false}
             title="Attérrissages"
             actions={<CustomListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>}
