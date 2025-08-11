@@ -161,7 +161,7 @@ export const PrestationEdit = () => {
                   // @ts-ignore
                   const { id, ...defaultLand} = defaultLanding;
                   // @ts-ignore
-                  transformedVol.landings = [{...defaultLand, complets: parseInt(defaultLand.complets ?? 1, 10), touches: parseInt(defaultLand.touches ?? 0, 10)}];
+                  transformedVol.landings = [{...defaultLand, complets: parseInt(vol.quantite) * parseInt(defaultLand.complets ?? 1, 10), touches: parseInt(vol.quantite) * parseInt(defaultLand.touches ?? 0, 10)}];
                 }
             }
           } else {

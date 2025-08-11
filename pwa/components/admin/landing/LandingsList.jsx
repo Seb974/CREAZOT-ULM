@@ -280,7 +280,6 @@ export const LandingsList = (props) => {
             filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>}
             filterDefaultValues={defaultFilters}
             filterValues={filters}
-            // onFilterChange={setFilters}
             disableSyncWithLocation
         >
             <LandingsTableWrapper/>

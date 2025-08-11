@@ -62,7 +62,7 @@ export const PrestationForm = () => {
                     } else {
                         const {id, ...defaultLand} = defaultLanding;
                         return isDefined(c.circuit.hadDefaultLanding) && c.circuit.hadDefaultLanding ?
-                            {...formattedVol, landings: [{...defaultLand, complets: parseInt(defaultLand.complets, 10), touches: parseInt(defaultLand.touches, 10)}]}
+                            {...formattedVol, landings: [{...defaultLand, complets: parseInt(c.quantite) * parseInt(defaultLand.complets, 10), touches: parseInt(defaultLand.touches, 10)}]}
                           : {...formattedVol, landings: []}
                     }
                 }
