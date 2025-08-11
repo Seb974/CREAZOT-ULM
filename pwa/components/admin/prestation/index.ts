@@ -10,7 +10,6 @@ const prestationResourceProps = {
   edit: PrestationEdit,
   show: PrestationShow,
   hasShow: true,
-  // recordRepresentation: (record: Prestation) => `${record.title} - ${record.author}`,
 };
 
 export default prestationResourceProps;
