@@ -14,15 +14,19 @@ const ReservationField = ({ choices = [], isLoading = false, setSelection, defau
         return choices.find(choice => choice.id === selectedReservation);
     }, [selectedReservation, choices]);
 
-    useEffect(() => {      
+    useEffect(() => {   
         setSelection(selectedChoice);
-        if (isDefined(selectedChoice) && isDefinedAndNotVoid(selectedChoice.prepayments)) {
-            const details = selectedChoice.prepayments.map(p => ({
-                mode: 'web', 
-                amount: isDefined(p.prix) ? p.prix : isDefined(p.cout) ? p.cout : 0,
-                prepayment: p['@id']
-            }));
-            setValue('details', details);
+        if (isDefined(selectedChoice)) {
+            if (isDefinedAndNotVoid(selectedChoice.prepayments)) {
+                const details = selectedChoice.prepayments.map(p => ({
+                    mode: 'web', 
+                    amount: isDefined(p.prix) ? p.prix : isDefined(p.cout) ? p.cout : 0,
+                    prepayment: p['@id']
+                }));
+                setValue('details', details);
+            } else {
+                setValue('details', [{mode: 'cb', amount: selectedChoice.prix ?? ''}])
+            }
         } else {
             setValue('details', defaultDetails);
         }
