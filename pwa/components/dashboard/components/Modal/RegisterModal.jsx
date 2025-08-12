@@ -141,7 +141,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                 };
             for (let i = 0; i < data.quantite; i++) {
                 const option = clientWithOptions(client) && isDefinedAndNotVoid(optionsSelected) && isDefined(optionsSelected[i]) ? optionsSelected[i]['@id'] : null;
-                const prix = getFinalPrice(circuit, option, origine);
+                const prix = getFinalPrice(circuit, optionsSelected[i], origine);
                 const newReservation = await dataProvider.create('reservations', {data: {...data, option, prix }});
                 newReservations = !isDefined(newReservation.data) || (isDefined(newReservation.data.statut) && newReservation.data.statut.includes('CANCEL')) ? 
                 newReservations : [...newReservations, newReservation.data];
