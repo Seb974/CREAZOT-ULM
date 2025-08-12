@@ -31,7 +31,7 @@ export const ClientProvider = ({ children }) => {
             });
             const data = await res.json();
             setClient(data['hydra:member'][0]);
-            sessionStorage.setItem("client", JSON.stringify(client));
+            sessionStorage.setItem("client", JSON.stringify(data['hydra:member'][0]));
             setLoading(false);
         } catch (e) {
             console.error("Erreur de récupération client", e);
