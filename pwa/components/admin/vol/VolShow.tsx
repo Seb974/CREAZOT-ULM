@@ -55,6 +55,7 @@ export const VolShow = () => {
                     </Datagrid>
                 </ArrayField>
                 <NumberField source="prix" label="C.A." options={{ style: 'currency', currency: 'EUR' }}/>
+                <NumberField source="cout" label="Coût pilote" options={{ style: 'currency', currency: 'EUR' }}/>
             </SimpleShowLayout>
         </Show>
     )

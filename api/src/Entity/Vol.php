@@ -97,27 +97,13 @@ class Vol
     #[Groups(groups: ['Vol:write', 'Prestation:write', 'Prestation:read', 'Vol:read'])]
     private Collection $landings;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Vol:write', 'Prestation:write', 'Vol:read', 'Prestation:read'])]
+    private ?float $cout = null;
+
     public function __construct()
     {
         $this->landings = new ArrayCollection();
-    }
-
-    #[Groups(groups: ['Vol:write', 'Prestation:write', 'Vol:read', 'Prestation:read'])]
-    public function getCout(): float
-    {
-        if ($this->circuit->isPrixFixe())
-            return $this->circuit->getCout() * $this->quantite;
-        else {
-            $aeronef = $this->prestation->getAeronef();
-            if ($aeronef->isDecimal()) {
-                $decimalResult = $this->duree * $this->circuit->getCout() * $this->quantite;
-                return $decimalResult;
-            } else {
-                $duree = floor($this->duree) + ($this->duree - floor($this->duree)) / 60 * 100;
-                $localeResult = $duree * $this->circuit->getCout() * $this->quantite;
-                return $localeResult;
-            }
-        }
     }
 
     public function getId(): ?int
@@ -227,16 +213,32 @@ class Vol
         return $this;
     }
 
-    // public function getLandings()
-    // {
-    //     return $this->landings;
-    // }
+    private function getCalculatedCost(): float
+    {
+        if ($this->circuit->isPrixFixe())
+            return $this->circuit->getCout() * $this->quantite;
+        else {
+            $aeronef = $this->prestation->getAeronef();
+            if ($aeronef->isDecimal()) {
+                $decimalResult = $this->duree * $this->circuit->getCout() * $this->quantite;
+                return $decimalResult;
+            } else {
+                $duree = floor($this->duree) + ($this->duree - floor($this->duree)) / 60 * 100;
+                $localeResult = $duree * $this->circuit->getCout() * $this->quantite;
+                return $localeResult;
+            }
+        }
+    }
 
+    public function getCout(): ?float
+    {
+        return !\is_null($this->cout) ? $this->cout : $this->getCalculatedCost();
+    }
 
-    // public function setLandings($landings)
-    // {
-    //     $this->landings = $landings;
+    public function setCout(?float $cout): static
+    {
+        $this->cout = $cout;
 
-    //     return $this;
-    // }
+        return $this;
+    }
 }
