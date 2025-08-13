@@ -1,5 +1,5 @@
 import { Show, SimpleShowLayout, TextField, DateField, NumberField, FunctionField, Datagrid, ArrayField } from 'react-admin';
-import { TopToolbar, ListButton } from 'react-admin';
+import { TopToolbar, ListButton, EditButton } from 'react-admin';
 import { isDefined } from '../../../app/lib/utils';
 import { useClient } from '../../admin/ClientProvider';
 import { clientWithOptions } from "../../../app/lib/client";
@@ -7,6 +7,7 @@ import { clientWithOptions } from "../../../app/lib/client";
 const CustomShowActions = () => (
     <TopToolbar>
         <ListButton />
+        <EditButton />
     </TopToolbar>
 );
 
