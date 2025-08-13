@@ -12,6 +12,15 @@ import { ListContextProvider } from 'react-admin';
 
 const dateOptions = { year: 'numeric', month: 'numeric', day: 'numeric' };
 
+const addDays = (d, n) => {
+  const c = new Date(d);
+  c.setDate(c.getDate() + n);
+  c.setHours(0, 0, 0, 0);
+  return c;
+};
+
+const formatYMD = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 const CustomFilterBar = ({ showMore, isSmall }) => {
 
     const { filterValues, setFilters } = useListContext();
@@ -248,12 +257,14 @@ const LandingsTable = ({ prestations, isSmall }) => {
 
 export const LandingsList = (props) => {
     const today = new Date();
+    today.setHours(0,0,0,0);
+    const tomorrow = addDays(today, 1);
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const isSmall = useMediaQuery('(max-width:600px)');
 
     const defaultFilters = {
-        "date[after]": firstDayOfMonth.toISOString().split('T')[0],
-        "date[before]": today.toISOString().split('T')[0],
+        "date[after]": formatYMD(firstDayOfMonth),
+        "date[before]": formatYMD(tomorrow),
         aeronef: '',
         airport: ''
     };
