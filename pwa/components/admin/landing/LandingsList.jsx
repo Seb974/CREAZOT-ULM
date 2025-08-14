@@ -7,7 +7,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import Button from '@mui/material/Button';
 import { groupLandingsByDateAirportAndAeronef } from '../../../app/lib/landing';
 import { isDefinedAndNotVoid, toLocalDateString } from '../../../app/lib/utils';
-import { useMediaQuery, Theme, Box } from '@mui/material';
+import { useMediaQuery, Box } from '@mui/material';
 import { ListContextProvider } from 'react-admin';
 
 const dateOptions = { year: 'numeric', month: 'numeric', day: 'numeric' };
@@ -213,7 +213,6 @@ const LandingsTable = ({ prestations, isSmall }) => {
             }}>
                 <span>{`Touchés : ${getTotalTouches(data)}`}</span>
                 <span>{`Complets : ${getTotalComplets(data)}`}</span>
-                {/* <span>{`Touchés : ${getTotalTouches(data)} | Complets : ${getTotalComplets(data)}`}</span> */}
             </div>
         </ListContextProvider>
         : 

@@ -24,7 +24,7 @@ import { useClient } from '../../admin/ClientProvider';
 import { clientWithGifts, clientWithOptions, clientWithOriginContact, clientWithPartners } from "../../../app/lib/client";
 import { Link } from 'react-router-dom';
 import { Typography } from '@mui/material';
-import { Box } from "@mui/material";
+import { Box, useMediaQuery } from "@mui/material";
 import { Toolbar, SaveButton } from 'react-admin';
 import { Button } from '@mui/material';
 import CreditScoreIcon from '@mui/icons-material/CreditScore';
@@ -32,13 +32,14 @@ import CreditScoreIcon from '@mui/icons-material/CreditScore';
 const CustomToolbar = () => {
   const redirect = useRedirect();
   const { client } = useClient();
+  const isSmall = useMediaQuery('(max-width:600px)');
 
   return (
     <Toolbar>
       <SaveButton />
       { !clientWithGifts(client) ? null : 
-        <Button onClick={() => redirect('/reservations')} sx={{ ml: 'auto'}}>
-          <CreditScoreIcon className="mr-2"/> Convertir un prépaiement
+        <Button onClick={() => redirect('/convert')} sx={{ ml: 'auto'}}>
+          { !isSmall ? <CreditScoreIcon className="mr-2"/> : <></> } Convertir un prépaiement
         </Button>
       }
     </Toolbar>
