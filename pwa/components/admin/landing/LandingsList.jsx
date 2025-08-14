@@ -203,6 +203,18 @@ const LandingsTable = ({ prestations, isSmall }) => {
                 tertiaryText={ record => <span style={{ fontSize: 'small' }}>{`${ new Date(record.date).toLocaleDateString("fr-FR", dateOptions) }`}</span>}
                 linkType={false}
             /> 
+            <div style={{
+                padding: '0.5em 1em',
+                background: '#ededed',
+                fontSize: '0.8em',
+                fontWeight: 'bolder',
+                display: 'flex',
+                justifyContent: 'space-between'
+            }}>
+                <span>{`Touchés : ${getTotalTouches(data)}`}</span>
+                <span>{`Complets : ${getTotalComplets(data)}`}</span>
+                {/* <span>{`Touchés : ${getTotalTouches(data)} | Complets : ${getTotalComplets(data)}`}</span> */}
+            </div>
         </ListContextProvider>
         : 
         <TableContainer component={Paper}>

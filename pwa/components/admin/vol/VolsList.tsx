@@ -22,7 +22,6 @@ import { Fragment } from 'react';
 import { type Vol } from "../../../types/Vol";
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { type PagedCollection } from "../../../types/collection";
-import { useSession } from "next-auth/react";
 import { isDefined, toLocalDateString } from "../../../app/lib/utils";
 import { useMediaQuery, Theme } from '@mui/material';
 import { useClient } from '../../admin/ClientProvider';
@@ -128,9 +127,7 @@ const CustomFilterButton = ({ showMore, setShowMore, isSmall }) => {
 const CustomBody = (props) => {
 
     const { data, isLoading } = useListContext();
-    // const session = useSession();
     const { session } = useSessionContext();
-    // const user = session?.data?.user;
     const user = session?.user;
     const hasAdminAccess = user => isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin");
   
@@ -166,12 +163,33 @@ const CustomBody = (props) => {
     );
 };
 
+const MobileFooter = (props) => {
+    const { data, isLoading } = useListContext();
+  
+    if (isLoading || !data) return null;
+  
+    const totalVols = data.reduce((sum, row) => sum + row.quantite, 0);
+    const totalCoutPilote = data.reduce((sum, row) => sum + row.cout, 0);
+
+    return (
+      <div style={{
+          padding: '0.5em 1em',
+          background: '#ededed',
+          fontSize: '0.8em',
+          fontWeight: 'bolder',
+          display: 'flex',
+          justifyContent: 'space-between'
+      }}>
+          <span>{`${ totalVols.toFixed(0) } vols`}</span>
+          <span>{`Pilote : ${ totalCoutPilote.toFixed(2) } €`}</span>
+      </div>
+    );
+};
+
 const CustomDatagrid = () => {
 
     const { client } = useClient();
-    // const session = useSession();
     const { session } = useSessionContext();
-    // const user = session?.data?.user;
     const user = session?.user;
     const hasAdminAccess = user => isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin");
 
@@ -209,9 +227,7 @@ const CustomDatagrid = () => {
 
 export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
-  // const session = useSession();
   const { session } = useSessionContext();
-  // const user = session?.data?.user;
   const user = session?.user;
   const options = { year: "numeric", month: "numeric", day: "numeric" };
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
@@ -233,13 +249,16 @@ export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
       disableSyncWithLocation
     > 
         { isSmall ? 
+          <>
             <SimpleList
               primaryText={ record => record.prestation.aeronefImmatriculation + ' | ' +  (isDefined(record.prestation) && isDefined(record.prestation.pilotName) && record.prestation.pilotName !== '' ? record.prestation.pilotName : '') }
               // @ts-ignore
               secondaryText={ record => `${ (new Date(record.prestation.date)).toLocaleDateString("fr-FR", options) } `}
               tertiaryText={ record => record.quantite + ' x ' + record.circuit.code }
               linkType="show"
-            /> 
+            />
+            <MobileFooter/>
+          </>
             : 
             <CustomDatagrid />
         }

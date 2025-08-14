@@ -192,6 +192,33 @@ const CustomBody = ({ isAdmin, ...props }) => {
   );
 };
 
+const MobileFooter = (props) => {
+    const { data, isLoading } = useListContext();
+  
+    if (isLoading || !data) return null;
+  
+    const totalDuration = React.useMemo(() => {
+        return data.reduce((sum, record) => {
+          const duree = parseFloat(record.duree) || 0;
+          return sum + duree;
+        }, 0);
+    }, [data]);
+
+    return (
+      <div style={{
+          padding: '0.5em 1em',
+          background: '#ededed',
+          fontSize: '0.9em',
+          fontWeight: 'bolder',
+          display: 'flex',
+          justifyContent: 'space-between'
+      }}>
+          <span>{`Total`}</span>
+          <span>{`${ formatHeure(totalDuration) }`}</span>
+      </div>
+    );
+};
+
 const CustomDatagrid = ({isAdmin, client}) => {
 
   return (  
@@ -240,18 +267,21 @@ const CustomDatagrid = ({isAdmin, client}) => {
 const ListContent = ({ isSmall, isAdmin, client }) => {
 
   return isSmall ?
-      <SimpleList
-        primaryText={
-          record => <>
-            {record?.aeronefImmatriculation + ' | ' + (isDefined(record?.pilotName) && record?.pilotName !== '' ? record?.pilotName : '')}
-            {isDefined(record?.encadrantName) && record?.encadrantName !== '' ? <span className="text-gray-500 italic text-sm"> - {record?.encadrantName}</span> : ''}
-          </>
-        }
-        // @ts-ignore
-        secondaryText={record => `${(new Date(record?.date)).toLocaleDateString("fr-FR", { year: "numeric", month: "numeric", day: "numeric" })}`}
-        tertiaryText={record => getFormattedDuration(record)}
-        linkType="show"
-      />
+      <>
+        <SimpleList
+          primaryText={
+            record => <>
+              {record?.aeronefImmatriculation + ' | ' + (isDefined(record?.pilotName) && record?.pilotName !== '' ? record?.pilotName : '')}
+              {isDefined(record?.encadrantName) && record?.encadrantName !== '' ? <span className="text-gray-500 italic text-sm"> - {record?.encadrantName}</span> : ''}
+            </>
+          }
+          // @ts-ignore
+          secondaryText={record => `${(new Date(record?.date)).toLocaleDateString("fr-FR", { year: "numeric", month: "numeric", day: "numeric" })}`}
+          tertiaryText={record => getFormattedDuration(record)}
+          linkType="show"
+        />
+        <MobileFooter/>
+      </>
     :
     <CustomDatagrid isAdmin={isAdmin} client={client}/>;
 };

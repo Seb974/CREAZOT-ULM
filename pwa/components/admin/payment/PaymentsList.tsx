@@ -197,6 +197,34 @@ const CustomBody = (props) => {
     );
 };
 
+const MobileFooter = (props) => {
+    const { data, isLoading, filterValues } = useListContext();
+    if (isLoading || !data) return null;
+
+    const filteredData = isLoading || !data ? [] :
+      data.map(payment => {
+          const modeFilter = filterValues['details.mode']?.toLowerCase();
+          const newDetails = modeFilter ? payment.details.filter(detail => detail.mode ? matchesStartOfWord(detail.mode, modeFilter) : false): payment.details;
+          return { ...payment, details: newDetails };
+      }).filter(payment => payment.details.length > 0);
+
+    const total = filteredData.reduce((sum, row) => sum + row.details.reduce((s, c) => s+= c.amount, 0), 0);
+
+    return (
+      <div style={{
+          padding: '0.5em 1em',
+          background: '#ededed',
+          fontSize: '0.9em',
+          fontWeight: 'bolder',
+          display: 'flex',
+          justifyContent: 'space-between'
+      }}>
+          <span>{`Total`}</span>
+          <span>{`${ total.toFixed(2) } €`}</span>
+      </div>
+    );
+}
+
 const CustomDatagrid = () => {
 
   return (
@@ -244,13 +272,16 @@ export const PaymentsList: NextPage<Props> = ({ data, hubURL, page }) => {
       disableSyncWithLocation
     >
         { isSmall ? 
+          <>
             <SimpleList
               primaryText={({ name, label }) =>  isNotBlank(name) ? name : (isNotBlank(label) ? label : '')}
               // @ts-ignore
               secondaryText={({ details, date }) => <div>{ getModeList(details) }<br/>{ `${ (new Date(date)).toLocaleDateString("fr-FR", options) } ` }</div>}
               tertiaryText={({ details }) => (details.reduce((sum, current) => sum += current.amount, 0)).toFixed(2) + "€" }
               linkType="show"
-            /> 
+            />
+            <MobileFooter/>
+          </>
             : <CustomDatagrid />
         }
     </List>
