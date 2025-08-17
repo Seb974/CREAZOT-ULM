@@ -21,12 +21,9 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 
 #[ORM\Entity(repositoryClass: ProfilPiloteRepository::class)]
 #[ApiResource(
-    uriTemplate: '/profil_pilotes{._format}',
     operations: [
         new GetCollection(
-            itemUriTemplate: '/profil_pilotes{._format}',
             paginationClientItemsPerPage: true,
-            security: 'is_granted("OIDC_USER")',
             filters: [
                 'app.filter.profile.pilote',
                 'app.filter.profile.email',
@@ -35,22 +32,10 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
                 'app.filter.profile.instructeur',
             ],
         ),
-        new Post(
-            itemUriTemplate: '/profil_pilotes/{id}{._format}',
-            security: 'is_granted("OIDC_ADMIN")'
-        ),
-        new Get(
-            uriTemplate: '/profil_pilotes/{id}{._format}',
-            security: 'is_granted("OIDC_ADMIN") or object.pilote == user'
-        ),
-        new Put(
-            uriTemplate: '/profil_pilotes/{id}{._format}',
-            security: 'is_granted("OIDC_ADMIN")'
-        ),
-        new Delete(
-            uriTemplate: '/profil_pilotes/{id}{._format}',
-            security: 'is_granted("OIDC_ADMIN")'
-        ),
+        new Post(),
+        new Get(),
+        new Put(),
+        new Delete(),
     ],
     normalizationContext: [
         AbstractNormalizer::GROUPS => ['Profil_pilote:read'],
@@ -61,6 +46,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     ],
     collectDenormalizationErrors: true,
     paginationEnabled: false,
+    security: 'is_granted("OIDC_USER")',
     mercure: true,
 )]
 class ProfilPilote

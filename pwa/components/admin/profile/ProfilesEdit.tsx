@@ -4,7 +4,7 @@ export const ProfilesEdit = () => {
 
   const transform = data => {
     data['pilote'] = data['pilote']['@id'];
-    data['qualifications'] = data['qualifications'].map(qualification => qualification['@id'])
+    data['qualifications'] = data['qualifications'].map(qualification => qualification['@id']);
     return data;
   };
 
