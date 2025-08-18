@@ -142,7 +142,7 @@ const CustomBody = (props) => {
         <DatagridBody {...props} />
         <TableFooter>
           <TableRow sx={{ backgroundColor: '#ededed', fontStyle: 'italic', fontWeight: 'bold', color: '#555'  }}>
-              <TableCell colSpan={4} sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
+              <TableCell colSpan={hasAdminAccess(user) ? 4 : 3} sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
                 Totaux
               </TableCell>
               <TableCell style={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'right' }}>
@@ -192,6 +192,8 @@ const CustomDatagrid = () => {
     const { session } = useSessionContext();
     const user = session?.user;
     const hasAdminAccess = user => isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin");
+    // @ts-ignore
+    const isAdmin = isDefined(session) && isDefined(user) && user?.roles.includes("admin");
 
     const OptionField = () => {
       return !clientWithOptions(client) ? null :
@@ -199,7 +201,7 @@ const CustomDatagrid = () => {
     };
 
     return (
-      <Datagrid body={<CustomBody />} sx={{'& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
+      <Datagrid body={<CustomBody/>} bulkActionButtons={ isAdmin } sx={{'& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
             <DateField source="prestation.date" label="Date" sortable={ true }/>
             <TextField source="prestation.aeronef.immatriculation" label="Aéronef" sortable={ true }/>
             <FunctionField
@@ -260,7 +262,7 @@ export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
             <MobileFooter/>
           </>
             : 
-            <CustomDatagrid />
+            <CustomDatagrid/>
         }
     </List>
   );

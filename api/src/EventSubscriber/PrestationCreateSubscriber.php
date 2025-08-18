@@ -7,6 +7,7 @@ use App\Entity\Aeronef;
 use App\Entity\Prestation;
 use App\Repository\AeronefRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
@@ -19,48 +20,77 @@ use App\Service\ClientGetter;
 use Symfony\Component\Mailer\Mailer;
 use App\Entity\Client;
 use App\Entity\Vol;
+use App\Entity\User;
 
 final class PrestationCreateSubscriber implements EventSubscriberInterface
 {
     private DynamicMailerFactory $dynamicMailerFactory;
     private ClientGetter $clientGetter;
+    private Security $security;
 
-    public function __construct(DynamicMailerFactory $dynamicMailerFactory, ClientGetter $clientGetter)
+    public function __construct(DynamicMailerFactory $dynamicMailerFactory, ClientGetter $clientGetter, Security $security)
     {
         $this->dynamicMailerFactory = $dynamicMailerFactory;
         $this->clientGetter = $clientGetter;
+        $this->security = $security;
     }
 
     public static function getSubscribedEvents()
     {
         return [
-            KernelEvents::VIEW => ['updateHorametre', EventPriorities::PRE_WRITE],
+            KernelEvents::VIEW => ['updateData', EventPriorities::PRE_WRITE],
         ];
     }
 
-    public function updateHorametre(ViewEvent $event): void
+    public function updateData(ViewEvent $event): void
     {   
         $prestation = $event->getControllerResult();
         $method = $event->getRequest()->getMethod(); 
 
-        if (!$prestation instanceof Prestation || Request::METHOD_POST !== $method) 
+        if (!$prestation instanceof Prestation || !in_array($method, [Request::METHOD_POST, Request::METHOD_PUT, Request::METHOD_PATCH])) 
             return;
+
+        $user = $this->security->getUser();
+        $this->setEditionMetas($prestation, $user, $method);
         
-        $aeronef = $prestation->getAeronef();
-        $aeronef->setHorametre($prestation->getHorametreFin());
+        if (Request::METHOD_POST === $method) {
+            $aeronef = $prestation->getAeronef();
+            $aeronef->setHorametre($prestation->getHorametreFin());
+    
+            if ( \is_null($aeronef->getSeuilAlerte()) )
+                $aeronef->setSeuilAlerte(10);
+    
+            $this->setFlightsCost($prestation, $aeronef);
+            $this->checkDeadlines($aeronef);
+        }
+    }
 
-        if ( \is_null($aeronef->getSeuilAlerte()) )
-            $aeronef->setSeuilAlerte(10);
+    private function setEditionMetas(Prestation $prestation, ?User $user, string $method): void
+    {
+        if ($method === Request::METHOD_POST) {
+            $prestation->setCreatedAt(new \DateTimeImmutable());
+            $prestation->setCreatedBy($user);
+        } else {
+            $prestation->setUpdatedAt(new \DateTimeImmutable());
+            $prestation->setUpdatedBy($user);
+        }
 
-        $this->setFlightsCost($prestation, $aeronef);
-        $this->chekDeadlines($aeronef);
+        foreach ($prestation->getVols() as $vol) {
+            if ($method === Request::METHOD_POST) {
+                $vol->setCreatedAt(new \DateTimeImmutable());
+                $vol->setCreatedBy($user);
+            } else {
+                $vol->setUpdatedAt(new \DateTimeImmutable());
+                $vol->setUpdatedBy($user);
+            }
+        }
     }
 
     private function setFlightsCost(Prestation $prestation, Aeronef $aeronef): void
     {
         foreach ($prestation->getVols() as $vol) {
-            $dafaultCost = $this->calculateFlightCost($prestation, $aeronef, $vol);
-            $vol->setCout($dafaultCost);
+            $defaultCost = $this->calculateFlightCost($prestation, $aeronef, $vol);
+            $vol->setCout($defaultCost);
         }
     }
 
@@ -81,7 +111,7 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
         }
     }
 
-    private function chekDeadlines(Aeronef $aeronef): void
+    private function checkDeadlines(Aeronef $aeronef): void
     {
         $client = $this->clientGetter->get();
         if (!$client->getEmailServer() || !$client->getEmailAddressSender()) 
@@ -121,7 +151,10 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
                     ]);
     
                 $mailer->send($message);
-                $aeronef->setAlerteEnvoyee(true);
+                if ($type === 'ENTRETIEN')
+                    $aeronef->setAlerteEnvoyee(true);
+                else
+                    $aeronef->setAlerteMoteurEnvoyee(true);
             } catch (\Throwable $e) {
                 return;
             }
@@ -144,13 +177,17 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
         $remainingDecimalTime = $decimal - $decimalHorametre;
         $intRemainingTime = abs($remainingDecimalTime);
         $restRemainingTime = abs($remainingDecimalTime) - $intRemainingTime;
-        $formattedRest = round($restRemainingTime * 60, 0) < 10 ? "0" . round($restRemainingTime * 60, 0) : round($restRemainingTime * 60, 0);
+        $minutes = round($restRemainingTime * 60);
+        $formattedRest = str_pad($minutes, 2, '0', STR_PAD_LEFT);
  
         return $intRemainingTime . "h" . $formattedRest;
     }
 
     private function getDecimalTimeFromLocale(float $duration) : float
     {
-        return floor($duration) + round(($duration - floor($duration)) / 60, 0) * 100;
+        $hours = floor($duration);
+        $minutes = ($duration - $hours) * 100;
+        $decimal = $hours + ($minutes / 60);
+        return round($decimal, 2);
     }
 }

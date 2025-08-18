@@ -174,10 +174,10 @@ const CustomBody = ({ isAdmin, ...props }) => {
 
   return (
     <Fragment>
-      <DatagridBody {...props} />
+      <DatagridBody {...props}/>
       <TableFooter>
         <TableRow sx={{ backgroundColor: '#ededed', fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
-          <TableCell colSpan={6} sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
+          <TableCell colSpan={isAdmin ? 6 : 5} sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
             Total
           </TableCell>
           <TableCell sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'right' }}>
@@ -222,7 +222,7 @@ const MobileFooter = (props) => {
 const CustomDatagrid = ({isAdmin, client}) => {
 
   return (  
-    <Datagrid body={(props) => <CustomBody {...props} isAdmin={isAdmin}/>} expand={<VolsExpansion client={client}/>} sx={{ '& .RaDatagrid-expandedPanel': { backgroundColor: '#ededed' }, '& .RaDatagrid-tbody': { backgroundColor: '#FFFFFF' }, '& .RaDatagrid-headerCell': { backgroundColor: '#ededed' } }}>
+    <Datagrid body={(props) => <CustomBody {...props} isAdmin={isAdmin}/>} bulkActionButtons={ isAdmin } expand={<VolsExpansion client={client}/>} sx={{ '& .RaDatagrid-expandedPanel': { backgroundColor: '#ededed' }, '& .RaDatagrid-tbody': { backgroundColor: '#FFFFFF' }, '& .RaDatagrid-headerCell': { backgroundColor: '#ededed' } }}>
       <DateField source="date" sortable={true} />
       <TextField source="aeronef.immatriculation" label="Aéronef" sortable={true} />
       <FunctionField

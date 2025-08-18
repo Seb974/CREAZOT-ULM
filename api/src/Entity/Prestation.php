@@ -120,6 +120,22 @@ class Prestation
     #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read', 'Landing:read'])]
     private ?User $encadrant = null;
 
+    #[ORM\ManyToOne]
+    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read'])]
+    private ?User $createdBy = null;
+
+    #[ORM\ManyToOne]
+    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read'])]
+    private ?User $updatedBy = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read'])]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read'])]
+    private ?\DateTimeImmutable $updatedAt = null;
+
     public function __construct()
     {
         $this->vols = new ArrayCollection();
@@ -282,6 +298,54 @@ class Prestation
     public function setEncadrant(?User $encadrant): static
     {
         $this->encadrant = $encadrant;
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $createdBy): static
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getUpdatedBy(): ?User
+    {
+        return $this->updatedBy;
+    }
+
+    public function setUpdatedBy(?User $updatedBy): static
+    {
+        $this->updatedBy = $updatedBy;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }

@@ -30,12 +30,13 @@ export const PassagersList: NextPage<Props> = ({ data, hubURL, page }) => {
   const user = session?.user;
   const options = { year: "numeric", month: "numeric", day: "numeric" };
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
+  const isAdmin = isDefined(session) && isDefined(user) && user?.roles.includes("admin");
 
   const ListActions = () => (
     <TopToolbar>
         <CreateButton/>
         {/* @ts-ignore */}
-        {isDefined(session) && isDefined(user) && user.roles.find(r => r === "admin") && <ExportButton/>}
+        {isAdmin && <ExportButton/>}
     </TopToolbar>
   );
 
@@ -49,7 +50,7 @@ export const PassagersList: NextPage<Props> = ({ data, hubURL, page }) => {
               linkType="show"
             /> 
             : 
-            <Datagrid sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
+            <Datagrid bulkActionButtons={ isAdmin } sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
                 <DateField source="date" label="Date" sortable={ true } />
                 <TextField source="nom" label="Nom" sortable={ true }/>
                 <TextField source="prenom" label="Prénom" sortable={ true }/>

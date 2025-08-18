@@ -127,6 +127,22 @@ export const PrestationShow = () => {
                 </ArrayField>
                 <TextField source="remarques" label="Remarques"/>
                 <NumberField source="turnover" label="C.A." options={{ style: 'currency', currency: 'EUR' }}/>
+                <DateField source="createdAt" label="Créé le" showTime/>
+                <FunctionField
+                    label="Créé par"
+                    source="createdBy.firstName"
+                    render={(record) => isDefined(record.createdBy) && isDefined(record.createdBy.firstName) ?
+                        record.createdBy.firstName.charAt(0).toUpperCase() + record.createdBy.firstName.slice(1) : ''
+                    }
+                />
+                <DateField source="updatedAt" label="Modifié le" showTime/>
+                <FunctionField
+                    label="Modifié par"
+                    source="updatedBy.firstName"
+                    render={(record) => isDefined(record.updatedBy) && isDefined(record.updatedBy.firstName) ?
+                        record.updatedBy.firstName.charAt(0).toUpperCase() + record.updatedBy.firstName.slice(1) : ''
+                    }
+                />
             </SimpleShowLayout>
         </Show>
     );

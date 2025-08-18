@@ -136,7 +136,7 @@ export const PrestationEdit = () => {
             });
     };
 
-    const transform = ({date, aeronef, pilote, encadrant, vols, ...data}) => {
+    const transform = ({date, aeronef, pilote, encadrant, vols, createdBy, updatedBy, ...data}) => {
         const transformedVols = [];
         let landingAssigned = false;
 
@@ -145,6 +145,8 @@ export const PrestationEdit = () => {
             ...vol,
             circuit: getFormattedValueForBackEnd(vol.circuit),
             option: getFormattedValueForBackEnd(vol.option, clientWithOptions(client)),
+            createdBy: getFormattedValueForBackEnd(vol.createdBy),
+            updatedBy: getFormattedValueForBackEnd(vol.updatedBy),
           };
       
           if (clientWithLandingManagement(client)) {
@@ -178,9 +180,10 @@ export const PrestationEdit = () => {
             pilote: getFormattedValueForBackEnd(pilote),
             encadrant: getFormattedValueForBackEnd(encadrant),
             aeronef: getFormattedValueForBackEnd(aeronef),
+            createdBy: getFormattedValueForBackEnd(createdBy),
+            updatedBy: getFormattedValueForBackEnd(updatedBy),
             vols: transformedVols,
         };
-        console.log(newData);
         return newData;
     };
 
