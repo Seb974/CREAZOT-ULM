@@ -11,6 +11,9 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        wix:
+            pattern: ^/wix/purchase(/.*)?$
+            security: false
         main:
             lazy: true
             provider: app_user_provider
@@ -25,6 +28,7 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+        # - { path: ^/wix/purchase, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/admin/bons-cadeaux, roles: ROLE_USER }
         - { path: ^/profile, roles: IS_AUTHENTICATED_FULLY }
 
