@@ -27,7 +27,7 @@ class WixController extends AbstractController
     public function wixPurchase(Request $request): Response
     {
         $rawBody = $request->getContent();
-        $signatureHeader = $request->headers->get('X-Wix-Signature', '');
+        $signatureHeader = $request->headers->get('X-Wix-Velo-Hmac', '');
         $calculated = base64_encode(hash_hmac('sha256', $rawBody, $this->webhookSecret, true));
 
         if (!hash_equals($calculated, $signatureHeader)) {
