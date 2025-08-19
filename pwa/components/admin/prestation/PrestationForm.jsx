@@ -121,6 +121,7 @@ export const PrestationForm = () => {
                 selectedAircraft={ selectedAircraft }
                 selectedFlightTime={ selectedFlightTime }
                 selectedPilot={ selectedPilot }
+                date={ date }
             />
             <FlightTimeForm
                 aircrafts={ aircrafts }

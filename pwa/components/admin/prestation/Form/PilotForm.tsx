@@ -20,7 +20,7 @@ export const PilotForm: React.FC = ({ selectedPilot, setSelectedPilot, pilots, s
       .getList('profil_pilotes', {})
       .then(({ data }) => {
           const pilots = data.map(({pilote, ...user}) => ({...pilote, profil: user}));
-          const encadrants = pilots.filter(p => isDefined(p.profil.qualifications.find(q => (isDefined(q.encadrant) && q.encadrant))));
+          const encadrants = pilots.filter(p => isDefined(p.profil.pilotQualifications.find(q => (isDefined(q.qualification.encadrant) && q.qualification.encadrant))));
           setPilots(pilots);
           setEncadrants(encadrants);
           if (autoSelect)

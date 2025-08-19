@@ -11,7 +11,7 @@ import {
   SimpleFormIterator
 } from "react-admin";
 import { useWatch, useFormContext } from "react-hook-form";
-import { generateSafeCode, isDefined, isDefinedAndNotVoid, isNotBlank } from "../../../app/lib/utils";
+import { generateSafeCode, isDefined, isDefinedAndNotVoid, isNotBlank, isValid } from "../../../app/lib/utils";
 import { status, positions } from "../../../app/lib/reservation";
 import { useEffect, useState } from "react";
 import { useClient } from '../../admin/ClientProvider';
@@ -20,6 +20,7 @@ import { clientWithOptions, clientWithGifts, clientWithOriginContact, clientWith
 
 const FilteredPiloteInput = ({ pilotes, circuits }) => {
   const circuitId = useWatch({ name: "circuit.@id" });
+  const debut = useWatch({ name: "debut" });
   const { setValue, getValues } = useFormContext();
 
   const selectedCircuit = circuits.find(c => c['@id'] === circuitId);
@@ -27,11 +28,14 @@ const FilteredPiloteInput = ({ pilotes, circuits }) => {
   const needsEncadrant = selectedCircuit?.needsEncadrant;
 
   const pilotesEligibles = qualificationsRequises.length === 0
-    ? (needsEncadrant ? pilotes.filter(({profil, ...p}) => isDefined(profil.qualifications.find(q => isDefined(q.encadrant) && q.encadrant))) : pilotes)
-    : pilotes.filter(({profil, ...p}) =>
-        Array.isArray(profil.qualifications) &&
-        profil.qualifications.map(q => q['@id']).some(q => qualificationsRequises.includes(q))
-  );
+      ? (needsEncadrant ? pilotes.filter(({profil, ...p}) => isDefined(profil.pilotQualifications.find(q => isDefined(q.qualification.encadrant) && q.qualification.encadrant && isValid(q.validUntil, q.dateObtention, debut)))) : pilotes)
+      : pilotes.filter(({profil, ...p}) =>
+          Array.isArray(profil.pilotQualifications) &&
+          profil.pilotQualifications
+                .filter(q => isValid(q.validUntil, q.dateObtention, debut))
+                .map(q => q.qualification['@id'])
+                .some(q => qualificationsRequises.includes(q))
+    );
 
   useEffect(() => {
     const selectedPiloteId = getValues("pilote.@id");
@@ -98,8 +102,7 @@ export const ReservationsEdit = () => {
             .filter(p => isDefined(p.pilote))
             .map(({pilote, ...profil}) => ({
               ...pilote, 
-              profil: {...profil, qualifications: isDefinedAndNotVoid(profil.qualifications) ? profil.qualifications : []},
-              encadrant: !!profil.qualifications?.find(q => q.encadrant)
+              profil: {...profil, pilotQualifications: isDefinedAndNotVoid(profil.pilotQualifications) ? profil.pilotQualifications : []},
             }))
           setPilotes(piloteProfils)
         });

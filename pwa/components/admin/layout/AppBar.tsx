@@ -50,16 +50,14 @@ const CustomAppBar = () => {
 
   const isAuthorized = profile => {
     if (isDefined(profile)) {
-      const { qualifications } = profile;
-      if (isDefinedAndNotVoid(qualifications)) {
-        const authorizedSet = new Set(authorizedProfiles);
-        return qualifications.map(q => q.slug).some(item => authorizedSet.has(item));
-      }
+      const { pilotQualifications } = profile;
+      const authorizedSet = new Set(authorizedProfiles);
+      if (isDefinedAndNotVoid(pilotQualifications))
+        return pilotQualifications.map(q => q.qualification.slug).some(item => authorizedSet.has(item));
     }
     return false;
   };
   
-
   return loading || profileLoading ? <GlobalLoader/> : 
     isDefined(client) && (
       <AppBar

@@ -24,7 +24,7 @@ export const EncadrantForm: React.FC = ({ selectedPilot, encadrants, selectedEnc
       }
   }, [selectedCircuits]);
 
-  const hasQualification = pilote => isDefined(pilote) && isDefined(pilote.profil) && isDefinedAndNotVoid(pilote.profil.qualifications) 
+  const hasQualification = pilote => isDefined(pilote) && isDefined(pilote.profil) && isDefinedAndNotVoid(pilote.profil.pilotQualifications) 
 
   return (
         <div className="mb-2 mt-4">

@@ -5,9 +5,9 @@ import { useDataProvider } from "react-admin";
 import { OneFlightForm } from "./OneFlightForm";
 import { Button } from '../../../common/ui/button';
 import AddIcon from '@mui/icons-material/Add';
-import { getCircuitPrice, isDefined, isDefinedAndNotVoid } from '../../../../app/lib/utils';
+import { getCircuitPrice, isDefined, isDefinedAndNotVoid, isValid } from '../../../../app/lib/utils';
 
-export const FlightForm = ({ selectedCircuits, setSelectedCircuits, selectedAircraft, selectedFlightTime, selectedPilot }) => {
+export const FlightForm = ({ selectedCircuits, setSelectedCircuits, selectedAircraft, selectedFlightTime, selectedPilot, date = new Date() }) => {
 
   const defaultOption = {id: 0, prix: 0};
   const dataProvider = useDataProvider();
@@ -25,8 +25,8 @@ export const FlightForm = ({ selectedCircuits, setSelectedCircuits, selectedAirc
 
   useEffect(() => {
     if (isDefinedAndNotVoid(circuits) && isDefined(selectedPilot) && isDefined(selectedPilot.profil))
-      getAvailableCircuits(circuits, selectedPilot.profil.qualifications);
-  }, [circuits, selectedPilot]);
+      getAvailableCircuits(circuits, selectedPilot.profil.pilotQualifications, date);
+  }, [circuits, selectedPilot, date]);
 
   useEffect(() => {
     const circuitWithUniqueDeclaration = selectedCircuits.find(c => !c.circuit.prixFixe || (isDefined(c.circuit.requireLandingDeclaration) && c.circuit.requireLandingDeclaration));
@@ -51,12 +51,13 @@ export const FlightForm = ({ selectedCircuits, setSelectedCircuits, selectedAirc
         .then(({ data }) => setOptions(data));
   };
 
-
-  const getAvailableCircuits = (circuits, userQualifications) => {
-    const isUserQualified = isDefinedAndNotVoid(userQualifications);
-    const availables = isUserQualified ? circuits.filter(circuit =>
+  const getAvailableCircuits = (circuits, userQualifications, date = new Date()) => {
+    const pilotQualifications = !isDefinedAndNotVoid(userQualifications) ? [] : 
+        userQualifications.filter(q => isValid(q.validUntil, q.dateObtention, date))
+                          .map(q => q.qualification['@id']);
+    const availables = isDefinedAndNotVoid(pilotQualifications) ? circuits.filter(circuit =>
         Array.isArray(circuit.qualifications) &&
-        circuit.qualifications.map(q => q['@id']).some(q => (userQualifications.map(q => q['@id']) || []).includes(q))) : 
+        circuit.qualifications.some(q => pilotQualifications.includes(q['@id']))) : 
         circuits.filter(c => !isDefinedAndNotVoid(c.qualifications));
 
     setAvailableCircuits(availables);

@@ -1,30 +1,37 @@
+import React from "react";
 import { ArrayInput, DateInput, Edit, NumberInput, ReferenceInput, SimpleForm, SimpleFormIterator, TextInput, SelectInput, useDataProvider, useEditController } from "react-admin";
-import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid, isNotBlank, isValid } from "../../../app/lib/utils";
 import { useClient } from '../../admin/ClientProvider';
 import { clientWithLandingManagement, clientWithOptions, getAirportName, getDefaultLanding } from "../../../app/lib/client";
-import { useWatch, useFormContext } from "react-hook-form";
+import { useWatch, useFormContext, useFormState } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
+import { useRecordContext } from "react-admin";
 
-const FilteredPiloteInput = ({ pilotes }) => {
+const FilteredPiloteInput = ({ pilotes, circuits }) => {
   const vols = useWatch({ name: "vols" });
+  const date = useWatch({ name: "date" });
   const { setValue, getValues } = useFormContext();
   const selectedPiloteId = getValues("pilote.@id");
   
   let needsEncadrant = false;
   let qualificationsRequises = [];
-  if (isDefinedAndNotVoid(vols)) {
+  if (isDefinedAndNotVoid(vols) && isDefinedAndNotVoid(circuits)) {
     vols.forEach(({ circuit }) => {
-      qualificationsRequises = [...qualificationsRequises, ...circuit?.qualifications?.map(q => q['@id']) || []];
-      needsEncadrant = circuit.needsEncadrant === true ? true : needsEncadrant;
+      const selectedCircuit = circuits.find(c => c['@id'] === circuit['@id']);
+      qualificationsRequises = [...qualificationsRequises, ...selectedCircuit?.qualifications?.map(q => q['@id']) || []];
+      needsEncadrant = selectedCircuit?.needsEncadrant === true ? true : needsEncadrant;
     });
   }
 
   const pilotesEligibles = qualificationsRequises.length === 0
     ? pilotes
     : pilotes.filter(({profil, ...p}) =>
-        Array.isArray(profil.qualifications) &&
-        profil.qualifications.map(q => q['@id']).some(q => qualificationsRequises.includes(q))
+        Array.isArray(profil.pilotQualifications) &&
+        profil.pilotQualifications
+              .filter(q => isValid(q.validUntil, q.dateObtention, date))
+              .map(q => q.qualification['@id'])
+              .some(q => qualificationsRequises.includes(q))
   );
 
   useEffect(() => {
@@ -46,30 +53,72 @@ const FilteredPiloteInput = ({ pilotes }) => {
   );
 };
 
-const EncadrantInput = ({ pilotes }) => {
-    const vols = useWatch({ name: "vols" });
-    const needsEncadrant = vols.reduce((result, { circuit }) => result = circuit.needsEncadrant === true ? true : result, false);
-    const encadrants = pilotes.filter(p => p.encadrant);
+const EncadrantInput = ({ pilotes, circuits }) => {
+  const { setValue, getValues } = useFormContext();
+  const date = useWatch({ name: "date" });
+  const vols = useWatch({ name: "vols" });
+  const piloteId = useWatch({ name: "pilote.@id" });
+  const currentId = useWatch({ name: "encadrant.@id" });
+  const currentEncadrant = pilotes.find(p => p["@id"] === currentId);
 
-    return (
-      <SelectInput
-        source="encadrant.@id" 
-        label="Encadrant @id"
-        choices={ encadrants }
-        disabled={ !needsEncadrant }
-        optionText={(r) => isDefined(r) && isDefined(r.firstName) ? r.firstName.charAt(0).toUpperCase() + r.firstName.slice(1) : ' '}
-        optionValue="@id"
-      />
+  let needsEncadrant = false;
+  if (isDefinedAndNotVoid(vols) && isDefinedAndNotVoid(circuits)) {
+    vols.forEach(({ circuit }) => {
+      const selectedCircuit = circuits.find(c => c['@id'] === circuit['@id']);
+      needsEncadrant = selectedCircuit?.needsEncadrant === true ? true : needsEncadrant;
+    });
+  }
+
+  const encadrants = React.useMemo(() => {
+    return (pilotes || []).filter(p =>
+      p?.profil?.pilotQualifications?.some(q =>
+        q?.qualification?.encadrant && isValid(q.validUntil, q.dateObtention, date)
+      )
     );
+  }, [pilotes, date]);
+
+  const choices = React.useMemo(() => {
+    if (!currentEncadrant) return encadrants;
+    return [...encadrants, currentEncadrant].filter(
+      (v, i, arr) => arr.findIndex(x => x["@id"] === v["@id"]) === i
+    );
+  }, [encadrants, currentEncadrant]);
+
+
+  useEffect(() => {
+    if (!needsEncadrant) setValue("encadrant.@id", null);
+  }, [needsEncadrant, setValue]);
+
+  useEffect(() => {
+    if (needsEncadrant && !isDefined(currentId) && isDefinedAndNotVoid(encadrants)) { 
+      const selectedPilote = pilotes.find(p => p["@id"] === piloteId);
+      const pilotePeutEncadrer = !!selectedPilote?.profil?.pilotQualifications?.some(q =>
+        q?.qualification?.encadrant && isValid(q.validUntil, q.dateObtention, date)
+      );
+
+      if (!pilotePeutEncadrer) {
+        setValue("encadrant.@id", encadrants[0]["@id"], { shouldValidate: true });
+      }
+    }
+  }, [needsEncadrant, encadrants, pilotes, piloteId, date, setValue, getValues]);
+
+  return (
+    <SelectInput
+      source="encadrant.@id"
+      label="Encadrant @id"
+      choices={choices}
+      disabled={!needsEncadrant}
+      optionText={r =>
+        r?.firstName ? r.firstName[0].toUpperCase() + r.firstName.slice(1) : " "
+      }
+      optionValue="@id"
+    />
+  );
 };
 
 const LandingsInput = ({ client }) => {
     const vols = useWatch({ name: "vols" });
     const airportList = client.airportCodes.map(a =>({...a, airportCode: a.code, airportName: a.nom}));
-
-    const requireLandingsDeclaration = vols => {
-        return vols.map(vol => vol.circuit).find(({requireLandingDeclaration}) => isDefined(requireLandingDeclaration) && requireLandingDeclaration) !== undefined;
-    };
 
     const validateLandings = (value) => {
       const codes = new Set();
@@ -85,8 +134,8 @@ const LandingsInput = ({ client }) => {
       return undefined;
     };
 
-    if (!clientWithLandingManagement(client) || !isDefinedAndNotVoid(client.airportCodes) || !vols || !Array.isArray(vols) )   // || !requireLandingsDeclaration(vols)
-        return null;
+    if (!clientWithLandingManagement(client) || !isDefinedAndNotVoid(client.airportCodes) || !vols || !Array.isArray(vols) )
+      return null;
 
     return (
       <ArrayInput source="landings" label="Atterrissages" validate={validateLandings}>
@@ -117,23 +166,32 @@ export const PrestationEdit = () => {
     const { client } = useClient();
     const dataProvider = useDataProvider();
     const [pilotes, setPilotes] = useState([]);
+    const [circuits, setCircuits] = useState([]);
     const defaultLanding = getDefaultLanding(client);
 
-    useEffect(() => getProfilPilotes(), []);
+    useEffect(() => {
+      getProfilPilotes();
+      getCircuits();
+    }, []);
 
     const getProfilPilotes = () => {
         dataProvider
             .getList("profil_pilotes", {})
             .then(({ data }) => {
-              const piloteProfils = data
-                .filter(p => isDefined(p.pilote))
+                const piloteProfils = data
+                .filter(p => isDefined(p.pilote))   // AJOUTER ICI LE FILTRE SUR LES CERTIFICATS MEDICAUX VALIDES
                 .map(({pilote, ...profil}) => ({
                   ...pilote, 
-                  profil: {...profil, qualifications: isDefinedAndNotVoid(profil.qualifications) ? profil.qualifications : []},
-                  encadrant: !!profil.qualifications?.find(q => q.encadrant)
+                  profil: {...profil, pilotQualifications: isDefinedAndNotVoid(profil.pilotQualifications) ? profil.pilotQualifications : []},
                 }))
               setPilotes(piloteProfils)
             });
+    };
+
+    const getCircuits = () => {
+      dataProvider
+            .getList("circuits", {})
+            .then(({ data }) => setCircuits(data));
     };
 
     const transform = ({date, aeronef, pilote, encadrant, vols, createdBy, updatedBy, ...data}) => {
@@ -193,8 +251,8 @@ export const PrestationEdit = () => {
         <SimpleForm>
             <DateInput source="date" />
             <ReferenceInput reference="aeronefs" source="aeronef.@id" label="Aéronef" />
-            <FilteredPiloteInput pilotes={ pilotes }/>
-            <EncadrantInput pilotes={ pilotes }/>
+            <FilteredPiloteInput pilotes={ pilotes } circuits={ circuits }/>
+            <EncadrantInput pilotes={ pilotes } circuits={ circuits }/>
             <ArrayInput source="vols">
                 <SimpleFormIterator disableReordering>
                   <Box display="flex" gap={ !clientWithOptions(client) ? 2 : 3 } flexWrap="wrap">

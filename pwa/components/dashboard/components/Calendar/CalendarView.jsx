@@ -27,7 +27,7 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
   const { session } = useSessionContext();
   const user = session?.user;
   const dataProvider = useDataProvider();
-  const authorizedProfiles = ['pro', 'instructeur'];
+  const authorizedProfiles = ['pro', 'instructeur', 'secretariat'];
   const min = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0);
   const max = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30);
 
@@ -356,17 +356,14 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
   }, [isSmall]);
 
   const isAuthorized = profile => {
-    if (isDefined(profile)) {
-      const { qualifications } = profile;
-      if (isDefinedAndNotVoid(qualifications)) {
+      if (isDefined(profile)) {
+        const { pilotQualifications } = profile;
         const authorizedSet = new Set(authorizedProfiles);
-        return qualifications.map(q => q.slug).some(item => authorizedSet.has(item));
+        if (isDefinedAndNotVoid(pilotQualifications))
+          return pilotQualifications.map(q => q.qualification.slug).some(item => authorizedSet.has(item));
       }
-    }
-    return false;
-  };
-
-  
+      return false;
+    };
 
   const CustomToolbar = ({ label, onNavigate, onView, views, view, isLoading }) => {
     const viewLabels = {

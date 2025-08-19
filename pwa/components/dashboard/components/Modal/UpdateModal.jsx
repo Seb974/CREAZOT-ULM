@@ -6,7 +6,7 @@ import { ProfilPiloteForm } from '../../../admin/prestation/Form/ProfilPiloteFor
 import { CircuitForm } from "../../../admin/prestation/Form/CircuitForm";
 import { AircraftForm } from "../../../admin/prestation/Form/AircraftForm";
 import { OptionForm } from "../../../admin/prestation/Form/OptionForm";
-import { generateSafeCode, getRandomColor, isDefined, isDefinedAndNotVoid, isNotBlank } from "../../../../app/lib/utils";
+import { generateSafeCode, getRandomColor, isDefined, isDefinedAndNotVoid, isNotBlank, isValid } from "../../../../app/lib/utils";
 import { PlusForm } from "../../../admin/prestation/Form/PlusForm";
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
@@ -83,10 +83,13 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
             const qualificationsRequises = selectedCircuit?.qualifications?.map(q => q['@id']) || [];
             const needsEncadrant = selectedCircuit?.needsEncadrant;
             pilotesEligibles = qualificationsRequises.length === 0
-            ? (needsEncadrant ? pilots.filter(({profil, ...p}) => isDefined(profil.qualifications.find(q => isDefined(q.encadrant) && q.encadrant))) : pilots)
-            : pilots.filter(({profil, ...p}) =>
-                Array.isArray(profil.qualifications) &&
-                profil.qualifications.map(q => q['@id']).some(q => qualificationsRequises.includes(q))
+                ? (needsEncadrant ? pilots.filter(({profil, ...p}) => isDefined(profil.pilotQualifications.find(q => isDefined(q.qualification.encadrant) && q.qualification.encadrant && isValid(q.validUntil, q.dateObtention, consumer.debut)))) : pilots)
+                : pilots.filter(({profil, ...p}) =>
+                    Array.isArray(profil.pilotQualifications) &&
+                    profil.pilotQualifications
+                        .filter(q => isValid(q.validUntil, q.dateObtention, consumer.debut))
+                        .map(q => q.qualification['@id'])
+                        .some(q => qualificationsRequises.includes(q))
             );
         }
         setEligiblePilots(pilotesEligibles);

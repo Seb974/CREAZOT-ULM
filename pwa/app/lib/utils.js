@@ -187,12 +187,25 @@ export const getShipStyle = ({ color }, validity = null) => ({
   textDecoration: isValid(validity) ? 'none' : 'line-through',
 });
 
-export const isValid = (validUntil) => {
-  if (!validUntil) return true;
-  const today = new Date();
-  const validDate = new Date(validUntil);
+export const isValid = (validUntil, dateObtention = null, referenceDate = new Date()) => {
+  let ref = new Date(referenceDate);
+  const valid = validUntil ? new Date(validUntil) : null;
+  const obt = dateObtention ? new Date(dateObtention) : null;
 
-  return validDate.setHours(0,0,0,0) >= today.setHours(0,0,0,0);
+  if (isNaN(ref.getTime()))
+    ref = new Date();
+
+  if ((valid && isNaN(valid.getTime())) || isNaN(ref.getTime()) || (obt && isNaN(obt.getTime())))
+    return false;
+
+  ref.setHours(0,0,0,0);
+  if (valid) valid.setHours(0,0,0,0);
+  if (obt) obt.setHours(0,0,0,0);
+
+  const validCheck = !valid || valid.getTime() >= ref.getTime();
+  const obtCheck = !obt || (ref.getTime() >= obt.getTime() && (!valid || valid.getTime() >= obt.getTime()));
+
+  return validCheck && obtCheck;
 };
 
 export const formatDisplayDate = (date) => date.toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
