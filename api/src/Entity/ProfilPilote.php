@@ -68,9 +68,25 @@ class ProfilPilote
     #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
     private Collection $qualifications;
 
+    /**
+     * @var Collection<int, PilotQualification>
+     */
+    #[ORM\OneToMany(targetEntity: PilotQualification::class, mappedBy: 'profil', cascade: ['persist', 'remove'])]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
+    private Collection $pilotQualifications;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
+    private ?\DateTimeImmutable $birthDate = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
+    private ?float $totalFlightHours = null;
+
     public function __construct()
     {
         $this->qualifications = new ArrayCollection();
+        $this->pilotQualifications = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -110,6 +126,60 @@ class ProfilPilote
     public function removeQualification(Qualification $qualification): static
     {
         $this->qualifications->removeElement($qualification);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PilotQualification>
+     */
+    public function getPilotQualifications(): Collection
+    {
+        return $this->pilotQualifications;
+    }
+
+    public function addPilotQualification(PilotQualification $pilotQualification): static
+    {
+        if (!$this->pilotQualifications->contains($pilotQualification)) {
+            $this->pilotQualifications->add($pilotQualification);
+            $pilotQualification->setProfil($this);
+        }
+
+        return $this;
+    }
+
+    public function removePilotQualification(PilotQualification $pilotQualification): static
+    {
+        if ($this->pilotQualifications->removeElement($pilotQualification)) {
+            // set the owning side to null (unless already changed)
+            if ($pilotQualification->getProfil() === $this) {
+                $pilotQualification->setProfil(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getBirthDate(): ?\DateTimeImmutable
+    {
+        return $this->birthDate;
+    }
+
+    public function setBirthDate(?\DateTimeImmutable $birthDate): static
+    {
+        $this->birthDate = $birthDate;
+
+        return $this;
+    }
+
+    public function getTotalFlightHours(): ?float
+    {
+        return $this->totalFlightHours;
+    }
+
+    public function setTotalFlightHours(?float $totalFlightHours): static
+    {
+        $this->totalFlightHours = $totalFlightHours;
 
         return $this;
     }

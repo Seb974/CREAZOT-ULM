@@ -15,7 +15,7 @@ import Chip from '@mui/material/Chip';
 import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
 import { useMediaQuery, Theme } from '@mui/material';
-import { getShipStyle, isDefined } from "../../../app/lib/utils";
+import { getShipStyle, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 
 export interface Props {
   data: PagedCollection<Circuit> | null;
@@ -34,7 +34,7 @@ export const ProfilesList: NextPage<Props> = ({ data, hubURL, page }) => {
 
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
 
-  const getPilotStatus = ({ qualifications }) => <span className="text-right flex flex-end">{ qualifications.map((q, i) => <Chip key={i} label={q.slug} size="small" sx={ getShipStyle(q) }/>) }</span>
+  const getPilotStatus = ({ pilotQualifications }) => isDefinedAndNotVoid(pilotQualifications) && <span className="text-right flex flex-end">{ pilotQualifications.map((q, i) => <Chip key={i} label={q.qualification.slug} size="small" sx={ getShipStyle(q.qualification, q.validUntil) }/>) }</span>
 
   return (
     <List 
@@ -59,7 +59,7 @@ export const ProfilesList: NextPage<Props> = ({ data, hubURL, page }) => {
                 />
                 <FunctionField
                   label="Qualifications"
-                  render={record => record.qualifications?.map((q, i) => <Chip key={i} label={q.slug} size="small" sx={ getShipStyle(q) }/>)}
+                  render={record => record.pilotQualifications?.map((q, i) => <Chip key={i} label={q.qualification.slug} size="small" sx={ getShipStyle(q.qualification, q.validUntil) }/>)}
                 />
                 <p className="text-right">
                     <ShowButton />

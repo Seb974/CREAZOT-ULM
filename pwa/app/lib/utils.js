@@ -176,15 +176,24 @@ export const matchesStartOfWord = (value, search) => {
   return regex.test(value);
 };
 
-export const getShipStyle = ({ color }) => ({
+export const getShipStyle = ({ color }, validity = null) => ({
   backgroundColor: color + '33',
   color: color,
   border: '1px solid',
   borderColor: color,
   marginRight: '4px',
   marginBottom: '2px',
-  marginTop: '2px'
+  marginTop: '2px',
+  textDecoration: isValid(validity) ? 'none' : 'line-through',
 });
+
+export const isValid = (validUntil) => {
+  if (!validUntil) return true;
+  const today = new Date();
+  const validDate = new Date(validUntil);
+
+  return validDate.setHours(0,0,0,0) >= today.setHours(0,0,0,0);
+};
 
 export const formatDisplayDate = (date) => date.toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
   
