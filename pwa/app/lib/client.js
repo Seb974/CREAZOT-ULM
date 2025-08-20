@@ -244,3 +244,13 @@ export const paymentMode = [
     { id: 'virement', name: 'Virement', color: '#a78bfa' },     // Violet
     { id: 'cheque', name: 'Chèque', color: '#f87171' },         // Red
 ];
+
+export const certificatMedicalTypes = [
+    { id: 'CL1', name: "Certificat médical de Classe 1" },
+    { id: 'CL2', name: "Certificat médical de Classe 2" },         
+    { id: 'CA', name: "Certificat d'aptitude" },
+    { id: 'CNCI', name: "Certificat de non contre-indication" },
+    { id: 'CE', name: "Certificat exceptionnel" }
+];
+
+export const infiniteCertificateTypes = ['CNCI'];

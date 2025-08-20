@@ -177,6 +177,11 @@ services:
         arguments:
             $properties: { email: 'exact' } # ]
         tags: [ 'api_platform.filter' ]
+
+    app.filter.user.profil:
+        parent: 'api_platform.doctrine.orm.exists_filter'
+        arguments: [{ profilPilote: ~ }]
+        tags: [ 'api_platform.filter' ]
     
     app.filter.vol.pilote.email:
         parent: 'api_platform.doctrine.orm.search_filter'

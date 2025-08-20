@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\Put;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
+use App\Entity\User;
 
 #[ORM\Entity(repositoryClass: ProfilPiloteRepository::class)]
 #[ApiResource(
@@ -57,7 +58,7 @@ class ProfilPilote
     #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
     private ?int $id = null;
 
-    #[ORM\OneToOne(cascade: ['persist'])]
+    #[ORM\OneToOne(inversedBy: 'profilPilote', cascade: ['persist'])]
     #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
     private ?User $pilote = null;
 
@@ -82,6 +83,10 @@ class ProfilPilote
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
     private ?float $totalFlightHours = null;
+
+    #[ORM\OneToOne(mappedBy: 'profil', cascade: ['persist', 'remove'])]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
+    private ?CertificatMedical $certificatMedical = null;
 
     public function __construct()
     {
@@ -180,6 +185,28 @@ class ProfilPilote
     public function setTotalFlightHours(?float $totalFlightHours): static
     {
         $this->totalFlightHours = $totalFlightHours;
+
+        return $this;
+    }
+
+    public function getCertificatMedical(): ?CertificatMedical
+    {
+        return $this->certificatMedical;
+    }
+
+    public function setCertificatMedical(?CertificatMedical $certificatMedical): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($certificatMedical === null && $this->certificatMedical !== null) {
+            $this->certificatMedical->setProfil(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($certificatMedical !== null && $certificatMedical->getProfil() !== $this) {
+            $certificatMedical->setProfil($this);
+        }
+
+        $this->certificatMedical = $certificatMedical;
 
         return $this;
     }

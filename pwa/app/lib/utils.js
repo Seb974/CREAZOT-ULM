@@ -216,3 +216,39 @@ export const isSameDay = (d1, d2) =>
     d1.getFullYear() === d2.getFullYear() &&
     d1.getMonth() === d2.getMonth() &&
     d1.getDate() === d2.getDate();
+
+export const getValidityDurationMonths = (birthDate, referenceDate = new Date()) => {
+  const birth = new Date(birthDate);
+  const ref = new Date(referenceDate);
+
+  let age = ref.getFullYear() - birth.getFullYear();
+  const monthDiff = ref.getMonth() - birth.getMonth();
+  const dayDiff = ref.getDate() - birth.getDate();
+
+  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+    age--;
+  }
+
+  if (age < 40) return 60; 
+  if (age < 50) return 24;
+  return 12;
+};
+
+export const calculateValidUntil = (dateObtention, validityMonths) => {
+  const obtained = new Date(dateObtention);
+  const validUntil = new Date(obtained);
+
+  validUntil.setMonth(validUntil.getMonth() + validityMonths);
+
+  if (validUntil.getDate() !== obtained.getDate()) {
+    validUntil.setDate(0);
+  }
+
+  return validUntil;
+};
+
+export const isValidNumber = (value) => {
+  const num = Number(value);
+  return !isNaN(num) && num > 0;
+};
+

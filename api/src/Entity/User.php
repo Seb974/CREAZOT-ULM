@@ -18,6 +18,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Uid\Uuid;
+use App\Entity\ProfilPilote;
 
 /**
  * A person (alive, dead, undead, or fictional).
@@ -33,7 +34,8 @@ use Symfony\Component\Uid\Uuid;
             security: 'is_granted("OIDC_USER")',
             filters: [
                 'app.filter.user.admin.name',
-                'app.filter.user.email'
+                'app.filter.user.email',
+                'app.filter.user.profil'
             ],
             paginationClientItemsPerPage: true
         ),
@@ -45,7 +47,10 @@ use Symfony\Component\Uid\Uuid;
     normalizationContext: [
         AbstractNormalizer::GROUPS => ['User:read'],
         AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
-    ]
+    ],
+    denormalizationContext: [
+        AbstractNormalizer::GROUPS => ['User:write'],
+    ],
 )]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -88,6 +93,10 @@ class User implements UserInterface
 
     #[ORM\Column(type: 'json')]
     private array $roles = [];
+
+    #[ORM\OneToOne(targetEntity: ProfilPilote::class, mappedBy:'pilote', cascade: ['persist', 'remove'])]
+    #[Groups(groups: ['User:read', 'User:write'])]
+    private ?ProfilPilote $profilPilote = null;
 
     public function getId(): ?Uuid
     {
@@ -147,6 +156,17 @@ class User implements UserInterface
     {
         $this->roles = $roles;
 
+        return $this;
+    }
+
+    public function getProfilPilote(): ?ProfilPilote
+    {
+        return $this->profilPilote;
+    }
+
+    public function setProfilPilote(?ProfilPilote $profilPilote): self
+    {
+        $this->profilPilote = $profilPilote;
         return $this;
     }
 }
