@@ -36,8 +36,6 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
     const [selectedOriginContact, setSelectedOriginContact] = useState([]);
     const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, paid: false, upsell: false, debut: new Date((new Date()).setHours(8, 0, 0)), color: getRandomColor(), position: "-", cadeau: defaultCadeau['@id']});
 
-    useEffect(() => getProfiles(), []);
-
     useEffect(() => {
         if (!isDefinedAndNotVoid(validCadeaux))
             getValidCadeaux();
@@ -69,44 +67,37 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
     }, [toUpdate]);
 
     useEffect(() => {
-        if (isDefined(toUpdate) && isDefinedAndNotVoid(pilots) && isDefined(toUpdate.pilote) && selectedPilot === "") {
-            const currentPilot = pilots.find(p => p['@id'] === (typeof toUpdate.pilote === 'string' ? toUpdate.pilote : toUpdate.pilote['@id']));
+        if ( isDefined(toUpdate) && isDefinedAndNotVoid(eligiblePilots) && isDefined(toUpdate.pilote) && (!isDefined(selectedPilot) || selectedPilot === "" || !eligiblePilots.some(p => p['@id'] === selectedPilot['@id'])) ) {
+            const currentPilot = eligiblePilots.find(p => p['@id'] === (typeof toUpdate.pilote === 'string' ? toUpdate.pilote : toUpdate.pilote['@id']));
             if (isDefined(currentPilot))
                 setSelectedPilot(currentPilot);
+            else
+                setSelectedPilot("");
         }
-    }, [toUpdate, pilots])
+    }, [toUpdate, eligiblePilots]);
 
     useEffect(() => {
         if (isDefined(selectedCircuit)) {
-        let pilotesEligibles = [];
-        if (isDefinedAndNotVoid(pilots)) {
-            const qualificationsRequises = selectedCircuit?.qualifications?.map(q => q['@id']) || [];
-            const needsEncadrant = selectedCircuit?.needsEncadrant;
-            pilotesEligibles = qualificationsRequises.length === 0
-                ? (needsEncadrant ? pilots.filter(({profil, ...p}) => isDefined(profil.pilotQualifications.find(q => isDefined(q.qualification.encadrant) && q.qualification.encadrant && isValid(q.validUntil, q.dateObtention, consumer.debut)))) : pilots)
-                : pilots.filter(({profil, ...p}) =>
-                    Array.isArray(profil.pilotQualifications) &&
-                    profil.pilotQualifications
-                        .filter(q => isValid(q.validUntil, q.dateObtention, consumer.debut))
-                        .map(q => q.qualification['@id'])
-                        .some(q => qualificationsRequises.includes(q))
-            );
-        }
-        setEligiblePilots(pilotesEligibles);
-        if (!isDefined(selectedPilot) || selectedPilot === "" || !pilotesEligibles.some(p => p['@id'] === selectedPilot['@id'])) 
-            setSelectedPilot("");
+            let pilotesEligibles = [];
+            if (isDefinedAndNotVoid(pilots)) {
+                const qualificationsRequises = selectedCircuit?.qualifications?.map(q => q['@id']) || [];
+                const needsEncadrant = selectedCircuit?.needsEncadrant;
+                pilotesEligibles = qualificationsRequises.length === 0
+                    ? (needsEncadrant ? pilots.filter(({profil, ...p}) => isDefined(profil.pilotQualifications.find(q => isDefined(q.qualification.encadrant) && q.qualification.encadrant && isValid(q.validUntil, q.dateObtention, consumer.debut)))) : pilots)
+                    : pilots.filter(({profil, ...p}) =>
+                        Array.isArray(profil.pilotQualifications) &&
+                        profil.pilotQualifications
+                            .filter(q => isValid(q.validUntil, q.dateObtention, consumer.debut))
+                            .map(q => q.qualification['@id'])
+                            .some(q => qualificationsRequises.includes(q))
+                );
+            }
+            setEligiblePilots(pilotesEligibles);
+        } else {
+            setEligiblePilots(pilots);
         }
     }, [selectedCircuit, pilots]);
     
-    const getProfiles = () => {
-        dataProvider
-            .getList('profil_pilotes', {})
-            .then(({ data }) => {
-                const pilots = data.map(({pilote, ...profil}) => ({...pilote, profil}));
-                setPilots(pilots);
-            });
-    };
-
     const onConsumerChange = e => setConsumer({...consumer, [e.target.name]: e.target.value});
 
     const onClose = () => setToUpdate(null);
@@ -397,6 +388,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                                         setEligiblePilots={ setEligiblePilots }
                                         selectedCircuit={ selectedCircuit }
                                         autoSelect={ false }
+                                        date={ consumer.debut }
                                     />
                                     <AircraftForm 
                                         selectedAircraft={ selectedAircraft }

@@ -108,6 +108,7 @@ export const PrestationForm = () => {
                 pilots={ pilots } 
                 setPilots={ setPilots }
                 setEncadrants={ setEncadrants }
+                date={ date }
             />
             <AircraftForm 
                 selectedAircraft={ selectedAircraft }

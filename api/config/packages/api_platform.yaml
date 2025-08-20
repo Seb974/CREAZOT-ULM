@@ -182,6 +182,11 @@ services:
         parent: 'api_platform.doctrine.orm.exists_filter'
         arguments: [{ profilPilote: ~ }]
         tags: [ 'api_platform.filter' ]
+
+    app.filter.profile.certificat_medical:
+        parent: 'api_platform.doctrine.orm.exists_filter'
+        arguments: [{ certificatMedical: ~ }]
+        tags: [ 'api_platform.filter' ]
     
     app.filter.vol.pilote.email:
         parent: 'api_platform.doctrine.orm.search_filter'

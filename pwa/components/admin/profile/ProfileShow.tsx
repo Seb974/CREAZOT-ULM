@@ -1,8 +1,14 @@
 import { Show, FunctionField, ArrayField, Datagrid, DateField, TabbedShowLayout, TextField, NumberField } from 'react-admin';
 import { getShipStyle, isDefined } from '../../../app/lib/utils';
+import { certificatMedicalTypes } from '../../../app/lib/client';
 import Chip from '@mui/material/Chip';
 
 export const ProfileShow = () => {
+
+    const getTypeName = code => {
+        const type = certificatMedicalTypes.find(t => t.id === code);
+        return type?.name ?? code;
+    };
 
     return (
         <Show>
@@ -16,6 +22,7 @@ export const ProfileShow = () => {
                         }
                     />
                     <DateField source="birthDate" label="Date de naissance"/>
+                    <TextField source="pilote.email" label="Adresse email"/>
                     <ArrayField source="pilotQualifications" label="Qualifications">
                         <Datagrid
                             optimized
@@ -38,6 +45,7 @@ export const ProfileShow = () => {
                     </ArrayField>
                 </TabbedShowLayout.Tab>
                 <TabbedShowLayout.Tab label="Médical">
+                    <FunctionField label="Type" render={({certificatMedical}) => getTypeName(certificatMedical?.type)}/>
                     <DateField source="certificatMedical.dateObtention" label="Date d'obtention"/>
                     <NumberField source="certificatMedical.validityDurationMonths" label="Nombre de mois de validité"/>
                     <DateField source="certificatMedical.validUntil" label="Date de fin de validité"/>

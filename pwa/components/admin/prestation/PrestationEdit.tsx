@@ -1,12 +1,11 @@
 import React from "react";
-import { ArrayInput, DateInput, Edit, NumberInput, ReferenceInput, SimpleForm, SimpleFormIterator, TextInput, SelectInput, useDataProvider, useEditController } from "react-admin";
-import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid, isNotBlank, isValid } from "../../../app/lib/utils";
+import { ArrayInput, DateInput, Edit, NumberInput, ReferenceInput, SimpleForm, SimpleFormIterator, TextInput, SelectInput, useDataProvider } from "react-admin";
+import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid, isValid } from "../../../app/lib/utils";
 import { useClient } from '../../admin/ClientProvider';
 import { clientWithLandingManagement, clientWithOptions, getAirportName, getDefaultLanding } from "../../../app/lib/client";
-import { useWatch, useFormContext, useFormState } from "react-hook-form";
+import { useWatch, useFormContext } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
-import { useRecordContext } from "react-admin";
 
 const FilteredPiloteInput = ({ pilotes, circuits }) => {
   const vols = useWatch({ name: "vols" });
@@ -25,8 +24,9 @@ const FilteredPiloteInput = ({ pilotes, circuits }) => {
   }
 
   const pilotesEligibles = qualificationsRequises.length === 0
-    ? pilotes
+    ? pilotes.filter(({profil, ...p}) => isValid(profil?.certificatMedical?.validUntil, profil?.certificatMedical?.dateObtention, date))
     : pilotes.filter(({profil, ...p}) =>
+        isValid(profil?.certificatMedical?.validUntil, profil?.certificatMedical?.dateObtention, date) && 
         Array.isArray(profil.pilotQualifications) &&
         profil.pilotQualifications
               .filter(q => isValid(q.validUntil, q.dateObtention, date))
@@ -71,6 +71,7 @@ const EncadrantInput = ({ pilotes, circuits }) => {
 
   const encadrants = React.useMemo(() => {
     return (pilotes || []).filter(p =>
+      isValid(p?.profil?.certificatMedical?.validUntil, p?.profil?.certificatMedical?.dateObtention, date) &&
       p?.profil?.pilotQualifications?.some(q =>
         q?.qualification?.encadrant && isValid(q.validUntil, q.dateObtention, date)
       )
@@ -176,10 +177,10 @@ export const PrestationEdit = () => {
 
     const getProfilPilotes = () => {
         dataProvider
-            .getList("profil_pilotes", {})
+            .getList("profil_pilotes", { filter: { "exists[certificatMedical]": true } })
             .then(({ data }) => {
                 const piloteProfils = data
-                .filter(p => isDefined(p.pilote))   // AJOUTER ICI LE FILTRE SUR LES CERTIFICATS MEDICAUX VALIDES
+                .filter(p => isDefined(p.pilote))
                 .map(({pilote, ...profil}) => ({
                   ...pilote, 
                   profil: {...profil, pilotQualifications: isDefinedAndNotVoid(profil.pilotQualifications) ? profil.pilotQualifications : []},
@@ -217,11 +218,19 @@ export const PrestationEdit = () => {
               );
               landingAssigned = true;
             } else {
-                if (isDefined(vol.circuit?.hadDefaultLanding) && vol.circuit?.hadDefaultLanding) {
+                if (isDefinedAndNotVoid(vol.landings)) {
                   // @ts-ignore
-                  const { id, ...defaultLand} = defaultLanding;
-                  // @ts-ignore
-                  transformedVol.landings = [{...defaultLand, complets: parseInt(vol.quantite) * parseInt(defaultLand.complets ?? 1, 10), touches: parseInt(vol.quantite) * parseInt(defaultLand.touches ?? 0, 10)}];
+                  transformedVol.landings = vol.landings.map(({id, airportCode, ...l}) => {
+                    const formattedLanding =  {...l, airportCode, airportName: getAirportName(client, airportCode), complets: parseInt(l.complets ?? 0, 10), touches: parseInt(l.touches ?? 0, 10)};
+                    return '@id' in formattedLanding && isDefined(formattedLanding['@id']) ? {...formattedLanding, id} : formattedLanding;
+                  });
+                } else {
+                  if (isDefined(vol.circuit?.hadDefaultLanding) && vol.circuit?.hadDefaultLanding) {
+                    // @ts-ignore
+                    const { id, ...defaultLand} = defaultLanding;
+                    // @ts-ignore
+                    transformedVol.landings = [{...defaultLand, complets: parseInt(vol.quantite) * parseInt(defaultLand.complets ?? 1, 10), touches: parseInt(vol.quantite) * parseInt(defaultLand.touches ?? 0, 10)}];
+                  }
                 }
             }
           } else {

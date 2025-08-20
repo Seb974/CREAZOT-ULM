@@ -3,28 +3,40 @@
 import React, { useEffect, useState } from "react";
 import BadgeIcon from '@mui/icons-material/Badge';
 import { useDataProvider } from "react-admin";
-import { isDefined } from "../../../../app/lib/utils";
+import { isDefined, isDefinedAndNotVoid, isValid } from "../../../../app/lib/utils";
 
 // @ts-ignore
-export const PilotForm: React.FC = ({ selectedPilot, setSelectedPilot, pilots, setPilots, setEncadrants, autoSelect = true}) => {
+export const PilotForm: React.FC = ({ selectedPilot, setSelectedPilot, pilots, setPilots, setEncadrants, autoSelect = true, date = new Date() }) => {
 
   const dataProvider = useDataProvider();
   const changeTextColor = () => setIsPilotSelected(true);
 
   const [isPilotSelected, setIsPilotSelected] = useState<boolean>(false);
+  const [unfilteredPilots, setUnfilteredPilots] = useState([]);
 
   useEffect(() => getProfiles(), []);
 
+  useEffect(() => {
+    if (isDefinedAndNotVoid(unfilteredPilots)) {
+      const enabledPilots = unfilteredPilots.filter(({ profil }) => isValid(profil.certificatMedical?.validUntil, profil.certificatMedical?.dateObtention, date));
+      const encadrants = enabledPilots.filter(({profil}) => isDefined(profil.pilotQualifications.find(({qualification}) => (isDefined(qualification.encadrant) && qualification.encadrant))));
+      setPilots(enabledPilots);
+      setEncadrants(encadrants);
+
+      if (autoSelect && (!isDefined(selectedPilot) || !enabledPilots.map(p => p['@id']).includes(selectedPilot?.['@id'])))
+          setSelectedPilot(enabledPilots[0]);
+    } else {
+        setPilots([]);
+        setEncadrants([]);
+    }
+  }, [date, unfilteredPilots]);
+
   const getProfiles = () => {
     dataProvider
-      .getList('profil_pilotes', {})
+      .getList('profil_pilotes', { filter: { "exists[certificatMedical]": true } })
       .then(({ data }) => {
-          const pilots = data.map(({pilote, ...user}) => ({...pilote, profil: user}));
-          const encadrants = pilots.filter(p => isDefined(p.profil.pilotQualifications.find(q => (isDefined(q.qualification.encadrant) && q.qualification.encadrant))));
-          setPilots(pilots);
-          setEncadrants(encadrants);
-          if (autoSelect)
-            setSelectedPilot(pilots[0]);
+          const pilots = data.map(({pilote, ...profil}) => ({...pilote, profil}));
+          setUnfilteredPilots(pilots);
       })
   };
 

@@ -3,26 +3,37 @@
 import React, { useEffect, useState } from "react";
 import BadgeIcon from '@mui/icons-material/Badge';
 import { useDataProvider } from "react-admin";
-import { isDefined } from "../../../../app/lib/utils";
+import { isDefined, isDefinedAndNotVoid, isValid } from "../../../../app/lib/utils";
 
 // @ts-ignore
-export const ProfilPiloteForm: React.FC = ({ selectedPilot, setSelectedPilot, pilots, setPilots, eligiblePilots, setEligiblePilots, selectedCircuit, autoSelect = true}) => {
+export const ProfilPiloteForm: React.FC = ({ selectedPilot, setSelectedPilot, pilots, setPilots, eligiblePilots, setEligiblePilots, selectedCircuit, autoSelect = true, date = new Date()}) => {
 
   const dataProvider = useDataProvider();
   const changeTextColor = () => setIsPilotSelected(true);
 
   const [isPilotSelected, setIsPilotSelected] = useState<boolean>(false);
+  const [unfilteredPilots, setUnfilteredPilots] = useState([]);
 
   useEffect(() => getProfiles(), []);
 
+  useEffect(() => {
+      if (isDefinedAndNotVoid(unfilteredPilots)) {
+        const enabledPilots = unfilteredPilots.filter(({ profil }) => isValid(profil.certificatMedical?.validUntil, profil.certificatMedical?.dateObtention, date));
+        setPilots(enabledPilots);
+  
+        if (autoSelect && (!isDefined(selectedPilot) || !enabledPilots.map(p => p['@id']).includes(selectedPilot?.['@id'])))
+            setSelectedPilot(enabledPilots[0]);
+      } else {
+          setPilots([]);
+      }
+    }, [date, unfilteredPilots]);
+
   const getProfiles = () => {
     dataProvider
-      .getList('profil_pilotes', {})
+      .getList('profil_pilotes', { filter: { "exists[certificatMedical]": true } })
       .then(({ data }) => {
           const pilots = data.map(({pilote, ...profil}) => ({...pilote, profil}));
-          setPilots(pilots);
-          if (autoSelect)
-            setSelectedPilot(pilots[0]);
+          setUnfilteredPilots(pilots);
       })
   };
 

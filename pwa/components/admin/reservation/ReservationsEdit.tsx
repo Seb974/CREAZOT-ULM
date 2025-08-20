@@ -26,10 +26,11 @@ const FilteredPiloteInput = ({ pilotes, circuits }) => {
   const selectedCircuit = circuits.find(c => c['@id'] === circuitId);
   const qualificationsRequises = selectedCircuit?.qualifications?.map(q => q['@id']) || [];
   const needsEncadrant = selectedCircuit?.needsEncadrant;
+  const enabledPilots = pilotes.filter(({profil, ...p}) => isValid(profil?.certificatMedical?.validUntil, profil?.certificatMedical?.dateObtention, debut)) ?? [];
 
   const pilotesEligibles = qualificationsRequises.length === 0
-      ? (needsEncadrant ? pilotes.filter(({profil, ...p}) => isDefined(profil.pilotQualifications.find(q => isDefined(q.qualification.encadrant) && q.qualification.encadrant && isValid(q.validUntil, q.dateObtention, debut)))) : pilotes)
-      : pilotes.filter(({profil, ...p}) =>
+      ? (needsEncadrant ? enabledPilots.filter(({profil, ...p}) => isDefined(profil.pilotQualifications.find(q => isDefined(q.qualification.encadrant) && q.qualification.encadrant && isValid(q.validUntil, q.dateObtention, debut)))) : enabledPilots)
+      : enabledPilots.filter(({profil, ...p}) =>
           Array.isArray(profil.pilotQualifications) &&
           profil.pilotQualifications
                 .filter(q => isValid(q.validUntil, q.dateObtention, debut))
@@ -96,7 +97,7 @@ export const ReservationsEdit = () => {
 
   const getProfilPilotes = () => {
     dataProvider
-        .getList("profil_pilotes", {})
+        .getList("profil_pilotes", { filter: { "exists[certificatMedical]": true } })
         .then(({ data }) => {
           const piloteProfils = data
             .filter(p => isDefined(p.pilote))
