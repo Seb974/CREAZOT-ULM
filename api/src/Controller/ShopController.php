@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
+use App\Factory\Prepayment\PrepaymentFactoryResolver;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,7 +29,7 @@ class ShopController extends AbstractController
     }
 
     #[Route('/wix/purchase', methods: ['POST'])]
-    public function wixPurchase(Request $request): Response
+    public function wixPurchase(Request $request, PrepaymentFactoryResolver $factoryResolver, EntityManagerInterface $em): Response
     {
         $raw = $request->getContent();
         $signatureHeader = trim($request->headers->get('X-Wix-Velo-Hmac', ''));
@@ -35,7 +37,6 @@ class ShopController extends AbstractController
 
         if (!hash_equals($calculatedHmac, $signatureHeader)) {
             $this->logger->error('Wix webhook debug', [
-                'secret-symfony-side' => $this->webhookSecret,
                 'signatureHeader' => $signatureHeader,
                 'calculatedHmac' => $calculatedHmac,
                 'equalHmac64' => hash_equals($calculatedHmac, $signatureHeader) ? 'yes' : 'no',
@@ -47,26 +48,46 @@ class ShopController extends AbstractController
         if (!$payload) {
             return new Response('JSON invalide', Response::HTTP_BAD_REQUEST);
         }
-        
-        // → logique : créer une réservation, etc.
-        $client = $this->clientGetter->get();
-        if (!$client->getEmailServer() || !$client->getEmailAddressSender()) {
-            return new Response('Client mail config missing', Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+
+        $factory = $factoryResolver->resolve('wix');
+        $prepayments = $factory->createPrepaymentFromPayload($payload);
 
         try {
-            $mailer = $this->mailerFactory->getMailerForClient();
-            $email = (new Email())
-                ->from($client->getEmailAddressSender())
-                ->to("sebastien.maillot@gmx.fr")
-                ->subject('Webhook Wix - Payload brut')
-                ->html('<pre>' . json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . '</pre>');
-
-            $mailer->send($email);
-        } catch (\Throwable $e) {
-            return new Response('Erreur envoi email', Response::HTTP_INTERNAL_SERVER_ERROR);
+            $em->wrapInTransaction(function(EntityManagerInterface $em) use ($prepayments) {
+                foreach ($prepayments as $prepayment) {
+                    $em->persist($prepayment);
+                }
+                $em->flush();
+            });
+        } catch (\Exception $e) {
+            $this->logger->error('Erreur lors de l\'insertion des prépaiements Wix', [
+                'message' => $e->getMessage(),
+                'payload' => $payload,
+            ]);
+            throw $e;
         }
+        
+        $this->sendPayloadByEmail($payload);
 
-        return new Response('OK', Response::HTTP_OK);
+        return $this->json($prepayments, 200, [], ['groups' => 'Cadeau:read']);
+    }
+
+    private function sendPayloadByEmail($payload): void
+    {
+        $client = $this->clientGetter->get();
+        if (!\is_null($client->getEmailServer()) && !\is_null($client->getEmailAddressSender())) {
+            try {
+                $mailer = $this->mailerFactory->getMailerForClient();
+                $email = (new Email())
+                    ->from($client->getEmailAddressSender())
+                    ->to("sebastien.maillot@gmx.fr")
+                    ->subject('Webhook Wix - Payload brut')
+                    ->html('<pre>' . json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . '</pre>');
+
+                $mailer->send($email);
+            } catch (\Throwable $e) {
+                throw $e;
+            }
+        }
     }
 }

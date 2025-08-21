@@ -4,6 +4,7 @@ import { useWatch } from "react-hook-form";
 import { useClient } from '../../admin/ClientProvider';
 import { clientWithLandingManagement, clientWithOptions, clientWithWebshop } from "../../../app/lib/client";
 import { Box } from "@mui/material";
+import { getFormattedValueForBackEnd, isDefinedAndNotVoid } from "../../../app/lib/utils";
 
 export const CircuitsCreate = () => {
 
@@ -42,8 +43,13 @@ export const CircuitsCreate = () => {
       <BooleanInput source="hadDefaultLanding" label="Ajouter un attérrissage par défaut" defaultValue={ false } fullWidth/>
   };
 
+  const transform = ({qualifications, ...data}) => ({
+        ...data,
+        qualifications: isDefinedAndNotVoid(qualifications) ? qualifications.map(q => getFormattedValueForBackEnd(q)) : []
+    });
+
   return (
-      <Create>
+      <Create transform={ transform } redirect="list">
         <SimpleForm>
           <TextInput source="nom" validate={required()}/>
           <IdsInput />

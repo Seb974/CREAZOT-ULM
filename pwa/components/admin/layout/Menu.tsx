@@ -54,6 +54,22 @@ const CustomMenu = () => {
           leftIcon={<EditCalendarIcon />}
         />
       }
+      {/* @ts-ignore */}
+      { (isDefined(client) && isDefined(client.hasGifts) && client.hasGifts) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
+        <Menu.Item
+          to="/cadeaux"
+          primaryText="Prépaiements"
+          leftIcon={<CreditScoreIcon />}
+        />
+      }
+      {/* @ts-ignore */}
+      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") && isDefined(client) && isDefined(client.hasPaymentManagement) && client.hasPaymentManagement &&
+        <Menu.Item
+          to="/payments"
+          primaryText="Paiements"
+          leftIcon={<PointOfSaleIcon />}
+        />
+      }
       <Menu.Item
         to="/prestations"
         primaryText="Carnets de vols"
@@ -72,14 +88,7 @@ const CustomMenu = () => {
           leftIcon={<FlightLandIcon />}
         />
       }
-      {/* @ts-ignore */}
-      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") && isDefined(client) && isDefined(client.hasPaymentManagement) && client.hasPaymentManagement &&
-        <Menu.Item
-          to="/payments"
-          primaryText="Paiements"
-          leftIcon={<PointOfSaleIcon />}
-        />
-      }
+      
       { isDefined(client) && isDefined(client.hasPassengerRegistration) && client.hasPassengerRegistration && 
         <Menu.Item
           to="/passagers"
@@ -87,14 +96,7 @@ const CustomMenu = () => {
           leftIcon={<GroupIcon />}
         />
       }
-      {/* @ts-ignore */}
-      { (isDefined(client) && isDefined(client.hasGifts) && client.hasGifts) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
-        <Menu.Item
-          to="/cadeaux"
-          primaryText="Prépaiements"
-          leftIcon={<CreditScoreIcon />}
-        />
-      }
+      
       {/* @ts-ignore */}
       { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
         <Menu.Item
@@ -123,7 +125,7 @@ const CustomMenu = () => {
       { (isDefined(client) && isDefined(client.hasPartners) && client.hasPartners) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
         <Menu.Item
           to="/origines"
-          primaryText="Pouvoyeurs"
+          primaryText="Partenaires"
           leftIcon={<StoreIcon />}
         />
       }
