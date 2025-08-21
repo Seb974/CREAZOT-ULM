@@ -29,7 +29,7 @@ class MigratePilotQualificationsCommand extends Command
                 $pilotQualif = new PilotQualification();
                 $pilotQualif->setProfil($profil);
                 $pilotQualif->setQualification($qualification);
-                $pilotQualif->setDateObtention(new \DateTimeImmutable('yesterday'));
+                $pilotQualif->setDateObtention(new \DateTimeImmutable('2025-01-01'));
                 $pilotQualif->setValidUntil(null);
 
                 $this->em->persist($pilotQualif);

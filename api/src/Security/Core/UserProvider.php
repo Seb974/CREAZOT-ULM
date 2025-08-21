@@ -42,27 +42,32 @@ final readonly class UserProvider implements AttributesBasedUserProviderInterfac
      */
     public function loadUserByIdentifier(string $identifier, array $attributes = []): UserInterface
     {
-        $user = $this->repository->findOneBy(['email' => $identifier]) ?: new User();
+        $user = null;
+
+        if (!empty($attributes['sub'])) {
+            $user = $this->repository->findOneBy(['keycloakId' => $attributes['sub']]);
+        }
+
+        if (!$user) {
+            $user = $this->repository->findOneBy(['email' => $identifier]) ?: new User();
+        }
+
         $user->email = $identifier;
-
-        if (!isset($attributes['preferred_username'])) {
-            throw new UnsupportedUserException('Property "preferred_username" is missing in token attributes.');
+        if (!empty($attributes['sub'])) {
+            $user->setKeycloakId($attributes['sub']);
         }
-        $user->firstName = $attributes['preferred_username'];
 
-        if (!isset($attributes['family_name'])) {
-            throw new UnsupportedUserException('Property "family_name" is missing in token attributes.');
-        }
-        $user->lastName = $attributes['family_name'];
+        $user->firstName = $attributes['given_name'] ?? $user->firstName;
+        $user->lastName  = $attributes['family_name'] ?? $user->lastName;
 
-        if (!isset($attributes['realm_access'])) {
-            throw new UnsupportedUserException('Property "realm_access" is missing in token attributes.');
-        // } else if (array_key_exists('realm_access', $attributes) && array_key_exists('roles', $attributes['realm_access'])) {
-        } else if (isset($attributes['realm_access']['roles'])) {
-            $roles = in_array('admin', $attributes['realm_access']['roles']) ? ['ROLE_USER', 'OIDC_USER', 'ROLE_ADMIN', 'OIDC_ADMIN'] : ['ROLE_USER', 'OIDC_USER'];
-            $user->setRoles($roles);
+        if (!empty($attributes['realm_access']['roles'])) {
+            $currentRoles = $user->getRoles();
+            $newRoles = in_array('super_admin', $attributes['realm_access']['roles']) || in_array('admin', $attributes['realm_access']['roles'])
+                ? ['ROLE_USER', 'OIDC_USER', 'ROLE_ADMIN', 'OIDC_ADMIN']
+                : ['ROLE_USER', 'OIDC_USER'];
+            $user->setRoles(array_unique(array_merge($currentRoles, $newRoles)));
         }
-        
+
         $this->repository->save($user, true);
 
         return $user;

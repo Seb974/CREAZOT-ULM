@@ -98,6 +98,9 @@ class User implements UserInterface
     #[Groups(groups: ['User:read', 'User:write'])]
     private ?ProfilPilote $profilPilote = null;
 
+    #[ORM\Column(type: 'string', length: 255, unique: true, nullable: true)]
+    private ?string $keycloakId = null;
+
     public function getId(): ?Uuid
     {
         return $this->id;
@@ -167,6 +170,22 @@ class User implements UserInterface
     public function setProfilPilote(?ProfilPilote $profilPilote): self
     {
         $this->profilPilote = $profilPilote;
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function getKeycloakId(): ?string
+    {
+        return $this->keycloakId;
+    }
+
+    public function setKeycloakId(?string $keycloakId): self
+    {
+        $this->keycloakId = $keycloakId;
         return $this;
     }
 }

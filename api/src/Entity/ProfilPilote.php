@@ -31,6 +31,7 @@ use App\Entity\User;
                 'app.filter.profile.eleve',
                 'app.filter.profile.professionnel',
                 'app.filter.profile.instructeur',
+                'app.filter.profile.certificat_medical',
             ],
         ),
         new Post(),
@@ -87,6 +88,21 @@ class ProfilPilote
     #[ORM\OneToOne(mappedBy: 'profil', cascade: ['persist', 'remove'])]
     #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
     private ?CertificatMedical $certificatMedical = null;
+
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
+    public function getAvailableCertificate(): ?bool
+    {
+        if (!\is_null($this->certificatMedical)) {
+            
+            if (is_null($this->certificatMedical->getValidUntil())) return true;
+
+            $now = new \DateTimeImmutable('now');
+            $todayEnd = $now->setTime(23, 59, 59);
+
+            return $this->certificatMedical->getValidUntil() >= $todayEnd;
+        }
+        return false;
+    }
 
     public function __construct()
     {

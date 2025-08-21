@@ -21,8 +21,8 @@ export const ProfileShow = () => {
                             record.pilote.firstName.charAt(0).toUpperCase() + record.pilote.firstName.slice(1) : ''
                         }
                     />
-                    <DateField source="birthDate" label="Date de naissance"/>
                     <TextField source="pilote.email" label="Adresse email"/>
+                    <DateField source="birthDate" label="Date de naissance"/>
                     <ArrayField source="pilotQualifications" label="Qualifications">
                         <Datagrid
                             optimized

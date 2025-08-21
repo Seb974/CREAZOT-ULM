@@ -39,7 +39,7 @@ export const ProfilesEdit = () => {
   const transform = ({ qualifications, pilotQualifications, certificatMedical, ...data }) => {
     const updatedProfile = {
         ...data,
-        // pilote: getFormattedValueForBackEnd(data.pilote),
+        pilote: getFormattedValueForBackEnd(data.pilote),
         pilotQualifications: !isDefinedAndNotVoid(pilotQualifications) ? [] : 
             pilotQualifications.map(q => ({
                 ...q, 
@@ -80,8 +80,8 @@ export const ProfilesEdit = () => {
               <ReferenceInput reference="users" source="pilote.@id" readOnly>
                 <SelectInput label="Pilote" validate={required()} readOnly/>
               </ReferenceInput>
+              <TextInput source="pilote.email" label="Adresse email" readOnly helperText={`Modifiable uniquement via Administration`}/>
               <DateInput source="birthDate" label="Date de naissance" validate={required()}/>
-              <TextInput source="pilote.email" label="Adresse email" />
               <ArrayInput source="pilotQualifications" label="Qualifications">
                 <SimpleFormIterator inline disableReordering>
                     <ReferenceInput reference="qualifications" source="qualification.@id">
