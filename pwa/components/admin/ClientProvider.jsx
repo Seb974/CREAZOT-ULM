@@ -38,8 +38,13 @@ export const ClientProvider = ({ children }) => {
         }
     };
 
+    const updateClient = (newClient) => {
+        setClient(newClient);
+        sessionStorage.setItem("client", JSON.stringify(newClient));
+    };
+
     return (
-        <ClientContext.Provider value={{ client, loading, error }}>
+        <ClientContext.Provider value={{ client, loading, error, updateClient }}>
             { children }
         </ClientContext.Provider>
     );

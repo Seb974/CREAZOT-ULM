@@ -147,7 +147,7 @@ export const uploadImages = async (data, session) => {
               method: 'POST',
               body: formData,
               // @ts-ignore
-              headers: { Authorization: `Bearer ${session?.data?.accessToken}` },
+              headers: { Authorization: `Bearer ${session?.accessToken}` },
             });
     
             const jsonResponse = await response.json();
@@ -221,6 +221,10 @@ export const clientWithPaymentManagement = client => {
 
 export const clientWithMicrotrakTags = client => {
     return isDefined(client) && isDefined(client.hasMicrotrakTag) && client.hasMicrotrakTag;
+};
+
+export const clientWithWebshop = client => {
+    return isDefined(client) && isDefined(client.hasWebshop) && client.hasWebshop;
 };
 
 export const getDefaultLanding = client => {

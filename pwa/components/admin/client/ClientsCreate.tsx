@@ -2,16 +2,16 @@ import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput
 import { Create } from "react-admin";
 import { colors, objectToFormData, timezones, fileInputSX, sanitizeData } from "../../../app/lib/client";
 import { Box } from "@mui/material";
-import { useSession } from "next-auth/react";
 import { ColorPreview } from './ColorPreview';
 import { ThanksOptions } from './ThanksOptions';
+import { useClient } from '../../admin/ClientProvider';
 import { useSessionContext } from "../../admin/SessionContextProvider";
 
 export const ClientsCreate = () => {
 
     const notify = useNotify();
     const redirect = useRedirect();
-    // const session = useSession();
+    const { updateClient } = useClient();
     const { session } = useSessionContext();
 
     const onSubmit = async data => {
@@ -19,9 +19,13 @@ export const ClientsCreate = () => {
         const formData = objectToFormData(sanitizedData);
         try {
             // @ts-ignore
-            const response = await fetch('/clients', { method: 'POST', body: formData, headers: {'Authorization': `Bearer ${session?.data?.accessToken}`}});
+            const response = await fetch('/clients', { method: 'POST', body: formData, headers: {'Authorization': `Bearer ${session?.accessToken}`}});
         
             if (!response.ok) throw new Error('Erreur lors de l’envoi');
+
+            const newClient = await response.json();
+
+            updateClient(newClient);
             notify('Le client a bien été enregistré.', { type: 'success' });
             redirect('list', 'clients');
           } catch (error) {
@@ -49,6 +53,7 @@ export const ClientsCreate = () => {
                     hasEmailConfirmation: false,
                     hasPaymentManagement: false,
                     hasMicrotrakTag: false,
+                    hasWebshop: false,
                     airportCodes: record?.airportCodes?.map(code => ({ ...code, meteo: code.meteo ?? false, main: code.main ?? false })) ?? [],
                 })}
             >
@@ -158,6 +163,9 @@ export const ClientsCreate = () => {
                     <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
                         <Box flex={1}>
                             <BooleanInput source="hasMicrotrakTag" label="Balise(s) Microtrak" fullWidth/>
+                        </Box>
+                        <Box flex={1}>
+                            <BooleanInput source="hasWebshop" label="Site e-commerce lié" fullWidth/>
                         </Box>
                     </Box>
                     <ThanksOptions/>

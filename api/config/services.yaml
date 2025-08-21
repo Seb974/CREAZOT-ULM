@@ -34,7 +34,7 @@ services:
         arguments:
             $microtrakApiKey: '%microtrak.api_key%'
 
-    App\Controller\WixController:
+    App\Controller\ShopController:
         arguments:
             $webhookSecret: '%wix.webhook_secret%'
 

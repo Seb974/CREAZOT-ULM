@@ -11,7 +11,7 @@ use App\Service\ClientGetter;
 use Symfony\Component\Mime\Email;
 use Psr\Log\LoggerInterface;
 
-class WixController extends AbstractController
+class ShopController extends AbstractController
 {
     private string $webhookSecret;
     private DynamicMailerFactory $mailerFactory;

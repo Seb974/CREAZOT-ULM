@@ -22,6 +22,8 @@ import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
+import { useClient } from '../../admin/ClientProvider';
+import { isDefined } from "../../../app/lib/utils";
 
 
 export interface Props {
@@ -30,12 +32,15 @@ export interface Props {
   page: number;
 }
 
-const ListActions = () => (
-  <TopToolbar>
-      <CreateButton/>
-      <ExportButton/>
-  </TopToolbar>
-);
+const ListActions = () => {
+  const { client } = useClient();
+
+  return (
+    <TopToolbar>
+        { !isDefined(client) && <CreateButton/> }
+        <ExportButton/>
+    </TopToolbar>
+)};
 
 export const ClientsList: NextPage<Props> = ({ data, hubURL, page }) => {
   const collection = useMercure(data, hubURL);

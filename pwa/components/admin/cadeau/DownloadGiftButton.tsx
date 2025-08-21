@@ -54,7 +54,7 @@ const DownloadGiftButton = () => {
             const response = await fetch(`/admin/bons-cadeaux/${record.originId}/download`, {
                 method: 'GET',
                 // @ts-ignore
-                headers: new Headers({'Authorization': `Bearer ${session?.data?.accessToken}`})
+                headers: new Headers({'Authorization': `Bearer ${session?.accessToken}`})
             })
             const blob = await response.blob();
             const link = document.createElement('a');

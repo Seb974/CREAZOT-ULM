@@ -89,7 +89,6 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
       // Save the access token in the Session for API calls
       if (token) {
         const decodedToken = JSON.parse(decode(token.accessToken));
-        // const roles = isDefined(decodedToken) && isDefinedAndNotVoid(decodedToken["realm_access"]) && isDefinedAndNotVoid(decodedToken["realm_access"]["roles"]) && isDefined(decodedToken["realm_access"]["roles"].find("admin")) ? 'admin' : 'user';
         session.accessToken = token.accessToken;
         session.idToken = token.idToken;
         session.error = token.error;
