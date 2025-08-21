@@ -111,6 +111,10 @@ class Circuit
     #[Groups(groups: ['Circuit:write', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read', 'Landing:read'])]
     private ?bool $hadDefaultLanding = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ['Circuit:write', 'Circuit:read'])]
+    private ?string $webshopId = null;
+
     public function __construct()
     {
         $this->qualifications = new ArrayCollection();
@@ -279,6 +283,18 @@ class Circuit
     public function setHadDefaultLanding(?bool $hadDefaultLanding): static
     {
         $this->hadDefaultLanding = $hadDefaultLanding;
+
+        return $this;
+    }
+
+    public function getWebshopId(): ?string
+    {
+        return $this->webshopId;
+    }
+
+    public function setWebshopId(?string $webshopId): static
+    {
+        $this->webshopId = $webshopId;
 
         return $this;
     }

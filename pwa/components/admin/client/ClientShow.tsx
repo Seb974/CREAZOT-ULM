@@ -87,6 +87,8 @@ export const ClientShow = () => {
                     <BooleanField source="hasLandingManagement" label="Gestion des atterrissages" textAlign="center"/>
                     <BooleanField source="hasPaymentManagement" label="Gestion des paiements" textAlign="center"/>
                     <BooleanField source="hasPassengerRegistration" label="Enregistrement des passagers" textAlign="center"/>
+                    <BooleanField source="hasMicrotrakTag" label="Balise(s) Microtrak" textAlign="center"/>
+                    <BooleanField source="hasWebshop" label="Site e-commerce lié" textAlign="center"/>
                     <TextField source="thanksTitle" label="Titre du formulaire"/>
                     <RichTextField source="thanksMessage" label="Contenu de la page de redirection"/>
                     <BooleanField source="hasEmailConfirmation" label="Email de confirmation" textAlign="center"/>

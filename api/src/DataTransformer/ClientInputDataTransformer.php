@@ -68,6 +68,7 @@ class ClientInputDataTransformer implements ProcessorInterface
         $client->setConfirmationSubject($data->confirmationSubject);
         $client->setHasPaymentManagement($data->$hasPaymentManagement);
         $client->setHasMicrotrakTag($data->$hasMicrotrakTag);
+        $client->setHasWebshop($data->$hasWebshop);
 
         // Uploads de fichiers
         if ($data->logo instanceof UploadedFile) {

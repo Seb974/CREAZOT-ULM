@@ -31,7 +31,9 @@ class Data
         'hasEmailConfirmation' => true,
         'emailAddressSender' => 'contact@planetair974.com',
         'confirmationSubject' => 'Vos souvenirs de l\’île intense vous attendent 📸✨',
-        'hasPaymentManagement' => true
+        'hasPaymentManagement' => true,
+        'hasMicrotrakTag' => true,
+        'hasWebshop' => true
     ];
 
     private $natures = [

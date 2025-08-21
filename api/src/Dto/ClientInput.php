@@ -136,4 +136,7 @@ final class ClientInput
 
     #[Groups(groups: ['Client:write'])]
     public ?bool $hasMicrotrakTag = null;
+
+    #[Groups(groups: ['Client:write'])]
+    public ?bool $hasWebshop = null;
 }

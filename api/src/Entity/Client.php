@@ -239,6 +239,10 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?bool $hasMicrotrakTag = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasWebshop = null;
+
     #[Groups(groups: ['Client:read'])]
     public function getEmailParams(): string
     {
@@ -757,6 +761,18 @@ class Client
     public function setHasMicrotrakTag(?bool $hasMicrotrakTag): static
     {
         $this->hasMicrotrakTag = $hasMicrotrakTag;
+
+        return $this;
+    }
+
+    public function getHasWebshop(): ?bool
+    {
+        return $this->hasWebshop;
+    }
+
+    public function setHasWebshop(?bool $hasWebshop): static
+    {
+        $this->hasWebshop = $hasWebshop;
 
         return $this;
     }
