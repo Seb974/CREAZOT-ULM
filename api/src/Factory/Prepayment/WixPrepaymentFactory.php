@@ -2,9 +2,10 @@
 
 namespace App\Factory\Prepayment;
 
-use App\Entity\Prepayment;
+use App\Entity\Cadeau;
 use App\Entity\Combinaison;
 use App\Entity\Circuit;
+use App\Entity\Origine;
 use App\Repository\CircuitRepository;
 use App\Repository\CombinaisonRepository;
 use App\Repository\OrigineRepository;
@@ -25,19 +26,20 @@ class WixPrepaymentFactory implements PrepaymentFactoryInterface
             return $prepayments;
         }
 
+        $code = $this->generateCode();
         $creationDate = $this->getDate($payload['_dateCreated'] ?? null, 'now');
+        $startValidity = \DateTime::createFromImmutable($creationDate);
         $endValidity = $this->getEndValidity($creationDate);
-        $code = $this->getString($payload['_id'] ?? null, '');
         $paymentId = $this->getString($payload['number'] ?? null, '');
         $offreur = $this->getIdentity($payload['buyerInfo'] ?? []);
         $beneficiaire = $this->getIdentity($payload['shippingInfo']['shipmentDetails'] ?? []);
         $email = $this->getString($payload['buyerInfo']['email'] ?? null, '');
         $telephone = $this->getString($payload['shippingInfo']['shipmentDetails']['phone'] ?? null, '');
-        $isGift = $this->isSamePerson($offreur, $beneficiaire);
+        $isGift = !$this->isSamePerson($offreur, $beneficiaire);
         $origine = $this->getOrigine($this->getString($payload['channelInfo']['type'] ?? null, 'web'));
 
         foreach ($payload['lineItems'] as $item) {
-            $prepayment = new Prepayment();
+            $prepayment = new Cadeau();
             $webshopId = $this->getString($item['productId'] ?? null, '');
             $quantity = $this->getInt($item['quantity'] ?? 1, 1);
 
@@ -46,7 +48,7 @@ class WixPrepaymentFactory implements PrepaymentFactoryInterface
             $prixTotal = $this->getFloat($item['totalPrice'] ?? null, $this->getDefaultPrice($circuit, $options, $quantity));
 
             $prepayment->setQuantite($quantity)
-                ->setDate($creationDate)
+                ->setDate($startValidity)
                 ->setFin($endValidity)
                 ->setCode($code)
                 ->setPaymentId($paymentId)
@@ -59,6 +61,7 @@ class WixPrepaymentFactory implements PrepaymentFactoryInterface
                 ->setUsed(false)
                 ->setCircuit($circuit)
                 ->setOptions($options)
+                ->addOrigine($origine)
                 ->setPrix($prixTotal);
 
             $prepayments[] = $prepayment;
@@ -66,6 +69,12 @@ class WixPrepaymentFactory implements PrepaymentFactoryInterface
 
         return $prepayments;
     }
+
+    private function generateCode(): string
+    {
+        return substr(base_convert(time(), 10, 36), -6) . substr(base_convert(mt_rand(), 10, 36), 0, 6);
+    }
+
 
     private function getOptions(array $item, int $quantity): ?Combinaison
     {
@@ -100,9 +109,9 @@ class WixPrepaymentFactory implements PrepaymentFactoryInterface
         return $this->origineRepository->findOneByNameInsensitive($origine);
     }
 
-    private function getEndValidity(DateTimeImmutable $date): DateTimeImmutable
+    private function getEndValidity(DateTimeImmutable $date): \DateTime
     {
-        return $date->modify('+1 year +1 day');
+        return \DateTime::createFromImmutable($date->modify('+1 year +1 day'));
     }
 
     private function isSamePerson(string $buyer, string $receiver): bool

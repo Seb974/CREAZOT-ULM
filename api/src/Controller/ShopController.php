@@ -49,6 +49,8 @@ class ShopController extends AbstractController
             return new Response('JSON invalide', Response::HTTP_BAD_REQUEST);
         }
 
+        $payload = $payload['event'] ?? $payload;
+
         $factory = $factoryResolver->resolve('wix');
         $prepayments = $factory->createPrepaymentFromPayload($payload);
 
@@ -67,8 +69,7 @@ class ShopController extends AbstractController
             throw $e;
         }
         
-        $this->sendPayloadByEmail($payload);
-
+        // $this->sendPayloadByEmail($payload);
         return $this->json($prepayments, 200, [], ['groups' => 'Cadeau:read']);
     }
 
