@@ -1,4 +1,4 @@
-import { Show, TabbedShowLayout, TextField, DateField, BooleanField, FunctionField, RichTextField, ArrayField, Datagrid } from 'react-admin';
+import { Show, TabbedShowLayout, TextField, DateField, BooleanField, FunctionField, RichTextField, ArrayField, Datagrid, NumberField } from 'react-admin';
 import { getColor } from '../../../app/lib/client';
 import { isDefined } from '../../../app/lib/utils';
 import { Box } from "@mui/material";
@@ -89,6 +89,8 @@ export const ClientShow = () => {
                     <BooleanField source="hasPassengerRegistration" label="Enregistrement des passagers" textAlign="center"/>
                     <BooleanField source="hasMicrotrakTag" label="Balise(s) Microtrak" textAlign="center"/>
                     <BooleanField source="hasWebshop" label="Site e-commerce lié" textAlign="center"/>
+                    <NumberField source="seuilMedical" label="Alerte sur les certificats médicaux (en jours)" />
+                    <NumberField source="seuilQualifications" label="Alerte sur les qualifications (en jours)" />
                     <TextField source="thanksTitle" label="Titre du formulaire"/>
                     <RichTextField source="thanksMessage" label="Contenu de la page de redirection"/>
                     <BooleanField source="hasEmailConfirmation" label="Email de confirmation" textAlign="center"/>

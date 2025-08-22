@@ -1,11 +1,12 @@
 import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, SimpleFormIterator, ArrayInput, TabbedForm, required, useRedirect, useNotify } from "react-admin";
 import { Create } from "react-admin";
 import { colors, objectToFormData, timezones, fileInputSX, sanitizeData } from "../../../app/lib/client";
-import { Box } from "@mui/material";
+import { Typography, Divider, Box } from '@mui/material';
 import { ColorPreview } from './ColorPreview';
 import { ThanksOptions } from './ThanksOptions';
 import { useClient } from '../../admin/ClientProvider';
 import { useSessionContext } from "../../admin/SessionContextProvider";
+import { min } from "moment";
 
 export const ClientsCreate = () => {
 
@@ -54,6 +55,8 @@ export const ClientsCreate = () => {
                     hasPaymentManagement: false,
                     hasMicrotrakTag: false,
                     hasWebshop: false,
+                    seuilMedical: 30,
+                    seuilQualifications: 30,
                     airportCodes: record?.airportCodes?.map(code => ({ ...code, meteo: code.meteo ?? false, main: code.main ?? false })) ?? [],
                 })}
             >
@@ -166,6 +169,18 @@ export const ClientsCreate = () => {
                         </Box>
                         <Box flex={1}>
                             <BooleanInput source="hasWebshop" label="Site e-commerce lié" fullWidth/>
+                        </Box>
+                    </Box>
+                    <Divider sx={{ mt: 2, borderBottomWidth: 2, borderColor: '#666' }} />
+                    <Typography variant="h6" gutterBottom>
+                        Seuils d'alerte
+                    </Typography>
+                    <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                        <Box flex={1}>
+                            <NumberInput source="seuilMedical" label="Alerte sur les certificats médicaux" min={ 0 } helperText="Nb de jour(s) avant la fin de validité"/>
+                        </Box>
+                        <Box flex={1}>
+                            <NumberInput source="seuilQualifications" label="Alerte sur les qualifications" min={ 0 } helperText="Nb de jour(s) avant la fin de validité"/>
                         </Box>
                     </Box>
                     <ThanksOptions/>

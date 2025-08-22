@@ -33,7 +33,9 @@ class Data
         'confirmationSubject' => 'Vos souvenirs de l\’île intense vous attendent 📸✨',
         'hasPaymentManagement' => true,
         'hasMicrotrakTag' => true,
-        'hasWebshop' => true
+        'hasWebshop' => true,
+        'seuilMedical' => 90,
+        'seuilQualifications' => 90
     ];
 
     private $natures = [

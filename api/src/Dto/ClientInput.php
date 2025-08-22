@@ -139,4 +139,10 @@ final class ClientInput
 
     #[Groups(groups: ['Client:write'])]
     public ?bool $hasWebshop = null;
+
+    #[Groups(groups: ['Client:write'])]
+    public ?int $seuilMedical = null;
+
+    #[Groups(groups: ['Client:write'])]
+    public ?int $seuilQualifications = null;
 }

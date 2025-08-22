@@ -243,6 +243,14 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?bool $hasWebshop = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?int $seuilMedical = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?int $seuilQualifications = null;
+
     #[Groups(groups: ['Client:read'])]
     public function getEmailParams(): string
     {
@@ -773,6 +781,30 @@ class Client
     public function setHasWebshop(?bool $hasWebshop): static
     {
         $this->hasWebshop = $hasWebshop;
+
+        return $this;
+    }
+
+    public function getSeuilMedical(): ?int
+    {
+        return $this->seuilMedical;
+    }
+
+    public function setSeuilMedical(?int $seuilMedical): static
+    {
+        $this->seuilMedical = $seuilMedical;
+
+        return $this;
+    }
+
+    public function getSeuilQualifications(): ?int
+    {
+        return $this->seuilQualifications;
+    }
+
+    public function setSeuilQualifications(?int $seuilQualifications): static
+    {
+        $this->seuilQualifications = $seuilQualifications;
 
         return $this;
     }

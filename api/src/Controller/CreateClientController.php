@@ -50,6 +50,8 @@ class CreateClientController extends AbstractController
         $dto->hasPaymentManagement = $this->getBool($request, 'hasPaymentManagement');
         $dto->hasMicrotrakTag = $this->getBool($request, 'hasMicrotrakTag');
         $dto->hasWebshop = $this->getBool($request, 'hasWebshop');
+        $dto->seuilMedical = $this->getInt($request, 'seuilMedical');
+        $dto->seuilQualifications = $this->getInt($request, 'seuilQualifications');
 
         // Fichiers
         $dto->logo = $request->files->get('logo');

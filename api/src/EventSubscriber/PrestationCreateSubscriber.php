@@ -17,6 +17,7 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use App\Service\DynamicMailerFactory;
 use App\Service\ClientGetter;
+use App\Service\PilotValidityChecker;
 use Symfony\Component\Mailer\Mailer;
 use App\Entity\Client;
 use App\Entity\Vol;
@@ -25,12 +26,14 @@ use App\Entity\User;
 final class PrestationCreateSubscriber implements EventSubscriberInterface
 {
     private DynamicMailerFactory $dynamicMailerFactory;
+    private PilotValidityChecker $pilotValidityChecker;
     private ClientGetter $clientGetter;
     private Security $security;
 
-    public function __construct(DynamicMailerFactory $dynamicMailerFactory, ClientGetter $clientGetter, Security $security)
+    public function __construct(DynamicMailerFactory $dynamicMailerFactory, ClientGetter $clientGetter, Security $security, PilotValidityChecker $pilotValidityChecker)
     {
         $this->dynamicMailerFactory = $dynamicMailerFactory;
+        $this->pilotValidityChecker = $pilotValidityChecker;
         $this->clientGetter = $clientGetter;
         $this->security = $security;
     }
@@ -62,6 +65,7 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
     
             $this->setFlightsCost($prestation, $aeronef);
             $this->checkDeadlines($aeronef);
+            $this->pilotValidityChecker->checkAndNotify($user);
         }
     }
 

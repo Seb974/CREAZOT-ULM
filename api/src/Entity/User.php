@@ -95,7 +95,7 @@ class User implements UserInterface
     private array $roles = [];
 
     #[ORM\OneToOne(targetEntity: ProfilPilote::class, mappedBy:'pilote', cascade: ['persist', 'remove'])]
-    #[Groups(groups: ['User:read', 'User:write'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read'])]
     private ?ProfilPilote $profilPilote = null;
 
     #[ORM\Column(type: 'string', length: 255, unique: true, nullable: true)]
@@ -176,6 +176,16 @@ class User implements UserInterface
     public function getEmail(): ?string
     {
         return $this->email;
+    }
+
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
     }
 
     public function getKeycloakId(): ?string

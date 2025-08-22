@@ -90,6 +90,10 @@ class CertificatMedical
     #[Groups(groups: ['CertificatMedical:write', 'CertificatMedical:read', 'Profil_pilote:write', 'Profil_pilote:read', 'Prestation:read', 'Reservation:read'])]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['CertificatMedical:write', 'CertificatMedical:read', 'Profil_pilote:write', 'Profil_pilote:read', 'Prestation:read', 'Reservation:read'])]
+    private ?bool $isAlertSent = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -199,6 +203,18 @@ class CertificatMedical
     public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getIsAlertSent(): ?bool
+    {
+        return $this->isAlertSent;
+    }
+
+    public function setIsAlertSent(?bool $isAlertSent): static
+    {
+        $this->isAlertSent = $isAlertSent;
 
         return $this;
     }

@@ -70,6 +70,10 @@ class PilotQualification
     #[Groups(groups: ['PilotQualification:write', 'PilotQualification:read', 'Profil_pilote:write', 'Profil_pilote:read', 'Prestation:read', 'Reservation:read'])]
     private ?\DateTimeImmutable $validUntil = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['PilotQualification:write', 'PilotQualification:read', 'Profil_pilote:write', 'Profil_pilote:read', 'Prestation:read', 'Reservation:read'])]
+    private ?bool $isAlertSent = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -119,6 +123,18 @@ class PilotQualification
     public function setValidUntil(?\DateTimeImmutable $validUntil): static
     {
         $this->validUntil = $validUntil;
+
+        return $this;
+    }
+
+    public function getIsAlertSent(): ?bool
+    {
+        return $this->isAlertSent;
+    }
+
+    public function setIsAlertSent(?bool $isAlertSent): static
+    {
+        $this->isAlertSent = $isAlertSent;
 
         return $this;
     }

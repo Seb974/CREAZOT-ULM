@@ -1,7 +1,7 @@
 import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, SimpleFormIterator, ArrayInput, TabbedForm, useRedirect, useNotify } from "react-admin";
 import { Edit } from "react-admin";
 import { timezones, fileInputSX, uploadImages, sanitizeData } from "../../../app/lib/client";
-import { Box } from "@mui/material";
+import { Typography, Divider, Box } from '@mui/material';
 import { ColorPreview } from './ColorPreview';
 import { ThanksOptions } from './ThanksOptions';
 import { useClient } from '../../admin/ClientProvider';
@@ -70,6 +70,8 @@ export const ClientsEdit = () => {
                     hasPaymentManagement: false,
                     hasMicrotrakTag: false,
                     hasWebshop: false,
+                    seuilMedical: 30,
+                    seuilQualifications: 30,
                     airportCodes: record?.airportCodes?.map(code => ({ ...code, meteo: code.meteo ?? false, main: code.main ?? false })) ?? [],
                     })}
                 >   
@@ -195,29 +197,41 @@ export const ClientsEdit = () => {
                             </Box> 
                         </Box>
                         <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                                <Box flex={1}>
-                                    <BooleanInput source="hasOriginContact" label="Origine du contact" fullWidth/>
-                                </Box>
-                                <Box flex={1}>
-                                    <BooleanInput source="hasLandingManagement" label="Gestion des atterrissages" fullWidth/>
-                                </Box>
+                            <Box flex={1}>
+                                <BooleanInput source="hasOriginContact" label="Origine du contact" fullWidth/>
                             </Box>
-                            <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                                <Box flex={1}>
-                                    <BooleanInput source="hasPaymentManagement" label="Gestion des paiements" fullWidth/>
-                                </Box>
-                                <Box flex={1}>
-                                    <BooleanInput source="hasPassengerRegistration" label="Enregistrement des passagers" fullWidth/>
-                                </Box>
+                            <Box flex={1}>
+                                <BooleanInput source="hasLandingManagement" label="Gestion des atterrissages" fullWidth/>
                             </Box>
-                            <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                                <Box flex={1}>
-                                    <BooleanInput source="hasMicrotrakTag" label="Balise(s) Microtrak" fullWidth/>
-                                </Box>
-                                <Box flex={1}>
-                                    <BooleanInput source="hasWebshop" label="Site e-commerce lié" fullWidth/>
-                                </Box>
+                        </Box>
+                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                            <Box flex={1}>
+                                <BooleanInput source="hasPaymentManagement" label="Gestion des paiements" fullWidth/>
                             </Box>
+                            <Box flex={1}>
+                                <BooleanInput source="hasPassengerRegistration" label="Enregistrement des passagers" fullWidth/>
+                            </Box>
+                        </Box>
+                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                            <Box flex={1}>
+                                <BooleanInput source="hasMicrotrakTag" label="Balise(s) Microtrak" fullWidth/>
+                            </Box>
+                            <Box flex={1}>
+                                <BooleanInput source="hasWebshop" label="Site e-commerce lié" fullWidth/>
+                            </Box>
+                        </Box>
+                        <Divider sx={{ mt: 2, borderBottomWidth: 2, borderColor: '#666' }} />
+                        <Typography variant="h6" gutterBottom>
+                            Seuils d'alerte
+                        </Typography>
+                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                            <Box flex={1}>
+                                <NumberInput source="seuilMedical" label="Alerte sur les certificats médicaux" min={ 0 } helperText="Nb de jour(s) avant la fin de validité"/>
+                            </Box>
+                            <Box flex={1}>
+                                <NumberInput source="seuilQualifications" label="Alerte sur les qualifications" min={ 0 } helperText="Nb de jour(s) avant la fin de validité"/>
+                            </Box>
+                        </Box>
                         <ThanksOptions/>
                     </TabbedForm.Tab>
                 </TabbedForm>
