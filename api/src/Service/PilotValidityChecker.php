@@ -30,12 +30,13 @@ class PilotValidityChecker
             }
         }
 
-        foreach ($profil->getPilotQualifications() as $qualification) {
-            $validUntil = $qualification->getValidUntil();
-            if (!$qualification->getIsAlertSent() && $this->isValidityBelowThreshold($validUntil ?? null, $qualificationThreshold)) {
+        foreach ($profil->getPilotQualifications() as $pilotqualification) {
+            $validUntil = $pilotqualification->getValidUntil();
+            if (!$pilotqualification->getIsAlertSent() && $this->isValidityBelowThreshold($validUntil ?? null, $qualificationThreshold)) {
                 if ($validUntil) {
-                    $alerts[] = $this->formatValidityAlert("qualification '" . $qualification->getName() . "'", $validUntil);
-                    $qualification->setIsAlertSent(true); 
+                    $qualification = $pilotqualification->getQualification();
+                    $alerts[] = $this->formatValidityAlert("qualification '" . $qualification->getNom() . "'", $validUntil);
+                    $pilotqualification->setIsAlertSent(true); 
                 }
             }
         }
@@ -46,7 +47,8 @@ class PilotValidityChecker
                 $body = "Bonjour {$user->getFirstName()},\n\n" .
                         "Nous vous rappelons que :\n" .
                         implode("\n", $alerts) .
-                        "\n\nMerci de régulariser avant expiration.";
+                        "\n\nMerci de régulariser avant expiration.".
+                        "\n\nL'équipe de " . $client->getName() . ".";
                 $email = (new Email())
                     ->from($client->getEmailAddressSender())
                     ->to($user->getEmail())

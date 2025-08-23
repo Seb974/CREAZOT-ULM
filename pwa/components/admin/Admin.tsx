@@ -1,7 +1,7 @@
 "use client";
 
 import Head from "next/head";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { type DataProvider, defaultTheme, CustomRoutes } from "react-admin";
 import { Route } from 'react-router-dom';
 import { signIn } from "next-auth/react";
@@ -124,9 +124,6 @@ const AdminWithOIDC = () => {
   return (
       // @ts-ignore
       <AdminAdapter session={session}>
-        {/* <CustomRoutes>
-            <Route path="/vols" element={<PrestationsList />} />
-        </CustomRoutes> */}
         <ResourceGuesser name="clients" {...clientResourceProps}/>
         <ResourceGuesser name="prestations" {...prestationResourceProps} />
         <ResourceGuesser name="vols" {...volResourceProps}/>
@@ -158,7 +155,16 @@ const AdminWithOIDC = () => {
 const Admin = () => {
 
   const { client } = useClient();
-  
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+
+    if (url.searchParams.has("error")) {
+        url.searchParams.delete("error");
+        window.history.replaceState({}, document.title, url.pathname + (url.search ? url.search : "") + url.hash);
+    }
+  }, []);
+
   return (
   <>
     <Head>
@@ -166,10 +172,9 @@ const Admin = () => {
     </Head>  
 
     <SessionContextProvider>
-      {/*@ts-ignore*/}
-      <AdminWithOIDC />
+        {/*@ts-ignore*/}
+        <AdminWithOIDC />
     </SessionContextProvider>
-
   </>
 )};
 

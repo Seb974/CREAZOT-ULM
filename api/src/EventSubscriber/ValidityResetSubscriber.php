@@ -3,6 +3,7 @@
 namespace App\EventSubscriber;
 
 use Doctrine\ORM\Events;
+use App\Entity\ProfilPilote;
 use App\Entity\CertificatMedical;
 use App\Entity\PilotQualification;
 use Doctrine\Common\EventSubscriber;
@@ -25,12 +26,19 @@ final class ValidityResetSubscriber implements EventSubscriberInterface
     public function preUpdate(ViewEvent $event): void
     {
         $entity = $event->getControllerResult();
-        $method = $event->getRequest()->getMethod(); 
+        $method = $event->getRequest()->getMethod();
 
-        if (($entity instanceof CertificatMedical || $entity instanceof PilotQualification) && in_array($method, [Request::METHOD_PUT, Request::METHOD_PATCH])) {
-            $validUntil = $entity->getValidUntil();
-            if ($validUntil instanceof \DateTimeInterface && $validUntil > new \DateTimeImmutable('today')) {
-                $entity->setIsAlertSent(false);
+        if ($entity instanceof ProfilPilote && in_array($method, [Request::METHOD_PUT, Request::METHOD_PATCH])) {
+            $validitiesToCheck = array_merge(
+                $entity->getCertificatMedical() ? [$entity->getCertificatMedical()] : [],
+                $entity->getPilotQualifications() ? $entity->getPilotQualifications()->toArray() : []
+            );
+
+            foreach ($validitiesToCheck as $item) {
+                $validUntil = $item->getValidUntil();
+                if (($validUntil instanceof \DateTimeInterface && $validUntil > new \DateTimeImmutable('today')) || \is_null($validUntil)) {
+                    $item->setIsAlertSent(false);
+                }
             }
         }
     }
