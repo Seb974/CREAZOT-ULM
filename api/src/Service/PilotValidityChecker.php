@@ -11,16 +11,18 @@ class PilotValidityChecker
 {
     public function __construct(private DynamicMailerFactory $dynamicMailerFactory, private ClientGetter $clientGetter) {}
 
-    public function checkAndNotify(User $user, int $threshold = 30): void
+    public function checkAndNotify(User $user): void
     {
         $profil = $user->getProfilPilote();
         if (!$profil) return; 
 
         $alerts = [];
         $client = $this->clientGetter->get();
+        $medicalThreshold = $client->getSeuilMedical() ?? 30;
+        $qualificationThreshold = $client->getSeuilQualifications() ?? 30;
 
         $certificatMedical = $profil->getCertificatMedical();
-        if ($certificatMedical && !$certificatMedical->getIsAlertSent() && $this->isValidityBelowThreshold($certificatMedical->getValidUntil() ?? null, $threshold)) {
+        if ($certificatMedical && !$certificatMedical->getIsAlertSent() && $this->isValidityBelowThreshold($certificatMedical->getValidUntil() ?? null, $medicalThreshold)) {
             $validUntil = $certificatMedical->getValidUntil();
             if ($validUntil) {
                 $alerts[] = $this->formatValidityAlert("certificat médical", $validUntil);
@@ -30,7 +32,7 @@ class PilotValidityChecker
 
         foreach ($profil->getPilotQualifications() as $qualification) {
             $validUntil = $qualification->getValidUntil();
-            if (!$qualification->getIsAlertSent() && $this->isValidityBelowThreshold($validUntil ?? null, $threshold)) {
+            if (!$qualification->getIsAlertSent() && $this->isValidityBelowThreshold($validUntil ?? null, $qualificationThreshold)) {
                 if ($validUntil) {
                     $alerts[] = $this->formatValidityAlert("qualification '" . $qualification->getName() . "'", $validUntil);
                     $qualification->setIsAlertSent(true); 
