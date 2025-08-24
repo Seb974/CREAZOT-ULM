@@ -26,7 +26,7 @@ import { type PagedCollection } from "../../../types/collection";
 import { isDefined, toLocalDateString } from "../../../app/lib/utils";
 import { useMediaQuery, Theme } from '@mui/material';
 import { useClient } from '../../admin/ClientProvider';
-import { clientWithOptions } from "../../../app/lib/client";
+import { clientWithLandingManagement, clientWithOptions } from "../../../app/lib/client";
 import { useSessionContext } from "../../admin/SessionContextProvider";
 
 export interface Props {
@@ -146,6 +146,7 @@ const CustomBody = (props) => {
 
     const { data, isLoading } = useListContext();
     const { session } = useSessionContext();
+    const { client } = useClient();
     const user = session?.user;
     const hasAdminAccess = user => isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin");
   
@@ -155,12 +156,16 @@ const CustomBody = (props) => {
     const totalCoutPilote = data.reduce((sum, row) => sum + row.cout, 0);
     const totalCA = data.reduce((sum, row) => sum + row.prix, 0);
 
+    const mergedColumns = clientWithLandingManagement(client) ?
+        (hasAdminAccess(user) ? 5 : 4) : 
+        (hasAdminAccess(user) ? 4 : 3);
+
     return (
       <Fragment>
         <DatagridBody {...props} />
         <TableFooter>
           <TableRow sx={{ backgroundColor: '#ededed', fontStyle: 'italic', fontWeight: 'bold', color: '#555'  }}>
-              <TableCell colSpan={hasAdminAccess(user) ? 5 : 4} sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
+              <TableCell colSpan={ mergedColumns } sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
                 Totaux
               </TableCell>
               <TableCell style={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'right' }}>
@@ -219,7 +224,7 @@ const CustomDatagrid = () => {
     };
 
     return (
-      <Datagrid body={<CustomBody/>} expand={<LandingsExpansion />} bulkActionButtons={ isAdmin } sx={{'& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
+      <Datagrid body={<CustomBody/>} expand={clientWithLandingManagement(client) && <LandingsExpansion/>} bulkActionButtons={ isAdmin } sx={{'& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
             <DateField source="prestation.date" label="Date" sortable={ true }/>
             <TextField source="prestation.aeronef.immatriculation" label="Aéronef" sortable={ true }/>
             <FunctionField

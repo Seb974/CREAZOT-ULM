@@ -1,5 +1,5 @@
 import { Show, FunctionField, ArrayField, Datagrid, DateField, TabbedShowLayout, TextField, NumberField } from 'react-admin';
-import { getShipStyle, isDefined } from '../../../app/lib/utils';
+import { decimalToTime, getShipStyle, isDefined } from '../../../app/lib/utils';
 import { certificatMedicalTypes } from '../../../app/lib/client';
 import Chip from '@mui/material/Chip';
 
@@ -23,6 +23,11 @@ export const ProfileShow = () => {
                     />
                     <TextField source="pilote.email" label="Adresse email"/>
                     <DateField source="birthDate" label="Date de naissance"/>
+                    <FunctionField
+                        label="Total des heures de vol"
+                        render={record => isDefined(record?.totalFlightHours) ? decimalToTime(record.totalFlightHours) : "00:00"}
+                        textAlign="center"
+                    />
                     <ArrayField source="pilotQualifications" label="Qualifications">
                         <Datagrid
                             optimized

@@ -252,3 +252,21 @@ export const isValidNumber = (value) => {
   return !isNaN(num) && num > 0;
 };
 
+export const decimalToTime = (decimalHour) => {
+  if (decimalHour == null || isNaN(decimalHour)) return "";
+  const hours = Math.floor(decimalHour);
+  const minutes = Math.round((decimalHour - hours) * 60);
+
+  const finalHours = (minutes === 60) ? hours + 1 : hours;
+  const finalMinutes = (minutes === 60) ? 0 : minutes;
+  return `${finalHours}:${finalMinutes}`;   // ${String(finalMinutes).padStart(2, "0")}`
+};
+
+export const timeToDecimal = (timeStr) => {
+  if (!timeStr) return null;
+  const parts = timeStr.split(":");
+
+  const [hours, minutes] = parts.map(Number);
+  if (isNaN(hours) || isNaN(minutes)) return null;
+  return hours + (minutes / 60);
+};

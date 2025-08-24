@@ -1,5 +1,5 @@
 import { Edit, ReferenceInput, ArrayInput, SimpleFormIterator, SelectInput, required, DateInput, TabbedForm, NumberInput, TextInput } from "react-admin";
-import { calculateValidUntil, getFormattedValueForBackEnd, getValidityDurationMonths, isDefined, isDefinedAndNotVoid, isValidNumber } from "../../../app/lib/utils";
+import { calculateValidUntil, decimalToTime, getFormattedValueForBackEnd, getValidityDurationMonths, isDefined, isDefinedAndNotVoid, isValidNumber, timeToDecimal } from "../../../app/lib/utils";
 import { certificatMedicalTypes, infiniteCertificateTypes } from "../../../app/lib/client";
 import { useWatch, useFormContext } from 'react-hook-form';
 import { useEffect } from "react";
@@ -66,6 +66,7 @@ export const ProfilesEdit = () => {
             defaultValues={(record) => ({
                 ...record,
                 birthDate: new Date(),
+                totalFlightHours: 0,
                 pilotQualifications: record?.pilotQualifications?.map(q => ({...q, dateObtention: new Date()})) ?? [],
                 certificatMedical: {
                   dateObtention: new Date(),
@@ -82,6 +83,7 @@ export const ProfilesEdit = () => {
               </ReferenceInput>
               <TextInput source="pilote.email" label="Adresse email" readOnly helperText={`Modifiable uniquement via Administration`}/>
               <DateInput source="birthDate" label="Date de naissance" validate={required()}/>
+              <TextInput source="totalFlightHours" label="Total des heures de vol" format={ decimalToTime } parse={ timeToDecimal }/>
               <ArrayInput source="pilotQualifications" label="Qualifications">
                 <SimpleFormIterator inline disableReordering>
                     <ReferenceInput reference="qualifications" source="qualification.@id">

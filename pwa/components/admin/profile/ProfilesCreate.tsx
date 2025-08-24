@@ -1,5 +1,5 @@
 import { ReferenceInput, Create, ArrayInput, SimpleFormIterator, useCreate, useRedirect, useNotify, DateInput, BooleanInput, required, SelectInput, TabbedForm, NumberInput, TextInput } from "react-admin";
-import { calculateValidUntil, getFormattedValueForBackEnd, getValidityDurationMonths, isDefined, isDefinedAndNotVoid, isValidNumber } from "../../../app/lib/utils";
+import { calculateValidUntil, decimalToTime, getFormattedValueForBackEnd, getValidityDurationMonths, isDefined, isDefinedAndNotVoid, isValidNumber, timeToDecimal } from "../../../app/lib/utils";
 import { certificatMedicalTypes, infiniteCertificateTypes } from "../../../app/lib/client";
 import { useWatch, useFormContext } from 'react-hook-form';
 import { useEffect } from "react";
@@ -76,6 +76,7 @@ export const ProfilesCreate = () => {
           defaultValues={(record) => ({
               birthDate: new Date(),
               dateObtention: new Date(),
+              totalFlightHours: 0,
               pilotQualifications: record?.pilotQualifications?.map(q => ({...q, dateObtention: new Date()})) ?? [],
               validityDurationMonths: 60, 
               certificatMedical: { 
@@ -92,6 +93,7 @@ export const ProfilesCreate = () => {
               <SelectInput label="Pilote" validate={required()}/>
             </ReferenceInput>
             <DateInput source="birthDate" label="Date de naissance" validate={required()}/>
+            <TextInput source="totalFlightHours" label="Total des heures de vol" format={ decimalToTime } parse={ timeToDecimal } />
             <ArrayInput source="pilotQualifications" label="Qualifications">
               <SimpleFormIterator inline disableReordering>
                   <ReferenceInput reference="qualifications" source="qualification">
