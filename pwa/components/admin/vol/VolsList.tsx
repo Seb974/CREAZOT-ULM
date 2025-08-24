@@ -15,7 +15,8 @@ import {
   DateInput,
   SimpleList,
   useListContext,
-  Form
+  Form,
+  ArrayField
 } from "react-admin";
 import Button from '@mui/material/Button';
 import { Fragment } from 'react';
@@ -111,6 +112,23 @@ const CustomFilterBar = ({ showMore, isSmall }) => {
     </Form>
 };
 
+const LandingsExpansion = () => {
+
+  return (
+    <ArrayField source="landings">
+      <Datagrid isRowSelectable={record => false} rowClick={false} bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': { backgroundColor: '#ededed', fontWeight: "lighter" } }} className="text-xs italic">
+          <FunctionField
+              source="airportCode"
+              label="Aéroport"
+              render={record => <p>{record.airportCode} - <span className="text-xs italic">{record.airportName}</span></p>}
+          />
+          <NumberField source="complets" label="Complet(s)" />
+          <NumberField source="touches" label="Touché(s)" />
+      </Datagrid>
+    </ArrayField>
+  );
+};
+
 const CustomFilterButton = ({ showMore, setShowMore, isSmall }) => {
   return (
     <Button
@@ -142,7 +160,7 @@ const CustomBody = (props) => {
         <DatagridBody {...props} />
         <TableFooter>
           <TableRow sx={{ backgroundColor: '#ededed', fontStyle: 'italic', fontWeight: 'bold', color: '#555'  }}>
-              <TableCell colSpan={hasAdminAccess(user) ? 4 : 3} sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
+              <TableCell colSpan={hasAdminAccess(user) ? 5 : 4} sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
                 Totaux
               </TableCell>
               <TableCell style={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'right' }}>
@@ -201,7 +219,7 @@ const CustomDatagrid = () => {
     };
 
     return (
-      <Datagrid body={<CustomBody/>} bulkActionButtons={ isAdmin } sx={{'& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
+      <Datagrid body={<CustomBody/>} expand={<LandingsExpansion />} bulkActionButtons={ isAdmin } sx={{'& .RaDatagrid-tbody': {backgroundColor: '#FFFFFF'}, '& .RaDatagrid-headerCell': {backgroundColor: '#ededed'}}}>
             <DateField source="prestation.date" label="Date" sortable={ true }/>
             <TextField source="prestation.aeronef.immatriculation" label="Aéronef" sortable={ true }/>
             <FunctionField
