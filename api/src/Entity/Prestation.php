@@ -121,19 +121,19 @@ class Prestation
     private ?User $encadrant = null;
 
     #[ORM\ManyToOne]
-    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read'])]
+    #[Groups(groups: ['Prestation:read', 'Vol:read'])]
     private ?User $createdBy = null;
 
     #[ORM\ManyToOne]
-    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read'])]
+    #[Groups(groups: ['Prestation:read', 'Vol:read'])]
     private ?User $updatedBy = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read'])]
+    #[Groups(groups: ['Prestation:read', 'Vol:read'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Prestation:write', 'Prestation:read', 'Vol:read'])]
+    #[Groups(groups: ['Prestation:read', 'Vol:read'])]
     private ?\DateTimeImmutable $updatedAt = null;
 
     public function __construct()

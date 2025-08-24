@@ -89,6 +89,22 @@ class ProfilPilote
     #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
     private ?CertificatMedical $certificatMedical = null;
 
+    #[ORM\ManyToOne]
+    #[Groups(groups: ['Profil_pilote:read'])]
+    private ?User $createdBy = null;
+
+    #[ORM\ManyToOne]
+    #[Groups(groups: ['Profil_pilote:read'])]
+    private ?User $updatedBy = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Profil_pilote:read'])]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Profil_pilote:read'])]
+    private ?\DateTimeImmutable $updatedAt = null;
+
     #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
     public function getAvailableCertificate(): ?bool
     {

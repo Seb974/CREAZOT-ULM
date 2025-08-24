@@ -95,6 +95,22 @@ class Entretien
     #[Groups(groups: ['Entretien:write', 'Entretien:read'])]
     private ?bool $changementMoteur = null;
 
+    #[ORM\ManyToOne]
+    #[Groups(groups: ['Entretien:read'])]
+    private ?User $createdBy = null;
+
+    #[ORM\ManyToOne]
+    #[Groups(groups: ['Entretien:read'])]
+    private ?User $updatedBy = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Entretien:read'])]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Entretien:read'])]
+    private ?\DateTimeImmutable $updatedAt = null;
+
     public function __construct()
     {
         $this->intervenants = new ArrayCollection();

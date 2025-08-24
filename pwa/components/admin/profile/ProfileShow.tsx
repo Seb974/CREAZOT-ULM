@@ -48,6 +48,22 @@ export const ProfileShow = () => {
                             />
                         </Datagrid>
                     </ArrayField>
+                    <DateField source="createdAt" label="Créé le" showTime/>
+                    <FunctionField
+                        label="Créé par"
+                        source="createdBy.firstName"
+                        render={(record) => isDefined(record?.createdBy) && isDefined(record?.createdBy?.firstName) ?
+                            record?.createdBy?.firstName?.charAt(0).toUpperCase() + record?.createdBy?.firstName?.slice(1) : ''
+                        }
+                    />
+                    <DateField source="updatedAt" label="Modifié le" showTime/>
+                    <FunctionField
+                        label="Modifié par"
+                        source="updatedBy.firstName"
+                        render={(record) => isDefined(record?.updatedBy) && isDefined(record?.updatedBy?.firstName) ?
+                            record?.updatedBy?.firstName?.charAt(0).toUpperCase() + record?.updatedBy?.firstName?.slice(1) : ''
+                        }
+                    />
                 </TabbedShowLayout.Tab>
                 <TabbedShowLayout.Tab label="Médical">
                     <FunctionField label="Type" render={({certificatMedical}) => getTypeName(certificatMedical?.type)}/>
@@ -56,6 +72,22 @@ export const ProfileShow = () => {
                     <DateField source="certificatMedical.validUntil" label="Date de fin de validité"/>
                     <TextField source="certificatMedical.medecin" label="Nom du Médecin"/>
                     <TextField source="certificatMedical.remarques" label="Remarques"/>
+                    <DateField source="certificatMedical.createdAt" label="Créé le" showTime/>
+                    <FunctionField
+                        label="Créé par"
+                        source="certificatMedical.createdBy.firstName"
+                        render={(record) => isDefined(record?.certificatMedical) && isDefined(record?.certificatMedical?.createdBy) && isDefined(record?.certificatMedical?.createdBy?.firstName) ?
+                            record?.certificatMedical?.createdBy?.firstName?.charAt(0).toUpperCase() + record?.certificatMedical?.createdBy?.firstName?.slice(1) : ''
+                        }
+                    />
+                    <DateField source="certificatMedical.updatedAt" label="Modifié le" showTime/>
+                    <FunctionField
+                        label="Modifié par"
+                        source="ucertificatMedical.pdatedBy.firstName"
+                        render={(record) => isDefined(record?.certificatMedical) && isDefined(record?.certificatMedical?.updatedBy) && isDefined(record?.certificatMedical?.updatedBy?.firstName) ?
+                            record?.certificatMedical?.updatedBy?.firstName?.charAt(0).toUpperCase() + record?.certificatMedical?.updatedBy?.firstName?.slice(1) : ''
+                        }
+                    />
                 </TabbedShowLayout.Tab>
             </TabbedShowLayout>
         </Show>

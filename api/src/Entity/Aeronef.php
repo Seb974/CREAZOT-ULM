@@ -97,6 +97,22 @@ class Aeronef
     #[Groups(groups: ['Aeronef:write', 'Aeronef:read'])]
     private ?string $codeBalise = null;
 
+    #[ORM\ManyToOne]
+    #[Groups(groups: ['Aeronef:read'])]
+    private ?User $createdBy = null;
+
+    #[ORM\ManyToOne]
+    #[Groups(groups: ['Aeronef:read'])]
+    private ?User $updatedBy = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Aeronef:read'])]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Aeronef:read'])]
+    private ?\DateTimeImmutable $updatedAt = null;
+
     #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Landing:read'])]
     public function getName(): ?string
     {

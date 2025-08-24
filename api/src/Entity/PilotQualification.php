@@ -74,6 +74,22 @@ class PilotQualification
     #[Groups(groups: ['PilotQualification:write', 'PilotQualification:read', 'Profil_pilote:write', 'Profil_pilote:read', 'Prestation:read', 'Reservation:read'])]
     private ?bool $isAlertSent = null;
 
+    #[ORM\ManyToOne]
+    #[Groups(groups: ['PilotQualification:read', 'Profil_pilote:write'])]
+    private ?User $createdBy = null;
+
+    #[ORM\ManyToOne]
+    #[Groups(groups: ['PilotQualification:read', 'Profil_pilote:write'])]
+    private ?User $updatedBy = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['PilotQualification:read', 'Profil_pilote:write'])]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: [ 'PilotQualification:read', 'Profil_pilote:write'])]
+    private ?\DateTimeImmutable $updatedAt = null;
+
     public function getId(): ?int
     {
         return $this->id;
