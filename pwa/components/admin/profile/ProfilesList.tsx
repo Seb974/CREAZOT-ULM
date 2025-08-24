@@ -1,5 +1,5 @@
 import { Datagrid, List, CreateButton, ExportButton, TopToolbar, EditButton, ShowButton, SimpleList, FunctionField } from "react-admin";
-import { decimalToTime, getShipStyle, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { decimalToTimeFormatted, getShipStyle, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { type PagedCollection } from "../../../types/collection";
 import { type Circuit } from "../../../types/Circuit";
 import { useMediaQuery, Theme } from '@mui/material';
@@ -41,7 +41,7 @@ export const ProfilesList: NextPage<Props> = ({ data, hubURL, page }) => {
             <SimpleList
               primaryText={ record => <>{ getFormattedPilotMedicalStatus(record) }{ getPiloteName(record) }</> }
               secondaryText={ record => getPilotQualifications(record) }
-              tertiaryText={record => !isDefined(record?.totalFlightHours) ? "00:00" :  decimalToTime(record.totalFlightHours) }
+              tertiaryText={record => !isDefined(record?.totalFlightHours) ? "00:00" :  decimalToTimeFormatted(record.totalFlightHours) }
             /> 
             : 
             <Datagrid sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
@@ -54,7 +54,7 @@ export const ProfilesList: NextPage<Props> = ({ data, hubURL, page }) => {
                 />
                 <FunctionField
                   label="Total des heures de vol"
-                  render={record => isDefined(record?.totalFlightHours) ? decimalToTime(record.totalFlightHours) : "00:00"}
+                  render={record => isDefined(record?.totalFlightHours) ? decimalToTimeFormatted(record.totalFlightHours) : "00:00"}
                   textAlign="center"
                 />
                 <FunctionField

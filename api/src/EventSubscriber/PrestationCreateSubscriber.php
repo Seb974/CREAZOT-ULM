@@ -65,6 +65,7 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
     
             $this->setFlightsCost($prestation, $aeronef);
             $this->checkDeadlines($aeronef);
+            $this->addFlightTimeToUser($prestation->getDuree(), $prestation->getPilote(), $aeronef);
             $this->pilotValidityChecker->checkAndNotify($user);
         }
     }
@@ -108,7 +109,7 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
                 $decimalResult = $vol->getDuree() * $circuit->getCout() * $vol->getQuantite();
                 return $decimalResult;
             } else {
-                $duree = floor($vol->getDuree()) + ($vol->getDuree() - floor($vol->getDuree())) / 60 * 100;
+                $duree = $this->getDecimalTimeFromLocale($vol->getDuree());
                 $localeResult = $duree * $circuit->getCout() * $vol->getQuantite();
                 return $localeResult;
             }
@@ -174,6 +175,17 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
         $decimalHorametre = $aeronef->isDecimal() ? $aeronef->getHorametre() : $this->getDecimalTimeFromLocale($aeronef->getHorametre());
 
         return $this->getRemains($decimal, $decimalHorametre);
+    }
+
+    private function addFlightTimeToUser(float $duration, User $user, Aeronef $aeronef): void
+    {
+        $profilPilote = $user->getProfilPilote();
+        if (!$profilPilote) return;
+
+        $duree = $aeronef->isDecimal() ? $duration : $this->getDecimalTimeFromLocale($duration);
+        $currentFlightTime = $profilPilote->getTotalFlightHours() ?? 0;
+        $updatedFlightTime = $currentFlightTime + $duree;
+        $profilPilote->setTotalFlightHours($updatedFlightTime);
     }
 
     private function getRemains(float $decimal, float $decimalHorametre) : string
