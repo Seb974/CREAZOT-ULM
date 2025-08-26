@@ -145,4 +145,7 @@ final class ClientInput
 
     #[Groups(groups: ['Client:write'])]
     public ?int $seuilQualifications = null;
+
+    #[Groups(groups: ['Client:write'])]
+    public ?bool $hasIndividualFlightLogs = null;
 }

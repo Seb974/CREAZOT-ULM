@@ -251,6 +251,10 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?int $seuilQualifications = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasIndividualFlightLogs = null;
+
     #[Groups(groups: ['Client:read'])]
     public function getEmailParams(): string
     {
@@ -805,6 +809,18 @@ class Client
     public function setSeuilQualifications(?int $seuilQualifications): static
     {
         $this->seuilQualifications = $seuilQualifications;
+
+        return $this;
+    }
+
+    public function getHasIndividualFlightLogs(): ?bool
+    {
+        return $this->hasIndividualFlightLogs;
+    }
+
+    public function setHasIndividualFlightLogs(?bool $hasIndividualFlightLogs): static
+    {
+        $this->hasIndividualFlightLogs = $hasIndividualFlightLogs;
 
         return $this;
     }

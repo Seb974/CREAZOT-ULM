@@ -56,11 +56,11 @@ class ProfilPilote
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'CarnetVol:read'])]
     private ?int $id = null;
 
     #[ORM\OneToOne(inversedBy: 'profilPilote', cascade: ['persist'])]
-    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'CarnetVol:read'])]
     private ?User $pilote = null;
 
     /**
@@ -82,12 +82,16 @@ class ProfilPilote
     private ?\DateTimeImmutable $birthDate = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'CarnetVol:read'])]
     private ?float $totalFlightHours = null;
 
     #[ORM\OneToOne(mappedBy: 'profil', cascade: ['persist', 'remove'])]
     #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
     private ?CertificatMedical $certificatMedical = null;
+
+    #[ORM\OneToMany(targetEntity: CarnetVol::class, mappedBy: 'profil', cascade: ['persist', 'remove'])]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
+    private Collection $carnetVols;
 
     #[ORM\ManyToOne]
     #[Groups(groups: ['Profil_pilote:read'])]
@@ -124,6 +128,7 @@ class ProfilPilote
     {
         $this->qualifications = new ArrayCollection();
         $this->pilotQualifications = new ArrayCollection();
+        $this->carnetVols = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -191,6 +196,45 @@ class ProfilPilote
             // set the owning side to null (unless already changed)
             if ($pilotQualification->getProfil() === $this) {
                 $pilotQualification->setProfil(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CarnetVol>
+     */
+    public function getCarnetVols(): Collection
+    {
+        return $this->carnetVols;
+    }
+
+    public function setCarnetVols(iterable $carnetVols): static
+    {
+        $this->carnetVols = $carnetVols instanceof Collection
+            ? new ArrayCollection($carnetVols->toArray())
+            : new ArrayCollection(is_array($carnetVols) ? $carnetVols : iterator_to_array($carnetVols));
+
+        return $this;
+    }
+
+    public function addCarnetVol(CarnetVol $carnetVol): self
+    {
+        if (!$this->carnetVols->contains($carnetVol)) {
+            $this->carnetVols->add($carnetVol);
+            $carnetVol->setProfil($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCarnetVol(CarnetVol $carnetVol): self
+    {
+        if ($this->carnetVols->removeElement($carnetVol)) {
+            // set the owning side to null (unless already changed)
+            if ($carnetVol->getProfil() === $this) {
+                $carnetVol->setProfil(null);
             }
         }
 

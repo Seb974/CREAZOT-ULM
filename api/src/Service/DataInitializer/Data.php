@@ -35,7 +35,8 @@ class Data
         'hasMicrotrakTag' => true,
         'hasWebshop' => true,
         'seuilMedical' => 90,
-        'seuilQualifications' => 90
+        'seuilQualifications' => 90,
+        'hasIndividualFlightLogs' => true
     ];
 
     private $natures = [

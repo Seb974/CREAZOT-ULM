@@ -54,15 +54,15 @@ class Nature
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Nature:write', 'Nature:read', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Nature:write', 'Nature:read', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read', 'CarnetVol:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 15, nullable: true)]
-    #[Groups(groups: ['Nature:write', 'Nature:read', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Nature:write', 'Nature:read', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read', 'CarnetVol:read'])]
     private ?string $code = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Nature:write', 'Nature:read', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['Nature:write', 'Nature:read', 'Circuit:read', 'Vol:read', 'Prestation:read', 'Reservation:read', 'CarnetVol:read'])]
     private ?string $label = null;
 
     public function getId(): ?int

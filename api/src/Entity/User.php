@@ -72,14 +72,14 @@ class User implements UserInterface
      * @see https://schema.org/email
      */
     #[ORM\Column(unique: true)]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read', 'CarnetVol:read' ])]
     public ?string $email = null;
 
     /**
      * @see https://schema.org/givenName
      */
     #[ApiProperty(types: ['https://schema.org/givenName'])]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read', 'Landing:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read', 'Landing:read', 'CarnetVol:read'])]
     #[ORM\Column]
     public ?string $firstName = null;
 
@@ -87,7 +87,7 @@ class User implements UserInterface
      * @see https://schema.org/familyName
      */
     #[ApiProperty(types: ['https://schema.org/familyName'])]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read', 'Landing:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read', 'Landing:read', 'CarnetVol:read'])]
     #[ORM\Column]
     public ?string $lastName = null;
 

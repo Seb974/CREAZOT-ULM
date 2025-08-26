@@ -12,6 +12,8 @@ import Oidc from "./Oidc";
 import { useEffect, useState } from "react";
 import Payment from "./Payment";
 import { useSessionContext } from "../../admin/SessionContextProvider";
+import CarnetVol from "./CarnetVol";
+import { clientWithIndividualFlightLogs, clientWithPaymentManagement, clientWithReservationManagement } from "../../../app/lib/client";
 
 const CustomAppBar = () => {
 
@@ -57,6 +59,9 @@ const CustomAppBar = () => {
     }
     return false;
   };
+
+  {/* @ts-ignore  */}
+  const isAdmin = (user) => isDefined(user) && user.roles.find(r => r === "admin");
   
   return loading || profileLoading ? <GlobalLoader/> : 
     isDefined(client) && (
@@ -65,12 +70,14 @@ const CustomAppBar = () => {
         userMenu={
           <UserMenu>
             {/* @ts-ignore  */}
-            { (isDefined(client) && isDefined(client.hasReservation) && client.hasReservation) && isDefined(session) && isDefined(user) && user.roles.find(r => r === "admin") && <Reservation /> }
+            { clientWithReservationManagement(client) && isAdmin(user) && <Reservation /> }
             <Flight />
             {/* @ts-ignore  */}
-            { (isDefined(client) && isDefined(client.hasPaymentManagement) && client.hasPaymentManagement) && ((isDefined(session) && isDefined(user) && user.roles.find(r => r === "admin")) || (isDefined(profile) && isAuthorized(profile))) && <Payment /> }
+            { clientWithPaymentManagement(client) && (isAdmin(user) || (isDefined(profile) && isAuthorized(profile))) && <Payment /> }
             {/* @ts-ignore  */}
-            { (isDefined(client) && isDefined(client.hasReservation) && client.hasReservation) && isDefined(session) && isDefined(user) && user.roles.find(r => r === "admin") && <Oidc /> }
+            { isAdmin(user) && <Oidc /> }
+            {/* @ts-ignore  */}
+            { clientWithIndividualFlightLogs(client) && isAdmin(user) && <CarnetVol/> }
             <Logout />
           </UserMenu>
         }

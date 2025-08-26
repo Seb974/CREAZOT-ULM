@@ -69,6 +69,24 @@ services:
             $properties: { date: ~ } # ]
         tags: [ 'api_platform.filter' ]
 
+    app.filter.carnet.pilote:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { profil.pilote.firstName: 'iword_start' } # ]
+        tags: [ 'api_platform.filter' ]
+    
+    app.filter.carnet.aeronef:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { aeronef: 'ipartial' } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.carnet.date:
+        parent: 'api_platform.doctrine.orm.date_filter'
+        arguments:
+            $properties: { date: ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
     app.filter.vol.pilote:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:

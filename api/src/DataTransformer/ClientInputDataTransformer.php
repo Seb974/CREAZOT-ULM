@@ -71,6 +71,7 @@ class ClientInputDataTransformer implements ProcessorInterface
         $client->setHasWebshop($data->$hasWebshop);
         $client->setSeuilMedical($data->$seuilMedical);
         $client->setSeuilQualifications($data->$seuilQualifications);
+        $client->setHasIndividualFlightLogs($data->$hasIndividualFlightLogs);
 
         // Uploads de fichiers
         if ($data->logo instanceof UploadedFile) {

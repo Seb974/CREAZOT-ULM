@@ -227,6 +227,14 @@ export const clientWithWebshop = client => {
     return isDefined(client) && isDefined(client.hasWebshop) && client.hasWebshop;
 };
 
+export const clientWithIndividualFlightLogs = client => {
+    return isDefined(client) && isDefined(client.hasIndividualFlightLogs) && client.hasIndividualFlightLogs;
+};
+
+export const clientWithReservationManagement = client => {
+    return isDefined(client) && isDefined(client.hasReservation) && client.hasReservation;
+};
+
 export const getDefaultLanding = client => {
     if (isDefined(client) && isDefinedAndNotVoid(client.airportCodes) && clientWithLandingManagement(client)) {
         const mainAirport = client.airportCodes.find(airport => airport.main);

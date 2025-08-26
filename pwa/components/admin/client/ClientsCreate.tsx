@@ -6,7 +6,6 @@ import { ColorPreview } from './ColorPreview';
 import { ThanksOptions } from './ThanksOptions';
 import { useClient } from '../../admin/ClientProvider';
 import { useSessionContext } from "../../admin/SessionContextProvider";
-import { min } from "moment";
 
 export const ClientsCreate = () => {
 
@@ -57,6 +56,7 @@ export const ClientsCreate = () => {
                     hasWebshop: false,
                     seuilMedical: 30,
                     seuilQualifications: 30,
+                    hasIndividualFlightLogs: false,
                     airportCodes: record?.airportCodes?.map(code => ({ ...code, meteo: code.meteo ?? false, main: code.main ?? false })) ?? [],
                 })}
             >
@@ -169,6 +169,11 @@ export const ClientsCreate = () => {
                         </Box>
                         <Box flex={1}>
                             <BooleanInput source="hasWebshop" label="Site e-commerce lié" fullWidth/>
+                        </Box>
+                    </Box>
+                    <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                        <Box flex={1}>
+                            <BooleanInput source="hasIndividualFlightLogs" label="Carnets de vols individuels" fullWidth/>
                         </Box>
                     </Box>
                     <Divider sx={{ mt: 2, borderBottomWidth: 2, borderColor: '#666' }} />

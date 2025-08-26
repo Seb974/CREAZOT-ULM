@@ -15,6 +15,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Mime\Email;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
+use App\Factory\CarnetVol\CarnetVolFactory;
 use App\Service\DynamicMailerFactory;
 use App\Service\ClientGetter;
 use App\Service\PilotValidityChecker;
@@ -27,13 +28,15 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
 {
     private DynamicMailerFactory $dynamicMailerFactory;
     private PilotValidityChecker $pilotValidityChecker;
+    private CarnetVolFactory $carnetVolFactory;
     private ClientGetter $clientGetter;
     private Security $security;
 
-    public function __construct(DynamicMailerFactory $dynamicMailerFactory, ClientGetter $clientGetter, Security $security, PilotValidityChecker $pilotValidityChecker)
+    public function __construct(DynamicMailerFactory $dynamicMailerFactory, ClientGetter $clientGetter, Security $security, PilotValidityChecker $pilotValidityChecker, CarnetVolFactory $carnetVolFactory)
     {
         $this->dynamicMailerFactory = $dynamicMailerFactory;
         $this->pilotValidityChecker = $pilotValidityChecker;
+        $this->carnetVolFactory = $carnetVolFactory;
         $this->clientGetter = $clientGetter;
         $this->security = $security;
     }
@@ -54,10 +57,12 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
             return;
 
         $user = $this->security->getUser();
+        $client = $this->clientGetter->get();
         $this->setEditionMetas($prestation, $user, $method);
         
         if (Request::METHOD_POST === $method) {
             $aeronef = $prestation->getAeronef();
+            $profil = $prestation->getPilote()?->getProfilPilote();
             $aeronef->setHorametre($prestation->getHorametreFin());
     
             if ( \is_null($aeronef->getSeuilAlerte()) )
@@ -67,6 +72,12 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
             $this->checkDeadlines($aeronef);
             $this->addFlightTimeToUser($prestation->getDuree(), $prestation->getPilote(), $aeronef);
             $this->pilotValidityChecker->checkAndNotify($user);
+            if (!\is_null($client) && $client->getHasIndividualFlightLogs()) {
+                $carnetsVol = $this->carnetVolFactory->createFromPrestation($prestation, $user);
+                foreach ($carnetsVol as $carnetVol) {
+                    $profil->addCarnetVol($carnetVol);
+                }
+            }
         }
     }
 

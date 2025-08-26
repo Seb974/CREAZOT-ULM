@@ -37,6 +37,7 @@ import rappelResourceProps from "./rappel";
 import { ReservationCreate } from "./cadeau/ReservationCreate";
 import { useSessionContext, SessionContextProvider } from "../admin/SessionContextProvider";
 import { useClient } from "../admin/ClientProvider";
+import carnetVolResourceProps from "./carnetVol";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -120,7 +121,6 @@ const AdminWithOIDC = () => {
     return;
   }
 
-  
   return (
       // @ts-ignore
       <AdminAdapter session={session}>
@@ -143,6 +143,7 @@ const AdminWithOIDC = () => {
         <ResourceGuesser name="reservations" {...reservationResourceProps}/>
         <ResourceGuesser name="rappels" {...rappelResourceProps}/>
         <ResourceGuesser name="payments" {...paymentResourceProps}/>
+        <ResourceGuesser name="carnet_vols" {...carnetVolResourceProps}/>
         <CustomRoutes>
           <Route path="/landings" element={<LandingsList />} />
           <Route path="/convert" element={<ReservationCreate />} />
