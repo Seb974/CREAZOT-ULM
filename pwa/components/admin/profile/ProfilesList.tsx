@@ -2,12 +2,15 @@ import { Datagrid, List, CreateButton, ExportButton, TopToolbar, EditButton, Sho
 import { decimalToTimeFormatted, getShipStyle, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { type PagedCollection } from "../../../types/collection";
 import { type Circuit } from "../../../types/Circuit";
-import { useMediaQuery, Theme } from '@mui/material';
+import { useMediaQuery, Theme, Button } from '@mui/material';
 import ClearIcon from'@mui/icons-material/Clear';
 import DoneIcon from'@mui/icons-material/Done';
 import Chip from '@mui/material/Chip';
 import { type NextPage } from "next";
 import React from 'react';
+import BackupTableIcon from '@mui/icons-material/BackupTable';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import { useSessionContext } from "../SessionContextProvider";
 
 export interface Props {
   data: PagedCollection<Circuit> | null;
@@ -15,12 +18,58 @@ export interface Props {
   page: number;
 }
 
-const ListActions = () => (
-  <TopToolbar>
-      <CreateButton/>
-      <ExportButton/>
-  </TopToolbar>
-);
+const CustomCSVButton = ({ isSmall, onClick }) => {
+  return (
+    <Button
+      size="small"
+      color="primary"
+      onClick={() => onClick()}
+      startIcon={<BackupTableIcon className={`${isSmall && 'mb-3'}`}/>}
+    >
+      {!isSmall && 'EXPORT CSV'}
+    </Button>
+  );
+};
+
+const CustomPDFButton = ({ isSmall, onClick }) => {
+  return (
+    <Button
+      size="small"
+      color="primary"
+      onClick={() => onClick()}
+      startIcon={<PictureAsPdfIcon className={`${isSmall && 'mb-3'}`}/>}
+    >
+      {!isSmall && 'EXPORT PDF'}
+    </Button>
+  );
+};
+
+const ListActions = ({ isSmall, resource }) => { 
+  const { session } = useSessionContext();
+
+  const handleExport = async (format) => {
+
+      const url = `/exports/${resource}?format=${format}`;
+      const response = await fetch(url, {headers: {'Authorization': `Bearer ${session?.accessToken}`}});
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${resource}.${format}`;
+      a.click();
+      window.URL.revokeObjectURL(blobUrl);
+  };
+
+  return (
+    <TopToolbar>
+      <CreateButton className={`${!isSmall && 'mb-[2px]'}`}/>
+      <CustomCSVButton onClick={ () => handleExport('csv') } isSmall={isSmall}/>
+      <CustomPDFButton onClick={ () => handleExport('pdf') } isSmall={isSmall}/>
+    </TopToolbar>
+  );
+};
 
 export const ProfilesList: NextPage<Props> = ({ data, hubURL, page }) => {
 
@@ -34,7 +83,7 @@ export const ProfilesList: NextPage<Props> = ({ data, hubURL, page }) => {
   return (
     <List 
       resource="profil_pilotes" 
-      actions={<ListActions/>} 
+      actions={<ListActions isSmall={isSmall} resource="profil_pilotes"/>} 
       pagination={false}
     >
         { isSmall ? 

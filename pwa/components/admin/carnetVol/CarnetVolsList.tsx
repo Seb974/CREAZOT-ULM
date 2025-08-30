@@ -12,15 +12,22 @@ import {
   DateField,
   FunctionField,
   DatagridBody,
-  useListContext
+  useListContext,
+  Form,
+  TextInput,
+  DateInput,
 } from "react-admin";
-import { TableRow, TableCell, TableFooter } from '@mui/material';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import { TableRow, TableCell, TableFooter, Box, Button } from '@mui/material';
 import { useMercure } from "../../../utils/mercure";
 import { type Contact } from "../../../types/Contact";
 import { useMediaQuery, Theme } from '@mui/material';
 import { type PagedCollection } from "../../../types/collection";
 import { decimalToTimeFormatted, isDefined } from "../../../app/lib/utils";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
+import { useSessionContext } from "../SessionContextProvider";
+import BackupTableIcon from '@mui/icons-material/BackupTable';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 export interface Props {
   data: PagedCollection<Contact> | null;
@@ -28,12 +35,89 @@ export interface Props {
   page: number;
 }
 
-const ListActions = () => (
-  <TopToolbar>
-      <CreateButton/>
-      <ExportButton/>
-  </TopToolbar>
-);
+const CustomCSVButton = ({ isSmall, onClick }) => {
+  return (
+    <Button
+      size="small"
+      color="primary"
+      onClick={() => onClick()}
+      startIcon={<BackupTableIcon className={`${isSmall && 'mb-3'}`}/>}
+    >
+      {!isSmall && 'EXPORT CSV'}
+    </Button>
+  );
+};
+
+const CustomPDFButton = ({ isSmall, onClick }) => {
+  return (
+    <Button
+      size="small"
+      color="primary"
+      onClick={() => onClick()}
+      startIcon={<PictureAsPdfIcon className={`${isSmall && 'mb-3'}`}/>}
+    >
+      {!isSmall && 'EXPORT PDF'}
+    </Button>
+  );
+};
+
+const ListActions = ({ showMore, setShowMore, isSmall, resource }) => {
+
+  const { filterValues } = useListContext();
+  const { session } = useSessionContext();
+  const params = new URLSearchParams();
+
+  Object.entries(filterValues).forEach(([key, value]) => {
+      // @ts-ignore
+      if (value && typeof value === 'object' && value.after) {
+          // @ts-ignore
+          if (value.after) params.append(`${key}[after]`, value.after);
+          // @ts-ignore
+          if (value.before) params.append(`${key}[before]`, value.before);
+      } else if (value != null) {
+          // @ts-ignore
+          params.append(key, value);
+      }
+  });
+
+  const handleExport = async (format) => {
+
+      const url = `/exports/${resource}?${params.toString()}&format=${format}`;
+      const response = await fetch(url, {headers: {'Authorization': `Bearer ${session?.accessToken}`}});
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${resource}.${format}`;
+      a.click();
+      window.URL.revokeObjectURL(blobUrl);
+  };
+
+  return (
+    <TopToolbar>
+        <CustomFilterButton showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>
+        <CreateButton/>
+        <CustomCSVButton onClick={ () => handleExport('csv') } isSmall={isSmall}/>
+        <CustomPDFButton onClick={ () => handleExport('pdf') } isSmall={isSmall}/>
+    </TopToolbar>
+  );
+};
+
+const CustomFilterButton = ({ showMore, setShowMore, isSmall }) => {
+  return (
+    <Button
+      size="small"
+      color="primary"
+      onClick={() => setShowMore(!showMore)}
+      startIcon={<FilterListIcon className={`${isSmall && 'mb-3'}`}/>}
+    >
+      {/* @ts-ignore */}
+      {!isSmall && 'FILTRER'}
+    </Button>
+  );
+};
 
 const DestinationsExpansion = () => (
   <FunctionField
@@ -61,6 +145,49 @@ const DestinationsExpansion = () => (
     }}
   />
 );
+
+const CustomFilterBar = ({ showMore, isSmall }) => {
+
+    const { filterValues, setFilters } = useListContext();
+    const [formValues, setFormValues] = useState({
+        'date[after]': filterValues['date[after]'] ? new Date(filterValues['date[after]']).toLocaleDateString() : '',
+        'date[before]': filterValues['date[before]'] ? new Date(filterValues['date[before]']).toLocaleDateString() : ''
+    });
+
+    useEffect(() => {
+        setFormValues({
+            'date[after]': filterValues['date[after]'] ? new Date(filterValues['date[after]']).toLocaleDateString() : '',
+            'date[before]': filterValues['date[before]'] ? new Date(filterValues['date[before]']).toLocaleDateString() : ''
+        });
+    }, [filterValues]);
+  
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        const newValues = { ...formValues, [name]: value };
+        setFormValues(newValues);
+        setFilters(newValues); 
+    };
+  
+    return !showMore ? <></> :
+      <Form >
+          <Box display="flex" flexWrap="wrap" columnGap={isSmall ? 6 : 2} rowGap={0.5} mt={1} alignItems="flex-end">
+              <DateInput
+                  source="date[after]"
+                  label="Date Min"
+                  onChange={handleChange}
+                  defaultValue={formValues['date[after]']}
+                  sx={{ width: isSmall ? '100%' : 200 }}
+              />
+              <DateInput
+                  source="date[before]"
+                  label="Date Max"
+                  onChange={handleChange}
+                  defaultValue={formValues['date[before]']}
+                  sx={{ width: isSmall ? '100%' : 200 }}
+              />
+          </Box>
+      </Form>
+  };
 
 const CustomBody = (props) => {
 
@@ -114,8 +241,10 @@ export const CarnetVolsList: NextPage<Props> = ({ data, hubURL, page }) => {
   const collection = useMercure(data, hubURL);
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
 
+  const [showMore, setShowMore] = useState(false);
+
   return (
-    <List resource="carnet_vols" actions={<ListActions/>}>
+    <List resource="carnet_vols" actions={<ListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall} resource="carnet_vols"/>} filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>}>
         { isSmall ?
           <>
             <SimpleList

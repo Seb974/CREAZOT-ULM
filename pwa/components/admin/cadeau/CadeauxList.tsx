@@ -25,6 +25,9 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { useMediaQuery, Theme, Box } from '@mui/material';
 import { ConversionLink } from './ConversionLink';
 import { isDefined, isDefinedAndNotVoid, toLocalDateString } from "../../../app/lib/utils";
+import BackupTableIcon from '@mui/icons-material/BackupTable';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import { useSessionContext } from "../SessionContextProvider";
 
 export interface Props {
   data: PagedCollection<Circuit> | null;
@@ -32,13 +35,75 @@ export interface Props {
   page: number;
 }
 
-const CustomListActions = ({ showMore, setShowMore, isSmall }) => (
-  <TopToolbar>
-    <CustomFilterButton showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>
-    <CreateButton/>
-    <ExportButton />
-  </TopToolbar>
-);
+const CustomCSVButton = ({ isSmall, onClick }) => {
+  return (
+    <Button
+      size="small"
+      color="primary"
+      onClick={() => onClick()}
+      startIcon={<BackupTableIcon className={`${isSmall && 'mb-3'}`}/>}
+    >
+      {!isSmall && 'EXPORT CSV'}
+    </Button>
+  );
+};
+
+const CustomPDFButton = ({ isSmall, onClick }) => {
+  return (
+    <Button
+      size="small"
+      color="primary"
+      onClick={() => onClick()}
+      startIcon={<PictureAsPdfIcon className={`${isSmall && 'mb-3'}`}/>}
+    >
+      {!isSmall && 'EXPORT PDF'}
+    </Button>
+  );
+};
+
+const CustomListActions = ({ showMore, setShowMore, isSmall, resource }) => {
+  
+  const { filterValues } = useListContext();
+  const { session } = useSessionContext();
+  const params = new URLSearchParams();
+
+  Object.entries(filterValues).forEach(([key, value]) => {
+      // @ts-ignore
+      if (value && typeof value === 'object' && value.after) {
+          // @ts-ignore
+          if (value.after) params.append(`${key}[after]`, value.after);
+          // @ts-ignore
+          if (value.before) params.append(`${key}[before]`, value.before);
+      } else if (value != null) {
+          // @ts-ignore
+          params.append(key, value);
+      }
+  });
+
+  const handleExport = async (format) => {
+
+      const url = `/exports/${resource}?${params.toString()}&format=${format}`;
+      const response = await fetch(url, {headers: {'Authorization': `Bearer ${session?.accessToken}`}});
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${resource}.${format}`;
+      a.click();
+      window.URL.revokeObjectURL(blobUrl);
+  };
+
+  return (
+    <TopToolbar>
+      <CustomFilterButton showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>
+      <CreateButton className={`${!isSmall && 'mb-[2px]'}`}/>
+      <CustomCSVButton onClick={ () => handleExport('csv') } isSmall={isSmall}/>
+      <CustomPDFButton onClick={ () => handleExport('pdf') } isSmall={isSmall}/>
+    </TopToolbar>
+  );
+};
 
 const CustomFilterButton = ({ showMore, setShowMore, isSmall }) => {
   return (
@@ -144,11 +209,10 @@ export const CadeauxList: NextPage<Props> = ({ data, hubURL, page }) => {
     <List 
       resource="cadeaux" 
       title="Prépaiements"
-      actions={<CustomListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>}
+      actions={<CustomListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall} resource="cadeaux"/>}
       filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>}
       // @ts-ignore
       filterValues={filters}
-      // onFilterChange={setFilters}
       filterDefaultValues={defaultFilters}
       disableSyncWithLocation
     >

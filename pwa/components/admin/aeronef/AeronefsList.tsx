@@ -10,13 +10,17 @@ import {
   EditButton,
   ShowButton,
   SimpleList,
-  FunctionField
+  FunctionField,
+  useListContext
 } from "react-admin";
 import { useMercure } from "../../../utils/mercure";
 import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
 import { isDefined } from "../../../app/lib/utils";
-import { useMediaQuery, Theme } from '@mui/material';
+import { useMediaQuery, Theme, Button } from '@mui/material';
+import { useSessionContext } from "../SessionContextProvider";
+import BackupTableIcon from '@mui/icons-material/BackupTable';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 export interface Props {
   data: PagedCollection<Circuit> | null;
@@ -24,12 +28,74 @@ export interface Props {
   page: number;
 }
 
-const ListActions = () => (
-  <TopToolbar>
-      <CreateButton/>
-      <ExportButton/>
-  </TopToolbar>
-);
+const CustomCSVButton = ({ isSmall, onClick }) => {
+  return (
+    <Button
+      size="small"
+      color="primary"
+      onClick={() => onClick()}
+      startIcon={<BackupTableIcon className={`${isSmall && 'mb-3'}`}/>}
+    >
+      {!isSmall && 'EXPORT CSV'}
+    </Button>
+  );
+};
+
+const CustomPDFButton = ({ isSmall, onClick }) => {
+  return (
+    <Button
+      size="small"
+      color="primary"
+      onClick={() => onClick()}
+      startIcon={<PictureAsPdfIcon className={`${isSmall && 'mb-3'}`}/>}
+    >
+      {!isSmall && 'EXPORT PDF'}
+    </Button>
+  );
+};
+
+const ListActions = ({ resource, isSmall }) => {
+
+  const { filterValues } = useListContext();
+  const { session } = useSessionContext();
+  const params = new URLSearchParams();
+
+  Object.entries(filterValues).forEach(([key, value]) => {
+      // @ts-ignore
+      if (value && typeof value === 'object' && value.after) {
+          // @ts-ignore
+          if (value.after) params.append(`${key}[after]`, value.after);
+          // @ts-ignore
+          if (value.before) params.append(`${key}[before]`, value.before);
+      } else if (value != null) {
+          // @ts-ignore
+          params.append(key, value);
+      }
+  });
+
+  const handleExport = async (format) => {
+
+      const url = `/exports/${resource}?${params.toString()}&format=${format}`;
+      const response = await fetch(url, {headers: {'Authorization': `Bearer ${session?.accessToken}`}});
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${resource}.${format}`;
+      a.click();
+      window.URL.revokeObjectURL(blobUrl);
+  };
+
+  return (
+    <TopToolbar>
+        <CreateButton/>
+        <CustomCSVButton onClick={ () => handleExport('csv') } isSmall={isSmall}/>
+        <CustomPDFButton onClick={ () => handleExport('pdf') } isSmall={isSmall}/>
+    </TopToolbar>
+  )
+};
 
 export const AeronefsList: NextPage<Props> = ({ data, hubURL, page }) => {
 
@@ -62,7 +128,7 @@ export const AeronefsList: NextPage<Props> = ({ data, hubURL, page }) => {
   };
 
   return (
-    <List resource="aeronefs" actions={<ListActions/>}>
+    <List resource="aeronefs" actions={<ListActions resource="aeronefs" isSmall={isSmall}/>}>
         { isSmall ? 
             <SimpleList
               primaryText={ record => record.immatriculation }

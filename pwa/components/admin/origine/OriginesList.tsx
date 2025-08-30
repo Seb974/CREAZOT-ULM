@@ -14,7 +14,10 @@ import {
 import { useMercure } from "../../../utils/mercure";
 import { type Origine } from "../../../types/Origine";
 import { type PagedCollection } from "../../../types/collection";
-import { useMediaQuery, Theme } from '@mui/material';
+import { useMediaQuery, Theme, Button } from '@mui/material';
+import BackupTableIcon from '@mui/icons-material/BackupTable';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import { useSessionContext } from "../SessionContextProvider";
 
 export interface Props {
   data: PagedCollection<Origine> | null;
@@ -22,19 +25,65 @@ export interface Props {
   page: number;
 }
 
-const ListActions = () => (
-  <TopToolbar>
-      <CreateButton/>
-      <ExportButton/>
-  </TopToolbar>
-);
+const CustomCSVButton = ({ isSmall, onClick }) => {
+  return (
+    <Button
+      size="small"
+      color="primary"
+      onClick={() => onClick()}
+      startIcon={<BackupTableIcon className={`${isSmall && 'mb-3'}`}/>}
+    >
+      {!isSmall && 'EXPORT CSV'}
+    </Button>
+  );
+};
+
+const CustomPDFButton = ({ isSmall, onClick }) => {
+  return (
+    <Button
+      size="small"
+      color="primary"
+      onClick={() => onClick()}
+      startIcon={<PictureAsPdfIcon className={`${isSmall && 'mb-3'}`}/>}
+    >
+      {!isSmall && 'EXPORT PDF'}
+    </Button>
+  );
+};
+
+const ListActions = ({ isSmall, resource }) => { 
+  const { session } = useSessionContext();
+
+  const handleExport = async (format) => {
+
+      const url = `/exports/${resource}?format=${format}`;
+      const response = await fetch(url, {headers: {'Authorization': `Bearer ${session?.accessToken}`}});
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${resource}.${format}`;
+      a.click();
+      window.URL.revokeObjectURL(blobUrl);
+  };
+
+  return (
+    <TopToolbar>
+      <CreateButton className={`${!isSmall && 'mb-[2px]'}`}/>
+      <CustomCSVButton onClick={ () => handleExport('csv') } isSmall={isSmall}/>
+      <CustomPDFButton onClick={ () => handleExport('pdf') } isSmall={isSmall}/>
+    </TopToolbar>
+  );
+};
 
 export const OriginesList: NextPage<Props> = ({ data, hubURL, page }) => {
   const collection = useMercure(data, hubURL);
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
 
   return (
-    <List resource="origines" actions={<ListActions/>}>
+    <List resource="origines" actions={<ListActions isSmall={isSmall} resource="origines"/>}>
         { isSmall ? 
             <SimpleList
               primaryText={ record => record.name }

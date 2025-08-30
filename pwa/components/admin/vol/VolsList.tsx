@@ -28,6 +28,8 @@ import { useMediaQuery, Theme } from '@mui/material';
 import { useClient } from '../../admin/ClientProvider';
 import { clientWithLandingManagement, clientWithOptions } from "../../../app/lib/client";
 import { useSessionContext } from "../../admin/SessionContextProvider";
+import BackupTableIcon from '@mui/icons-material/BackupTable';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 export interface Props {
   data: PagedCollection<Vol> | null;
@@ -35,12 +37,73 @@ export interface Props {
   page: number;
 }
 
-const CustomListActions = ({ showMore, setShowMore, isSmall }) => (
-  <TopToolbar>
-    <CustomFilterButton showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>
-    <ExportButton />
-  </TopToolbar>
-);
+const CustomCSVButton = ({ isSmall, onClick }) => {
+  return (
+    <Button
+      size="small"
+      color="primary"
+      onClick={() => onClick()}
+      startIcon={<BackupTableIcon className={`${isSmall && 'mb-3'}`}/>}
+    >
+      {!isSmall && 'EXPORT CSV'}
+    </Button>
+  );
+};
+
+const CustomPDFButton = ({ isSmall, onClick }) => {
+  return (
+    <Button
+      size="small"
+      color="primary"
+      onClick={() => onClick()}
+      startIcon={<PictureAsPdfIcon className={`${isSmall && 'mb-3'}`}/>}
+    >
+      {!isSmall && 'EXPORT PDF'}
+    </Button>
+  );
+};
+
+const CustomListActions = ({ showMore, setShowMore, isSmall, resource }) => { 
+  const { filterValues } = useListContext();
+  const { session } = useSessionContext();
+  const params = new URLSearchParams();
+
+  Object.entries(filterValues).forEach(([key, value]) => {
+      // @ts-ignore
+      if (value && typeof value === 'object' && value.after) {
+          // @ts-ignore
+          if (value.after) params.append(`${key}[after]`, value.after);
+          // @ts-ignore
+          if (value.before) params.append(`${key}[before]`, value.before);
+      } else if (value != null) {
+          // @ts-ignore
+          params.append(key, value);
+      }
+  });
+
+  const handleExport = async (format) => {
+
+      const url = `/exports/${resource}?${params.toString()}&format=${format}`;
+      const response = await fetch(url, {headers: {'Authorization': `Bearer ${session?.accessToken}`}});
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${resource}.${format}`;
+      a.click();
+      window.URL.revokeObjectURL(blobUrl);
+  };
+
+  return (
+    <TopToolbar>
+      <CustomFilterButton showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>
+      <CustomCSVButton onClick={ () => handleExport('csv') } isSmall={isSmall}/>
+      <CustomPDFButton onClick={ () => handleExport('pdf') } isSmall={isSmall}/>
+    </TopToolbar>
+  );
+};
 
 const CustomFilterBar = ({ showMore, isSmall }) => {
 
@@ -265,7 +328,7 @@ export const VolsList: NextPage<Props> = ({ data, hubURL, page }) => {
   return (
     <List 
       resource="vols" 
-      actions={<CustomListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall}/>}
+      actions={<CustomListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall} resource="vols"/>}
       filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>}
       filter={ !hasAdminAccess(user) ? { "prestation.pilote.email": user.email } : null}
       // @ts-ignore

@@ -7,6 +7,7 @@ use App\Entity\Aeronef;
 use App\Entity\Entretien;
 use App\Entity\ProfilPilote;
 use App\Entity\User;
+use App\Entity\CarnetVol;
 use App\Service\ClientGetter;
 use App\Service\DynamicMailerFactory;
 use App\Service\PilotValidityChecker;
@@ -44,7 +45,7 @@ final class EntitiesMetaSubscriber implements EventSubscriberInterface
         $user = $this->security->getUser();
 
         // Aeronef OU Entretien
-        if ($entity instanceof Aeronef || $entity instanceof Entretien) {
+        if ($entity instanceof Aeronef || $entity instanceof Entretien || $entity instanceof CarnetVol) {
             $this->setEntityEditionMetas($entity, $user, $method);
         }
 
