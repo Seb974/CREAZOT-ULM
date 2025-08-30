@@ -23,7 +23,8 @@ class CarnetVolFactory
 
     public function createFromPrestation(Prestation $prestation, User $user): Collection
     {
-        $carnets = [];        
+        $carnets = []; 
+        $durations = [];       
         $pilote = $prestation->getPilote();
         $vols = $prestation->getVols();
 
@@ -35,20 +36,30 @@ class CarnetVolFactory
         $date = \DateTimeImmutable::createFromMutable($prestation->getDate());
         $slicedDifference = $this->getSlicedDurationDifference($prestation);
 
-        foreach ($vols as $vol) {
+        foreach ($vols as $vol)
+            $durations[] = $this->getRealVolDuration($vol, $slicedDifference);
+
+        $realDuration = \is_null($aeronef) || $aeronef->isDecimal() ? ($prestation->getDuree() ?? 0) : $this->getDecimalTimeFromLocale($prestation->getDuree() ?? 0);
+
+        $sumDurations = array_sum($durations);
+        $delta = round($realDuration - $sumDurations, 2);
+
+        if (abs($delta) > 0)
+            $durations[array_key_last($durations)] += $delta;
+
+        
+        foreach ($vols as $index => $vol) {
             $carnetVol = new CarnetVol();
             $circuit = $vol->getCircuit();
             $landings = $vol->getLandings();
-            $duree = $this->getRealVolDuration($vol, $slicedDifference);
             $destinations = $this->getDestinations($landings, $mainAirport);
-
 
             $carnetVol
                 ->setProfil($pilote?->getProfilPilote())
                 ->setDate($date)
                 ->setAeronef($aeronef?->getImmatriculation() ?? "")
                 ->setTypeDeVol($circuit?->getNature())
-                ->setDuree($duree)
+                ->setDuree(round($durations[$index], 2))
                 ->setLieuDepart($this->getAirportName($mainAirport))
                 ->setLieuxArrivee($destinations)
                 ->setIsValidated(true)
@@ -95,8 +106,10 @@ class CarnetVolFactory
 
     private function getRealVolDuration(Vol $vol, float $slicedDifference): float
     {
+        $quantite = $vol?->getQuantite() ?? 1;
         $theoretical = $this->getTheoreticalVolDuration($vol);
-        return $theoretical + $slicedDifference;
+
+        return $theoretical + ($quantite * $slicedDifference);
     }
 
     private function getSlicedDurationDifference(Prestation $prestation): float
@@ -109,7 +122,8 @@ class CarnetVolFactory
         $theoreticalDuration = $this->getTheoreticalDuration($vols);
 
         $difference = $realDuration - $theoreticalDuration;
-        $count = max(count($vols), 1);
+        $totalQuantities = array_sum(array_map(fn($vol) => $vol->getQuantite() ?? 1, $vols->toArray()));
+        $count = max($totalQuantities, 1);
         $slicedDifference = $difference / $count;
         return round($slicedDifference, 2);
 
@@ -133,7 +147,10 @@ class CarnetVolFactory
 
         if (\is_null($circuit)) return 0;
 
-        return $this->getTimeToDecimal($circuit->getDuree());
+        $quantite = $vol?->getQuantite() ?? 1;
+        $decimalDuration = $this->getTimeToDecimal($circuit->getDuree());
+
+        return $quantite * $decimalDuration;
     }
 
     private function getDecimalTimeFromLocale(float $duration) : float
