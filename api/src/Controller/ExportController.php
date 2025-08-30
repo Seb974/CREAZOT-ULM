@@ -355,19 +355,41 @@ class ExportController extends AbstractController
         $format = strtolower($request->query->get('format', 'csv'));
 
         if ($format === 'pdf') {
-            $html = '<table border="1" cellpadding="5"><thead><tr>';
-            foreach ($headers as $header) $html .= "<th>{$header}</th>";
+            $html = '
+            <style>
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    font-size: 9pt;      /* ajuste la taille du texte */
+                    word-wrap: break-word; /* coupe les longs mots */
+                }
+                th, td {
+                    border: 1px solid #000;
+                    padding: 4px;
+                    text-align: left;
+                }
+                thead {
+                    background-color: #f2f2f2;
+                }
+            </style>
+            <table>
+                <thead><tr>';
+            foreach ($headers as $header) {
+                $html .= "<th>{$header}</th>";
+            }
             $html .= '</tr></thead><tbody>';
             foreach ($rows as $row) {
                 $html .= '<tr>';
-                foreach ($row as $cell) $html .= "<td>{$cell}</td>";
+                foreach ($row as $cell) {
+                    $html .= "<td>{$cell}</td>";
+                }
                 $html .= '</tr>';
             }
             $html .= '</tbody></table>';
 
             $dompdf = new Dompdf();
             $dompdf->loadHtml($html);
-            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->setPaper('A4', 'landscape'); // mode paysage
             $dompdf->render();
 
             $response = new Response($dompdf->output());
@@ -375,6 +397,7 @@ class ExportController extends AbstractController
             $response->headers->set('Content-Disposition', "attachment; filename=\"$filenameBase.pdf\"");
             return $response;
         }
+
 
         // CSV
         $handle = fopen('php://temp', 'r+');
@@ -388,7 +411,7 @@ class ExportController extends AbstractController
         $response->headers->set('Content-Disposition', "attachment; filename=\"$filenameBase.csv\"");
 
         return $response;
-}
+    }
 
     #[Route('/exports/aeronefs', name: 'export_aeronefs', methods: ['GET'])]
     #[IsGranted('ROLE_USER')]
@@ -479,7 +502,7 @@ class ExportController extends AbstractController
                         $first ? $profil->getId() ?? '' : '',
                         $first ? $pilote?->getFirstName() ?? '' : '',
                         $first ? $pilote?->getEmail() ?? '' : '',
-                        $first ? $profil?->getTotalFlightHours() ?? '' : '',
+                        $first ? $this->getDecimalToHourMinute($profil?->getTotalFlightHours()) ?? '' : '',
                         $first ? $this->getCertificatName($certificatMedical?->getType()) ?? '' : '',
                         $first ? $certificatMedical?->getDateObtention()?->format('Y-m-d') ?? '' : '',
                         $first ? $this->getValidity($certificatMedical?->getValidUntil()) ?? '' : '',
@@ -881,6 +904,8 @@ class ExportController extends AbstractController
 
     private function getDecimalToHourMinute(float $decimalDuration): string
     {
+        if (\is_null($decimalDuration)) return "00:00";
+        
         $hours = floor($decimalDuration);
         $minutes = round(($decimalDuration - $hours) * 60);
 
