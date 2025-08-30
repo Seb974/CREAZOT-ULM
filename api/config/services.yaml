@@ -46,6 +46,35 @@ services:
             $itemProvider: '@api_platform.doctrine.orm.state.item_provider'
         tags: [ 'api_platform.state_processor' ]
 
+    App\Service\Export\VolExportFilter: ~
+    App\Service\Export\CadeauExportFilter: ~
+    App\Service\Export\AeronefExportFilter: ~
+    App\Service\Export\CircuitExportFilter: ~
+    App\Service\Export\LandingExportFilter: ~
+    App\Service\Export\PaymentExportFilter: ~
+    App\Service\Export\PassagerExportFilter: ~
+    App\Service\Export\EntretienExportFilter: ~
+    App\Service\Export\CarnetVolExportFilter: ~
+    App\Service\Export\PrestationExportFilter: ~
+    App\Service\Export\ReservationExportFilter: ~
+    App\Service\Export\ProfilPiloteExportFilter: ~
+
+    App\Service\Export\ExportFilterManager:
+        arguments:
+            $filters:
+                - '@App\Service\Export\VolExportFilter'
+                - '@App\Service\Export\CadeauExportFilter'
+                - '@App\Service\Export\AeronefExportFilter'
+                - '@App\Service\Export\CircuitExportFilter'
+                - '@App\Service\Export\LandingExportFilter'
+                - '@App\Service\Export\PaymentExportFilter'
+                - '@App\Service\Export\PassagerExportFilter'
+                - '@App\Service\Export\EntretienExportFilter'
+                - '@App\Service\Export\CarnetVolExportFilter'
+                - '@App\Service\Export\PrestationExportFilter'
+                - '@App\Service\Export\ReservationExportFilter'
+                - '@App\Service\Export\ProfilPiloteExportFilter'
+
 when@test:
     services:
         App\Tests\Api\Security\:

@@ -240,11 +240,22 @@ const MobileFooter = (props) => {
 export const CarnetVolsList: NextPage<Props> = ({ data, hubURL, page }) => {
   const collection = useMercure(data, hubURL);
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
+  const defaultFilters = {};
 
   const [showMore, setShowMore] = useState(false);
+  const [filters, setFilters] = useState(defaultFilters);
 
   return (
-    <List resource="carnet_vols" actions={<ListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall} resource="carnet_vols"/>} filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>}>
+    <List
+      key="carnet_vols-list"
+      resource="carnet_vols" 
+      actions={<ListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall} resource="carnet_vols"/>} 
+      filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>} 
+      // @ts-ignore
+      filterValues={filters}
+      filterDefaultValues={defaultFilters}
+      disableSyncWithLocation
+    >
         { isSmall ?
           <>
             <SimpleList
