@@ -6,11 +6,14 @@ import {
   NumberInput,
   BooleanInput
 } from "react-admin";
+import { getFormattedValueForBackEnd } from "../../../app/lib/utils";
 
 export const EntretiensEdit = () => {
 
   const transform = data => {
     data['intervenants'] = data['intervenants'].map(intervenant => intervenant['@id']);
+    data['createdBy'] = getFormattedValueForBackEnd(data['createdBy']);
+    data['updatedBy'] = getFormattedValueForBackEnd(data['updatedBy']);
     return data;
   };
 

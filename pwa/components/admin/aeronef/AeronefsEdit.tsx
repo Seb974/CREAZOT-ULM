@@ -1,18 +1,55 @@
-import { Edit, SimpleForm, TextInput, NumberInput, BooleanInput } from "react-admin";
+import { Edit, SimpleForm, TextInput, NumberInput, BooleanInput, useRecordContext, FileInput } from "react-admin";
 import { useClient } from "../ClientProvider";
-import { clientWithMicrotrakTags } from "../../../app/lib/client";
+import { clientWithMicrotrakTags, syncDocuments } from "../../../app/lib/client";
+import { Link } from "@mui/material";
+import { useSessionContext } from "../SessionContextProvider";
+import { getFormattedValueForBackEnd, isDefined } from "../../../app/lib/utils";
+
+const MyFileField = ({ source }) => {
+  const record = useRecordContext();
+  if (!record) return null;
+
+  const url = record[source];
+  const label = record.description || record.title || record.path || "Sans nom";
+
+  return (
+    <Link href={url} target="_blank" rel="noopener noreferrer" underline="always"
+      sx={{ color: "primary.main", fontSize: "0.85rem" }}
+    >
+      {label}
+    </Link>
+  );
+};
 
 export const AeronefsEdit = () => {
 
   const { client } = useClient();
+  const { session } = useSessionContext();
+
+  const getDocuments = async (documents) => {   
+      const docs = documents.map(document => {
+          return isDefined(document?.['@id']) ? document : { ...document, description: document.title };
+      });
+      return await syncDocuments(docs, session);
+  };
   
-    const MicrotrakInput = () => {
-      return !clientWithMicrotrakTags(client) ? null : 
-        <TextInput source="codeBalise" label="Code Microtrak"/>
-    };
+  const MicrotrakInput = () => {
+    return !clientWithMicrotrakTags(client) ? null : 
+      <TextInput source="codeBalise" label="Code Microtrak"/>
+  };
+
+  const transform = async ({documents, createdBy, updatedBy, ...data}) => {
+      const documentIds = await getDocuments(documents);
+      return {
+        ...data, 
+        documents: documentIds,
+        createdBy: getFormattedValueForBackEnd(createdBy),
+        updatedBy: getFormattedValueForBackEnd(updatedBy),
+      };
+  };
 
   return (
-    <Edit >
+    <Edit transform={ transform } redirect="list">
         <SimpleForm>
           <TextInput source="immatriculation" label="Immatriculation"/>
           <NumberInput source="horametre" label="Horamètre actuel"/>
@@ -22,6 +59,9 @@ export const AeronefsEdit = () => {
           <NumberInput source="seuilAlerteChangementMoteur" label="Seuil d'alerte (en h) avant changement du moteur"/>
           <MicrotrakInput/>
           <BooleanInput source="decimal" label="Horamètre décimal"/>
+          <FileInput source="documents" multiple={ true } label="Documents associés">
+              <MyFileField source="contentUrl"/>
+          </FileInput>
         </SimpleForm>
     </Edit>
   )

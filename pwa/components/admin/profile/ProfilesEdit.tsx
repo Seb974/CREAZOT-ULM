@@ -1,8 +1,10 @@
-import { Edit, ReferenceInput, ArrayInput, SimpleFormIterator, SelectInput, required, DateInput, TabbedForm, NumberInput, TextInput } from "react-admin";
+import { Edit, ReferenceInput, ArrayInput, SimpleFormIterator, SelectInput, required, DateInput, TabbedForm, NumberInput, TextInput, FileInput, FileField, useRecordContext } from "react-admin";
 import { calculateValidUntil, decimalToTime, getFormattedValueForBackEnd, getValidityDurationMonths, isDefined, isDefinedAndNotVoid, isValidNumber, timeToDecimal } from "../../../app/lib/utils";
-import { certificatMedicalTypes, infiniteCertificateTypes } from "../../../app/lib/client";
+import { certificatMedicalTypes, infiniteCertificateTypes, syncDocument, syncDocuments } from "../../../app/lib/client";
 import { useWatch, useFormContext } from 'react-hook-form';
 import { useEffect } from "react";
+import { Link } from "@mui/material";
+import { useSessionContext } from "../SessionContextProvider";
 
 const BirthDateWatcher = () => {
   const { setValue } = useFormContext();
@@ -34,27 +36,76 @@ const ValidityDurationMonthsWatcher = () => {
   return null;
 };
 
+const MyFileField = ({ source }) => {
+  const record = useRecordContext();
+  if (!record) return null;
+
+  const url = record[source];
+  const label = record.description || record.title || record.path || "Sans nom";
+
+  return (
+    <Link href={url} target="_blank" rel="noopener noreferrer" underline="always"
+      sx={{ color: "primary.main", fontSize: "0.85rem" }}
+    >
+      {label}
+    </Link>
+  );
+};
+
 export const ProfilesEdit = () => {
 
-  const transform = ({ qualifications, pilotQualifications, certificatMedical, ...data }) => {
+  const { session } = useSessionContext();
+
+  const getDocument = async ({ document }, description = '') => {
+        const finalDescription = description.length > 0 ? description : document?.rawFile?.name ?? '';
+        const docWithDescription = document ? {...document, description: finalDescription} : null;
+        return await syncDocument(docWithDescription, session);
+    }
+  
+    const getDocuments = async (documents) => {   
+        const docs = documents.map(document => {
+            return isDefined(document?.['@id']) ? document : { ...document, description: document.title };
+        });
+        return await syncDocuments(docs, session);
+    };
+
+  const transform = async ({ qualifications, pilotQualifications, certificatMedical, documents, createdBy, updatedBy, ...data }) => {
+
+    const documentIds = await getDocuments(documents);
+    const certificatMedicalDocument = await getDocument(certificatMedical, 'Certificat Médical');
+    const formattedPilotQualifications = await Promise.all(
+        pilotQualifications.map(async (q) => {
+          const qualificationDocument = await getDocument(q, q.qualification?.nom ?? '');
+          return {
+            ...q,
+            qualification: getFormattedValueForBackEnd(q.qualification),
+            dateObtention: new Date(q.dateObtention).toISOString().split('T')[0],
+            validUntil: isDefined(q.validUntil) ? new Date(q.validUntil).toISOString().split('T')[0] : null,
+            document: qualificationDocument,
+            createdBy: getFormattedValueForBackEnd(q.createdBy),
+            updatedBy: getFormattedValueForBackEnd(q.updatedBy),
+          };
+        })
+    );
+
     const updatedProfile = {
         ...data,
+        documents: documentIds,
         pilote: getFormattedValueForBackEnd(data.pilote),
-        pilotQualifications: !isDefinedAndNotVoid(pilotQualifications) ? [] : 
-            pilotQualifications.map(q => ({
-                ...q, 
-                qualification: getFormattedValueForBackEnd(q.qualification),
-                dateObtention: new Date(q.dateObtention).toISOString().split('T')[0],
-                validUntil: isDefined(q.validUntil) ? new Date(q.validUntil).toISOString().split('T')[0] : null
-            })
-        ),
+        pilotQualifications: !isDefinedAndNotVoid(pilotQualifications) ? [] : formattedPilotQualifications,
         certificatMedical: {
             ...certificatMedical,
             dateObtention: new Date(certificatMedical.dateObtention).toISOString().split('T')[0],
-            validUntil: isDefined(certificatMedical.validUntil) ? new Date(certificatMedical.validUntil).toISOString().split('T')[0] : null
-        }
+            validUntil: isDefined(certificatMedical.validUntil) ? new Date(certificatMedical.validUntil).toISOString().split('T')[0] : null,
+            document: certificatMedicalDocument,
+            createdBy: getFormattedValueForBackEnd(certificatMedical.createdBy),
+            updatedBy: getFormattedValueForBackEnd(certificatMedical.updatedBy),
 
-    }
+        },
+        createdBy: getFormattedValueForBackEnd(createdBy),
+        updatedBy: getFormattedValueForBackEnd(updatedBy),
+    };
+
     return !isDefinedAndNotVoid(qualifications) ? updatedProfile :
       {...updatedProfile, qualifications : qualifications.map(q => getFormattedValueForBackEnd(q))};
   };
@@ -91,8 +142,14 @@ export const ProfilesEdit = () => {
                     </ReferenceInput>
                     <DateInput source="dateObtention" label="Date d'obtention" validate={required()}/>
                     <DateInput source="validUntil" label="Date de fin de validité" helperText="Laisser vide si pas de fin de validité"/>
+                    <FileInput source="document" multiple={ false } label=" " placeholder="Fichier">
+                        <FileField source="contentUrl" title="description"/>
+                    </FileInput>
                 </SimpleFormIterator>
               </ArrayInput>
+              <FileInput source="documents" multiple={ true } label="Autres documents">
+                  <MyFileField source="contentUrl"/>
+              </FileInput>
           </TabbedForm.Tab>
           <TabbedForm.Tab label="Médical">
               <SelectInput source="certificatMedical.type" label="Type" choices={ certificatMedicalTypes } validate={required()}/>
@@ -101,6 +158,9 @@ export const ProfilesEdit = () => {
               <DateInput source="certificatMedical.validUntil" label="Date de fin de validité" helperText="Laisser vide si pas de fin de validité"/>
               <TextInput source="certificatMedical.medecin" label="Nom du Médecin" />
               <TextInput source="certificatMedical.remarques" label="Remarques" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
+              <FileInput source="certificatMedical.document" multiple={ false } label="Certificat médical">
+                <FileField source="contentUrl" title="description"/>
+            </FileInput>
           </TabbedForm.Tab>
           <BirthDateWatcher />
           <ValidityDurationMonthsWatcher />

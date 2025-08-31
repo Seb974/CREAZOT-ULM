@@ -122,6 +122,97 @@ export const objectToFormData = (data, form = new FormData(), namespace = '') =>
     return form;
 };
 
+export const createMediaObject = async (file, description = '', session) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('description', description);
+
+    try {
+        const response = await fetch('/media_objects', {
+            method: 'POST',
+            body: formData,
+            headers: { Authorization: `Bearer ${session?.accessToken}` },
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Erreur lors de l'upload du fichier : ${errorText}`);
+            return null;
+        }
+
+        const mediaObject = await response.json();
+        return mediaObject;
+    } catch (err) {
+        console.error('Erreur :', err);
+        return null;
+    }
+}
+
+export const createMediaObjects = async (items, session) => {
+    const results = [];
+
+    for (const { file, description } of items) {
+        const media = await createMediaObject(file, description, session);
+        if (media) results.push(media);
+    }
+
+    return results;
+}
+
+export const syncDocument = async (document, session) => {
+
+  if (!document) return null;
+
+  // Cas 1 & 2 : création ou remplacement d’un fichier
+  if (document.rawFile) {
+    const created = await createMediaObject(document.rawFile, document.description ?? '', session);
+    console.log(created);
+    return created ? created['@id'] : null;
+  }
+
+  // Cas 3 : update description seulement
+  if (document['@id'] && document.description !== document.originalDescription) {
+    const response = await fetch(document['@id'], {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/merge-patch+json',
+        Authorization: `Bearer ${session?.accessToken}`,
+      },
+      body: JSON.stringify({ description: document.description }),
+    });
+
+    if (!response.ok) {
+      console.error( `Erreur PATCH description MediaObject :`, await response.text());
+      return document['@id']; // fallback
+    }
+
+    const updated = await response.json();
+    return updated['@id'];
+  }
+
+  // Cas 4 : pas de changement
+  if (document['@id']) return document['@id'];
+
+  return null;
+};
+
+
+export const syncDocuments = async (documents, session) => {
+    console.log(documents);
+  if (!documents || documents.length === 0) return [];
+
+  const results = [];
+
+  for (const document of documents) {
+    const mediaId = await syncDocument(document, session);
+    console.log(mediaId);
+    if (mediaId) results.push(mediaId);
+  }
+  console.log(results);
+
+  return results;
+};
+
 export const uploadImages = async (data, session) => {
     const uploadPromises = images.map(async (image) => {
         const value = data[image.name];

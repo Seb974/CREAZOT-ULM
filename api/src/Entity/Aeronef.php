@@ -6,6 +6,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\AeronefRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\Delete;
@@ -112,6 +114,18 @@ class Aeronef
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['Aeronef:read'])]
     private ?\DateTimeImmutable $updatedAt = null;
+
+    /**
+     * @var Collection<int, MediaObject>
+     */
+    #[ORM\OneToMany(targetEntity: MediaObject::class, mappedBy: 'aeronef')]
+    #[Groups(groups: ['Aeronef:write', 'Aeronef:read'])]
+    private Collection $documents;
+
+    public function __construct()
+    {
+        $this->documents = new ArrayCollection();
+    }
 
     #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Landing:read'])]
     public function getName(): ?string
@@ -288,6 +302,36 @@ class Aeronef
     public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MediaObject>
+     */
+    public function getDocuments(): Collection
+    {
+        return $this->documents;
+    }
+
+    public function addDocument(MediaObject $document): static
+    {
+        if (!$this->documents->contains($document)) {
+            $this->documents->add($document);
+            $document->setAeronef($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDocument(MediaObject $document): static
+    {
+        if ($this->documents->removeElement($document)) {
+            // set the owning side to null (unless already changed)
+            if ($document->getAeronef() === $this) {
+                $document->setAeronef(null);
+            }
+        }
 
         return $this;
     }

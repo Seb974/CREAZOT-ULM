@@ -99,8 +99,12 @@ class CertificatMedical
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: [ 'CertificatMedical:read', 'Profil_pilote:write'])]
+    #[Groups(groups: ['CertificatMedical:read', 'Profil_pilote:write'])]
     private ?\DateTimeImmutable $updatedAt = null;
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[Groups(groups: ['CertificatMedical:read', 'Profil_pilote:read', 'Profil_pilote:write'])]
+    private ?MediaObject $document = null;
 
     public function getId(): ?int
     {
@@ -247,6 +251,18 @@ class CertificatMedical
     public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getDocument(): ?MediaObject
+    {
+        return $this->document;
+    }
+
+    public function setDocument(?MediaObject $document): static
+    {
+        $this->document = $document;
 
         return $this;
     }

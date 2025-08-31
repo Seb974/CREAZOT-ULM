@@ -1,4 +1,4 @@
-import { Show, SimpleShowLayout, TextField, NumberField, BooleanField, FunctionField, DateField } from 'react-admin';
+import { Show, SimpleShowLayout, TextField, NumberField, BooleanField, FunctionField, DateField, FileField } from 'react-admin';
 import { isDefined } from '../../../app/lib/utils';
 
 export const AeronefShow = () => {
@@ -47,6 +47,7 @@ export const AeronefShow = () => {
                 <NumberField source="seuilAlerteChangementMoteur" options={{ style: 'unit', unit: 'hour' }} label="Seuil d'alerte (en h) avant changement du moteur"/>
                 <TextField source="codeBalise" label="Code Microtrak"/>
                 <BooleanField source="decimal" label="Horamètre décimal"/>
+                <FileField source="documents" src="contentUrl" title="description" target="_blank" label="Documents associés"/>
                 <DateField source="createdAt" label="Créé le" showTime/>
                 <FunctionField
                     label="Créé par"

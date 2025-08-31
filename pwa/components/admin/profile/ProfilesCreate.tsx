@@ -1,8 +1,10 @@
-import { ReferenceInput, Create, ArrayInput, SimpleFormIterator, useCreate, useRedirect, useNotify, DateInput, BooleanInput, required, SelectInput, TabbedForm, NumberInput, TextInput } from "react-admin";
+import { ReferenceInput, Create, ArrayInput, SimpleFormIterator, useCreate, useRedirect, useNotify, DateInput, BooleanInput, required, SelectInput, TabbedForm, NumberInput, TextInput, FileInput, FileField, useRecordContext } from "react-admin";
 import { calculateValidUntil, decimalToTime, getFormattedValueForBackEnd, getValidityDurationMonths, isDefined, isDefinedAndNotVoid, isValidNumber, timeToDecimal } from "../../../app/lib/utils";
-import { certificatMedicalTypes, infiniteCertificateTypes } from "../../../app/lib/client";
+import { certificatMedicalTypes, infiniteCertificateTypes, syncDocument, syncDocuments } from "../../../app/lib/client";
 import { useWatch, useFormContext } from 'react-hook-form';
+import { useSessionContext } from "../SessionContextProvider";
 import { useEffect } from "react";
+import { Link } from "@mui/material";
 
 const BirthDateWatcher = () => {
   const { setValue } = useFormContext();
@@ -34,31 +36,73 @@ const ValidityDurationMonthsWatcher = () => {
   return null;
 };
 
+const MyFileField = ({ source }) => {
+  const record = useRecordContext();
+  if (!record) return null;
+
+  const url = record[source];
+  const label = record.description || record.title || record.path || "Sans nom";
+
+  return (
+    <Link href={url} target="_blank" rel="noopener noreferrer" underline="always"
+      sx={{ color: "primary.main", fontSize: "0.85rem" }}
+    >
+      {label}
+    </Link>
+  );
+};
+
 export const ProfilesCreate = () => {
 
   const notify = useNotify();
   const redirect = useRedirect();
   const [create] = useCreate();
+  const { session } = useSessionContext();
 
-  const onSubmit = async ({ pilotQualifications, certificatMedical, ...data }) => {
+  const getDocument = async ({ document }, description = '') => {
+      const finalDescription = description.length > 0 ? description : document?.rawFile?.name ?? '';
+      const docWithDescription = document ? {...document, description: finalDescription} : null;
+      return await syncDocument(docWithDescription, session);
+  }
+
+  const getDocuments = async (documents) => { 
+      const docs = documents.map(document => {
+          return isDefined(document?.['@id']) ? document : { ...document, description: document.title };
+      });
+      return await syncDocuments(docs, session);
+  };
+
+  const onSubmit = async ({ pilotQualifications, certificatMedical, documents, ...data }) => {
     try {
+      const documentIds = await getDocuments(documents);
+      const certificatMedicalDocument = await getDocument(certificatMedical, 'Certificat Médical');
+
+      const formattedPilotQualifications = await Promise.all(
+        pilotQualifications.map(async (q) => {
+          const qualificationDocument = await getDocument(q, q.qualification?.nom ?? '');
+          return {
+            ...q,
+            qualification: getFormattedValueForBackEnd(q.qualification),
+            dateObtention: new Date(q.dateObtention).toISOString().split('T')[0],
+            validUntil: isDefined(q.validUntil) ? new Date(q.validUntil).toISOString().split('T')[0] : null,
+            document: qualificationDocument
+          };
+        })
+      );
+
       const newProfile = {
           ...data,
           pilote: getFormattedValueForBackEnd(data.pilote),
-          pilotQualifications: !isDefinedAndNotVoid(pilotQualifications) ? [] : 
-              pilotQualifications.map(q => ({
-                  ...q, 
-                  qualification: getFormattedValueForBackEnd(q.qualification),
-                  dateObtention: new Date(q.dateObtention).toISOString().split('T')[0],
-                  validUntil: isDefined(q.validUntil) ? new Date(q.validUntil).toISOString().split('T')[0] : null
-              })
-          ),
+          documents: documentIds,
+          pilotQualifications: !isDefinedAndNotVoid(pilotQualifications) ? [] : formattedPilotQualifications,
           certificatMedical: {
             ...certificatMedical,
             dateObtention: new Date(certificatMedical.dateObtention).toISOString().split('T')[0],
-            validUntil: isDefined(certificatMedical.validUntil) ? new Date(certificatMedical.validUntil).toISOString().split('T')[0] : null
+            validUntil: isDefined(certificatMedical.validUntil) ? new Date(certificatMedical.validUntil).toISOString().split('T')[0] : null,
+            document: certificatMedicalDocument
         }
       };
+
       await create('profil_pilotes', {data: newProfile});
       notify('Le profil du pilote a bien été enregistré.', { type: 'info' });
       redirect('list', 'profil_pilotes');
@@ -101,8 +145,14 @@ export const ProfilesCreate = () => {
                   </ReferenceInput>
                   <DateInput source="dateObtention" label="Date d'obtention" validate={required()}/>
                   <DateInput source="validUntil" label="Date de fin de validité" helperText="Laisser vide si pas de fin de validité"/>
+                  <FileInput source="document" multiple={ false } label=" " placeholder="Fichier">
+                      <FileField source="src" title="title"/>
+                  </FileInput>
               </SimpleFormIterator>
             </ArrayInput>
+            <FileInput source="documents" multiple={ true } label="Autres documents">
+                <MyFileField source="contentUrl"/>
+            </FileInput>
         </TabbedForm.Tab>
         <TabbedForm.Tab label="Médical">
             <SelectInput source="certificatMedical.type" label="Type" choices={ certificatMedicalTypes } validate={required()}/>
@@ -111,6 +161,9 @@ export const ProfilesCreate = () => {
             <DateInput source="certificatMedical.validUntil" label="Date de fin de validité" helperText="Laisser vide si pas de fin de validité"/>
             <TextInput source="certificatMedical.medecin" label="Nom du Médecin" />
             <TextInput source="certificatMedical.remarques" label="Remarques" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
+            <FileInput source="certificatMedical.document" multiple={ false } label="Certificat médical">
+                <FileField source="src" title="title"/>
+            </FileInput>
         </TabbedForm.Tab>
         <BirthDateWatcher />
         <ValidityDurationMonthsWatcher />
