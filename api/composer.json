@@ -45,6 +45,7 @@
         "symfony/uid": "7.1.*",
         "symfony/validator": "7.1.*",
         "symfony/yaml": "7.1.*",
+        "vich/uploader-bundle": "^2.7",
         "web-token/jwt-bundle": "^4.0",
         "webonyx/graphql-php": "^15.8",
         "zenstruck/foundry": "^2.0"
