@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\PrestationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -20,10 +20,6 @@ use ApiPlatform\Metadata\Patch;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\OrderFilter;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 
 #[ORM\Entity(repositoryClass: PrestationRepository::class)]
 #[ApiResource(
@@ -68,7 +64,6 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
     security: 'is_granted("OIDC_USER")',
     mercure: true,
 )]
-#[ApiFilter(DateFilter::class, properties: ['date'])]
 class Prestation
 {
     #[ORM\Id]

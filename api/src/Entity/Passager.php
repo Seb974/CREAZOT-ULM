@@ -14,9 +14,8 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Patch;
-use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use Symfony\Component\Serializer\Annotation\Groups;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
@@ -55,7 +54,6 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     security: 'is_granted("OIDC_USER")',
     mercure: true,
 )]
-#[ApiFilter(DateFilter::class, properties: ['date'])]
 class Passager
 {
     #[ORM\Id]
