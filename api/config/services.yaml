@@ -58,6 +58,7 @@ services:
     App\Service\Export\PrestationExportFilter: ~
     App\Service\Export\ReservationExportFilter: ~
     App\Service\Export\ProfilPiloteExportFilter: ~
+    App\Service\Export\DisponibiliteExportFilter: ~
 
     App\Service\Export\ExportFilterManager:
         arguments:
@@ -74,6 +75,7 @@ services:
                 - '@App\Service\Export\PrestationExportFilter'
                 - '@App\Service\Export\ReservationExportFilter'
                 - '@App\Service\Export\ProfilPiloteExportFilter'
+                - '@App\Service\Export\DisponibiliteExportFilter'
 
 when@test:
     services:

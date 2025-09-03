@@ -142,6 +142,18 @@ services:
             $properties: { debut: ~ } # ]
         tags: [ 'api_platform.filter' ]
 
+    app.filter.disponibilite.debut:
+        parent: 'api_platform.doctrine.orm.date_filter'
+        arguments:
+            $properties: { debut: ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.disponibilite.fin:
+        parent: 'api_platform.doctrine.orm.date_filter'
+        arguments:
+            $properties: { fin: ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
     app.filter.reservation.client:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:
@@ -155,6 +167,24 @@ services:
             $logger: '@logger'
             $nameConverter: '@?api_platform.name_converter'
             $properties: { cancel: 'ipartial' } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.aeronef.available:
+        class: 'App\Doctrine\Orm\Filter\AvailableAeronefFilter'
+        arguments:
+            $managerRegistry: '@doctrine'
+            $logger: '@logger'
+            $nameConverter: '@?api_platform.name_converter'
+            $properties: { start: null, end: null, reservationId: null }
+        tags: [ 'api_platform.filter' ]
+    
+    app.filter.pilote.available:
+        class: 'App\Doctrine\Orm\Filter\AvailablePiloteFilter'
+        arguments:
+            $managerRegistry: '@doctrine'
+            $logger: '@logger'
+            $nameConverter: '@?api_platform.name_converter'
+            $properties: { start: null, end: null, reservationId: null }
         tags: [ 'api_platform.filter' ]
 
     app.filter.reservation.paid:

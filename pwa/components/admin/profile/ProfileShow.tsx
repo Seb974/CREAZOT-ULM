@@ -1,4 +1,4 @@
-import { Show, FunctionField, ArrayField, Datagrid, DateField, TabbedShowLayout, TextField, NumberField, FileField } from 'react-admin';
+import { Show, FunctionField, ArrayField, Datagrid, DateField, TabbedShowLayout, TextField, NumberField, FileField, BooleanField } from 'react-admin';
 import { decimalToTimeFormatted, getShipStyle, isDefined } from '../../../app/lib/utils';
 import { certificatMedicalTypes } from '../../../app/lib/client';
 import Chip from '@mui/material/Chip';
@@ -28,6 +28,7 @@ export const ProfileShow = () => {
                         render={record => isDefined(record?.totalFlightHours) ? decimalToTimeFormatted(record.totalFlightHours) : "00:00"}
                         textAlign="center"
                     />
+                    <BooleanField source="availableByDefault" label="Disponible par défaut"/>
                     <ArrayField source="pilotQualifications" label="Qualifications">
                         <Datagrid
                             optimized

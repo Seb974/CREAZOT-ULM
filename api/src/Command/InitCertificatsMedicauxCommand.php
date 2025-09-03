@@ -61,6 +61,11 @@ class InitCertificatsMedicauxCommand extends Command
                 $profil->setBirthDate($defaultDate);
                 $io->writeln("→ BirthDate renseignée pour le pilote #{$profil->getId()}");
             }
+
+            if (is_null($profil->getAvailableByDefault())) {
+                $profil->setAvailableByDefault(true);
+                $io->writeln("→ availableByDefault = true pour le pilote #{$profil->getId()}");
+            }
         }
 
         $this->em->flush();

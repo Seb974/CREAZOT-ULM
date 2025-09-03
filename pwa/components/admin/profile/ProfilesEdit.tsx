@@ -1,4 +1,4 @@
-import { Edit, ReferenceInput, ArrayInput, SimpleFormIterator, SelectInput, required, DateInput, TabbedForm, NumberInput, TextInput, FileInput, FileField, useRecordContext } from "react-admin";
+import { Edit, ReferenceInput, ArrayInput, SimpleFormIterator, SelectInput, required, DateInput, TabbedForm, NumberInput, TextInput, FileInput, FileField, useRecordContext, BooleanInput } from "react-admin";
 import { calculateValidUntil, decimalToTime, getFormattedValueForBackEnd, getValidityDurationMonths, isDefined, isDefinedAndNotVoid, isValidNumber, timeToDecimal } from "../../../app/lib/utils";
 import { certificatMedicalTypes, infiniteCertificateTypes, syncDocument, syncDocuments } from "../../../app/lib/client";
 import { useWatch, useFormContext } from 'react-hook-form';
@@ -135,6 +135,7 @@ export const ProfilesEdit = () => {
               <TextInput source="pilote.email" label="Adresse email" readOnly helperText={`Modifiable uniquement via Administration`}/>
               <DateInput source="birthDate" label="Date de naissance" validate={required()}/>
               <TextInput source="totalFlightHours" label="Total des heures de vol" format={ decimalToTime } parse={ timeToDecimal }/>
+              <BooleanInput source="availableByDefault" label="Disponible par défaut" defaultValue={ false }/>
               <ArrayInput source="pilotQualifications" label="Qualifications">
                 <SimpleFormIterator inline disableReordering>
                     <ReferenceInput reference="qualifications" source="qualification.@id">

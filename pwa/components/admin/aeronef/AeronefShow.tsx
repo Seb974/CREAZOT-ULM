@@ -47,6 +47,7 @@ export const AeronefShow = () => {
                 <NumberField source="seuilAlerteChangementMoteur" options={{ style: 'unit', unit: 'hour' }} label="Seuil d'alerte (en h) avant changement du moteur"/>
                 <TextField source="codeBalise" label="Code Microtrak"/>
                 <BooleanField source="decimal" label="Horamètre décimal"/>
+                <BooleanField source="isAvailable" label="Disponible"/>
                 <FileField source="documents" src="contentUrl" title="description" target="_blank" label="Documents associés"/>
                 <DateField source="createdAt" label="Créé le" showTime/>
                 <FunctionField

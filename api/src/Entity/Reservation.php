@@ -68,6 +68,10 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     security: 'is_granted("OIDC_USER")',
     mercure: true
 )]
+#[ORM\Table(name: "reservation", indexes: [
+    new ORM\Index(name: "idx_reservation_pilote_debut_fin", columns: ["pilote_id", "debut", "fin"]),
+    new ORM\Index(name: "idx_reservation_avion_debut_fin", columns: ["avion_id", "debut", "fin"])
+])]
 class Reservation
 {
     #[ORM\Id]

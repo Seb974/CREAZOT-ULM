@@ -15,6 +15,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use App\Doctrine\Orm\Filter\AvailablePiloteFilter;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
@@ -25,6 +26,7 @@ use App\Entity\User;
     operations: [
         new GetCollection(
             paginationClientItemsPerPage: true,
+            name: 'profil_pilotes_list',
             filters: [
                 'app.filter.profile.pilote',
                 'app.filter.profile.email',
@@ -33,6 +35,11 @@ use App\Entity\User;
                 'app.filter.profile.instructeur',
                 'app.filter.profile.certificat_medical',
             ],
+        ),
+        new GetCollection(
+            name: 'profil_pilotes_available',
+            uriTemplate: '/profil_pilotes/disponibles',
+            filters: [AvailablePiloteFilter::class]
         ),
         new Post(),
         new Get(),
@@ -56,11 +63,11 @@ class ProfilPilote
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'CarnetVol:read'])]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'CarnetVol:read', 'Disponibilite:read'])]
     private ?int $id = null;
 
     #[ORM\OneToOne(inversedBy: 'profilPilote', cascade: ['persist'])]
-    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'CarnetVol:read'])]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'CarnetVol:read', 'Disponibilite:read'])]
     private ?User $pilote = null;
 
     /**
@@ -90,7 +97,7 @@ class ProfilPilote
     private ?CertificatMedical $certificatMedical = null;
 
     #[ORM\OneToMany(targetEntity: CarnetVol::class, mappedBy: 'profil', cascade: ['persist', 'remove'])]
-    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
+    #[Groups(groups: ['Profil_pilote:write'])]
     private Collection $carnetVols;
 
     #[ORM\ManyToOne]
@@ -115,6 +122,10 @@ class ProfilPilote
     #[ORM\OneToMany(targetEntity: MediaObject::class, mappedBy: 'profilPilote', cascade: ['persist', 'remove'])]
     #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
     private Collection $documents;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'Disponibilite:read'])]
+    private ?bool $availableByDefault = null;
 
     #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
     public function getAvailableCertificate(): ?bool
@@ -369,6 +380,18 @@ class ProfilPilote
                 $document->setProfilPilote(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getAvailableByDefault(): ?bool
+    {
+        return $this->availableByDefault;
+    }
+
+    public function setAvailableByDefault(?bool $availableByDefault): static
+    {
+        $this->availableByDefault = $availableByDefault;
 
         return $this;
     }

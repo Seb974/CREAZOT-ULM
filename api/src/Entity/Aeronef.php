@@ -15,6 +15,8 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\ApiFilter;
+use App\Doctrine\Orm\Filter\AvailableAeronefFilter;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
@@ -24,8 +26,14 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     uriTemplate: '/aeronefs{._format}',
     operations: [
         new GetCollection(
-            itemUriTemplate: '/aeronefs/{id}{._format}',
-            paginationClientItemsPerPage: true
+            paginationClientItemsPerPage: true,
+            name: 'aeronefs_list',
+            uriTemplate: '/aeronefs'
+        ),
+        new GetCollection(
+            name: 'aeronefs_available',
+            uriTemplate: '/aeronefs/disponibles',
+            filters: [AvailableAeronefFilter::class]
         ),
         new Post(
             itemUriTemplate: '/aeronefs/{id}{._format}'
@@ -51,6 +59,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     security: 'is_granted("OIDC_USER")',
     mercure: true
 )]
+#[ApiFilter(AvailableAeronefFilter::class)]
 class Aeronef
 {
     #[ORM\Id]
@@ -121,6 +130,10 @@ class Aeronef
     #[ORM\OneToMany(targetEntity: MediaObject::class, mappedBy: 'aeronef')]
     #[Groups(groups: ['Aeronef:write', 'Aeronef:read'])]
     private Collection $documents;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Aeronef:write', 'Aeronef:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Landing:read'])]
+    private ?bool $isAvailable = null;
 
     public function __construct()
     {
@@ -332,6 +345,18 @@ class Aeronef
                 $document->setAeronef(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getIsAvailable(): ?bool
+    {
+        return $this->isAvailable;
+    }
+
+    public function setIsAvailable(?bool $isAvailable): static
+    {
+        $this->isAvailable = $isAvailable;
 
         return $this;
     }

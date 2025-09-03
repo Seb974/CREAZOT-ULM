@@ -1,20 +1,49 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import BadgeIcon from '@mui/icons-material/Badge';
 import { useDataProvider } from "react-admin";
 import { isDefined, isDefinedAndNotVoid, isValid } from "../../../../app/lib/utils";
+import { useClient } from "../../ClientProvider";
+import { clientUsingAvailabilityFilter } from "../../../../app/lib/client";
 
 // @ts-ignore
-export const ProfilPiloteForm: React.FC = ({ selectedPilot, setSelectedPilot, pilots, setPilots, eligiblePilots, setEligiblePilots, selectedCircuit, autoSelect = true, date = new Date()}) => {
+export const ProfilPiloteForm: React.FC = ({ selectedPilot, setSelectedPilot, setPilots, eligiblePilots, reservation, autoSelect = true, date = new Date() }) => {
 
+  const { client } = useClient();
   const dataProvider = useDataProvider();
   const changeTextColor = () => setIsPilotSelected(true);
 
   const [isPilotSelected, setIsPilotSelected] = useState<boolean>(false);
   const [unfilteredPilots, setUnfilteredPilots] = useState([]);
 
-  useEffect(() => getProfiles(), []);
+  const filterParams = useMemo(() => {
+    if (!isDefined(reservation)) return {};
+    const { debut, fin, originId } = reservation;
+    return {
+      debut: debut instanceof Date ? debut.toISOString() : new Date(debut).toISOString(),
+      fin: fin instanceof Date ? fin.toISOString() : new Date(fin).toISOString(),
+      id: originId,
+    };
+  }, [reservation]);
+
+  const getProfiles = useCallback(() => {
+    if (!isDefined(reservation)) return;
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const { debut, fin, originId } = reservation;
+    const endpoint = clientUsingAvailabilityFilter(client) ? "profil_pilotes/disponibles" : "profil_pilotes";
+    const filters = clientUsingAvailabilityFilter(client) ? 
+        { debut, fin, timezone, reservationId: originId, "exists[certificatMedical]": true }  : 
+        { "exists[certificatMedical]": true };
+    dataProvider
+      .getList(endpoint, { filter: filters })
+      .then(({ data }) => {
+          const pilots = data.map(({pilote, ...profil}) => ({...pilote, profil}));
+          setUnfilteredPilots(pilots);
+      })
+  }, [dataProvider, reservation, setUnfilteredPilots]);
+
+  useEffect(() => getProfiles(), [getProfiles, filterParams]);
 
   useEffect(() => {
       if (isDefinedAndNotVoid(unfilteredPilots)) {
@@ -26,16 +55,7 @@ export const ProfilPiloteForm: React.FC = ({ selectedPilot, setSelectedPilot, pi
       } else {
           setPilots([]);
       }
-    }, [date, unfilteredPilots]);
-
-  const getProfiles = () => {
-    dataProvider
-      .getList('profil_pilotes', { filter: { "exists[certificatMedical]": true } })
-      .then(({ data }) => {
-          const pilots = data.map(({pilote, ...profil}) => ({...pilote, profil}));
-          setUnfilteredPilots(pilots);
-      })
-  };
+  }, [date, unfilteredPilots]);
 
   return (
         <div className="my-2">

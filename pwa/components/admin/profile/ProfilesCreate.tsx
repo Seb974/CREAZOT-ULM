@@ -138,6 +138,7 @@ export const ProfilesCreate = () => {
             </ReferenceInput>
             <DateInput source="birthDate" label="Date de naissance" validate={required()}/>
             <TextInput source="totalFlightHours" label="Total des heures de vol" format={ decimalToTime } parse={ timeToDecimal } />
+            <BooleanInput source="availableByDefault" label="Disponible par défaut" defaultValue={ false }/>
             <ArrayInput source="pilotQualifications" label="Qualifications">
               <SimpleFormIterator inline disableReordering>
                   <ReferenceInput reference="qualifications" source="qualification">

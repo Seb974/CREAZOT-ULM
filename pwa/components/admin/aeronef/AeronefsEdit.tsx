@@ -1,5 +1,6 @@
 import { Edit, SimpleForm, TextInput, NumberInput, BooleanInput, useRecordContext, FileInput } from "react-admin";
 import { useClient } from "../ClientProvider";
+import { Box } from '@mui/material';
 import { clientWithMicrotrakTags, syncDocuments } from "../../../app/lib/client";
 import { Link } from "@mui/material";
 import { useSessionContext } from "../SessionContextProvider";
@@ -58,7 +59,14 @@ export const AeronefsEdit = () => {
           <NumberInput source="seuilAlerte" label="Seuil d'alerte (en h) avant entretien"/>
           <NumberInput source="seuilAlerteChangementMoteur" label="Seuil d'alerte (en h) avant changement du moteur"/>
           <MicrotrakInput/>
-          <BooleanInput source="decimal" label="Horamètre décimal"/>
+          <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+            <Box flex={1} display="flex" alignItems="center">
+                <BooleanInput source="decimal" label="Horamètre décimal" defaultValue={ false }/>
+            </Box>
+            <Box flex={1}>
+                <BooleanInput source="isAvailable" label="Disponible" defaultValue={ false }/>
+            </Box>
+        </Box>
           <FileInput source="documents" multiple={ true } label="Documents associés">
               <MyFileField source="contentUrl"/>
           </FileInput>

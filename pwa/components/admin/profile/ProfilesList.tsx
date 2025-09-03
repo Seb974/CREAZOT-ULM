@@ -1,5 +1,5 @@
 import { Datagrid, List, CreateButton, ExportButton, TopToolbar, EditButton, ShowButton, SimpleList, FunctionField } from "react-admin";
-import { decimalToTimeFormatted, getShipStyle, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { decimalToTimeFormatted, getFirstCharToUpperCase, getShipStyle, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { type PagedCollection } from "../../../types/collection";
 import { type Circuit } from "../../../types/Circuit";
 import { useMediaQuery, Theme, Button } from '@mui/material';
@@ -97,9 +97,7 @@ export const ProfilesList: NextPage<Props> = ({ data, hubURL, page }) => {
                 <FunctionField
                   label="Prénom"
                   source="pilote.firstName"
-                  render={(record) => isDefined(record.pilote) && isDefined(record.pilote.firstName) ?
-                    record.pilote.firstName.charAt(0).toUpperCase() + record.pilote.firstName.slice(1) : ''
-                  }
+                  render={(record) => getFirstCharToUpperCase(record?.pilote?.firstName) }
                 />
                 <FunctionField
                   label="Total des heures de vol"

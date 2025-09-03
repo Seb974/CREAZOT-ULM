@@ -4,7 +4,6 @@ import {
   List,
   TextField,
   CreateButton,
-  ExportButton,
   TopToolbar,
   NumberField,
   EditButton,
@@ -21,6 +20,7 @@ import { useMediaQuery, Theme, Button } from '@mui/material';
 import { useSessionContext } from "../SessionContextProvider";
 import BackupTableIcon from '@mui/icons-material/BackupTable';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import ToggleAvailabilityButton from "./ToggleAvailabilityButton";
 
 export interface Props {
   data: PagedCollection<Circuit> | null;
@@ -152,6 +152,7 @@ export const AeronefsList: NextPage<Props> = ({ data, hubURL, page }) => {
                   textAlign="right"
                   render={ record => <>{ getRemainingMotorTime(record) }</> }
                 />
+                <ToggleAvailabilityButton label="Disponibilité" textAlign="center"/>
                 <p className="text-right">
                     <ShowButton />
                     <EditButton />

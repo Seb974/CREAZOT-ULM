@@ -87,8 +87,8 @@ export const SelectBalise = ({ value, onChange, setAeronefs }) => {
                     paddingTop: '8px'
                 }}
             >
-                {choices.map(choice => (
-                    <MenuItem key={choice.id} value={choice.id}>
+                {choices.map((choice, i) => (
+                    <MenuItem key={i} value={choice.id}>
                         {choice.name}
                     </MenuItem>
                 ))}

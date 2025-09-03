@@ -255,6 +255,10 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?bool $hasIndividualFlightLogs = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $useAvailabilityFilter = null;
+
     #[Groups(groups: ['Client:read'])]
     public function getEmailParams(): string
     {
@@ -821,6 +825,18 @@ class Client
     public function setHasIndividualFlightLogs(?bool $hasIndividualFlightLogs): static
     {
         $this->hasIndividualFlightLogs = $hasIndividualFlightLogs;
+
+        return $this;
+    }
+
+    public function getUseAvailabilityFilter(): ?bool
+    {
+        return $this->useAvailabilityFilter;
+    }
+
+    public function setUseAvailabilityFilter(?bool $useAvailabilityFilter): static
+    {
+        $this->useAvailabilityFilter = $useAvailabilityFilter;
 
         return $this;
     }

@@ -166,7 +166,6 @@ export const syncDocument = async (document, session) => {
   // Cas 1 & 2 : création ou remplacement d’un fichier
   if (document.rawFile) {
     const created = await createMediaObject(document.rawFile, document.description ?? '', session);
-    console.log(created);
     return created ? created['@id'] : null;
   }
 
@@ -198,17 +197,14 @@ export const syncDocument = async (document, session) => {
 
 
 export const syncDocuments = async (documents, session) => {
-    console.log(documents);
   if (!documents || documents.length === 0) return [];
 
   const results = [];
 
   for (const document of documents) {
     const mediaId = await syncDocument(document, session);
-    console.log(mediaId);
     if (mediaId) results.push(mediaId);
   }
-  console.log(results);
 
   return results;
 };
@@ -320,6 +316,10 @@ export const clientWithWebshop = client => {
 
 export const clientWithIndividualFlightLogs = client => {
     return isDefined(client) && isDefined(client.hasIndividualFlightLogs) && client.hasIndividualFlightLogs;
+};
+
+export const clientUsingAvailabilityFilter = client => {
+    return isDefined(client) && isDefined(client.useAvailabilityFilter) && client.useAvailabilityFilter;
 };
 
 export const clientWithReservationManagement = client => {

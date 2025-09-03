@@ -36,7 +36,8 @@ class Data
         'hasWebshop' => true,
         'seuilMedical' => 90,
         'seuilQualifications' => 90,
-        'hasIndividualFlightLogs' => true
+        'hasIndividualFlightLogs' => true,
+        'useAvailabilityFilter' => false
     ];
 
     private $natures = [

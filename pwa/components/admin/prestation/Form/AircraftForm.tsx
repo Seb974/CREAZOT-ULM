@@ -1,27 +1,46 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import FlightIcon from '@mui/icons-material/Flight';
 import { useDataProvider } from "react-admin";
 import { isDefined } from "../../../../app/lib/utils";
+import { useClient } from "../../ClientProvider";
+import { clientUsingAvailabilityFilter } from "../../../../app/lib/client";
 
 // @ts-ignore
-export const AircraftForm: React.FC = ({ selectedAircraft, setSelectedAircraft, aircrafts, setAircrafts, autoSelect = true }) => {
+export const AircraftForm: React.FC = ({ selectedAircraft, setSelectedAircraft, aircrafts, setAircrafts, reservation, autoSelect = true }) => {
 
+  const { client } = useClient();
   const dataProvider = useDataProvider();
   const changeTextColor = () => setIsAircraftSelected(true);
 
   const [isAircraftSelected, setIsAircraftSelected] = useState<boolean>(false);
 
-  useEffect(() => {
-    dataProvider
-        .getList('aeronefs', {})
+  const filterParams = useMemo(() => {
+      if (!isDefined(reservation)) return {};
+      const { debut, fin, originId } = reservation;
+      return {
+        debut: debut instanceof Date ? debut.toISOString() : new Date(debut).toISOString(),
+        fin: fin instanceof Date ? fin.toISOString() : new Date(fin).toISOString(),
+        id: originId,
+      };
+    }, [reservation]);
+
+  const getAeronefs = useCallback(() => {
+      if (!isDefined(reservation)) return;
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const { debut, fin, originId } = reservation;
+      const endpoint = clientUsingAvailabilityFilter(client) ? "aeronefs/disponibles" : "aeronefs";
+      const filters = clientUsingAvailabilityFilter(client) ? { debut, fin, timezone, reservationId: originId } : {};
+      dataProvider
+        .getList(endpoint, { filter: filters })
         .then(({ data }) => {
           setAircrafts(data);
-          if (autoSelect)
-            setSelectedAircraft(data[0]);
+          if (autoSelect) setSelectedAircraft(data[0]);  
         })
-  }, []);
+    }, [dataProvider, reservation, setAircrafts, setSelectedAircraft]);
+  
+  useEffect(() => getAeronefs(), [getAeronefs, filterParams]);
 
   const handleAircraftChange = e => {
     changeTextColor();

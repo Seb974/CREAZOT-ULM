@@ -280,3 +280,19 @@ export const timeToDecimal = (timeStr) => {
   if (isNaN(hours) || isNaN(minutes)) return null;
   return hours + (minutes / 60);
 };
+
+export const getFirstCharToUpperCase = text => isDefined(text) ? text.charAt(0).toUpperCase() + text.slice(1) : '';
+
+export const getFormattedStartDate = (start) => {
+  const datetime = new Date(start);
+  datetime.setHours(0, 0, 0, 0);
+
+  return datetime.toISOString()
+};
+
+export const getFormattedEndDate = (end) => {
+  const datetime = new Date(end);
+  datetime.setHours(23, 59, 59, 999);
+
+  return datetime.toISOString()
+};

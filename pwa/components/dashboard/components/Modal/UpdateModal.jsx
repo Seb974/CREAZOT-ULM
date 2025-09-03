@@ -382,11 +382,9 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                                     <ProfilPiloteForm 
                                         selectedPilot={ selectedPilot } 
                                         setSelectedPilot={ setSelectedPilot }
-                                        pilots={ pilots }
                                         setPilots={ setPilots }
                                         eligiblePilots={ eligiblePilots }
-                                        setEligiblePilots={ setEligiblePilots }
-                                        selectedCircuit={ selectedCircuit }
+                                        reservation={ toUpdate }
                                         autoSelect={ false }
                                         date={ consumer.debut }
                                     />
@@ -395,6 +393,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                                         setSelectedAircraft={ setSelectedAircraft }
                                         aircrafts={ aircrafts }
                                         setAircrafts={ setAircrafts }
+                                        reservation={ toUpdate }
                                         autoSelect={ false }
                                     />
                                     <div className="mb-2">

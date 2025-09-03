@@ -38,6 +38,7 @@ import { ReservationCreate } from "./cadeau/ReservationCreate";
 import { useSessionContext, SessionContextProvider } from "../admin/SessionContextProvider";
 import { useClient } from "../admin/ClientProvider";
 import carnetVolResourceProps from "./carnetVol";
+import disponibiliteResourceProps from "./disponibilite";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -144,6 +145,7 @@ const AdminWithOIDC = () => {
         <ResourceGuesser name="rappels" {...rappelResourceProps}/>
         <ResourceGuesser name="payments" {...paymentResourceProps}/>
         <ResourceGuesser name="carnet_vols" {...carnetVolResourceProps}/>
+        <ResourceGuesser name="disponibilites" {...disponibiliteResourceProps}/>
         <CustomRoutes>
           <Route path="/landings" element={<LandingsList />} />
           <Route path="/convert" element={<ReservationCreate />} />

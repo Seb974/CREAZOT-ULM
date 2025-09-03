@@ -15,6 +15,7 @@ use App\Entity\CarnetVol;
 use App\Entity\Passager;
 use App\Entity\Reservation;
 use App\Entity\ProfilPilote;
+use App\Entity\Disponibilite;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Service\Export\ExportFilterManager;
 use Symfony\Component\HttpFoundation\Request;
@@ -46,6 +47,7 @@ class ExportController extends AbstractController
             'vols'          => Vol::class,
             'payments'      => Payment::class,
             'landings'      => Landing::class,
+            'disponibilites'=> Disponibilite::class,
         ];
 
         if (!isset($map[$entity]))

@@ -23,6 +23,7 @@ import CollectionsIcon from '@mui/icons-material/Collections';
 import FlightLandIcon from '@mui/icons-material/FlightLand';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import CreditScoreIcon from '@mui/icons-material/CreditScore';
+import NoAccountsIcon from '@mui/icons-material/NoAccounts';
 import { useSessionContext } from "../../admin/SessionContextProvider";
 
 const CustomMenu = () => {
@@ -127,6 +128,14 @@ const CustomMenu = () => {
           to="/origines"
           primaryText="Partenaires"
           leftIcon={<StoreIcon />}
+        />
+      }
+      {/* @ts-ignore */}
+      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
+        <Menu.Item
+          to="/disponibilites"
+          primaryText="Disponibilités"
+          leftIcon={<NoAccountsIcon />}
         />
       }
       {/* @ts-ignore */}
