@@ -2,7 +2,7 @@ import React from "react";
 import { ArrayInput, DateInput, Edit, NumberInput, ReferenceInput, SimpleForm, SimpleFormIterator, TextInput, SelectInput, useDataProvider } from "react-admin";
 import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid, isValid } from "../../../app/lib/utils";
 import { useClient } from '../../admin/ClientProvider';
-import { clientWithLandingManagement, clientWithOptions, getAirportName, getDefaultLanding } from "../../../app/lib/client";
+import { clientWithLandingManagement, clientWithOptions, getAirportCode, getAirportName, getDefaultLanding } from "../../../app/lib/client";
 import { useWatch, useFormContext } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
@@ -119,7 +119,7 @@ const EncadrantInput = ({ pilotes, circuits }) => {
 
 const LandingsInput = ({ client }) => {
     const vols = useWatch({ name: "vols" });
-    const airportList = client.airportCodes.map(a =>({...a, airportCode: a.code, airportName: a.nom}));
+    const airportList = client.airports.map(a =>({...a, airportCode: getAirportCode(a), airportName: a.nom}));
 
     const validateLandings = (value) => {
       const codes = new Set();
@@ -135,7 +135,7 @@ const LandingsInput = ({ client }) => {
       return undefined;
     };
 
-    if (!clientWithLandingManagement(client) || !isDefinedAndNotVoid(client.airportCodes) || !vols || !Array.isArray(vols) )
+    if (!clientWithLandingManagement(client) || !isDefinedAndNotVoid(client.airports) || !vols || !Array.isArray(vols) )
       return null;
 
     return (
@@ -145,7 +145,7 @@ const LandingsInput = ({ client }) => {
                   source="airportCode"
                   label="Aéroport"
                   choices={ airportList }
-                  optionText={(a) => a.airportCode + ' - ' + a.airportName}
+                  optionText={(a) => a.airportName}
                   optionValue="airportCode"
                   />
               <NumberInput source="touches" label="Touchés" min="0" defaultValue={ 0 }/>

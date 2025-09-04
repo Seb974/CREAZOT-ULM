@@ -56,7 +56,7 @@ class Landing
     #[Groups(groups: ['Landing:write', 'Vol:write', 'Prestation:write', 'Landing:read', 'Vol:read', 'Prestation:read'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 10, nullable: true)]
+    #[ORM\Column(length: 120, nullable: true)]
     #[Groups(groups: ['Landing:write', 'Vol:write', 'Prestation:write', 'Landing:read', 'Vol:read', 'Prestation:read'])]
     private ?string $airportCode = null;
 

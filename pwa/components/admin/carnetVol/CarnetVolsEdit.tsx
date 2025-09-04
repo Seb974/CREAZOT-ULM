@@ -7,8 +7,8 @@ export const CarnetVolsEdit = () => {
   const { client } = useClient();
 
   const getMainAirportName = () => {
-    const mainAirport = client?.airportCodes?.find(a => a.main);
-    return isDefined(mainAirport) ? mainAirport.code + " - " + mainAirport.nom : '';
+      const mainAirport = client?.airports?.find(a => a.main);
+      return isDefined(mainAirport) ? mainAirport.nom : '';
   };
 
   const transform = ({ createdBy, updatedBy, profil, typeDeVol, date, ...data }) => {

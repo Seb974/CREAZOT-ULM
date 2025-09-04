@@ -28,7 +28,8 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
         new GetCollection(
             paginationClientItemsPerPage: true,
             name: 'aeronefs_list',
-            uriTemplate: '/aeronefs'
+            uriTemplate: '/aeronefs',
+            filters: ['app.filter.aeronef.selectable'],
         ),
         new GetCollection(
             name: 'aeronefs_available',

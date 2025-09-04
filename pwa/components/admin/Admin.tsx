@@ -39,6 +39,8 @@ import { useSessionContext, SessionContextProvider } from "../admin/SessionConte
 import { useClient } from "../admin/ClientProvider";
 import carnetVolResourceProps from "./carnetVol";
 import disponibiliteResourceProps from "./disponibilite";
+import airportResourceProps from "./airport";
+import cameraResourceProps from "./camera";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -146,6 +148,8 @@ const AdminWithOIDC = () => {
         <ResourceGuesser name="payments" {...paymentResourceProps}/>
         <ResourceGuesser name="carnet_vols" {...carnetVolResourceProps}/>
         <ResourceGuesser name="disponibilites" {...disponibiliteResourceProps}/>
+        <ResourceGuesser name="airports" {...airportResourceProps}/>
+        <ResourceGuesser name="cameras" {...cameraResourceProps}/>
         <CustomRoutes>
           <Route path="/landings" element={<LandingsList />} />
           <Route path="/convert" element={<ReservationCreate />} />

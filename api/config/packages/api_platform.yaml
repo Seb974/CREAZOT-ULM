@@ -169,6 +169,12 @@ services:
             $properties: { cancel: 'ipartial' } # ]
         tags: [ 'api_platform.filter' ]
 
+    app.filter.aeronef.selectable:
+        parent: 'api_platform.doctrine.orm.boolean_filter'
+        arguments:
+            $properties:  {isAvailable: ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
     app.filter.aeronef.available:
         class: 'App\Doctrine\Orm\Filter\AvailableAeronefFilter'
         arguments:

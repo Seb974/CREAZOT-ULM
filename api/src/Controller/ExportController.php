@@ -7,6 +7,8 @@ use App\Entity\Aeronef;
 use App\Entity\Entretien;
 use App\Entity\Prestation;
 use App\Entity\Landing;
+use App\Entity\Airport;
+use App\Entity\Camera;
 use App\Entity\Cadeau;
 use App\Entity\Circuit;
 use App\Entity\Origine;
@@ -48,6 +50,8 @@ class ExportController extends AbstractController
             'payments'      => Payment::class,
             'landings'      => Landing::class,
             'disponibilites'=> Disponibilite::class,
+            'airports'      => Airport::class,
+            'cameras'       => Camera::class,
         ];
 
         if (!isset($map[$entity]))

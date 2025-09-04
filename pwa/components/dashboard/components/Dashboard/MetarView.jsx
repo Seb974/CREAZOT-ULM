@@ -5,7 +5,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import ExploreIcon from '@mui/icons-material/Explore';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import { isDefined, isDefinedAndNotVoid } from '../../../../app/lib/utils';
-import { clientWithMicrotrakTags } from '../../../../app/lib/client';
+import { clientWithMicrotrakTags, getAirportCode } from '../../../../app/lib/client';
 
 export const MetarView = ({ showGraphic, setShowGraphic, switchToMap, hidden, client, isSmall }) => {
 
@@ -22,14 +22,14 @@ export const MetarView = ({ showGraphic, setShowGraphic, switchToMap, hidden, cl
     
     const changeView = e => setShowGraphic(!showGraphic);
 
-    const getMeteoStations = ({ airportCodes }) => {
-        return isDefinedAndNotVoid(airportCodes) ? airportCodes.filter(a => a.meteo) : []
+    const getMeteoStations = ({ airports }) => {
+        return isDefinedAndNotVoid(airports) ? airports.filter(a => a.meteo && !!a.code) : []
     };
 
     const getMainAirport = airports => {
         if (isDefinedAndNotVoid(airports)) {
             const mainAirport = airports.find(airport => isDefined(airport.main) && airport.main === true);
-            return isDefined(mainAirport) ? mainAirport.code : airports[0].code;
+            return isDefined(mainAirport) ? getAirportCode(mainAirport) : getAirportCode(airports[0]);
         }
         return null;
     }
@@ -43,7 +43,7 @@ export const MetarView = ({ showGraphic, setShowGraphic, switchToMap, hidden, cl
                     <>
                         <div className="mb-4 md:mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4"> 
                             <select className="border border-gray-300 rounded px-3 py-2 w-full md:w-1/2 text-sm min-h-[42px]" value={selectedCode} onChange={(e) => setSelectedCode(e.target.value)}>
-                                {meteoStations.map(({ code, nom }, i) => (<option key={i} value={code}>{code + " - " + nom}</option>))}
+                                {meteoStations.map((station, i) => (<option key={i} value={getAirportCode(station)}>{ station.nom }</option>))}
                             </select>
                             { clientWithMicrotrakTags(client) && 
                                 <button onClick={changeView} className="inline-flex items-center justify-center px-3 py-2 text-sm border border-gray-300 text-gray-800 rounded hover:border-red-600 hover:text-red-600 hover:bg-red-50 transition-colors min-h-[42px]">

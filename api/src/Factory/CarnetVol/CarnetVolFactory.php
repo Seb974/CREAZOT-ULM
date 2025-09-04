@@ -98,10 +98,13 @@ class CarnetVolFactory
 
     private function getMainAirport(Client $client): array
     {
-        $airports = $client->getAirportCodes() ?? [];
-        $main = array_values(array_filter($airports, fn($a) => $a['main'] ?? false));
+        foreach ($client->getAirports() as $airport) {
+            if ($airport->isMain()) {
+                return ['code' => $airport->getCode(), 'name' => $airport->getName()];
+            }
+        }
 
-        return $main[0] ?? ['code' => '', 'name' => ''];
+        return ['code' => '', 'name' => ''];
     }
 
     private function getRealVolDuration(Vol $vol, float $slicedDifference): float

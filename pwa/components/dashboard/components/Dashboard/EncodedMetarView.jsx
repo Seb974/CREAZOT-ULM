@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { EncodedMetarTaf } from './EncodedMetarTaf';
 import ExploreIcon from '@mui/icons-material/Explore';
 import { isDefined, isDefinedAndNotVoid } from '../../../../app/lib/utils';
+import { getAirportCode } from '../../../../app/lib/client';
 
 export const EncodedMetarView = ({ switchToMetar, client, isSmall, hidden }) => {
 
     const [selectedCode, setSelectedCode] = useState(null);
     const [meteoStations, setMeteoStations] = useState([]);
-
 
     useEffect(() => {
         const clientMeteoStations = getMeteoStations(client);
@@ -16,14 +16,14 @@ export const EncodedMetarView = ({ switchToMetar, client, isSmall, hidden }) => 
         setSelectedCode(defaultStation);
     }, [client]);
     
-    const getMeteoStations = ({ airportCodes }) => {
-        return isDefinedAndNotVoid(airportCodes) ? airportCodes.filter(a => a.meteo) : []
+    const getMeteoStations = ({ airports }) => {
+        return isDefinedAndNotVoid(airports) ? airports.filter(a => a.meteo && !!a.code) : []
     };
 
     const getMainAirport = airports => {
         if (isDefinedAndNotVoid(airports)) {
             const mainAirport = airports.find(airport => isDefined(airport.main) && airport.main === true);
-            return isDefined(mainAirport) ? mainAirport.code : airports[0].code;
+            return isDefined(mainAirport) ? getAirportCode(mainAirport) : getAirportCode(airports[0]);
         }
         return null;
     }
@@ -37,7 +37,7 @@ export const EncodedMetarView = ({ switchToMetar, client, isSmall, hidden }) => 
                     <>
                         <div className="mb-4 md:mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4"> 
                             <select className="border border-gray-300 rounded px-3 py-2 w-full md:w-1/2 text-sm min-h-[42px]" value={selectedCode} onChange={(e) => setSelectedCode(e.target.value)}>
-                                {meteoStations.map(({ code, nom }, i) => (<option key={i} value={code}>{code + " - " + nom}</option>))}
+                                {meteoStations.map((station, i) => (<option key={i} value={getAirportCode(station)}>{ station.nom }</option>))}
                             </select>
                         </div>
                         <div className="flex-grow">

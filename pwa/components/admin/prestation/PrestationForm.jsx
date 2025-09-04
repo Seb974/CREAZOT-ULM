@@ -115,6 +115,7 @@ export const PrestationForm = () => {
                 setSelectedAircraft={ setSelectedAircraft }
                 aircrafts={ aircrafts }
                 setAircrafts={ setAircrafts }
+                resource="prestations"
             />
             <FlightForm
                 selectedCircuits={ selectedCircuits }
@@ -139,7 +140,7 @@ export const PrestationForm = () => {
                 selectedCircuits={ selectedCircuits }
                 autoSelect={ true }
             />
-            { clientWithLandingManagement(client) && selectedCircuits.find(({circuit}) => circuit.requireLandingDeclaration) !== undefined && isDefinedAndNotVoid(client.airportCodes) && 
+            { clientWithLandingManagement(client) && selectedCircuits.find(({circuit}) => circuit.requireLandingDeclaration) !== undefined && isDefinedAndNotVoid(client.airports) && 
                 <AirportsForm
                     client={ client }
                     landings={ landings }

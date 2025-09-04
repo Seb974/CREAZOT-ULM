@@ -1,4 +1,4 @@
-import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, SimpleFormIterator, ArrayInput, TabbedForm, required, useRedirect, useNotify } from "react-admin";
+import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, TabbedForm, required, useRedirect, useNotify } from "react-admin";
 import { Create } from "react-admin";
 import { colors, objectToFormData, timezones, fileInputSX, sanitizeData } from "../../../app/lib/client";
 import { Typography, Divider, Box } from '@mui/material';
@@ -41,6 +41,8 @@ export const ClientsCreate = () => {
                     active: true,
                     timezone: timezones[0].id,
                     color: colors[0].id,
+                    lat: 0,
+                    lng: 0,
                     zoom: 9,
                     opacity: 1,
                     hasPassengerRegistration: false,
@@ -57,8 +59,7 @@ export const ClientsCreate = () => {
                     seuilMedical: 30,
                     seuilQualifications: 30,
                     hasIndividualFlightLogs: false,
-                    useAvailabilityFilter: false,
-                    airportCodes: record?.airportCodes?.map(code => ({ ...code, meteo: code.meteo ?? false, main: code.main ?? false })) ?? [],
+                    useAvailabilityFilter: false
                 })}
             >
                 <TabbedForm.Tab label="Informations">
@@ -80,57 +81,6 @@ export const ClientsCreate = () => {
                     <TextInput source="emailAddressSender" label="Adresse email d'envoi"/>
                     <BooleanInput source="active" label="Utilisateur actif" />
                 </TabbedForm.Tab>
-                <TabbedForm.Tab label="Dashboard">
-                    <ColorPreview/>
-                    <SelectInput source="timezone" choices={ timezones } validate={required()}/>
-                    <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                        <Box flex={1}>
-                            <NumberInput source="lat" label="Latitude" fullWidth />
-                        </Box>
-                        <Box flex={1}>
-                            <NumberInput source="lng" label="Longitude" fullWidth />
-                        </Box>
-                    </Box>
-                    <NumberInput source="zoom" label="Zoom"  min={ 1 } max={ 15 }/>
-                    <ArrayInput source="airportCodes" label="Codes des aéroports">
-                        <SimpleFormIterator inline disableReordering>
-                            <TextInput source="code"/>
-                            <TextInput source="nom"/>
-                            <BooleanInput source="meteo" parse={(value) => value === undefined ? false : value} sx={{marginTop: '1em'}}/>
-                            <BooleanInput source="main" label="principal" parse={(value) => value === undefined ? false : value} sx={{marginTop: '1em'}}/>
-                        </SimpleFormIterator>
-                    </ArrayInput>
-                    <ArrayInput source="camIds" label="Caméras Windy">
-                        <SimpleFormIterator inline disableReordering>
-                            <TextInput source="id"/>
-                            <TextInput source="nom"/>
-                        </SimpleFormIterator>
-                    </ArrayInput>
-                </TabbedForm.Tab>
-                <TabbedForm.Tab label="Images">
-                    <FileInput label="Logo" source="logo" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>
-                        <FileField source="src" title="title" />
-                    </FileInput> 
-                    <FileInput label="Icone GPS" source="mapIcon" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>
-                        <FileField source="src" title="title" />
-                    </FileInput> 
-                    <FileInput label="Favicon" source="favicon" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>
-                        <FileField source="src" title="title" />
-                    </FileInput>
-                    <FileInput label="Image de la page de remerciement" source="thanksImage" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>
-                        <FileField source="src" title="title" />
-                    </FileInput>
-                    <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                        <Box flex={2}>
-                            <FileInput label="Arrière plan PDF" source="pdfBackground" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>
-                                <FileField source="src" title="title" />
-                            </FileInput>
-                        </Box>
-                        <Box flex={1} display="flex" alignItems="center" pt={2}>
-                            <NumberInput source="opacity" label="Opacité" min={ 0 } max={ 1 } fullWidth />
-                        </Box>
-                    </Box>
-                </TabbedForm.Tab>
                 <TabbedForm.Tab label="Options">
                     <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
                         <Box flex={1}>
@@ -145,7 +95,7 @@ export const ClientsCreate = () => {
                             <BooleanInput source="hasPartners" label="Partenariat" fullWidth/>
                         </Box>
                         <Box flex={1}>
-                            <BooleanInput source="hasGifts" label="Cadeaux" fullWidth/>
+                            <BooleanInput source="hasGifts" label="Gestion des prépaiements" fullWidth/>
                         </Box> 
                     </Box>
                     <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
@@ -180,6 +130,19 @@ export const ClientsCreate = () => {
                             <BooleanInput source="useAvailabilityFilter" label="Fitrer sur les disponibilités" fullWidth/>
                         </Box>
                     </Box>
+                </TabbedForm.Tab>
+                <TabbedForm.Tab label="Dashboard">
+                    <ColorPreview/>
+                    <SelectInput source="timezone" choices={ timezones } validate={required()}/>
+                    <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                        <Box flex={1}>
+                            <NumberInput source="lat" label="Latitude" fullWidth />
+                        </Box>
+                        <Box flex={1}>
+                            <NumberInput source="lng" label="Longitude" fullWidth />
+                        </Box>
+                    </Box>
+                    <NumberInput source="zoom" label="Zoom"  min={ 1 } max={ 15 }/>
                     <Divider sx={{ mt: 2, borderBottomWidth: 2, borderColor: '#666' }} />
                     <Typography variant="h6" gutterBottom>
                         Seuils d'alerte
@@ -194,6 +157,31 @@ export const ClientsCreate = () => {
                     </Box>
                     <ThanksOptions/>
                 </TabbedForm.Tab>
+                <TabbedForm.Tab label="Images">
+                    <FileInput label="Logo" source="logo" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>
+                        <FileField source="src" title="title" />
+                    </FileInput> 
+                    <FileInput label="Icone GPS" source="mapIcon" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>
+                        <FileField source="src" title="title" />
+                    </FileInput> 
+                    <FileInput label="Favicon" source="favicon" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>
+                        <FileField source="src" title="title" />
+                    </FileInput>
+                    <FileInput label="Image de la page de remerciement" source="thanksImage" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>
+                        <FileField source="src" title="title" />
+                    </FileInput>
+                    <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                        <Box flex={2}>
+                            <FileInput label="Arrière plan PDF" source="pdfBackground" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }>
+                                <FileField source="src" title="title" />
+                            </FileInput>
+                        </Box>
+                        <Box flex={1} display="flex" alignItems="center" pt={2}>
+                            <NumberInput source="opacity" label="Opacité" min={ 0 } max={ 1 } fullWidth />
+                        </Box>
+                    </Box>
+                </TabbedForm.Tab>
+                
             </TabbedForm>
         </Create>
     )

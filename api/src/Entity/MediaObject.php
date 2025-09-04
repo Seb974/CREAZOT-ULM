@@ -54,7 +54,7 @@ class MediaObject
     private ?int $id = null;
 
     #[ApiProperty(types: ['https://schema.org/contentUrl'], writable: false)]
-    #[Groups(['media_object:read', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read'])]
+    #[Groups(['media_object:read', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read', 'Airport:read', 'Entretien:read'])]
     public ?string $contentUrl = null;
 
     #[Vich\UploadableField(mapping: 'media_object', fileNameProperty: 'filePath')]
@@ -67,11 +67,11 @@ class MediaObject
     public ?string $filePath = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['media_object:read', 'media_object:write', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read'])]
+    #[Groups(['media_object:read', 'media_object:write', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read', 'Airport:read', 'Entretien:read'])]
     public ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['media_object:read', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read'])]
+    #[Groups(['media_object:read', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read', 'Airport:read', 'Entretien:read'])]
     public ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'documents')]
@@ -82,12 +82,20 @@ class MediaObject
     #[Groups(['media_object:read'])]
     private ?Aeronef $aeronef = null;
 
+    #[ORM\ManyToOne(inversedBy: 'documents')]
+    #[Groups(['media_object:read'])]
+    private ?Airport $airport = null;
+
+    #[ORM\ManyToOne(inversedBy: 'documents')]
+    #[Groups(['media_object:read'])]
+    private ?Entretien $entretien = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
     }
 
-     #[Groups(['media_object:read', 'media_object:write', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read'])]
+     #[Groups(['media_object:read', 'media_object:write', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read', 'Airport:read', 'Entretien:read'])]
     public function getOriginalDescription(): ?string
     {
         return $this->description;
@@ -129,6 +137,30 @@ class MediaObject
     public function setAeronef(?Aeronef $aeronef): static
     {
         $this->aeronef = $aeronef;
+
+        return $this;
+    }
+
+    public function getAirport(): ?Airport
+    {
+        return $this->airport;
+    }
+
+    public function setAirport(?Airport $airport): static
+    {
+        $this->airport = $airport;
+
+        return $this;
+    }
+
+    public function getEntretien(): ?Entretien
+    {
+        return $this->entretien;
+    }
+
+    public function setEntretien(?Entretien $entretien): static
+    {
+        $this->entretien = $entretien;
 
         return $this;
     }

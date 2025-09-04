@@ -1,7 +1,5 @@
 <?php
 
-// src\Dto\ClientInput.php
-
 namespace App\Dto;
 
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -10,7 +8,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 final class ClientInput
 {
-    #[Assert\NotBlank]
     #[Groups(['Client:write'])]
     public ?string $name = null;
 
@@ -57,12 +54,6 @@ final class ClientInput
 
     #[Groups(['Client:write'])]
     public ?int $zoom = null;
-
-    #[Groups(['Client:write'])]
-    public $camIds = null;
-
-    #[Groups(['Client:write'])]
-    public $airportCodes = null;
 
     #[Assert\Range(min: 0, max: 1)]
     #[Groups(['Client:write'])]

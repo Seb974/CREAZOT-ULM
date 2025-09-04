@@ -3,7 +3,7 @@ import { Datagrid, List, TextField, CreateButton, TopToolbar, EditButton, Simple
 import { type Contact } from "../../../types/Contact";
 import { useMediaQuery, Theme, Button, Box } from '@mui/material';
 import { type PagedCollection } from "../../../types/collection";
-import { getFirstCharToUpperCase, isDefined, toLocalDateString } from "../../../app/lib/utils";
+import { getFirstCharToUpperCase, isDefined, isSameDay, toLocalDateString } from "../../../app/lib/utils";
 import { useSessionContext } from "../SessionContextProvider";
 import BackupTableIcon from '@mui/icons-material/BackupTable';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -133,7 +133,12 @@ export const DisponibilitesList: NextPage<Props> = ({ data, hubURL, page }) => {
   const isAdmin = isDefined(session) && isDefined(user) && user?.roles.includes("admin");
 
   const getType = ({ pilote }) => isDefined(pilote?.availableByDefault) ? (pilote?.availableByDefault ? 'Indisponible' : 'Disponible') : '';
-  const getDates = ({ debut, fin }) => isDefined(debut) && isDefined(fin) ? `du ${ new Date(debut).toLocaleDateString()} au ${ new Date(fin).toLocaleDateString()}`: '';
+
+  const getDates = ({ debut, fin }) => {
+    if (!isDefined(debut) || !isDefined(fin)) return '';
+    return isSameDay(debut, fin) ? `le ${ new Date(debut).toLocaleDateString()}` : `du ${ new Date(debut).toLocaleDateString()} au ${ new Date(fin).toLocaleDateString()}`;
+  };
+
   const getAvailability = disponibilite => getFirstCharToUpperCase(`${ getType(disponibilite) } ${ getDates(disponibilite) }`);
 
   const defaultFilters = {};

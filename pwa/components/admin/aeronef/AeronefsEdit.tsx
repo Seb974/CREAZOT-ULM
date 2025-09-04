@@ -60,13 +60,13 @@ export const AeronefsEdit = () => {
           <NumberInput source="seuilAlerteChangementMoteur" label="Seuil d'alerte (en h) avant changement du moteur"/>
           <MicrotrakInput/>
           <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-            <Box flex={1} display="flex" alignItems="center">
-                <BooleanInput source="decimal" label="Horamètre décimal" defaultValue={ false }/>
-            </Box>
-            <Box flex={1}>
-                <BooleanInput source="isAvailable" label="Disponible" defaultValue={ false }/>
-            </Box>
-        </Box>
+              <Box flex={1} display="flex" alignItems="center">
+                  <BooleanInput source="decimal" label="Horamètre décimal" defaultValue={ false }/>
+              </Box>
+              <Box flex={1}>
+                  <BooleanInput source="isAvailable" label="Disponible" defaultValue={ false }/>
+              </Box>
+          </Box>
           <FileInput source="documents" multiple={ true } label="Documents associés">
               <MyFileField source="contentUrl"/>
           </FileInput>

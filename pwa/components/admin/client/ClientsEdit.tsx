@@ -73,11 +73,11 @@ export const ClientsEdit = () => {
                     seuilMedical: 30,
                     seuilQualifications: 30,
                     hasIndividualFlightLogs: false,
-                    useAvailabilityFilter: false,
-                    airportCodes: record?.airportCodes?.map(code => ({ ...code, meteo: code.meteo ?? false, main: code.main ?? false })) ?? [],
+                    useAvailabilityFilter: false
                     })}
                 >   
                     <TabbedForm.Tab label="Informations">
+                        <TextInput source="name" label="Nom"/>
                         <TextInput source="address" label="Adresse"/>
                         <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
                             <Box flex={1} display="flex" alignItems="center">
@@ -95,6 +95,57 @@ export const ClientsEdit = () => {
                         <TextInput source="emailAddressSender" label="Adresse email d'envoi"/>
                         <BooleanInput source="active" label="Utilisateur actif" />    
                     </TabbedForm.Tab>
+                    <TabbedForm.Tab label="Options">
+                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                            <Box flex={1}>
+                                <BooleanInput source="hasReservation" label="Réservations" fullWidth/>
+                            </Box>
+                            <Box flex={1}>
+                                <BooleanInput source="hasOptions" label="Options" fullWidth/>
+                            </Box>
+                        </Box>
+                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                            <Box flex={1}>
+                                <BooleanInput source="hasPartners" label="Partenariat" fullWidth/>
+                            </Box>
+                            <Box flex={1}>
+                                <BooleanInput source="hasGifts" label="Gestion des prépaiements" fullWidth/>
+                            </Box> 
+                        </Box>
+                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                            <Box flex={1}>
+                                <BooleanInput source="hasOriginContact" label="Origine du contact" fullWidth/>
+                            </Box>
+                            <Box flex={1}>
+                                <BooleanInput source="hasLandingManagement" label="Gestion des atterrissages" fullWidth/>
+                            </Box>
+                        </Box>
+                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                            <Box flex={1}>
+                                <BooleanInput source="hasPaymentManagement" label="Gestion des paiements" fullWidth/>
+                            </Box>
+                            <Box flex={1}>
+                                <BooleanInput source="hasPassengerRegistration" label="Enregistrement des passagers" fullWidth/>
+                            </Box>
+                        </Box>
+                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                            <Box flex={1}>
+                                <BooleanInput source="hasMicrotrakTag" label="Balise(s) Microtrak" fullWidth/>
+                            </Box>
+                            <Box flex={1}>
+                                <BooleanInput source="hasWebshop" label="Site e-commerce lié" fullWidth/>
+                            </Box>
+                        </Box>
+                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                            <Box flex={1}>
+                                <BooleanInput source="hasIndividualFlightLogs" label="Carnets de vols individuels" fullWidth/>
+                            </Box>
+                            <Box flex={1}>
+                                <BooleanInput source="useAvailabilityFilter" label="Fitrer sur les disponibilités" fullWidth/>
+                            </Box>
+                        </Box>
+                        <Divider sx={{ mt: 2, borderBottomWidth: 2, borderColor: '#666' }} />
+                    </TabbedForm.Tab>
                     <TabbedForm.Tab label="Dashboard">
                         <ColorPreview/>
                         <SelectInput source="timezone" choices={ timezones }/>   
@@ -106,21 +157,19 @@ export const ClientsEdit = () => {
                                 <NumberInput source="lng" label="Longitude" fullWidth />
                             </Box>
                         </Box>
-                        <NumberInput source="zoom" label="Zoom" min={ 1 } max={ 15 }/>    
-                        <ArrayInput source="airportCodes" label="Codes des aéroports">
-                            <SimpleFormIterator inline disableReordering>
-                                <TextInput source="code"/>
-                                <TextInput source="nom"/>
-                                <BooleanInput source="meteo" sx={{marginTop: '1em'}}/>
-                                <BooleanInput source="main" label="principal" sx={{marginTop: '1em'}}/>
-                            </SimpleFormIterator>
-                        </ArrayInput>
-                        <ArrayInput source="camIds" label="Caméras Windy">
-                            <SimpleFormIterator inline disableReordering>
-                                <TextInput source="id"/>
-                                <TextInput source="nom"/>
-                            </SimpleFormIterator>
-                        </ArrayInput>
+                        <NumberInput source="zoom" label="Zoom" min={ 1 } max={ 15 }/>
+                        <Typography variant="h6" gutterBottom>
+                            Seuils d'alerte
+                        </Typography>
+                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                            <Box flex={1}>
+                                <NumberInput source="seuilMedical" label="Alerte sur les certificats médicaux" min={ 0 } helperText="Nb de jour(s) avant la fin de validité"/>
+                            </Box>
+                            <Box flex={1}>
+                                <NumberInput source="seuilQualifications" label="Alerte sur les qualifications" min={ 0 } helperText="Nb de jour(s) avant la fin de validité"/>
+                            </Box>
+                        </Box>
+                        <ThanksOptions/>
                     </TabbedForm.Tab>
                     <TabbedForm.Tab label="Images">
                         <FileInput label="Logo" source="logo" accept={{ 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }} sx={ fileInputSX }
@@ -181,69 +230,7 @@ export const ClientsEdit = () => {
                             </Box>
                         </Box>
                     </TabbedForm.Tab>
-                    <TabbedForm.Tab label="Options">
-                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                            <Box flex={1}>
-                                <BooleanInput source="hasReservation" label="Réservations" fullWidth/>
-                            </Box>
-                            <Box flex={1}>
-                                <BooleanInput source="hasOptions" label="Options" fullWidth/>
-                            </Box>
-                        </Box>
-                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                            <Box flex={1}>
-                                <BooleanInput source="hasPartners" label="Partenariat" fullWidth/>
-                            </Box>
-                            <Box flex={1}>
-                                <BooleanInput source="hasGifts" label="Cadeaux" fullWidth/>
-                            </Box> 
-                        </Box>
-                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                            <Box flex={1}>
-                                <BooleanInput source="hasOriginContact" label="Origine du contact" fullWidth/>
-                            </Box>
-                            <Box flex={1}>
-                                <BooleanInput source="hasLandingManagement" label="Gestion des atterrissages" fullWidth/>
-                            </Box>
-                        </Box>
-                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                            <Box flex={1}>
-                                <BooleanInput source="hasPaymentManagement" label="Gestion des paiements" fullWidth/>
-                            </Box>
-                            <Box flex={1}>
-                                <BooleanInput source="hasPassengerRegistration" label="Enregistrement des passagers" fullWidth/>
-                            </Box>
-                        </Box>
-                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                            <Box flex={1}>
-                                <BooleanInput source="hasMicrotrakTag" label="Balise(s) Microtrak" fullWidth/>
-                            </Box>
-                            <Box flex={1}>
-                                <BooleanInput source="hasWebshop" label="Site e-commerce lié" fullWidth/>
-                            </Box>
-                        </Box>
-                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                            <Box flex={1}>
-                                <BooleanInput source="hasIndividualFlightLogs" label="Carnets de vols individuels" fullWidth/>
-                            </Box>
-                            <Box flex={1}>
-                                <BooleanInput source="useAvailabilityFilter" label="Fitrer sur les disponibilités" fullWidth/>
-                            </Box>
-                        </Box>
-                        <Divider sx={{ mt: 2, borderBottomWidth: 2, borderColor: '#666' }} />
-                        <Typography variant="h6" gutterBottom>
-                            Seuils d'alerte
-                        </Typography>
-                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                            <Box flex={1}>
-                                <NumberInput source="seuilMedical" label="Alerte sur les certificats médicaux" min={ 0 } helperText="Nb de jour(s) avant la fin de validité"/>
-                            </Box>
-                            <Box flex={1}>
-                                <NumberInput source="seuilQualifications" label="Alerte sur les qualifications" min={ 0 } helperText="Nb de jour(s) avant la fin de validité"/>
-                            </Box>
-                        </Box>
-                        <ThanksOptions/>
-                    </TabbedForm.Tab>
+                    
                 </TabbedForm>
             </Edit>
         </div>

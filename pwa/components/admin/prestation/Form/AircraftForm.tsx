@@ -8,7 +8,7 @@ import { useClient } from "../../ClientProvider";
 import { clientUsingAvailabilityFilter } from "../../../../app/lib/client";
 
 // @ts-ignore
-export const AircraftForm: React.FC = ({ selectedAircraft, setSelectedAircraft, aircrafts, setAircrafts, reservation, autoSelect = true }) => {
+export const AircraftForm: React.FC = ({ selectedAircraft, setSelectedAircraft, aircrafts, setAircrafts, reservation = null, autoSelect = true, resource = "reservations" }) => {
 
   const { client } = useClient();
   const dataProvider = useDataProvider();
@@ -27,18 +27,23 @@ export const AircraftForm: React.FC = ({ selectedAircraft, setSelectedAircraft, 
     }, [reservation]);
 
   const getAeronefs = useCallback(() => {
-      if (!isDefined(reservation)) return;
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const { debut, fin, originId } = reservation;
-      const endpoint = clientUsingAvailabilityFilter(client) ? "aeronefs/disponibles" : "aeronefs";
-      const filters = clientUsingAvailabilityFilter(client) ? { debut, fin, timezone, reservationId: originId } : {};
+      let endpoint = "aeronefs";
+      let filters = { isAvailable : true };
+      if (resource === "reservations") {
+          if (!isDefined(reservation)) return;
+          const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          const { debut, fin, originId } = reservation;
+          endpoint = clientUsingAvailabilityFilter(client) ? "aeronefs/disponibles" : "aeronefs";
+          //@ts-ignore
+          filters = clientUsingAvailabilityFilter(client) ? { debut, fin, timezone, reservationId: originId } : { isAvailable : true };
+      } 
       dataProvider
         .getList(endpoint, { filter: filters })
         .then(({ data }) => {
           setAircrafts(data);
           if (autoSelect) setSelectedAircraft(data[0]);  
         })
-    }, [dataProvider, reservation, setAircrafts, setSelectedAircraft]);
+  }, [dataProvider, reservation, setAircrafts, setSelectedAircraft]);
   
   useEffect(() => getAeronefs(), [getAeronefs, filterParams]);
 

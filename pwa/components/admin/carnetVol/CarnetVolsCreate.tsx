@@ -12,8 +12,8 @@ export const CarnetVolsCreate = () => {
     const { session } = useSessionContext();
     
     const getMainAirportName = () => {
-        const mainAirport = client?.airportCodes?.find(a => a.main);
-        return isDefined(mainAirport) ? mainAirport.code + " - " + mainAirport.nom : '';
+        const mainAirport = client?.airports?.find(a => a.main);
+        return isDefined(mainAirport) ? mainAirport.nom : '';
     };
 
     const transform = (data) => {

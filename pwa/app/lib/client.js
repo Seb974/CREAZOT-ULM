@@ -1,4 +1,4 @@
-import { isDefined, isDefinedAndNotVoid } from "./utils";
+import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "./utils";
 
 export const colors = [
     // Prédéfinies de MUI / React-Admin
@@ -265,7 +265,9 @@ export const uploadImages = async (data, session) => {
 export const sanitizeData = (data, previousData) => {
     const registrationPax = data.hasPassengerRegistration;
     const sanitized = {
-        ...data, 
+        ...data,
+        airports: isDefinedAndNotVoid(data.airports) ? data.airports.map(a => getFormattedValueForBackEnd(a)) : [],
+        cameras: isDefinedAndNotVoid(data.cameras) ? data.cameras.map(c => getFormattedValueForBackEnd(c)) : [],
         thanksTitle: registrationPax && isDefined(data.thanksTitle) ? data.thanksTitle : '',
         thanksMessage: registrationPax && isDefined(data.thanksMessage) ? data.thanksMessage : ''
     };
@@ -327,16 +329,22 @@ export const clientWithReservationManagement = client => {
 };
 
 export const getDefaultLanding = client => {
-    if (isDefined(client) && isDefinedAndNotVoid(client.airportCodes) && clientWithLandingManagement(client)) {
-        const mainAirport = client.airportCodes.find(airport => airport.main);
-        const { code, nom, ...airport } = isDefined(mainAirport) ? mainAirport : client.airportCodes[0];
-        return {id: +new Date(), airportCode: code, airportName: nom, complets: 1, touches: 0};
+    if (isDefined(client) && isDefinedAndNotVoid(client.airports) && clientWithLandingManagement(client)) {
+        const mainAirport = client.airports.find(airport => airport.main);
+        const { nom } = isDefined(mainAirport) ? mainAirport : client.airports[0];
+        return {id: +new Date(), airportCode: getAirportCode(mainAirport), airportName: nom, complets: 1, touches: 0};
     }
     return [];
 };
 
+export const getAirportCode = airport => {
+        if (isDefined(airport?.code) && airport.code.length > 0) return airport.code;
+        if (isDefined(airport?.["@id"]) && airport["@id"].length > 0) return airport["@id"];
+        return +new Date();
+    }
+
 export const getAirportName = (client, code) => {
-    const selectedAirport = client.airportCodes.find(a => a.code === code);
+    const selectedAirport = client.airports.find(a => a.code === code || a['@id'] === code);
     return isDefined(selectedAirport) ? selectedAirport.nom : "";
 };
 

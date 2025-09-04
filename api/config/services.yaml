@@ -47,11 +47,14 @@ services:
         tags: [ 'api_platform.state_processor' ]
 
     App\Service\Export\VolExportFilter: ~
+    App\Service\Export\CameraExportFilter: ~
     App\Service\Export\CadeauExportFilter: ~
+    App\Service\Export\OrigineExportFilter: ~
     App\Service\Export\AeronefExportFilter: ~
     App\Service\Export\CircuitExportFilter: ~
     App\Service\Export\LandingExportFilter: ~
     App\Service\Export\PaymentExportFilter: ~
+    App\Service\Export\AirportExportFilter: ~
     App\Service\Export\PassagerExportFilter: ~
     App\Service\Export\EntretienExportFilter: ~
     App\Service\Export\CarnetVolExportFilter: ~
@@ -64,11 +67,14 @@ services:
         arguments:
             $filters:
                 - '@App\Service\Export\VolExportFilter'
+                - '@App\Service\Export\CameraExportFilter'
                 - '@App\Service\Export\CadeauExportFilter'
+                - '@App\Service\Export\OrigineExportFilter'
                 - '@App\Service\Export\AeronefExportFilter'
                 - '@App\Service\Export\CircuitExportFilter'
                 - '@App\Service\Export\LandingExportFilter'
                 - '@App\Service\Export\PaymentExportFilter'
+                - '@App\Service\Export\AirportExportFilter'
                 - '@App\Service\Export\PassagerExportFilter'
                 - '@App\Service\Export\EntretienExportFilter'
                 - '@App\Service\Export\CarnetVolExportFilter'

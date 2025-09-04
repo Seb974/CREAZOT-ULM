@@ -2,36 +2,38 @@
 
 namespace App\Service\Export;
 
-use App\Entity\Origine;
+use App\Entity\Airport;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-class OrigineExportFilter implements ExportFilterInterface
+class AirportExportFilter implements ExportFilterInterface
 {
     public function __construct(private EntityManagerInterface $em) {}
 
     public function supports(string $entityClass): bool
     {
-        return $entityClass === Origine::class;
+        return $entityClass === Airport::class;
     }
 
     public function getResults(Request $request): array
     {
         $params = $request->query->all();
-        $qb =  $this->em->getRepository(Origine::class)
-                    ->createQueryBuilder('o');
+        $qb =  $this->em->getRepository(Airport::class)
+                    ->createQueryBuilder('a');
 
         return $qb->getQuery()->getResult();
     }
 
     public function formatExport(array $results): array
     {
-        $headers = ['Id', 'Nom', 'Remise'];
+        $headers = ['Id', 'Code', 'Nom', 'Principal', 'Données météo'];
 
-        $rows = array_map(fn(Origine $c) => [
-            $c->getId() ?? '',
-            $c->getName() ?? '',
-            ($c->getDiscount() ?? '0') . '%'
+        $rows = array_map(fn(Airport $a) => [
+            $a->getId() ?? '',
+            $a->getCode() ?? '',
+            $a->getName() ?? '',
+            $a->isMain() ? 'Oui' : 'Non',
+            $a->isMeteo() ? 'Oui' : 'Non'
         ], $results);
 
         return [$headers, $rows];

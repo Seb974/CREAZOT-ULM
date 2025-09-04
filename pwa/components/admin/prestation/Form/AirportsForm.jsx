@@ -1,31 +1,34 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from '../../../common/ui/button';
 import AddIcon from '@mui/icons-material/Add';
 import FlightLandIcon from '@mui/icons-material/FlightLand';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { getAirportCode } from "../../../../app/lib/client";
 
 export const AirportsForm = ({ client, landings, setLandings, defaultLanding }) => {
 
+    useEffect(() => console.log(landings), [landings]);
+
     const handleAirportChange = (landing, e) => {
         const selectedCode = e.target.value;
-        const selectedAirport = client.airportCodes.find(a => a.code === selectedCode);
+        const selectedAirport = client.airports.find(a => a.code === selectedCode || a["@id"] === selectedCode);
 
         if (!selectedAirport) return;
 
-        const newLandings = landings.map(l => l.id !== landing.id ? l : {...l, airportCode: selectedAirport.code, airportName: selectedAirport.nom });
+        const newLandings = landings.map(l => l.id !== landing.id ? l : {...l, airportCode: getAirportCode(selectedAirport), airportName: selectedAirport.nom });
         setLandings(newLandings);
     };
 
     const handleAdd = e => {
         e.preventDefault();
-        const nextAvailable = client.airportCodes.find(a => !landings.some(l => l.airportCode === a.code));
+        const nextAvailable = client.airports.find(a => !landings.some(l => l.airportCode === a.code || l.airportCode === a["@id"]));
 
         if (!nextAvailable) return;
 
-        const { code, nom } = nextAvailable;
-        const newLanding = { ...defaultLanding, id: +new Date(), airportCode: code, airportName: nom };
+        const { nom } = nextAvailable;
+        const newLanding = { ...defaultLanding, id: +new Date(), airportCode: getAirportCode(nextAvailable), airportName: nom };
         setLandings([...landings, newLanding]);
     };
 
@@ -49,9 +52,9 @@ export const AirportsForm = ({ client, landings, setLandings, defaultLanding }) 
               Atterrissage(s) effectué(s)
             </label>
             { landings.map((landing, index) => {
-                const availableAirports = client.airportCodes.filter(a => {
-                    const isAlreadySelected = landings.some(l => l.airportCode === a.code && l.id !== landing.id);
-                    return !isAlreadySelected || a.code === landing.airportCode;
+                const availableAirports = client.airports.filter(a => {
+                    const isAlreadySelected = landings.some(l => (l.airportCode === a.code || l.airportCode === a['@id']) && l.id !== landing.id);
+                    return !isAlreadySelected || a.code === landing.airportCode || a['@id'] === landing.airportCode;
                 });
 
                 return (
@@ -68,8 +71,8 @@ export const AirportsForm = ({ client, landings, setLandings, defaultLanding }) 
                                         Choisissez un aéroport
                                     </option>
                                     {availableAirports.map((airport, index) => (
-                                        <option key={index} value={airport.code} className="text-body dark:text-bodydark">
-                                            {airport.code + ' - ' + airport.nom}
+                                        <option key={index} value={getAirportCode(airport)} className="text-body dark:text-bodydark">
+                                            {airport.nom}
                                         </option>
                                     ))}
                                 </select>
@@ -121,7 +124,7 @@ export const AirportsForm = ({ client, landings, setLandings, defaultLanding }) 
             })}
           </div>
           <div className="mt-6 flex justify-center gap-4">
-            <Button onClick={ e => handleAdd(e) } aria-disabled={ landings.length >= client.airportCodes.length } className="flex h-10 items-center rounded bg-green-500 px-4 text-sm font-medium text-white transition-colors hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500 active:bg-green-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50" >
+            <Button onClick={ e => handleAdd(e) } aria-disabled={ landings.length >= client.airports.length } className="flex h-10 items-center rounded bg-green-500 px-4 text-sm font-medium text-white transition-colors hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500 active:bg-green-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50" >
               <> <AddIcon/> Ajouter </>
             </Button>
           </div>

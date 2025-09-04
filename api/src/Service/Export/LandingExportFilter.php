@@ -69,19 +69,11 @@ class LandingExportFilter implements ExportFilterInterface
             $a->getId(),
             $a->getVol()?->getPrestation()?->getDate()?->format('Y-m-d') ?? '',
             $a->getVol()?->getPrestation()?->getAeronef()?->getImmatriculation(),
-            $this->getAirportName($a),
+            $a->getAirportName() ?? '',
             $a->getTouches() ?? 0,
             $a->getComplets() ?? 0
         ], $results);
 
         return [$headers, $rows];
-    }
-
-    private function getAirportName(Landing $landing): string 
-    {
-        $code = $landing->getAirportCode() ?? "";
-        $name = $landing->getAirportName() ?? "";
-
-        return strlen($code) > 0 && strlen($name) > 0 ? $code . ' - ' . $name : $code . $name;
     }
 }

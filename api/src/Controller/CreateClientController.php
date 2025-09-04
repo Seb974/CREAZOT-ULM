@@ -2,15 +2,17 @@
 
 namespace App\Controller;
 
+use App\Entity\Client;
 use App\Dto\ClientInput;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use App\DataTransformer\ClientInputDataTransformer;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class CreateClientController extends AbstractController
 {
-    public function __invoke(Request $request, EntityManagerInterface $em): ClientInput
+    public function __invoke(Request $request, ClientInputDataTransformer $transformer): Client
     {
         $dto = new ClientInput();
 
@@ -62,11 +64,9 @@ class CreateClientController extends AbstractController
         $dto->mapIcon = $request->files->get('mapIcon');
         $dto->thanksImage = $request->files->get('thanksImage');
 
-        // Champs array
-        $dto->camIds = $this->parseArrayField($request, 'camIds');
-        $dto->airportCodes = $this->parseArrayField($request, 'airportCodes');
+        $client = $transformer->process($dto, $request->attributes->get('_api_operation'));
 
-        return $dto;
+        return $client;
     }
 
     private function getFloat(Request $request, string $key): ?float

@@ -2,36 +2,36 @@
 
 namespace App\Service\Export;
 
-use App\Entity\Origine;
+use App\Entity\Camera;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-class OrigineExportFilter implements ExportFilterInterface
+class CameraExportFilter implements ExportFilterInterface
 {
     public function __construct(private EntityManagerInterface $em) {}
 
     public function supports(string $entityClass): bool
     {
-        return $entityClass === Origine::class;
+        return $entityClass === Camera::class;
     }
 
     public function getResults(Request $request): array
     {
         $params = $request->query->all();
-        $qb =  $this->em->getRepository(Origine::class)
-                    ->createQueryBuilder('o');
+        $qb =  $this->em->getRepository(Camera::class)
+                    ->createQueryBuilder('c');
 
         return $qb->getQuery()->getResult();
     }
 
     public function formatExport(array $results): array
     {
-        $headers = ['Id', 'Nom', 'Remise'];
+        $headers = ['Id', 'Code', 'Nom'];
 
-        $rows = array_map(fn(Origine $c) => [
+        $rows = array_map(fn(Camera $c) => [
             $c->getId() ?? '',
-            $c->getName() ?? '',
-            ($c->getDiscount() ?? '0') . '%'
+            $c->getCode() ?? '',
+            $c->getNom() ?? ''
         ], $results);
 
         return [$headers, $rows];

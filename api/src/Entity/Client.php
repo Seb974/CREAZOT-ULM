@@ -7,6 +7,8 @@ namespace App\Entity;
 use App\Dto\ClientInput;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\ClientRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\Delete;
@@ -39,16 +41,19 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
             processor: ClientInputDataTransformer::class,
             controller: CreateClientController::class,
             inputFormats: ['multipart' => ['multipart/form-data']],
-            deserialize: false
+            deserialize: false,
+            security: 'is_granted("OIDC_ADMIN")'
         ), 
         new Get(
             uriTemplate: '/clients/{id}{._format}'
         ),
         new Put(
             uriTemplate: '/clients/{id}{._format}',
+            security: 'is_granted("OIDC_ADMIN")'
         ),
         new Delete(
             uriTemplate: '/clients/{id}{._format}',
+            security: 'is_granted("OIDC_ADMIN")'
         ),
     ],
     normalizationContext: [
@@ -71,7 +76,6 @@ class Client
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\NotBlank]
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?string $name = null;
 
@@ -127,11 +131,11 @@ class Client
     private ?int $zoom = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Client:write', 'Client:read'])]
+    #[Groups(groups: ['Client:write'])]
     private ?array $camIds = [];
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Client:write', 'Client:read'])]
+    #[Groups(groups: ['Client:write'])]
     private ?array $airportCodes = [];
 
     #[ORM\Column(nullable: true)]
@@ -258,6 +262,26 @@ class Client
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?bool $useAvailabilityFilter = null;
+
+    /**
+     * @var Collection<int, Airport>
+     */
+    #[ORM\OneToMany(targetEntity: Airport::class, mappedBy: 'client')]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private Collection $airports;
+
+    /**
+     * @var Collection<int, Camera>
+     */
+    #[ORM\OneToMany(targetEntity: Camera::class, mappedBy: 'client')]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private Collection $cameras;
+
+    public function __construct()
+    {
+        $this->airports = new ArrayCollection();
+        $this->cameras = new ArrayCollection();
+    }
 
     #[Groups(groups: ['Client:read'])]
     public function getEmailParams(): string
@@ -837,6 +861,66 @@ class Client
     public function setUseAvailabilityFilter(?bool $useAvailabilityFilter): static
     {
         $this->useAvailabilityFilter = $useAvailabilityFilter;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Airport>
+     */
+    public function getAirports(): Collection
+    {
+        return $this->airports;
+    }
+
+    public function addAirport(Airport $airport): static
+    {
+        if (!$this->airports->contains($airport)) {
+            $this->airports->add($airport);
+            $airport->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAirport(Airport $airport): static
+    {
+        if ($this->airports->removeElement($airport)) {
+            // set the owning side to null (unless already changed)
+            if ($airport->getClient() === $this) {
+                $airport->setClient(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Camera>
+     */
+    public function getCameras(): Collection
+    {
+        return $this->cameras;
+    }
+
+    public function addCamera(Camera $camera): static
+    {
+        if (!$this->cameras->contains($camera)) {
+            $this->cameras->add($camera);
+            $camera->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCamera(Camera $camera): static
+    {
+        if ($this->cameras->removeElement($camera)) {
+            // set the owning side to null (unless already changed)
+            if ($camera->getClient() === $this) {
+                $camera->setClient(null);
+            }
+        }
 
         return $this;
     }

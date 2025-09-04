@@ -27,7 +27,7 @@ const LandingDetails: FC = () => {
                 <FunctionField
                     source="airportCode"
                     label="Aéroport"
-                    render={record => <p>{record.airportCode} - <span className="text-xs italic">{record.airportName}</span></p>}
+                    render={record => <p><span className="text-xs italic">{record.airportName}</span></p>}
                 />
                 <NumberField source="complets" label="Complet(s)" />
                 <NumberField source="touches" label="Touché(s)" />

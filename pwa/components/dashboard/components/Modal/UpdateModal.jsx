@@ -395,6 +395,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                                         setAircrafts={ setAircrafts }
                                         reservation={ toUpdate }
                                         autoSelect={ false }
+                                        resource = "reservations"
                                     />
                                     <div className="mb-2">
                                         <label className="mb-2 block text-sm font-medium text-black dark:text-white">

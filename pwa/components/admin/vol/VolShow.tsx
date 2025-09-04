@@ -53,7 +53,7 @@ export const VolShow = () => {
                         <FunctionField
                             source="airportCode"
                             label="Aéroport"
-                            render={record => <p>{record.airportCode} - <span className="text-xs italic">{record.airportName}</span></p>}
+                            render={record => record.airportName }
                         />
                         <NumberField source="complets" label="Complet(s)" />
                         <NumberField source="touches" label="Touché(s)" />

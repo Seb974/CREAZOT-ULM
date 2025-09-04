@@ -134,7 +134,7 @@ const RowWithExpand = ({ row, isExpanded, toggleExpand }) => (
           </IconButton>
         </TableCell>
         <TableCell style={{ width: '20%' }}>{new Date(row.date).toLocaleDateString("fr-FR", dateOptions)}</TableCell>
-        <TableCell style={{ width: '39%' }}>{row.airport}<span style={{ fontStyle: 'italic', fontSize: 'x-small', marginLeft: '1em' }}>{row.name}</span></TableCell>
+        <TableCell style={{ width: '39%' }}>{row.name}</TableCell>
         <TableCell style={{ width: '18%', textAlign: 'center' }}>{row.touches}</TableCell>
         <TableCell style={{ width: '18%', textAlign: 'center' }}>{row.complets}</TableCell>
       </TableRow>
@@ -263,7 +263,7 @@ const LandingsTable = ({ prestations, isSmall }) => {
     return isSmall ? 
         <ListContextProvider value={{ ...rest, data }}>
             <SimpleList
-                primaryText={ record => <>{record.airport}<span style={{ fontStyle: 'italic', fontSize: 'x-small', marginLeft: '1em' }}>{record.name}</span></> }
+                primaryText={ record => record.name }
                 secondaryText={ record => <span style={{ fontSize: 'small' }}>{`Touchés : ${ record.touches }`}<br/>{`Complets : ${ record.complets }`}</span>}
                 tertiaryText={ record => <span style={{ fontSize: 'small' }}>{`${ new Date(record.date).toLocaleDateString("fr-FR", dateOptions) }`}</span>}
                 linkType={false}

@@ -25,6 +25,9 @@ import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import CreditScoreIcon from '@mui/icons-material/CreditScore';
 import NoAccountsIcon from '@mui/icons-material/NoAccounts';
 import { useSessionContext } from "../../admin/SessionContextProvider";
+import { clientUsingAvailabilityFilter } from "../../../app/lib/client";
+import ConnectingAirportsIcon from '@mui/icons-material/ConnectingAirports';
+import VideoCameraBackIcon from '@mui/icons-material/VideoCameraBack';
 
 const CustomMenu = () => {
 
@@ -39,6 +42,7 @@ const CustomMenu = () => {
     e.preventDefault();
     setSuperAdminOpen(!superAdminOpen);
   };
+
   const handleOptionsClick = e => {
     e.preventDefault();
     setOptionsOpen(!optionsOpen);
@@ -115,23 +119,7 @@ const CustomMenu = () => {
         />
       }
       {/* @ts-ignore */}
-      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
-        <Menu.Item
-          to="/circuits"
-          primaryText="Circuits"
-          leftIcon={<PublicIcon />}
-        />
-      }
-      {/* @ts-ignore */}
-      { (isDefined(client) && isDefined(client.hasPartners) && client.hasPartners) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
-        <Menu.Item
-          to="/origines"
-          primaryText="Partenaires"
-          leftIcon={<StoreIcon />}
-        />
-      }
-      {/* @ts-ignore */}
-      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
+      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") && clientUsingAvailabilityFilter(client) &&
         <Menu.Item
           to="/disponibilites"
           primaryText="Disponibilités"
@@ -148,7 +136,7 @@ const CustomMenu = () => {
       }
 
       {/* @ts-ignore */}
-      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "super_admin") &&
+      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
           <MenuItemLink
               to="#"
               onClick={ handleSuperAdminClick }
@@ -160,15 +148,19 @@ const CustomMenu = () => {
           </MenuItemLink>
       }
       {/* @ts-ignore */}
-      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "super_admin") &&
+      { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
         <Collapse in={ superAdminOpen } timeout="auto" unmountOnExit>
-            <Menu.Item
-                  to="/qualifications"
-                  primaryText="Qualifications"
-                  leftIcon={<AdminPanelSettingsIcon />}
-                  sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
-                />
-            { isDefined(client) && isDefined(client.hasOptions) && client.hasOptions && 
+             {/* @ts-ignore */}
+            { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
+              <Menu.Item
+                to="/circuits"
+                primaryText="Circuits"
+                leftIcon={<PublicIcon />}
+                sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+              />
+            }  
+            {/* @ts-ignore */}
+            { (isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "super_admin")) && isDefined(client) && isDefined(client.hasOptions) && client.hasOptions && 
               <>
                 <MenuItemLink
                       to="#"
@@ -195,13 +187,35 @@ const CustomMenu = () => {
                 </Collapse>
               </>
             }
-            <Menu.Item
-                  to="/natures"
-                  primaryText="Natures"
-                  leftIcon={<CommentIcon />}
-                  sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
-                />
-            { (isDefined(client) && isDefined(client.hasOriginContact) && client.hasOriginContact) && 
+            {/* @ts-ignore */}
+            {  isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
+              <Menu.Item
+                to="/airports"
+                primaryText="Aéroports"
+                leftIcon={<ConnectingAirportsIcon />}
+                sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+              />
+            }
+            {/* @ts-ignore */}
+            {  isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
+              <Menu.Item
+                to="/cameras"
+                primaryText="Caméras"
+                leftIcon={<VideoCameraBackIcon />}
+                sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+              />
+            }
+            {/* @ts-ignore */}
+            { (isDefined(client) && isDefined(client.hasPartners) && client.hasPartners) && isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
+              <Menu.Item
+                to="/origines"
+                primaryText="Partenaires"
+                leftIcon={<StoreIcon />}
+                sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+              />
+            }
+            {/* @ts-ignore */}
+            { (isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "super_admin")) && (isDefined(client) && isDefined(client.hasOriginContact) && client.hasOriginContact) && 
               <Menu.Item
                     to="/contacts"
                     primaryText="Contacts"
@@ -209,12 +223,33 @@ const CustomMenu = () => {
                     sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
                   />
             }
+            {/* @ts-ignore */}
+            { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "super_admin") &&
+            <Menu.Item
+                  to="/natures"
+                  primaryText="Natures"
+                  leftIcon={<CommentIcon />}
+                  sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+                />
+            }
+            {/* @ts-ignore */}
+            { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "super_admin") &&
+            <Menu.Item
+                  to="/qualifications"
+                  primaryText="Qualifications"
+                  leftIcon={<AdminPanelSettingsIcon />}
+                  sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+                />
+            }
+            {/* @ts-ignore */}
+            { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "super_admin") &&
             <Menu.Item
                   to="/clients"
                   primaryText="Client"
                   leftIcon={<PersonIcon />}
                   sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
                 />
+            }
         </Collapse>
       }
     </Menu>

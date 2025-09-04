@@ -111,9 +111,17 @@ class Entretien
     #[Groups(groups: ['Entretien:read'])]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    /**
+     * @var Collection<int, MediaObject>
+     */
+    #[ORM\OneToMany(targetEntity: MediaObject::class, mappedBy: 'entretien')]
+    #[Groups(groups: ['Entretien:read'])]
+    private Collection $documents;
+
     public function __construct()
     {
         $this->intervenants = new ArrayCollection();
+        $this->documents = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -261,6 +269,36 @@ class Entretien
     public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MediaObject>
+     */
+    public function getDocuments(): Collection
+    {
+        return $this->documents;
+    }
+
+    public function addDocument(MediaObject $document): static
+    {
+        if (!$this->documents->contains($document)) {
+            $this->documents->add($document);
+            $document->setEntretien($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDocument(MediaObject $document): static
+    {
+        if ($this->documents->removeElement($document)) {
+            // set the owning side to null (unless already changed)
+            if ($document->getEntretien() === $this) {
+                $document->setEntretien(null);
+            }
+        }
 
         return $this;
     }

@@ -41,18 +41,18 @@ export const Cameras = ({ client }) => {
           loading ? "opacity-0" : "opacity-100"
         }`}
       >
-        {isDefinedAndNotVoid(client.camIds) && client.camIds.map((camera, i) => (
+        {isDefinedAndNotVoid(client.cameras) && client.cameras.map((camera, i) => (
           <div key={i} className="camera">
             <label>{camera.nom}</label>
             <a
               name="windy-webcam-timelapse-player"
-              data-id={camera.id}
+              data-id={camera.code}
               data-play="day"
               data-loop="0"
               data-auto-play="0"
               data-force-full-screen-on-overlay-play="0"
               data-interactive="0"
-              href={`https://windy.com/webcams/${camera.id}`}
+              href={`https://windy.com/webcams/${camera.code}`}
               target="_blank"
               rel="noreferrer"
             ></a>

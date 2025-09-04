@@ -1,7 +1,6 @@
 import { Show, TabbedShowLayout, TextField, DateField, BooleanField, FunctionField, RichTextField, ArrayField, Datagrid, NumberField } from 'react-admin';
 import { getColor } from '../../../app/lib/client';
 import { isDefined } from '../../../app/lib/utils';
-import { Box } from "@mui/material";
 
 export const ClientShow = () => {
 
@@ -31,6 +30,20 @@ export const ClientShow = () => {
                     <DateField source="updatedAt" label="Dernière mise à jour, le"/>
                     <BooleanField source="active" label="Compte activé" textAlign="center"/>
                 </TabbedShowLayout.Tab>
+                <TabbedShowLayout.Tab label="Options">
+                    <BooleanField source="hasReservation" label="Réservations" textAlign="center"/>
+                    <BooleanField source="hasOptions" label="Options" textAlign="center"/>
+                    <BooleanField source="hasPartners" label="Partenariat" textAlign="center"/>
+                    <BooleanField source="hasGifts" label="Gestion des prépaiements" textAlign="center"/>
+                    <BooleanField source="hasOriginContact" label="Origine du contact" textAlign="center"/>
+                    <BooleanField source="hasLandingManagement" label="Gestion des atterrissages" textAlign="center"/>
+                    <BooleanField source="hasPaymentManagement" label="Gestion des paiements" textAlign="center"/>
+                    <BooleanField source="hasPassengerRegistration" label="Enregistrement des passagers" textAlign="center"/>
+                    <BooleanField source="hasMicrotrakTag" label="Balise(s) Microtrak" textAlign="center"/>
+                    <BooleanField source="hasWebshop" label="Site e-commerce lié" textAlign="center"/>
+                    <BooleanField source="hasIndividualFlightLogs" label="Carnets de vols individuels" textAlign="center"/>
+                    <BooleanField source="useAvailabilityFilter" label="Fitrer sur les disponibilités" textAlign="center"/>
+                </TabbedShowLayout.Tab>  
                 <TabbedShowLayout.Tab label="Dashboard">
                     <FunctionField 
                         source="color"
@@ -44,24 +57,13 @@ export const ClientShow = () => {
                         render={({lat, lng}) => '[' + lat + ', ' + lng + ']'}
                     />
                     <TextField source="zoom" label="Zoom par défaut des cartes"/>
-                    <ArrayField source="airportCodes" label="Aéroports fréquentés">
-                        <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {display: "none"}}} className="text-xs italic">
-                            <FunctionField
-                                label=""
-                                source="name"
-                                render={ ({ code, nom }) => code + " - " + nom }
-                            />
-                        </Datagrid>
-                    </ArrayField>
-                    <ArrayField source="camIds" label="Caméras Windy suivies">
-                        <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {display: "none"}}} className="text-xs italic">
-                            <FunctionField
-                                label=""
-                                source="id"
-                                render={ ({ id, nom }) => id + " - " + nom }
-                            />
-                        </Datagrid>
-                    </ArrayField>
+                    <NumberField source="seuilMedical" label="Alerte sur les certificats médicaux (en jours)" />
+                    <NumberField source="seuilQualifications" label="Alerte sur les qualifications (en jours)" />
+                    <TextField source="thanksTitle" label="Titre du formulaire"/>
+                    <RichTextField source="thanksMessage" label="Contenu de la page de redirection"/>
+                    <BooleanField source="hasEmailConfirmation" label="Email de confirmation" textAlign="center"/>
+                    <TextField source="confirmationSubject" label="Objet de l'email"/>
+                    <RichTextField source="confirmationMessage" label="Contenu de l'email de confirmation"/>
                 </TabbedShowLayout.Tab>
                 <TabbedShowLayout.Tab label="Images">
                     <FunctionField source="logo" label="Logo" render={({ logo }) => isDefined(logo) ? <a href={logo} target="_blank" rel="noopener noreferrer">{ getFilename(logo) }</a> : ''}/>
@@ -77,28 +79,7 @@ export const ClientShow = () => {
                             </p>
                         }
                     />
-                </TabbedShowLayout.Tab>
-                <TabbedShowLayout.Tab label="Options">
-                    <BooleanField source="hasReservation" label="Réservations" textAlign="center"/>
-                    <BooleanField source="hasOptions" label="Options" textAlign="center"/>
-                    <BooleanField source="hasPartners" label="Partenariat" textAlign="center"/>
-                    <BooleanField source="hasGifts" label="Cadeaux" textAlign="center"/>
-                    <BooleanField source="hasOriginContact" label="Origine du contact" textAlign="center"/>
-                    <BooleanField source="hasLandingManagement" label="Gestion des atterrissages" textAlign="center"/>
-                    <BooleanField source="hasPaymentManagement" label="Gestion des paiements" textAlign="center"/>
-                    <BooleanField source="hasPassengerRegistration" label="Enregistrement des passagers" textAlign="center"/>
-                    <BooleanField source="hasMicrotrakTag" label="Balise(s) Microtrak" textAlign="center"/>
-                    <BooleanField source="hasWebshop" label="Site e-commerce lié" textAlign="center"/>
-                    <BooleanField source="hasIndividualFlightLogs" label="Carnets de vols individuels" textAlign="center"/>
-                    <BooleanField source="useAvailabilityFilter" label="Fitrer sur les disponibilités" textAlign="center"/>
-                    <NumberField source="seuilMedical" label="Alerte sur les certificats médicaux (en jours)" />
-                    <NumberField source="seuilQualifications" label="Alerte sur les qualifications (en jours)" />
-                    <TextField source="thanksTitle" label="Titre du formulaire"/>
-                    <RichTextField source="thanksMessage" label="Contenu de la page de redirection"/>
-                    <BooleanField source="hasEmailConfirmation" label="Email de confirmation" textAlign="center"/>
-                    <TextField source="confirmationSubject" label="Objet de l'email"/>
-                    <RichTextField source="confirmationMessage" label="Contenu de l'email de confirmation"/>
-                </TabbedShowLayout.Tab>     
+                </TabbedShowLayout.Tab>   
             </TabbedShowLayout>
         </Show>
     )
