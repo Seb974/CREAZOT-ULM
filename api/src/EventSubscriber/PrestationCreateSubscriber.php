@@ -72,7 +72,7 @@ final class PrestationCreateSubscriber implements EventSubscriberInterface
             $this->checkDeadlines($aeronef);
             $this->addFlightTimeToUser($prestation->getDuree(), $prestation->getPilote(), $aeronef);
             $this->pilotValidityChecker->checkAndNotify($user);
-            if (!\is_null($client) && $client->getHasIndividualFlightLogs()) {
+            if (!\is_null($client) && $client->getHasIndividualFlightLogs()) {  
                 $carnetsVol = $this->carnetVolFactory->createFromPrestation($prestation, $user);
                 foreach ($carnetsVol as $carnetVol) {
                     $profil->addCarnetVol($carnetVol);

@@ -31,6 +31,7 @@ export const getRealDuration = (selectedFlightTime, aircraft) => {
 };
 
 export const isValidDuration = (selectedFlightTime, aircraft) => {
+  if (!isDefined(aircraft)) return false;
   const duration = getRealDuration(selectedFlightTime, aircraft);
   return duration > 0;
 };

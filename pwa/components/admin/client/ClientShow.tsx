@@ -1,4 +1,4 @@
-import { Show, TabbedShowLayout, TextField, DateField, BooleanField, FunctionField, RichTextField, ArrayField, Datagrid, NumberField } from 'react-admin';
+import { Show, TabbedShowLayout, TextField, DateField, BooleanField, FunctionField, RichTextField, NumberField } from 'react-admin';
 import { getColor } from '../../../app/lib/client';
 import { isDefined } from '../../../app/lib/utils';
 
@@ -60,6 +60,7 @@ export const ClientShow = () => {
                     <NumberField source="seuilMedical" label="Alerte sur les certificats médicaux (en jours)" />
                     <NumberField source="seuilQualifications" label="Alerte sur les qualifications (en jours)" />
                     <TextField source="thanksTitle" label="Titre du formulaire"/>
+                    <TextField source="consentText" label="Texte nécessitant consentement"/>
                     <RichTextField source="thanksMessage" label="Contenu de la page de redirection"/>
                     <BooleanField source="hasEmailConfirmation" label="Email de confirmation" textAlign="center"/>
                     <TextField source="confirmationSubject" label="Objet de l'email"/>

@@ -9,15 +9,18 @@ import {
 import { createPassenger } from '../../app/lib/actions';
 import { useFormState } from 'react-dom';
 import SubmitButton from './SubmitButton';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { isNotBlank } from '../../app/lib/utils';
 
-export default function Form() {
+export default function Form({ client }) {
 
   const initialState = { message: null, errors: {} };
   const [state, dispatch] = useFormState(createPassenger, initialState);
-  const [check, setCheck] = useState(false);
+  const [check, setCheck] = useState(!isNotBlank(client?.consentText));
 
   const triggleCheck = () => setCheck(!check);
+
+  useEffect(() => setCheck(!isNotBlank(client?.consentText)), [client]);
 
   return (
     <form action={ dispatch }>
@@ -121,25 +124,25 @@ export default function Form() {
         </div>
 
         {/* consent */}
-        <div className="mb-4 mt-6">
-
-          <div className="relative mt-2 rounded-md flex">
-            <div className="relative w-14">
-              <input
-                id="consent"
-                name="consent"
-                type="checkbox"
-                checked={ check }
-                onChange={ triggleCheck }
-                className="peer h-auto min-h-[38px] rounded-md border border-gray-800 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500 z-10"
-              />
+        { isNotBlank(client?.consentText) && 
+          <div className="mb-4 mt-6">
+            <div className="relative mt-2 rounded-md flex">
+              <div className="relative w-14">
+                <input
+                  id="consent"
+                  name="consent"
+                  type="checkbox"
+                  checked={ check }
+                  onChange={ triggleCheck }
+                  className="peer h-auto min-h-[38px] rounded-md border border-gray-800 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500 z-10"
+                />
+              </div>
+                <label htmlFor="consent" className="mb-2 text-xs font-medium flex-1 text-justify italic text-neutral-600">
+                  { client?.consentText ?? '' }
+              </label>
             </div>
-              <label htmlFor="consent" className="mb-2 text-xs font-medium flex-1 text-justify italic">
-              Je reconnais avoir pris connaissance du fait que les exigences applicables aux vols en ULM ne garantissent pas un niveau de sécurité aussi élevé que les vols commerciaux de l'aviation certifiée. <br/> 
-              L'ULM, le pilote et l'exploitant ne sont pas soumis à des opérations de contrôle préalables de la part de l'autorité. 
-            </label>
           </div>
-        </div>
+        }
 
       </div>
       <div className="mt-6 flex justify-end gap-4 z-10">

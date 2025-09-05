@@ -115,7 +115,7 @@ class Entretien
      * @var Collection<int, MediaObject>
      */
     #[ORM\OneToMany(targetEntity: MediaObject::class, mappedBy: 'entretien')]
-    #[Groups(groups: ['Entretien:read'])]
+    #[Groups(groups: ['Entretien:write', 'Entretien:read'])]
     private Collection $documents;
 
     public function __construct()

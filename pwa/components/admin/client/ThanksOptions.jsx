@@ -33,6 +33,7 @@ export const ThanksOptions = () => {
           Enregistrement des passagers
       </Typography>
         <TextInput source="thanksTitle" label="Titre du formulaire"/>
+        <TextInput source="consentText" label="Texte nécessitant consentement" helperText="Laisser vide si non nécessaire" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
         <RichTextInput
             source="thanksMessage"
             label="Contenu de la page de redirection"

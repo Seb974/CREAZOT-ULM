@@ -56,7 +56,7 @@ export default function Page() {
       : 
       // @ts-ignore
       <FormLayout client={ client }>
-        <Form/>
+        <Form client={ client }/>
       </FormLayout>
 
 };

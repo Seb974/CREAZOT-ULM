@@ -31,11 +31,29 @@ final class PassagerEmailSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            KernelEvents::VIEW => ['sendMail', EventPriorities::POST_WRITE],
+            KernelEvents::VIEW => [
+                ['addConsentInformations', EventPriorities::PRE_WRITE],
+                ['sendEmail', EventPriorities::POST_WRITE],
+            ]
         ];
     }
 
-    public function sendMail(ViewEvent $event): void
+    public function addConsentInformations(ViewEvent $event): void
+    {
+        $passager = $event->getControllerResult();
+        $method = $event->getRequest()->getMethod();
+        $client = $this->clientGetter->get();
+
+        if (!$passager instanceof Passager || Request::METHOD_POST !== $method) {
+            return;
+        }
+
+        $passager->setConsentAccepted(empty($client?->getConsentText()) ? null : true);
+        $passager->setConsentText($client?->getConsentText() ?? '');
+        $passager->setConsentDatetime(new \DateTimeImmutable());
+    }
+
+    public function sendEmail(ViewEvent $event): void
     {   
         $passager = $event->getControllerResult();
         $method = $event->getRequest()->getMethod();
@@ -48,7 +66,7 @@ final class PassagerEmailSubscriber implements EventSubscriberInterface
         }
 
         try {
-            $subject = empty($client->getConfirmationSubject()) ? '' : $client->getConfirmationSubject();
+            $subject = empty($client->getConfirmationSubject()) ? 'Enregistrement confirmé' : $client->getConfirmationSubject();
             $bodyHtml = str_replace('{{FIRSTNAME}}', $passager->getPrenom(), $client->getConfirmationMessage());
 
             $mailer = $this->dynamicMailerFactory->getMailerForClient();
@@ -63,7 +81,6 @@ final class PassagerEmailSubscriber implements EventSubscriberInterface
             $this->logger->error('Erreur lors de l\'envoi du mail : ' . $e->getMessage(), [
                 'exception' => $e,
             ]);
-            return;
         }
     }
 }

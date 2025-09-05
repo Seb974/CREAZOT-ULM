@@ -34,7 +34,7 @@ class PassagerExportFilter implements ExportFilterInterface
 
     public function formatExport(array $results): array
     {
-        $headers = ['Id', 'Date', 'Nom', 'Prenom', 'Telephone', 'Email'];
+        $headers = ['Id', 'Date', 'Nom', 'Prenom', 'Telephone', 'Email', 'Consentement', 'Datetime', 'Texte accepté'];
 
         $rows = array_map(fn(Passager $p) => [
             $p->getId(),
@@ -43,6 +43,9 @@ class PassagerExportFilter implements ExportFilterInterface
             $p->getPrenom(),
             $p->getTelephone(),
             $p->getEmail(),
+            !empty($p->isConsentAccepted()) ? ($p->isConsentAccepted() ? 'Oui' : 'Non') : '',
+            !empty($p->isConsentAccepted()) ? ($p->getConsentDatetime()?->format('Y-m-d H:i:s') ?? '') : '',
+            !empty($p->isConsentAccepted()) ? ($p->getConsentText() ?? '') : '',
         ], $results);
         
         return [$headers, $rows];

@@ -1,4 +1,4 @@
-import { Show, SimpleShowLayout, TextField, DateField, NumberField, BooleanField, ArrayField, Datagrid, FunctionField } from 'react-admin';
+import { Show, SimpleShowLayout, TextField, DateField, NumberField, BooleanField, ArrayField, Datagrid, FunctionField, FileField } from 'react-admin';
 import { isDefined } from '../../../app/lib/utils';
 
 export const EntretienShow = () => (
@@ -18,6 +18,7 @@ export const EntretienShow = () => (
                 </Datagrid>
             </ArrayField>
             <NumberField source="horametreNextIntervention" options={{ style: 'unit', unit: 'hour' }} label="Prochaine intervention"/>
+            <FileField source="documents" src="contentUrl" title="description" target="_blank" label="Documents associés"/>
             <DateField source="createdAt" label="Créé le" showTime/>
             <FunctionField
                 label="Créé par"

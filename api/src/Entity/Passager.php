@@ -30,7 +30,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
         ),
         new Post(),
         new Get(
-            security: 'is_granted("OIDC_USER")',
+            security: 'is_granted("OIDC_USER")'
         ),
         new Put(
             security: 'is_granted("OIDC_USER")',
@@ -49,9 +49,8 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     denormalizationContext: [
         AbstractNormalizer::GROUPS => ['Passager:write'],
     ],
-    order: ['date' => 'DESC'],
+    order: ['date' => 'DESC', 'id' => 'DESC'],
     collectDenormalizationErrors: true,
-    security: 'is_granted("OIDC_USER")',
     mercure: true,
 )]
 class Passager
@@ -88,6 +87,18 @@ class Passager
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(groups: ['Passager:write', 'Passager:read'])]
     private ?\DateTimeInterface $date = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Passager:write', 'Passager:read'])]
+    private ?bool $consentAccepted = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(groups: ['Passager:write', 'Passager:read'])]
+    private ?string $consentText = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Passager:write', 'Passager:read'])]
+    private ?\DateTimeImmutable $consentDatetime = null;
 
     public function getId(): ?int
     {
@@ -150,6 +161,42 @@ class Passager
     public function setDate(?\DateTimeInterface $date): static
     {
         $this->date = $date;
+
+        return $this;
+    }
+
+    public function isConsentAccepted(): ?bool
+    {
+        return $this->consentAccepted;
+    }
+
+    public function setConsentAccepted(?bool $consentAccepted): static
+    {
+        $this->consentAccepted = $consentAccepted;
+
+        return $this;
+    }
+
+    public function getConsentText(): ?string
+    {
+        return $this->consentText;
+    }
+
+    public function setConsentText(?string $consentText): static
+    {
+        $this->consentText = $consentText;
+
+        return $this;
+    }
+
+    public function getConsentDatetime(): ?\DateTimeImmutable
+    {
+        return $this->consentDatetime;
+    }
+
+    public function setConsentDatetime(?\DateTimeImmutable $consentDatetime): static
+    {
+        $this->consentDatetime = $consentDatetime;
 
         return $this;
     }

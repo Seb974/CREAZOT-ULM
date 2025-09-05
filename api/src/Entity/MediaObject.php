@@ -18,6 +18,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 #[ORM\Entity]
 #[ApiResource(
     normalizationContext: ['groups' => ['media_object:read']],
+    denormalizationContext: ['groups' => ['media_object:write']],
     types: ['https://schema.org/MediaObject'],
     outputFormats: ['jsonld' => ['application/ld+json']],
     operations: [
@@ -59,6 +60,15 @@ class MediaObject
 
     #[Vich\UploadableField(mapping: 'media_object', fileNameProperty: 'filePath')]
     #[Assert\NotNull]
+    #[Assert\File(
+        maxSize: '200M',
+        mimeTypes: [
+            'image/jpeg',
+            'image/png',
+            'application/pdf',
+        ],
+    mimeTypesMessage: 'Veuillez uploader une image (JPEG, PNG) ou un PDF valide'
+)]
     #[Groups(['media_object:write'])]
     public ?File $file = null;
 

@@ -8,18 +8,10 @@ import { toast } from 'react-hot-toast';
  
 const FormSchema = z.object({
   id: z.number(),
-  nom: z.string({
-    invalid_type_error: 'Entrez votre nom de famille s\'il vous plaît.',
-  }),
-  prenom: z.string({
-    invalid_type_error: 'Entrez votre prénom s\'il vous plaît.',
-  }),
-  email: z.string({
-    invalid_type_error: 'Entrez votre adresse email s\'il vous plaît.',
-  }),
-  telephone: z.string({
-    invalid_type_error: 'Entrez votre numéro de téléphone s\'il vous plaît.',
-  }),
+  nom: z.string({invalid_type_error: 'Entrez votre nom de famille s\'il vous plaît.'}),
+  prenom: z.string({invalid_type_error: 'Entrez votre prénom s\'il vous plaît.'}),
+  email: z.string({invalid_type_error: 'Entrez votre adresse email s\'il vous plaît.'}),
+  telephone: z.string({invalid_type_error: 'Entrez votre numéro de téléphone s\'il vous plaît.'}),
   date: z.date(),
 });
 
@@ -84,7 +76,7 @@ export const getMetarOrTaf = (icao, request = "metar", decoded = false) => {
             return response.data;
           })
           .catch(function (error) {
-            console.log(error);
+            console.error(error);
           });
 
 };

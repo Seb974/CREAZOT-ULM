@@ -72,6 +72,7 @@ class ClientInputDataTransformer implements ProcessorInterface
             $client->setSeuilQualifications($data->seuilQualifications);
             $client->setHasIndividualFlightLogs($data->hasIndividualFlightLogs);
             $client->setUseAvailabilityFilter($data->useAvailabilityFilter);
+            $client->setConsentText($data->consentText);
 
             // Uploads de fichiers
             if ($data->logo instanceof UploadedFile) {

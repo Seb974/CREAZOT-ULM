@@ -277,6 +277,10 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private Collection $cameras;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?string $consentText = null;
+
     public function __construct()
     {
         $this->airports = new ArrayCollection();
@@ -921,6 +925,18 @@ class Client
                 $camera->setClient(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getConsentText(): ?string
+    {
+        return $this->consentText;
+    }
+
+    public function setConsentText(?string $consentText): static
+    {
+        $this->consentText = $consentText;
 
         return $this;
     }

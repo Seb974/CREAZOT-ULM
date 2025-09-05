@@ -1,20 +1,5 @@
 import { type NextPage } from "next";
-import {
-  Datagrid,
-  List,
-  TextField,
-  CreateButton,
-  TopToolbar,
-  DateField,
-  EditButton,
-  ShowButton,
-  SimpleList,
-  EmailField,
-  useListContext,
-  Form,
-  TextInput,
-  DateInput
-} from "react-admin";
+import { Datagrid, List, TextField, CreateButton, TopToolbar, DateField, EditButton, ShowButton, SimpleList, EmailField, useListContext, Form, DateInput, BooleanField, FunctionField } from "react-admin";
 import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
 import { isDefined, toLocalDateString } from "../../../app/lib/utils";
@@ -23,6 +8,8 @@ import { useSessionContext } from "../../admin/SessionContextProvider";
 import BackupTableIcon from '@mui/icons-material/BackupTable';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import ClearIcon from '@mui/icons-material/Clear';
+import DoneIcon from '@mui/icons-material/Done';
 import { useEffect, useState } from "react";
 
 export interface Props {
@@ -172,6 +159,14 @@ export const PassagersList: NextPage<Props> = ({ data, hubURL, page }) => {
   const [showMore, setShowMore] = useState(false);
   const [filters, setFilters] = useState(defaultFilters);
 
+  const getConsentIcon = ({ consentAccepted }) => {
+    return isDefined(consentAccepted) ? 
+      consentAccepted ? 
+        <DoneIcon className="text-green-500"/> : 
+        <ClearIcon className="text-red-500"/> :
+       <></>
+  };
+
   return (
     <List 
       resource="passagers" 
@@ -187,6 +182,7 @@ export const PassagersList: NextPage<Props> = ({ data, hubURL, page }) => {
               primaryText={ record => record.nom + ' ' +  record.prenom }
               // @ts-ignore
               secondaryText={ record => `${ (new Date(record.date)).toLocaleDateString("fr-FR", options) } `}
+              tertiaryText={ record => getConsentIcon(record) }
               linkType="show"
             /> 
             : 
@@ -196,6 +192,12 @@ export const PassagersList: NextPage<Props> = ({ data, hubURL, page }) => {
                 <TextField source="prenom" label="Prénom" sortable={ true }/>
                 <TextField source="telephone" label="Prénom" sortable={ true }/>
                 <EmailField source="email" label="Adresse email"/>
+                <FunctionField 
+                    source="consentAccepted"
+                    label="Consentement"
+                    render={record => getConsentIcon(record) }
+                    textAlign="center"
+                />
                 <p className="text-right">
                     <ShowButton />
                     <EditButton />

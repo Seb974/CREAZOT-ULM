@@ -1,17 +1,27 @@
-import { 
-  ReferenceInput, 
-  SimpleForm, 
-  TextInput,
-  NumberInput,
-  DateInput,
-  BooleanInput,
-  useDataProvider,
-  ReferenceArrayInput
-} from "react-admin";
+import { ReferenceInput, SimpleForm, TextInput, NumberInput, DateInput, BooleanInput, useDataProvider, ReferenceArrayInput, useRecordContext, FileInput } from "react-admin";
 import { Create } from "react-admin";
 import { useEffect, useState } from "react";
 import { useWatch, useFormContext } from 'react-hook-form';
-import { isDefined } from "../../../app/lib/utils";
+import { getFormattedValueForBackEnd, isDefined } from "../../../app/lib/utils";
+import { Link } from "@mui/material";
+import { syncDocuments } from "../../../app/lib/client";
+import { useSessionContext } from "../SessionContextProvider";
+
+const MyFileField = ({ source }) => {
+  const record = useRecordContext();
+  if (!record) return null;
+
+  const url = record[source];
+  const label = record.description || record.title || record.path || "Sans nom";
+
+  return (
+    <Link href={url} target="_blank" rel="noopener noreferrer" underline="always"
+      sx={{ color: "primary.main", fontSize: "0.85rem" }}
+    >
+      {label}
+    </Link>
+  );
+};
 
 const AeronefWatcher = ({ setSelectedAeronef, setIsChangementMoteur }) => {
   const dataProvider = useDataProvider();
@@ -49,11 +59,27 @@ const AeronefWatcher = ({ setSelectedAeronef, setIsChangementMoteur }) => {
 
 export const EntretiensCreate = () => {
 
+  const { session } = useSessionContext();
   const [selectedAeronef, setSelectedAeronef] = useState(null);
   const [isChangementMoteur, setIsChangementMoteur] = useState(null);
 
+  const getDocuments = async (documents) => {   
+      const docs = documents.map(document => {
+          return isDefined(document?.['@id']) ? document : { ...document, description: document.title };
+      });
+      return await syncDocuments(docs, session);
+  };
+
+  const transform = async data => {
+      const documentIds = await getDocuments(data.documents);
+
+      data['documents'] = documentIds;
+      data['intervenants'] = data['intervenants'].map(intervenant => getFormattedValueForBackEnd(intervenant));
+      return data;
+  };
+
   return (
-    <Create redirect="list">
+    <Create transform={transform} redirect="list">
       <SimpleForm>
         <DateInput source="date" defaultValue={ new Date() } label="Date"/>
         <ReferenceInput reference="aeronefs" source="aeronef" label="Aéronef" />
@@ -61,6 +87,9 @@ export const EntretiensCreate = () => {
         <TextInput source="intervention" label="Détail de l'intervention" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
         <BooleanInput source="changementMoteur" label="Changement du moteur" defaultValue={ false }/>
         <NumberInput key={ isDefined(selectedAeronef) ? selectedAeronef.id : 0 } source="horametreNextIntervention" label="Prochaine intervention" helperText={isDefined(selectedAeronef) && isDefined(selectedAeronef.horametre) ? `Horamètre actuel : ${ selectedAeronef.horametre.toFixed(2) }h` : ''}/>
+        <FileInput source="documents" multiple={ true } label="Documents associés">
+            <MyFileField source="contentUrl"/>
+        </FileInput>
         <AeronefWatcher setSelectedAeronef={ setSelectedAeronef } setIsChangementMoteur={ setIsChangementMoteur }/>
       </SimpleForm>
     </Create>

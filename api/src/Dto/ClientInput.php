@@ -142,4 +142,7 @@ final class ClientInput
 
     #[Groups(groups: ['Client:write'])]
     public ?bool $useAvailabilityFilter = null;
+
+    #[Groups(groups: ['Client:write'])]
+    public ?string $consentText = null;
 }

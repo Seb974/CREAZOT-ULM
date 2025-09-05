@@ -34,6 +34,7 @@ class CreateClientController extends AbstractController
         $dto->confirmationMessage = $request->request->get('confirmationMessage');
         $dto->emailAddressSender = $request->request->get('emailAddressSender');
         $dto->confirmationSubject = $request->request->get('confirmationSubject');
+        $dto->consentText = $request->request->get('consentText');
 
         // Champs Number/ Boolean
         $dto->lat = $this->getFloat($request, 'lat');

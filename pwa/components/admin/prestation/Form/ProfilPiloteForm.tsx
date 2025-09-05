@@ -77,7 +77,7 @@ export const ProfilPiloteForm: React.FC = ({ selectedPilot, setSelectedPilot, se
                 isPilotSelected ? "text-black dark:text-white" : ""
               } h-[41px]`}
             >
-              <option value="" disabled className="text-body dark:text-bodydark">
+              <option value="" className="text-body dark:text-bodydark">
                 Choisissez un pilote
               </option>
               { eligiblePilots.map(pilot => <option key={ pilot.id } value={ pilot['@id'] } className="text-body dark:text-bodydark">{ pilot.firstName.charAt(0).toUpperCase() + pilot.firstName.slice(1) }</option>)}

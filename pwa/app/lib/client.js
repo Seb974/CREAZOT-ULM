@@ -133,7 +133,6 @@ export const createMediaObject = async (file, description = '', session) => {
             body: formData,
             headers: { Authorization: `Bearer ${session?.accessToken}` },
         });
-
         if (!response.ok) {
             const errorText = await response.text();
             console.error(`Erreur lors de l'upload du fichier : ${errorText}`);
