@@ -145,4 +145,7 @@ final class ClientInput
 
     #[Groups(groups: ['Client:write'])]
     public ?string $consentText = null;
+
+    #[Groups(groups: ['Client:write'])]
+    public ?bool $hasExpensesManagement = null;
 }

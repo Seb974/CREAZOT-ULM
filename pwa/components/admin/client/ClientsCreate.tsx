@@ -59,7 +59,8 @@ export const ClientsCreate = () => {
                     seuilMedical: 30,
                     seuilQualifications: 30,
                     hasIndividualFlightLogs: false,
-                    useAvailabilityFilter: false
+                    useAvailabilityFilter: false,
+                    hasExpensesManagement: false
                 })}
             >
                 <TabbedForm.Tab label="Informations">
@@ -95,20 +96,12 @@ export const ClientsCreate = () => {
                             <BooleanInput source="hasPartners" label="Partenariat" fullWidth/>
                         </Box>
                         <Box flex={1}>
-                            <BooleanInput source="hasGifts" label="Gestion des prépaiements" fullWidth/>
+                            <BooleanInput source="hasOriginContact" label="Origine du contact" fullWidth/>  
                         </Box> 
                     </Box>
                     <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
                         <Box flex={1}>
-                            <BooleanInput source="hasOriginContact" label="Origine du contact" fullWidth/>
-                        </Box>
-                        <Box flex={1}>
-                            <BooleanInput source="hasLandingManagement" label="Gestion des atterrissages" fullWidth/>
-                        </Box>
-                    </Box>
-                    <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
-                        <Box flex={1}>
-                            <BooleanInput source="hasPaymentManagement" label="Gestion des paiements" fullWidth/>
+                                <BooleanInput source="hasLandingManagement" label="Gestion des atterrissages" fullWidth/>
                         </Box>
                         <Box flex={1}>
                             <BooleanInput source="hasPassengerRegistration" label="Enregistrement des passagers" fullWidth/>
@@ -130,6 +123,20 @@ export const ClientsCreate = () => {
                             <BooleanInput source="useAvailabilityFilter" label="Fitrer sur les disponibilités" fullWidth/>
                         </Box>
                     </Box>
+                    <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                        <Box flex={1}>
+                            <BooleanInput source="hasPaymentManagement" label="Gestion des paiements" fullWidth/>
+                        </Box>
+                        <Box flex={1}>
+                            <BooleanInput source="hasGifts" label="Gestion des prépaiements" fullWidth/>
+                        </Box>
+                    </Box>
+                    <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                        <Box flex={1}>
+                            <BooleanInput source="hasExpensesManagement" label="Gestion des dépenses" fullWidth/>
+                        </Box>
+                    </Box>
+                    <Divider sx={{ mt: 2, borderBottomWidth: 2, borderColor: '#666' }} />
                 </TabbedForm.Tab>
                 <TabbedForm.Tab label="Dashboard">
                     <ColorPreview/>

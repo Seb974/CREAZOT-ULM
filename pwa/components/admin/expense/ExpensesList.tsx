@@ -197,16 +197,6 @@ const DetailsExpansion = () => {
           source="mode"
           render={({mode}) => getChipMode(mode)}
         />
-         <FunctionField
-          source="prepayment"
-          render={({prepayment}) => isDefined(prepayment) ? 
-            <span className="text-xs italic">
-              <span>{ `${ prepayment.paymentId.startsWith('#') ? prepayment.paymentId : `#${ prepayment.paymentId }` } - ${ prepayment.offreur }` }<br/></span>
-              <span className="text-grey-500">{(new Date(prepayment.date)).toLocaleDateString()}</span>
-            </span>
-            : ''
-          }
-        />
         <NumberField source="amount" label="Montant" options={{ style: 'currency', currency: 'EUR' }}/>
       </Datagrid>
     </ArrayField>
@@ -234,11 +224,11 @@ const CustomBody = (props) => {
     if (isLoading || !data) return null;
 
     const filteredData = isLoading || !data ? [] :
-      data.map(payment => {
+      data.map(expense => {
           const modeFilter = filterValues['details.mode']?.toLowerCase();
-          const newDetails = modeFilter ? payment.details.filter(detail => detail.mode ? matchesStartOfWord(detail.mode, modeFilter) : false): payment.details;
-          return { ...payment, details: newDetails };
-      }).filter(payment => payment.details.length > 0);
+          const newDetails = modeFilter ? expense.details.filter(detail => detail.mode ? matchesStartOfWord(detail.mode, modeFilter) : false): expense.details;
+          return { ...expense, details: newDetails };
+      }).filter(expense => expense.details.length > 0);
 
     const total = filteredData.reduce((sum, row) => sum + row.details.reduce((s, c) => s+= c.amount, 0), 0);
 
@@ -248,7 +238,7 @@ const CustomBody = (props) => {
         <TableFooter>
           <TableRow sx={{ backgroundColor: '#ededed', fontStyle: 'italic', fontWeight: 'bold', color: '#555'  }}>
               <TableCell colSpan={2}/>
-              <TableCell colSpan={2} sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
+              <TableCell colSpan={3} sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
                 Total
               </TableCell>
               <TableCell style={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'center' }}>
@@ -266,11 +256,11 @@ const MobileFooter = (props) => {
     if (isLoading || !data) return null;
 
     const filteredData = isLoading || !data ? [] :
-      data.map(payment => {
+      data.map(expense => {
           const modeFilter = filterValues['details.mode']?.toLowerCase();
-          const newDetails = modeFilter ? payment.details.filter(detail => detail.mode ? matchesStartOfWord(detail.mode, modeFilter) : false): payment.details;
-          return { ...payment, details: newDetails };
-      }).filter(payment => payment.details.length > 0);
+          const newDetails = modeFilter ? expense.details.filter(detail => detail.mode ? matchesStartOfWord(detail.mode, modeFilter) : false): expense.details;
+          return { ...expense, details: newDetails };
+      }).filter(expense => expense.details.length > 0);
 
     const total = filteredData.reduce((sum, row) => sum + row.details.reduce((s, c) => s+= c.amount, 0), 0);
 
@@ -295,14 +285,15 @@ const CustomDatagrid = () => {
     <Datagrid body={<CustomBody />} expand={<DetailsExpansion/>}  sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
         <DateField source="date" label="Date" sortable={ true } />
         <FunctionField
-          source="name"
-          label="Intitulé"
-          render={ ({ name, label, details }) =>  <div>{ isNotBlank(name) ? name : (isNotBlank(label) ? label : '') }<br/>
+          source="beneficiaire"
+          label="Bénéficiaire"
+          render={ ({ beneficiaire, details }) =>  <div>{ isNotBlank(beneficiaire) ? beneficiaire : ''  }<br/>
             { getModeList(details) }</div>
           }
         />
+        <TextField source="libelle" label="Libellé"/>
         <FunctionField
-          source="name"
+          source="montant"
           label="Total"
           render={({ details }) => (details.reduce((sum, current) => sum += current.amount, 0)).toFixed(2) + "€" }
           sx={{textAlign: 'center'}}
@@ -315,8 +306,7 @@ const CustomDatagrid = () => {
   );
 }
 
-
-export const PaymentsList: NextPage<Props> = ({ data, hubURL, page }) => {
+export const ExpensesList: NextPage<Props> = ({ data, hubURL, page }) => {
   const collection = useMercure(data, hubURL);
   const options = { year: "numeric", month: "numeric", day: "numeric" };
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
@@ -327,8 +317,8 @@ export const PaymentsList: NextPage<Props> = ({ data, hubURL, page }) => {
   return (
     <List 
       title="Paiements"
-      resource="payments" 
-      actions={<CustomListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall} resource="payments"/>}
+      resource="expenses" 
+      actions={<CustomListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall} resource="expenses"/>}
       filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>}
       // @ts-ignore
       filterValues={filters}
@@ -338,7 +328,7 @@ export const PaymentsList: NextPage<Props> = ({ data, hubURL, page }) => {
         { isSmall ? 
           <>
             <SimpleList
-              primaryText={({ name, label }) =>  isNotBlank(name) ? name : (isNotBlank(label) ? label : '')}
+              primaryText={record =>  record?.beneficiaire ??  '' }
               // @ts-ignore
               secondaryText={({ details, date }) => <div>{ getModeList(details) }<br/>{ `${ (new Date(date)).toLocaleDateString("fr-FR", options) } ` }</div>}
               tertiaryText={({ details }) => (details.reduce((sum, current) => sum += current.amount, 0)).toFixed(2) + "€" }

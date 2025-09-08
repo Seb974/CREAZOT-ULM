@@ -71,6 +71,7 @@ class ClientInputDataTransformer implements ProcessorInterface
             $client->setSeuilMedical($data->seuilMedical);
             $client->setSeuilQualifications($data->seuilQualifications);
             $client->setHasIndividualFlightLogs($data->hasIndividualFlightLogs);
+            $client->setHasExpensesManagement($data->hasExpensesManagement);
             $client->setUseAvailabilityFilter($data->useAvailabilityFilter);
             $client->setConsentText($data->consentText);
 

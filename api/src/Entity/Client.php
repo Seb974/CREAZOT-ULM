@@ -281,6 +281,10 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?string $consentText = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasExpensesManagement = null;
+
     public function __construct()
     {
         $this->airports = new ArrayCollection();
@@ -937,6 +941,18 @@ class Client
     public function setConsentText(?string $consentText): static
     {
         $this->consentText = $consentText;
+
+        return $this;
+    }
+
+    public function getHasExpensesManagement(): ?bool
+    {
+        return $this->hasExpensesManagement;
+    }
+
+    public function setHasExpensesManagement(?bool $hasExpensesManagement): static
+    {
+        $this->hasExpensesManagement = $hasExpensesManagement;
 
         return $this;
     }

@@ -1,11 +1,12 @@
-import { ReferenceInput, SimpleForm, TextInput, NumberInput, DateInput, BooleanInput, useDataProvider, ReferenceArrayInput, useRecordContext, FileInput } from "react-admin";
+import { ReferenceInput, SimpleForm, TextInput, NumberInput, DateInput, BooleanInput, useDataProvider, ReferenceArrayInput, useRecordContext, FileInput, ArrayInput, SimpleFormIterator, SelectInput } from "react-admin";
 import { Create } from "react-admin";
 import { useEffect, useState } from "react";
 import { useWatch, useFormContext } from 'react-hook-form';
-import { getFormattedValueForBackEnd, isDefined } from "../../../app/lib/utils";
-import { Link } from "@mui/material";
-import { syncDocuments } from "../../../app/lib/client";
+import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { Box, Link } from "@mui/material";
+import { clientWithExpensesManagement, syncDocuments } from "../../../app/lib/client";
 import { useSessionContext } from "../SessionContextProvider";
+import { useClient } from "../ClientProvider";
 
 const MyFileField = ({ source }) => {
   const record = useRecordContext();
@@ -57,8 +58,20 @@ const AeronefWatcher = ({ setSelectedAeronef, setIsChangementMoteur }) => {
   return null;
 };
 
+const ExpensesInput = ({ client }) => {
+  return !clientWithExpensesManagement(client) ? null :
+    <ArrayInput source="expenses" label="Dépense(s) associée(s)">
+      <SimpleFormIterator disableReordering>
+          <ReferenceInput reference="expenses" source="@id" filter={{ relatedToMaintenance: true, 'exists[entretien]': false }}>
+              <SelectInput label="Dépense" optionText="name"/>     {/* optionText="libelle" */}
+          </ReferenceInput>
+      </SimpleFormIterator>
+    </ArrayInput>
+};
+
 export const EntretiensCreate = () => {
 
+  const { client } = useClient();
   const { session } = useSessionContext();
   const [selectedAeronef, setSelectedAeronef] = useState(null);
   const [isChangementMoteur, setIsChangementMoteur] = useState(null);
@@ -70,11 +83,16 @@ export const EntretiensCreate = () => {
       return await syncDocuments(docs, session);
   };
 
-  const transform = async data => {
+  const transform = async ({expenses, ...data}) => {
       const documentIds = await getDocuments(data.documents);
 
       data['documents'] = documentIds;
       data['intervenants'] = data['intervenants'].map(intervenant => getFormattedValueForBackEnd(intervenant));
+      if (clientWithExpensesManagement(client) && isDefinedAndNotVoid(expenses)) {
+        data['expenses'] = expenses.map(expense => getFormattedValueForBackEnd(expense))
+      } else {
+        data['expenses'] = [];
+      }
       return data;
   };
 
@@ -87,6 +105,7 @@ export const EntretiensCreate = () => {
         <TextInput source="intervention" label="Détail de l'intervention" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
         <BooleanInput source="changementMoteur" label="Changement du moteur" defaultValue={ false }/>
         <NumberInput key={ isDefined(selectedAeronef) ? selectedAeronef.id : 0 } source="horametreNextIntervention" label="Prochaine intervention" helperText={isDefined(selectedAeronef) && isDefined(selectedAeronef.horametre) ? `Horamètre actuel : ${ selectedAeronef.horametre.toFixed(2) }h` : ''}/>
+        <ExpensesInput client={ client }/>
         <FileInput source="documents" multiple={ true } label="Documents associés">
             <MyFileField source="contentUrl"/>
         </FileInput>

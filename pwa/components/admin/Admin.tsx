@@ -41,6 +41,7 @@ import carnetVolResourceProps from "./carnetVol";
 import disponibiliteResourceProps from "./disponibilite";
 import airportResourceProps from "./airport";
 import cameraResourceProps from "./camera";
+import expenseResourceProps from "./expense";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -150,6 +151,7 @@ const AdminWithOIDC = () => {
         <ResourceGuesser name="disponibilites" {...disponibiliteResourceProps}/>
         <ResourceGuesser name="airports" {...airportResourceProps}/>
         <ResourceGuesser name="cameras" {...cameraResourceProps}/>
+        <ResourceGuesser name="expenses" {...expenseResourceProps}/>
         <CustomRoutes>
           <Route path="/landings" element={<LandingsList />} />
           <Route path="/convert" element={<ReservationCreate />} />

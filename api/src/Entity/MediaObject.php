@@ -7,6 +7,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Patch;
 use ApiPlatform\OpenApi\Model;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
@@ -24,6 +25,8 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
     operations: [
         new Get(),
         new GetCollection(),
+        new GetCollection(),
+        new Patch(),
         new Post(
             inputFormats: ['multipart' => ['multipart/form-data']],
             openapi: new Model\Operation(
@@ -55,11 +58,11 @@ class MediaObject
     private ?int $id = null;
 
     #[ApiProperty(types: ['https://schema.org/contentUrl'], writable: false)]
-    #[Groups(['media_object:read', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read', 'Airport:read', 'Entretien:read'])]
+    #[Groups(['media_object:read', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read', 'Airport:read', 'Entretien:read', 'Expense:read'])]
     public ?string $contentUrl = null;
 
     #[Vich\UploadableField(mapping: 'media_object', fileNameProperty: 'filePath')]
-    #[Assert\NotNull]
+    // #[Assert\NotNull]
     #[Assert\File(
         maxSize: '200M',
         mimeTypes: [
@@ -77,11 +80,11 @@ class MediaObject
     public ?string $filePath = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['media_object:read', 'media_object:write', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read', 'Airport:read', 'Entretien:read'])]
+    #[Groups(['media_object:read', 'media_object:write', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read', 'Airport:read', 'Entretien:read', 'Expense:read'])]
     public ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['media_object:read', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read', 'Airport:read', 'Entretien:read'])]
+    #[Groups(['media_object:read', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read', 'Airport:read', 'Entretien:read', 'Expense:read'])]
     public ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'documents')]
@@ -105,7 +108,7 @@ class MediaObject
         $this->createdAt = new \DateTimeImmutable();
     }
 
-     #[Groups(['media_object:read', 'media_object:write', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read', 'Airport:read', 'Entretien:read'])]
+     #[Groups(['media_object:read', 'media_object:write', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read', 'Airport:read', 'Entretien:read', 'Expense:read'])]
     public function getOriginalDescription(): ?string
     {
         return $this->description;

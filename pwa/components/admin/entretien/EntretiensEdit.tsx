@@ -1,9 +1,10 @@
-import { ArrayInput, DateInput, Edit, FileInput, SimpleFormIterator, useRecordContext } from "react-admin";
+import { ArrayInput, DateInput, Edit, FileInput, SelectInput, SimpleFormIterator, useRecordContext } from "react-admin";
 import { ReferenceInput, SimpleForm, TextInput, NumberInput, BooleanInput } from "react-admin";
-import { getFormattedValueForBackEnd, isDefined } from "../../../app/lib/utils";
+import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { Link } from "@mui/material";
-import { syncDocuments } from "../../../app/lib/client";
+import { clientWithExpensesManagement, syncDocuments } from "../../../app/lib/client";
 import { useSessionContext } from "../SessionContextProvider";
+import { useClient } from "../ClientProvider";
 
 const MyFileField = ({ source }) => {
   const record = useRecordContext();
@@ -21,8 +22,20 @@ const MyFileField = ({ source }) => {
   );
 };
 
+const ExpensesInput = ({ client }) => {
+  return !clientWithExpensesManagement(client) ? null :
+    <ArrayInput source="expenses" label="Dépense(s) associée(s)">
+      <SimpleFormIterator disableReordering>
+          <ReferenceInput reference="expenses" source="@id" filter={{ relatedToMaintenance: true, 'exists[entretien]': false }}>
+              <SelectInput label="Dépense" optionText="name"/>     {/* optionText="libelle" */}
+          </ReferenceInput>
+      </SimpleFormIterator>
+    </ArrayInput>
+};
+
 export const EntretiensEdit = () => {
 
+  const { client } = useClient();
   const { session } = useSessionContext();
 
   const getDocuments = async (documents) => {   
@@ -32,13 +45,18 @@ export const EntretiensEdit = () => {
       return await syncDocuments(docs, session);
   };
 
-  const transform = async data => {
+  const transform = async ({expenses, ...data}) => {
     const documentIds = await getDocuments(data.documents);
 
     data['documents'] = documentIds;
     data['intervenants'] = data['intervenants'].map(intervenant => getFormattedValueForBackEnd(intervenant));
     data['createdBy'] = getFormattedValueForBackEnd(data['createdBy']);
     data['updatedBy'] = getFormattedValueForBackEnd(data['updatedBy']);
+    if (clientWithExpensesManagement(client) && isDefinedAndNotVoid(expenses)) {
+      data['expenses'] = expenses.map(expense => getFormattedValueForBackEnd(expense))
+    } else {
+      data['expenses'] = [];
+    }
     return data;
   };
 
@@ -56,6 +74,7 @@ export const EntretiensEdit = () => {
           <BooleanInput source="changementMoteur" label="Changement du moteur"/>
           <NumberInput source="horametreIntervention" label="Horamètre"/>
           <NumberInput source="horametreNextIntervention" label="Prochaine intervention"/>
+          <ExpensesInput client={ client }/>
           <FileInput source="documents" multiple={ true } label="Documents associés">
               <MyFileField source="contentUrl"/>
           </FileInput>

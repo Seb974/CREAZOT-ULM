@@ -34,15 +34,16 @@ export const ClientShow = () => {
                     <BooleanField source="hasReservation" label="Réservations" textAlign="center"/>
                     <BooleanField source="hasOptions" label="Options" textAlign="center"/>
                     <BooleanField source="hasPartners" label="Partenariat" textAlign="center"/>
-                    <BooleanField source="hasGifts" label="Gestion des prépaiements" textAlign="center"/>
                     <BooleanField source="hasOriginContact" label="Origine du contact" textAlign="center"/>
                     <BooleanField source="hasLandingManagement" label="Gestion des atterrissages" textAlign="center"/>
-                    <BooleanField source="hasPaymentManagement" label="Gestion des paiements" textAlign="center"/>
                     <BooleanField source="hasPassengerRegistration" label="Enregistrement des passagers" textAlign="center"/>
                     <BooleanField source="hasMicrotrakTag" label="Balise(s) Microtrak" textAlign="center"/>
                     <BooleanField source="hasWebshop" label="Site e-commerce lié" textAlign="center"/>
                     <BooleanField source="hasIndividualFlightLogs" label="Carnets de vols individuels" textAlign="center"/>
                     <BooleanField source="useAvailabilityFilter" label="Fitrer sur les disponibilités" textAlign="center"/>
+                    <BooleanField source="hasPaymentManagement" label="Gestion des paiements" textAlign="center"/>
+                    <BooleanField source="hasGifts" label="Gestion des prépaiements" textAlign="center"/>
+                    <BooleanField source="hasExpensesManagement" label="Gestion des dépenses" textAlign="center"/>
                 </TabbedShowLayout.Tab>  
                 <TabbedShowLayout.Tab label="Dashboard">
                     <FunctionField 

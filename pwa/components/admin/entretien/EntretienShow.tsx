@@ -18,6 +18,11 @@ export const EntretienShow = () => (
                 </Datagrid>
             </ArrayField>
             <NumberField source="horametreNextIntervention" options={{ style: 'unit', unit: 'hour' }} label="Prochaine intervention"/>
+            <ArrayField source="expenses" label="Dépenses associées">
+                <Datagrid isRowSelectable={ record => false } rowClick={ false } bulkActionButtons={false} sx={{ '& .RaDatagrid-headerCell': {display: "none"}}} className="text-xs italic">
+                    <FunctionField label="" source="name" render={ record => record?.name ?? '' } />
+                </Datagrid>
+            </ArrayField>
             <FileField source="documents" src="contentUrl" title="description" target="_blank" label="Documents associés"/>
             <DateField source="createdAt" label="Créé le" showTime/>
             <FunctionField

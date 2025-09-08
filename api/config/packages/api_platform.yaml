@@ -369,6 +369,12 @@ services:
             $properties: { date: ~ } # ]
         tags: [ 'api_platform.filter' ]
 
+    app.filter.expense.date:
+        parent: 'api_platform.doctrine.orm.date_filter'
+        arguments:
+            $properties: { date: ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
     app.filter.payment.reservation:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:
@@ -387,6 +393,12 @@ services:
             $properties: { details.mode: 'iword_start' } # ]
         tags: [ 'api_platform.filter' ]
 
+    app.filter.expense.mode:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { details.mode: 'iword_start' } # ]
+        tags: [ 'api_platform.filter' ]
+
     app.filter.payment.label:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:
@@ -400,4 +412,24 @@ services:
             $logger: '@logger'
             $nameConverter: '@?api_platform.name_converter'
             $properties: { intitule:  ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.expense.intitule:
+        class: 'App\Doctrine\Orm\Filter\BeneficiaireOrLibelleFilter'
+        arguments:
+            $managerRegistry: '@doctrine'
+            $logger: '@logger'
+            $nameConverter: '@?api_platform.name_converter'
+            $properties: { intitule:  ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.expense.maintenance:
+        parent: 'api_platform.doctrine.orm.boolean_filter'
+        arguments:
+            $properties:  {relatedToMaintenance: ~ } # ]
+        tags: [ 'api_platform.filter' ]
+
+    app.filter.expense.entretien:
+        parent: 'api_platform.doctrine.orm.exists_filter'
+        arguments: [{ entretien: ~ }]
         tags: [ 'api_platform.filter' ]

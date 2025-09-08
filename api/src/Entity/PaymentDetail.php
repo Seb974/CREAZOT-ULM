@@ -54,15 +54,15 @@ class PaymentDetail
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['PaymentDetail:write', 'Payment:write', 'PaymentDetail:read', 'Payment:read'])]
+    #[Groups(groups: ['PaymentDetail:write', 'Payment:write', 'PaymentDetail:read', 'Payment:read', 'Expense:write', 'Expense:read', 'Entretien:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['PaymentDetail:write', 'Payment:write', 'PaymentDetail:read', 'Payment:read'])]
+    #[Groups(groups: ['PaymentDetail:write', 'Payment:write', 'PaymentDetail:read', 'Payment:read', 'Expense:write', 'Expense:read', 'Entretien:read'])]
     private ?string $mode = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['PaymentDetail:write', 'Payment:write', 'PaymentDetail:read', 'Payment:read'])]
+    #[Groups(groups: ['PaymentDetail:write', 'Payment:write', 'PaymentDetail:read', 'Payment:read', 'Expense:write', 'Expense:read', 'Entretien:read'])]
     private ?float $amount = null;
 
     #[ORM\ManyToOne(inversedBy: 'details')]
@@ -72,6 +72,10 @@ class PaymentDetail
     #[ORM\ManyToOne]
     #[Groups(groups: ['PaymentDetail:write', 'Payment:write', 'PaymentDetail:read', 'Payment:read'])]
     private ?Cadeau $prepayment = null;
+
+    #[ORM\ManyToOne(inversedBy: 'details')]
+    #[Groups(groups: ['PaymentDetail:read'])]
+    private ?Expense $expense = null;
 
     public function getId(): ?int
     {
@@ -122,6 +126,18 @@ class PaymentDetail
     public function setPrepayment(?Cadeau $prepayment): static
     {
         $this->prepayment = $prepayment;
+
+        return $this;
+    }
+
+    public function getExpense(): ?Expense
+    {
+        return $this->expense;
+    }
+
+    public function setExpense(?Expense $expense): static
+    {
+        $this->expense = $expense;
 
         return $this;
     }

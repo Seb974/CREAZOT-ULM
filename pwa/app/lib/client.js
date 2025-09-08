@@ -327,6 +327,10 @@ export const clientWithReservationManagement = client => {
     return isDefined(client) && isDefined(client.hasReservation) && client.hasReservation;
 };
 
+export const clientWithExpensesManagement = client => {
+    return isDefined(client) && isDefined(client.hasExpensesManagement) && client.hasExpensesManagement;
+};
+
 export const getDefaultLanding = client => {
     if (isDefined(client) && isDefinedAndNotVoid(client.airports) && clientWithLandingManagement(client)) {
         const mainAirport = client.airports.find(airport => airport.main);
@@ -353,6 +357,12 @@ export const paymentMode = [
     { id: 'web', name: 'Site Web', color: '#38bdf8' },          // Sky
     { id: 'virement', name: 'Virement', color: '#a78bfa' },     // Violet
     { id: 'cheque', name: 'Chèque', color: '#f87171' },         // Red
+];
+
+export const tva = [
+    { id: 0.085, name: '8,5 %' },
+    { id: 0.021, name: '2,1 %' },          
+    { id: 0, name: '0,0 %' }
 ];
 
 export const certificatMedicalTypes = [
