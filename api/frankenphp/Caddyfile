@@ -34,7 +34,7 @@
 	}
 
 	handle /media/* {
-		root * /srv/api/public
+		root * /app/public
 		file_server
 	}
 
