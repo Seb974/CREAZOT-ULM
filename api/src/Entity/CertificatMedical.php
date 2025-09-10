@@ -87,19 +87,19 @@ class CertificatMedical
     private ?bool $isAlertSent = null;
 
     #[ORM\ManyToOne]
-    #[Groups(groups: ['CertificatMedical:read', 'Profil_pilote:write'])]
+    #[Groups(groups: ['CertificatMedical:read', 'Profil_pilote:write', 'Profil_pilote:read'])]
     private ?User $createdBy = null;
 
     #[ORM\ManyToOne]
-    #[Groups(groups: ['CertificatMedical:read', 'Profil_pilote:write'])]
+    #[Groups(groups: ['CertificatMedical:read', 'Profil_pilote:write', 'Profil_pilote:read'])]
     private ?User $updatedBy = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['CertificatMedical:read', 'Profil_pilote:write'])]
+    #[Groups(groups: ['CertificatMedical:read', 'Profil_pilote:write', 'Profil_pilote:read'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['CertificatMedical:read', 'Profil_pilote:write'])]
+    #[Groups(groups: ['CertificatMedical:read', 'Profil_pilote:write', 'Profil_pilote:read'])]
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]

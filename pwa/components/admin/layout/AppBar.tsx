@@ -77,7 +77,7 @@ const CustomAppBar = () => {
             {/* @ts-ignore  */}
             { isAdmin(user) && <Oidc /> }
             {/* @ts-ignore  */}
-            { clientWithIndividualFlightLogs(client) && isAdmin(user) && <CarnetVol/> }
+            { clientWithIndividualFlightLogs(client) && isDefined(profile) && <CarnetVol/> }
             <Logout />
           </UserMenu>
         }

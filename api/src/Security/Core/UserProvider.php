@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Security\Core;
 
 use App\Entity\User;
+use App\Entity\ProfilPilote;
+use App\Entity\CertificatMedical;
 use App\Repository\UserRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -68,8 +70,47 @@ final readonly class UserProvider implements AttributesBasedUserProviderInterfac
             $user->setRoles(array_unique(array_merge($currentRoles, $newRoles)));
         }
 
+        if (empty($user->getProfilPilote())) {
+            $profile = $this->createProfile($user);
+            $user->setProfilPilote($profile);
+        }
+
         $this->repository->save($user, true);
 
         return $user;
+    }
+
+    private function createProfile(User $user) :ProfilPilote 
+    {
+        $now = new \DateTimeImmutable();
+        $firstDayOfYear = new \DateTimeImmutable(date('Y') . '-01-01 00:00:00');
+
+        $profile = new ProfilPilote();
+
+        $profile
+            ->setPilote($user)
+            ->setBirthDate($firstDayOfYear)
+            ->setTotalFlightHours(0)
+            ->setAvailableByDefault(true)
+            ->setCreatedBy($user)
+            ->setCreatedAt($now);
+
+        $certificatMedical = $this->getCertificatMedical($profile);
+        $profile->setCertificatMedical($certificatMedical);
+
+        return $profile;
+    }
+
+    private function getCertificatMedical(ProfilPilote $profile) :CertificatMedical 
+    {
+        $certificatMedical = new CertificatMedical();
+
+        $certificatMedical
+            ->setType('CNCI')
+            ->setDateObtention($profile->getBirthDate())
+            ->setCreatedBy($profile->getCreatedBy())
+            ->setCreatedAt($profile->getCreatedAt());
+
+        return $certificatMedical;
     }
 }
