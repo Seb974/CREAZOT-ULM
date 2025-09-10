@@ -74,12 +74,12 @@ export const ProfilesCreate = () => {
 
   const onSubmit = async ({ pilotQualifications, certificatMedical, documents, ...data }) => {
     try {
-      const documentIds = await getDocuments(documents);
-      const certificatMedicalDocument = await getDocument(certificatMedical, 'Certificat Médical');
+      const documentIds = isDefinedAndNotVoid(documents) ? await getDocuments(documents) : [];
+      const certificatMedicalDocument = isDefined(certificatMedical) ? await getDocument(certificatMedical, 'Certificat Médical') : null;
 
       const formattedPilotQualifications = await Promise.all(
         pilotQualifications.map(async (q) => {
-          const qualificationDocument = await getDocument(q, q.qualification?.nom ?? '');
+          const qualificationDocument = isDefined(q.qualification) ? await getDocument(q, q.qualification?.nom ?? '') : null;
           return {
             ...q,
             qualification: getFormattedValueForBackEnd(q.qualification),
@@ -147,7 +147,8 @@ export const ProfilesCreate = () => {
                   <DateInput source="dateObtention" label="Date d'obtention" validate={required()}/>
                   <DateInput source="validUntil" label="Date de fin de validité" helperText="Laisser vide si pas de fin de validité"/>
                   <FileInput source="document" multiple={ false } label=" " placeholder="Fichier">
-                      <FileField source="src" title="title"/>
+                      {/* <FileField source="src" title="title"/> */}
+                      <MyFileField source="contentUrl"/>
                   </FileInput>
               </SimpleFormIterator>
             </ArrayInput>
@@ -163,7 +164,8 @@ export const ProfilesCreate = () => {
             <TextInput source="certificatMedical.medecin" label="Nom du Médecin" />
             <TextInput source="certificatMedical.remarques" label="Remarques" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
             <FileInput source="certificatMedical.document" multiple={ false } label="Certificat médical">
-                <FileField source="src" title="title"/>
+                {/* <FileField source="src" title="title"/> */}
+                <MyFileField source="contentUrl"/>
             </FileInput>
         </TabbedForm.Tab>
         <BirthDateWatcher />

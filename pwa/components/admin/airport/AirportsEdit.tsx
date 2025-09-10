@@ -1,7 +1,7 @@
 import { Box, Link } from "@mui/material";
 import { BooleanInput, Edit, FileInput, required, useDataProvider, useNotify, useRecordContext, useRedirect } from "react-admin";
 import { SimpleForm, TextInput } from "react-admin";
-import { isDefined } from "../../../app/lib/utils";
+import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { useSessionContext } from "../SessionContextProvider";
 import { syncDocuments } from "../../../app/lib/client";
 import { useClient } from "../ClientProvider";
@@ -39,7 +39,7 @@ export const AirportsEdit = () => {
   };
 
   const transform = async ({documents, ...data}) => {
-      const documentIds = await getDocuments(documents ?? []);
+      const documentIds = isDefinedAndNotVoid(documents) ? await getDocuments(documents) : [];
       return {...data, documents: documentIds};
   };
 

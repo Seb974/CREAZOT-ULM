@@ -1,6 +1,6 @@
 import { SimpleForm, TextInput,  BooleanInput, FileInput, useRecordContext, required, useRedirect, useNotify, useDataProvider } from "react-admin";
 import { Create } from "react-admin";
-import { isDefined } from "../../../app/lib/utils";
+import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { syncDocuments } from "../../../app/lib/client";
 import { useSessionContext } from "../SessionContextProvider";
 import { Box, Link } from "@mui/material";
@@ -39,7 +39,7 @@ export const AirportsCreate = () => {
     };
 
     const transform = async ({documents, ...data}) => {
-        const documentIds = await getDocuments(documents ?? []);
+        const documentIds = isDefinedAndNotVoid(documents) ? await getDocuments(documents) : [];
         return {...data, documents: documentIds};
     };
 

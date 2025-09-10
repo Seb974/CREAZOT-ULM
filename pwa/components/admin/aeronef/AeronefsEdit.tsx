@@ -4,7 +4,7 @@ import { Box } from '@mui/material';
 import { clientWithMicrotrakTags, syncDocuments } from "../../../app/lib/client";
 import { Link } from "@mui/material";
 import { useSessionContext } from "../SessionContextProvider";
-import { getFormattedValueForBackEnd, isDefined } from "../../../app/lib/utils";
+import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 
 const MyFileField = ({ source }) => {
   const record = useRecordContext();
@@ -40,7 +40,7 @@ export const AeronefsEdit = () => {
   };
 
   const transform = async ({documents, createdBy, updatedBy, ...data}) => {
-      const documentIds = await getDocuments(documents);
+      const documentIds = isDefinedAndNotVoid(documents) ? await getDocuments(documents) : [];
       return {
         ...data, 
         documents: documentIds,

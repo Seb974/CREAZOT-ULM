@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import { useClient } from '../../admin/ClientProvider';
 import { clientWithMicrotrakTags, syncDocuments } from "../../../app/lib/client";
 import { Link } from "@mui/material";
-import { isDefined } from "../../../app/lib/utils";
+import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { useSessionContext } from "../SessionContextProvider";
 
 const MyFileField = ({ source }) => {
@@ -40,7 +40,7 @@ export const AeronefsCreate = () => {
   };
 
   const transform = async ({documents, ...data}) => {
-      const documentIds = await getDocuments(documents);
+      const documentIds = isDefinedAndNotVoid(documents) ? await getDocuments(documents) : [];
       return {...data, documents: documentIds};
   };
 

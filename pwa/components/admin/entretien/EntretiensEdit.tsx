@@ -46,7 +46,7 @@ export const EntretiensEdit = () => {
   };
 
   const transform = async ({expenses, ...data}) => {
-    const documentIds = await getDocuments(data.documents);
+    const documentIds = isDefinedAndNotVoid(data.documents) ? await getDocuments(data.documents) : [];
 
     data['documents'] = documentIds;
     data['intervenants'] = data['intervenants'].map(intervenant => getFormattedValueForBackEnd(intervenant));

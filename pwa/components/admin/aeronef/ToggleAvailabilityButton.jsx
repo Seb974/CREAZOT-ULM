@@ -1,7 +1,7 @@
 import { useUpdate, useNotify, useRefresh, useRecordContext } from "react-admin";
 import { IconButton, Tooltip } from "@mui/material";
 import { CheckCircle, Cancel } from "@mui/icons-material";
-import { getFormattedValueForBackEnd, isDefined } from "../../../app/lib/utils";
+import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { syncDocuments } from "../../../app/lib/client";
 import { useSessionContext } from "../SessionContextProvider";
 import React from "react";
@@ -21,7 +21,7 @@ const ToggleAvailabilityButton = ({ label, textAlign }) => {
     };
 
     const transform = async ({documents, createdBy, updatedBy, ...data}) => {
-        const documentIds = await getDocuments(documents);
+        const documentIds = isDefinedAndNotVoid(documents) ? await getDocuments(documents) : [];
         return {
             ...data, 
             documents: documentIds,
