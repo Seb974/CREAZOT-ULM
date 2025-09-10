@@ -147,7 +147,6 @@ export const ProfilesCreate = () => {
                   <DateInput source="dateObtention" label="Date d'obtention" validate={required()}/>
                   <DateInput source="validUntil" label="Date de fin de validité" helperText="Laisser vide si pas de fin de validité"/>
                   <FileInput source="document" multiple={ false } label=" " placeholder="Fichier">
-                      {/* <FileField source="src" title="title"/> */}
                       <MyFileField source="contentUrl"/>
                   </FileInput>
               </SimpleFormIterator>
@@ -164,7 +163,6 @@ export const ProfilesCreate = () => {
             <TextInput source="certificatMedical.medecin" label="Nom du Médecin" />
             <TextInput source="certificatMedical.remarques" label="Remarques" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
             <FileInput source="certificatMedical.document" multiple={ false } label="Certificat médical">
-                {/* <FileField source="src" title="title"/> */}
                 <MyFileField source="contentUrl"/>
             </FileInput>
         </TabbedForm.Tab>
