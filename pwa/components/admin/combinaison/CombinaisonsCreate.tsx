@@ -59,14 +59,13 @@ export const CombinaisonsCreate = () => {
         prix,
         options: isDefinedAndNotVoid(selectedOptions) ? selectedOptions.map(o => ({"@id": (typeof o === 'string' ? o : o['@id']), name: isDefined(o.name) ? o.name :''})) : []
       };
-      console.log(data)
       await create('combinaisons', { data });
       notify('La combinaison d\'option a bien été enregistrée.', { type: 'info' });
       redirect('list', 'combinaisons');
     } catch (error) {
       notify(`Une erreur bloque l\'enregistrement de la combinaison d\'option.`, { type: 'error' });
       redirect('list', 'combinaisons');
-      console.log(error);
+      console.error(error);
     }
   };
 

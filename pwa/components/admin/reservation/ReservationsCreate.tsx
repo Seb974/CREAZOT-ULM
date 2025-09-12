@@ -1,33 +1,24 @@
-import { 
-  DateTimeInput, 
-  ReferenceInput, 
-  SimpleForm, 
-  TextInput,
-  NumberInput,
-  SelectInput,
-  Create,
-  required,
-  useDataProvider,
-  ArrayInput,
-  SimpleFormIterator,
-  BooleanInput,
-  useCreate,
-  useRedirect,
-  useNotify
-} from "react-admin";
+import { DateTimeInput, ReferenceInput, SimpleForm, TextInput, NumberInput, SelectInput, Create, required, 
+useDataProvider, BooleanInput, useCreate, useRedirect, useNotify, ReferenceArrayInput} from "react-admin";
 import { useLocation } from 'react-router-dom';
 import { useWatch, useFormContext } from 'react-hook-form';
-import { generateSafeCode, getRandomColor, isDefined, isDefinedAndNotVoid, isNotBlank } from "../../../app/lib/utils";
-import { useEffect, useRef, useState } from "react";
-import { status } from "../../../app/lib/reservation";
+import { generateSafeCode, getFormattedValueForBackEnd, getRandomColor, isDefined, isDefinedAndNotVoid, isNotBlank, isValid } from "../../../app/lib/utils";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { positions, status } from "../../../app/lib/reservation";
 import { useClient } from '../../admin/ClientProvider';
-import { clientWithGifts, clientWithOptions, clientWithOriginContact, clientWithPartners } from "../../../app/lib/client";
+import { clientUsingAvailabilityFilter, clientWithGifts, clientWithOptions, clientWithOriginContact, clientWithPartners } from "../../../app/lib/client";
 import { Link } from 'react-router-dom';
 import { Typography } from '@mui/material';
 import { Box, useMediaQuery } from "@mui/material";
 import { Toolbar, SaveButton } from 'react-admin';
 import { Button } from '@mui/material';
 import CreditScoreIcon from '@mui/icons-material/CreditScore';
+
+const getEnd = (debut, circuit) => {
+  const start = new Date(debut);
+  const duration = new Date(circuit?.duree) ?? new Date((new Date()).setHours(0,0,0));
+  return new Date(start.setHours(start.getHours() + duration.getHours(), start.getMinutes() + duration.getMinutes(), start.getSeconds() + duration.getSeconds()));
+};
 
 const CustomToolbar = () => {
   const redirect = useRedirect();
@@ -47,13 +38,180 @@ const CustomToolbar = () => {
 };
 
 const QuantiteWatcher = ({ setSelectedQuantite }) => {
-  const { control } = useFormContext();
-  const quantite = useWatch({ control, name: 'quantite', defaultValue: 1 });
+  const { control, setValue } = useFormContext();
+  const quantite = useWatch({control, name: 'quantite' });
 
   useEffect(() => setSelectedQuantite(quantite), [quantite, setSelectedQuantite]);
 
+  useEffect(() => {
+    if (!isNotBlank(quantite) || quantite > 1 || quantite === 0) {
+      setValue("pilote", null);
+      setValue("avion", null);
+      setValue("position", "-");
+    }
+  }, [quantite]);
+
   return null;
 };
+
+const CircuitWatcher = ({ circuits }) => {
+  const { control, setValue } = useFormContext();
+  const selectedCircuit = useWatch({ control, name: 'circuit' });
+  const debut = useWatch({ control, name: 'debut', defaultValue: new Date((new Date()).setHours(7,0,0)) });
+
+  useEffect(() => {
+    let newFin = debut;
+    if (isDefined(selectedCircuit)) {
+      const selection = circuits.find(c => c['@id'] === selectedCircuit);
+      newFin = getEnd(debut, selection)
+    } 
+    setValue("fin", newFin);
+  }, [selectedCircuit, debut, circuits]);
+
+  return null;
+};
+
+const FilteredPiloteInput = ({ circuits, client, selectedQuantite }) => {
+  const { control, setValue, getValues } = useFormContext();
+  const debut = useWatch({ control, name: "debut", defaultValue: new Date((new Date()).setHours(7,0,0)) }) ?? getValues("debut");
+  const fin = useWatch({ control, name: "fin", defaultValue: new Date((new Date()).setHours(7,0,0)) }) ?? getValues("fin");
+  const circuitId = useWatch({ control, name: "circuit" }) ?? getValues("circuit");
+  
+  const dataProvider = useDataProvider();
+
+  const [pilotes, setPilotes] = useState([]);
+
+  const getProfilPilotes = useCallback(() => {
+    if (!debut || !fin) return;
+
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const endpoint = clientUsingAvailabilityFilter(client) ? "profil_pilotes/disponibles" : "profil_pilotes";
+    const filters = clientUsingAvailabilityFilter(client) ? 
+        { debut: new Date(debut).toISOString(), fin: new Date(fin).toISOString(), timezone, "exists[certificatMedical]": true }  : 
+        { "exists[certificatMedical]": true };
+    dataProvider
+        .getList(endpoint, { filter: filters })
+        .then(({ data }) => {
+          const piloteProfils = data
+            .filter(p => isDefined(p.pilote))
+            .map(({pilote, ...profil}) => ({
+              ...pilote, 
+              profil: {...profil, pilotQualifications: isDefinedAndNotVoid(profil.pilotQualifications) ? profil.pilotQualifications : []},
+            }))
+          setPilotes(piloteProfils)
+        });
+  }, [debut, fin, circuitId, circuits, dataProvider, setPilotes]);
+
+  const selectedCircuit = useMemo(() => circuits.find(c => c["@id"] === circuitId), [circuits, circuitId]);
+
+  const enabledPilots = useMemo(() => {
+    return pilotes.filter(({profil, ...p}) => isValid(profil?.certificatMedical?.validUntil, profil?.certificatMedical?.dateObtention, debut)) ?? [];
+  }, [pilotes, debut]);
+
+  const pilotesEligibles = useMemo(() => {
+    if (!selectedCircuit) return enabledPilots;
+    const qualificationsRequises = selectedCircuit?.qualifications?.map(q => q['@id']) || [];
+    const needsEncadrant = selectedCircuit?.needsEncadrant;
+    return qualificationsRequises.length === 0
+      ? (needsEncadrant ? enabledPilots.filter(({profil, ...p}) => isDefined(profil.pilotQualifications.find(q => isDefined(q.qualification.encadrant) && q.qualification.encadrant && isValid(q.validUntil, q.dateObtention, debut)))) : enabledPilots)
+      : enabledPilots.filter(({profil, ...p}) =>
+          Array.isArray(profil.pilotQualifications) &&
+          profil.pilotQualifications
+                .filter(q => isValid(q.validUntil, q.dateObtention, debut))
+                .map(q => q.qualification['@id'])
+                .some(q => qualificationsRequises.includes(q))
+    );
+  }, [enabledPilots, selectedCircuit, debut]);
+
+  const filterParams = useMemo(() => ({
+    debut: new Date(debut).toISOString(),
+    fin: new Date(fin).toISOString()
+  }), [debut, fin]);
+
+  useEffect(() => getProfilPilotes(), [getProfilPilotes, filterParams]);
+
+  useEffect(() => {
+    const selectedPiloteId = getValues("pilote");
+    const stillEligible = pilotesEligibles.some(p => p["@id"] === selectedPiloteId);
+    if (!stillEligible) setValue("pilote", null);
+  }, [pilotesEligibles, getValues, setValue]);
+
+  return (
+    <SelectInput
+      source="pilote"
+      label="Pilote"
+      choices={pilotesEligibles}
+      optionText={r => isDefined(r) && isDefined(r.firstName) ? r.firstName.charAt(0).toUpperCase() + r.firstName.slice(1) : " "}
+      optionValue="@id"
+      readOnly={ !isNotBlank(selectedQuantite) || selectedQuantite > 1 || selectedQuantite === 0 }
+    />
+  );
+};
+
+const FilteredAeronefInput = ({ client, selectedQuantite }) => {
+  const debut = useWatch({ name: "debut", defaultValue: new Date((new Date()).setHours(7,0,0)) });
+  const fin = useWatch({ name: "fin", defaultValue: new Date((new Date()).setHours(7,0,0)) });
+  const dataProvider = useDataProvider();
+
+  const [aeronefs, setAeronefs] = useState([]);
+
+  const getAeronefs = useCallback(() => {
+    if (!debut || !fin) return;
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const endpoint = clientUsingAvailabilityFilter(client) ? "aeronefs/disponibles" : "aeronefs";
+    const filters = clientUsingAvailabilityFilter(client) ? { debut: new Date(debut).toISOString(), fin: new Date(fin).toISOString(), timezone } : {};
+    dataProvider
+        .getList(endpoint, { filter: filters })
+        .then(({ data }) => setAeronefs(data));
+  }, [debut, fin, dataProvider, setAeronefs]);
+
+  const filterParams = useMemo(() => ({
+    debut: new Date(debut).toISOString(),
+    fin: new Date(fin).toISOString(),
+  }), [debut, fin]);
+
+  useEffect(() => getAeronefs(), [getAeronefs, filterParams]);
+
+  return (
+    <SelectInput
+      source="avion"
+      label="Aéronef"
+      choices={ aeronefs }
+      optionText={r => isDefined(r?.immatriculation) ? r?.immatriculation : " "}
+      optionValue="@id"
+      readOnly={ !isNotBlank(selectedQuantite) || selectedQuantite > 1 || selectedQuantite === 0 }
+    />
+  );
+};
+
+const PositionInput = ({ selectedQuantite }) => {
+    return (
+        <SelectInput 
+            source="position"
+            choices={ positions } 
+            defaultValue="-"
+            readOnly={ !isNotBlank(selectedQuantite) || selectedQuantite > 1 || selectedQuantite === 0 }
+        />
+    )
+};
+
+const OptionInput = ({ client, enabledCombinaisons }) => !clientWithOptions(client) ? null : 
+    <SelectInput key={ +new Date() }  source="option" choices={ enabledCombinaisons } label="Option" />
+    
+  const OriginContactInput = ({ client }) => !clientWithOriginContact(client) ? null : 
+    <ReferenceArrayInput source="contact" reference="contacts" label="Contact initial"/>
+    
+  const PartnersInput = ({ client }) => !clientWithPartners(client) ? null : 
+    <ReferenceArrayInput source="origine" reference="origines" label="Contact initial"/>
+
+  const ConversionLink = ({ client }) => !clientWithGifts(client) ? null : 
+    <Box display="flex" gap={2} flexWrap="nowrap" width="100%" sx={{ marginBottom: '1em'}}>
+        <Box flex={1} display="flex" alignItems="right" justifyContent={"end"}>
+          <Link to="/convert" style={{ textDecoration: 'none', textAlign: 'right' }}>
+            <Typography color="primary">Créer à partir d'un prépaiement</Typography>
+          </Link>
+        </Box>
+    </Box>
 
 export const ReservationsCreate = () => {
 
@@ -106,29 +264,32 @@ export const ReservationsCreate = () => {
         .then(({ data }) => setCombinaisons(data));
   };
     
-  const onSubmit = async ({option, origine, contact, remarques, ...data}) => {
+  const onSubmit = async ({option, origine, contact, remarques, quantite, pilote, avion, position, ...data}) => {
     if (isOperating.current) return;
     isOperating.current = true;
     try {
       const selectedCircuit = circuits.find(c => c['@id'] === data.circuit);
-      const selectedOrigines = clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === o['@id']))) : [];
-      const selectedOptions = clientWithOptions(client) ? getSelectedOptions(option, data.quantite, options) : [];
+      const selectedOrigines = clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === o))) : [];
+      const selectedOptions = clientWithOptions(client) ? getSelectedOptions(option, quantite, options) : [];
       data = {
         ...data, 
         remarques: isDefined(remarques) ? remarques : '', 
         fin: getEnd(data.debut, selectedCircuit),
         color: getRandomColor(),
         report: false,
-        contact: clientWithOriginContact(client) && isDefinedAndNotVoid(contact) ? contact.map(c => c['@id']) : [],
-        origine: clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : [],
-        code: generateSafeCode('RESA')
+        contact: clientWithOriginContact(client) && isDefinedAndNotVoid(contact) ? contact.map(c => getFormattedValueForBackEnd(c)) : [],
+        origine: clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origine.map(o => getFormattedValueForBackEnd(o)) : [],
+        code: generateSafeCode('RESA'),
+        pilote : quantite <= 1 ? getFormattedValueForBackEnd(pilote) : null,
+        avion: quantite <= 1 ? getFormattedValueForBackEnd(avion) : null,
+        position: quantite <= 1 ? position : null
       };
-      for (let i = 0; i < data.quantite; i++) {
+      for (let i = 0; i < quantite; i++) {
         const option = isDefinedAndNotVoid(selectedOptions) && isDefined(selectedOptions[i]) ? selectedOptions[i]['@id'] : null;
         const bddOption = isDefined(option) ? options.find(o => o['@id'] === option) : null;
         const prix = getTotalPrice(selectedCircuit, bddOption, selectedOrigines);
         const newData = {...data, option, prix };
-        if (i < data.quantite - 1)
+        if (i < quantite - 1)
           await create('reservations', {data: newData});
         else
           await create('reservations', {data: newData});
@@ -160,12 +321,6 @@ export const ReservationsCreate = () => {
         
   const getMaxDiscountFromOrigin = origines =>  origines.map(o => o.discount).reduce((max, current) => current > max ? current : max, 0);
 
-  const getEnd = (debut, circuit) => {
-    const start = new Date(debut);
-    const duration = new Date(circuit.duree);
-    return new Date(start.setHours(start.getHours() + duration.getHours(), start.getMinutes() + duration.getMinutes(), start.getSeconds() + duration.getSeconds()));
-  };
-
   const getEnabledCombinaisons = (quantite, combinaisons) => {
       const enabledCombinaisons = combinaisons.map(c => ({...c, disabled: c.minPassager > quantite}));
       setEnabledCOmbinaisons(enabledCombinaisons);
@@ -187,52 +342,38 @@ export const ReservationsCreate = () => {
     return [];
   };
 
-  const OptionInput = () => !clientWithOptions(client) ? null : 
-    <SelectInput key={ selectedQuantite }  source="option" choices={ enabledCombinaisons } label="Option" />
-    
-  const OriginContactInput = () => !clientWithOriginContact(client) ? null : 
-    <ArrayInput source="contact" label="Contact initial">
-      <SimpleFormIterator inline disableReordering>
-          <ReferenceInput reference="contacts" source="@id" label="Contact initial" />
-      </SimpleFormIterator>
-    </ArrayInput>
-    
-  const PartnersInput = () => !clientWithPartners(client) ? null : 
-    <ArrayInput source="origine" label="Origine de l'appel">
-      <SimpleFormIterator inline disableReordering>
-          <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
-      </SimpleFormIterator>
-    </ArrayInput>
-
-  const ConversionLink = () => !clientWithGifts(client) ? null : 
-    <Box display="flex" gap={2} flexWrap="nowrap" width="100%" sx={{ marginBottom: '1em'}}>
-        <Box flex={1} display="flex" alignItems="right" justifyContent={"end"}>
-          <Link to="/convert" style={{ textDecoration: 'none', textAlign: 'right' }}>
-            <Typography color="primary">Créer à partir d'un prépaiement</Typography>
-          </Link>
-        </Box>
-    </Box>
-
   return (
     // @ts-ignore
     <Create redirect="list" mutationMode="pessimistic">
-      <SimpleForm onSubmit={onSubmit} defaultValues={{ debut }} toolbar={<CustomToolbar />}>
-        <ConversionLink />
-        <DateTimeInput source="debut" defaultValue={ new Date((new Date()).setHours(7,0,0)) } label="Décollage" validate={required()}/>
+      <SimpleForm onSubmit={onSubmit} toolbar={<CustomToolbar />} 
+      // defaultValues={{ 
+      //   debut: new Date((new Date()).setHours(7,0,0)), 
+      //   fin: new Date((new Date()).setHours(7,0,0)) ,
+      //   statut: status[0].id, 
+      //   quantite: 1
+      // }} 
+      >
+        <ConversionLink client={ client }/>
+        <DateTimeInput source="debut" label="Décollage" validate={required()} defaultValue={ new Date((new Date()).setHours(7,0,0)) }/>
+        <DateTimeInput source="fin" label="Fin" sx={{ display: 'none' }} defaultValue={ new Date((new Date()).setHours(7,0,0)) }/>
         <TextInput source="nom" label="Nom & prénom du passager" validate={required()}/>
         <TextInput source="telephone" label="N° de téléphone" validate={required()}/>
         <TextInput source="email" label="Adresse email"/>
         <NumberInput source="quantite" label="Nombre de passager(s)" min={ 1 } defaultValue={ 1 } validate={required()}/>
         <ReferenceInput reference="circuits" source="circuit" label="Circuit"/>
-        <OptionInput/>
+        <OptionInput client={ client } enabledCombinaisons={ enabledCombinaisons }/>
+        <FilteredPiloteInput circuits={ circuits } client={ client } selectedQuantite={ selectedQuantite }/>
+        <FilteredAeronefInput client={ client } selectedQuantite={ selectedQuantite }/>
+        <PositionInput selectedQuantite={ selectedQuantite }/>
         <SelectInput source="statut" choices={ status } defaultValue={ status[0].id } validate={required()}/>
-        <OriginContactInput/>
-        <PartnersInput/>
+        <OriginContactInput client={ client }/>
+        <PartnersInput client={ client }/>
         <TextInput source="remarques" label="Remarques" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
         <BooleanInput source="paid" label="Prépayé"/>
         <BooleanInput source="upsell" label="Upsell"/>
         <BooleanInput source="report" label="Report"/>
-        <QuantiteWatcher setSelectedQuantite={setSelectedQuantite} />
+        <CircuitWatcher circuits={ circuits }/>
+        <QuantiteWatcher setSelectedQuantite={ setSelectedQuantite } />
       </SimpleForm>
     </Create>
   ) ;

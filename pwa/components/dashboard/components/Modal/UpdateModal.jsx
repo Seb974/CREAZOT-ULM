@@ -112,7 +112,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                     .then(({ data }) => setValidCadeaux([defaultCadeau, ...data]));
             }
         } catch (e) {
-            console.log(e);
+            console.error(e);
         }
     };
 
@@ -145,7 +145,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
             reinitializeData();
             setToUpdate(null);
         } catch (error) {
-            console.log(error);
+            console.error(error);
         } finally {
             isOperating.current = false;
         }

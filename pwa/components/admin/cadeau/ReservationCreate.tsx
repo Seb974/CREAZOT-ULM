@@ -1,11 +1,173 @@
 import { DateTimeInput, ReferenceInput, SimpleForm, Create, required, useDataProvider, useCreate, useUpdate, useRedirect, useNotify, SelectInput } from "react-admin";
-import { generateSafeCode, getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { generateSafeCode, getFormattedValueForBackEnd, getRandomColor, isDefined, isDefinedAndNotVoid, isNotBlank, isValid } from "../../../app/lib/utils";
 import { useLocation, useParams } from 'react-router-dom';
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useClient } from '../../admin/ClientProvider';
-import { status } from "../../../app/lib/reservation";
-import { useWatch } from 'react-hook-form';
-import { clientWithOptions, clientWithPartners } from "../../../app/lib/client";
+import { positions, status } from "../../../app/lib/reservation";
+import { useFormContext, useWatch } from 'react-hook-form';
+import { clientUsingAvailabilityFilter, clientWithOptions, clientWithPartners } from "../../../app/lib/client";
+
+const getEnd = (debut, circuit) => {
+  const start = new Date(debut);
+  const duration = new Date(circuit?.duree) ?? new Date((new Date()).setHours(0,0,0));
+  return new Date(start.setHours(start.getHours() + duration.getHours(), start.getMinutes() + duration.getMinutes(), start.getSeconds() + duration.getSeconds()));
+};
+
+const QuantiteWatcher = ({ prepayments }) => {
+  const { setValue } = useFormContext();
+  const selection = useWatch({ name: "prepayment"});
+
+  const prepayment = useMemo(() => {
+    return isNotBlank(selection) ? prepayments.find(p => p['@id'] === selection) : null;
+  }, [selection, prepayments]);
+
+  useEffect(() => {
+    if (!isNotBlank(prepayment) || prepayment?.quantite > 1 || prepayment?.quantite === 0) {
+      setValue("pilote", null);
+      setValue("avion", null);
+      setValue("position", "-");
+    }
+  }, [prepayment]);
+
+  return null;
+};
+
+const FilteredPiloteInput = ({ client, prepayments, circuits }) => {
+  const { setValue, getValues } = useFormContext();
+  const debut = useWatch({ name: "debut", defaultValue: new Date((new Date()).setHours(7,0,0)) });
+  const selection = useWatch({ name: "prepayment"});
+  
+  const dataProvider = useDataProvider();
+
+  const [pilotes, setPilotes] = useState([]);
+
+  const prepayment = useMemo(() => {
+    return isNotBlank(selection) ? prepayments.find(p => p['@id'] === selection) : null;
+  }, [selection, prepayments]);
+
+  const getProfilPilotes = useCallback(() => {
+    if (!debut) return;
+    const fin = isDefined(prepayment) ? getEnd(debut, prepayment.circuit) : new Date((new Date()).setHours(7,0,0));
+
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const endpoint = clientUsingAvailabilityFilter(client) ? "profil_pilotes/disponibles" : "profil_pilotes";
+    const filters = clientUsingAvailabilityFilter(client) ? 
+        { debut: new Date(debut).toISOString(), fin: new Date(fin).toISOString(), timezone, "exists[certificatMedical]": true }  : 
+        { "exists[certificatMedical]": true };
+    dataProvider
+        .getList(endpoint, { filter: filters })
+        .then(({ data }) => {
+          const piloteProfils = data
+            .filter(p => isDefined(p.pilote))
+            .map(({pilote, ...profil}) => ({
+              ...pilote, 
+              profil: {...profil, pilotQualifications: isDefinedAndNotVoid(profil.pilotQualifications) ? profil.pilotQualifications : []},
+            }))
+          setPilotes(piloteProfils)
+        });
+  }, [debut, prepayment, dataProvider, setPilotes]);
+
+  const selectedCircuit = useMemo(() => circuits.find(c => c["@id"] === prepayment?.circuit?.['@id']), [circuits, prepayment]);
+
+  const enabledPilots = useMemo(() => {
+    return pilotes.filter(({profil, ...p}) => isValid(profil?.certificatMedical?.validUntil, profil?.certificatMedical?.dateObtention, debut)) ?? [];
+  }, [pilotes, debut]);
+
+  const pilotesEligibles = useMemo(() => {
+    if (!selectedCircuit) return enabledPilots;
+    const qualificationsRequises = selectedCircuit?.qualifications?.map(q => q['@id']) || [];
+    const needsEncadrant = selectedCircuit?.needsEncadrant;
+    return qualificationsRequises.length === 0
+      ? (needsEncadrant ? enabledPilots.filter(({profil, ...p}) => isDefined(profil.pilotQualifications.find(q => isDefined(q.qualification.encadrant) && q.qualification.encadrant && isValid(q.validUntil, q.dateObtention, debut)))) : enabledPilots)
+      : enabledPilots.filter(({profil, ...p}) =>
+          Array.isArray(profil.pilotQualifications) &&
+          profil.pilotQualifications
+                .filter(q => isValid(q.validUntil, q.dateObtention, debut))
+                .map(q => q.qualification['@id'])
+                .some(q => qualificationsRequises.includes(q))
+    );
+  }, [enabledPilots, selectedCircuit, debut]);
+
+  const filterParams = useMemo(() => ({
+    debut: new Date(debut).toISOString()
+  }), [debut]);
+
+  useEffect(() => getProfilPilotes(), [getProfilPilotes, filterParams]);
+
+  useEffect(() => {
+    const selectedPiloteId = getValues("pilote");
+    const stillEligible = pilotesEligibles.some(p => p["@id"] === selectedPiloteId);
+    if (!stillEligible) setValue("pilote", null);
+  }, [pilotesEligibles, getValues, setValue]);
+
+  return (
+    <SelectInput
+      source="pilote"
+      label="Pilote"
+      choices={pilotesEligibles}
+      optionText={r => isDefined(r) && isDefined(r.firstName) ? r.firstName.charAt(0).toUpperCase() + r.firstName.slice(1) : " "}
+      optionValue="@id"
+      readOnly={ !isNotBlank(prepayment?.quantite) || prepayment?.quantite > 1 || prepayment?.quantite === 0 }
+    />
+  );
+};
+
+const FilteredAeronefInput = ({ client, prepayments }) => {
+  const debut = useWatch({ name: "debut", defaultValue: new Date((new Date()).setHours(7,0,0)) });
+  const selection = useWatch({ name: "prepayment"});
+  const dataProvider = useDataProvider();
+
+  const prepayment = useMemo(() => {
+    return isNotBlank(selection) ? prepayments.find(p => p['@id'] === selection) : null;
+  }, [selection, prepayments]);
+
+  const [aeronefs, setAeronefs] = useState([]);
+
+  const getAeronefs = useCallback(() => {
+    if (!debut) return;
+    const fin = isDefined(prepayment) ? getEnd(debut, prepayment.circuit) : new Date((new Date()).setHours(7,0,0));
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const endpoint = clientUsingAvailabilityFilter(client) ? "aeronefs/disponibles" : "aeronefs";
+    const filters = clientUsingAvailabilityFilter(client) ? { debut: new Date(debut).toISOString(), fin: new Date(fin).toISOString(), timezone } : {};
+    dataProvider
+        .getList(endpoint, { filter: filters })
+        .then(({ data }) => setAeronefs(data));
+  }, [debut, prepayment, dataProvider, setAeronefs]);
+
+  const filterParams = useMemo(() => ({
+    debut: new Date(debut).toISOString()
+  }), [debut]);
+
+  useEffect(() => getAeronefs(), [getAeronefs, filterParams]);
+
+  return (
+    <SelectInput
+      source="avion"
+      label="Aéronef"
+      choices={ aeronefs }
+      optionText={r => isDefined(r?.immatriculation) ? r?.immatriculation : " "}
+      optionValue="@id"
+      readOnly={ !isNotBlank(prepayment?.quantite) || prepayment?.quantite > 1 || prepayment?.quantite === 0 }
+    />
+  );
+};
+
+const PositionInput = ({ prepayments }) => {
+    const selection = useWatch({ name: "prepayment"});
+
+    const prepayment = useMemo(() => {
+      return isNotBlank(selection) ? prepayments.find(p => p['@id'] === selection) : null;
+    }, [selection, prepayments]);
+
+    return (
+        <SelectInput 
+            source="position"
+            choices={ positions } 
+            defaultValue="-"
+            readOnly={ !isNotBlank(prepayment?.quantite) || prepayment?.quantite > 1 || prepayment?.quantite === 0 }
+        />
+    )
+};
 
 const PrepaymentHelperText = ({ prepayments }) => {
     const selectedId = useWatch({ name: 'prepayment' });
@@ -28,18 +190,22 @@ export const ReservationCreate = () => {
   const dataProvider = useDataProvider();
   const isOperating = useRef(false);
   const [options, setOptions] = useState([]);
+  const [circuits, setCircuits] = useState([]);
   const [prepayments, setPrepayments] = useState([]);
   const searchParams = new URLSearchParams(location.search);
   const debut = searchParams.get('debut');
   const { id: prepaymentIdFromUrl } = useParams();
-  const [defaultValues, setDefaultValues] = useState({ debut: debut || new Date(), prepayment: '' });
+  const [defaultValues, setDefaultValues] = useState({ debut: debut || new Date((new Date()).setHours(7,0,0)), prepayment: '' });
 
-  useEffect(() => getOptions(), []);
+  useEffect(() => {
+    getOptions();
+    getCircuits();
+  }, []);
 
   useEffect(() => {
   const fetchPrepayment = async () => {
     const { data } = await dataProvider.getList('cadeaux', { pagination: { page: 1, perPage: 100 }, sort: { field: 'id', order: 'ASC' } });
-    setPrepayments(data);
+    setPrepayments(data.map(d => ({...d, quantite: d.quantite ?? 1})));
     if (prepaymentIdFromUrl) {
       const selected = data.find(p => String(p.originId) === String(prepaymentIdFromUrl));
       if (selected) {
@@ -58,8 +224,14 @@ export const ReservationCreate = () => {
         .getList("options", {})
         .then(({ data }) => setOptions(data));
   };
+
+  const getCircuits = () => {
+    dataProvider
+        .getList("circuits", {})
+        .then(({ data }) => setCircuits(data));
+  };
     
-  const onSubmit = async ({debut, statut, prepayment}) => {
+  const onSubmit = async ({debut, statut, prepayment, pilote, avion, position}) => {
     if (isOperating.current) return;
 
     isOperating.current = true;
@@ -85,7 +257,10 @@ export const ReservationCreate = () => {
         circuit: circuit['@id'],
         cadeau: selection['@id'],
         origine: clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : [],
-        code: generateSafeCode('RESA')
+        code: generateSafeCode('RESA'),
+        pilote : quantite <= 1 ? getFormattedValueForBackEnd(pilote) : null,
+        avion: quantite <= 1 ? getFormattedValueForBackEnd(avion) : null,
+        position: quantite <= 1 ? position : null
       };
 
       for (let i = 0; i < data.quantite; i++) {
@@ -114,12 +289,6 @@ export const ReservationCreate = () => {
     } finally {
       isOperating.current = false;
     }
-  };
-        
-  const getEnd = (debut, circuit) => {
-    const start = new Date(debut);
-    const duration = new Date(circuit.duree);
-    return new Date(start.setHours(start.getHours() + duration.getHours(), start.getMinutes() + duration.getMinutes(), start.getSeconds() + duration.getSeconds()));
   };
 
   const getTotalPrice = (circuit, option, origines) => {
@@ -155,7 +324,7 @@ export const ReservationCreate = () => {
     const formattedPrepayment = getFormattedPrepayment(prepayment);
     await update('reservations', {
       id: formattedPrepayment.id,
-      data: {...formattedPrepayment, used: true},
+      data: {...formattedPrepayment, used: true, sendEmail: false},
       previousData: formattedPrepayment
     });
   };
@@ -169,6 +338,10 @@ export const ReservationCreate = () => {
           <SelectInput optionText="name" label="Prépaiement" validate={required()} helperText={ <PrepaymentHelperText prepayments={ prepayments }/> }/>
         </ReferenceInput>
         <SelectInput source="statut" choices={ status } defaultValue={ status[0].id } validate={required()}/>
+        <FilteredPiloteInput client={ client } prepayments={ prepayments } circuits={ circuits }/>
+        <FilteredAeronefInput client={ client } prepayments={ prepayments }/>
+        <PositionInput prepayments={ prepayments }/>
+        <QuantiteWatcher prepayments={ prepayments }/>
       </SimpleForm>
     </Create>
   ) ;

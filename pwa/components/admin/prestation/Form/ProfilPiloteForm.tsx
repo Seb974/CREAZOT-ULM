@@ -21,8 +21,8 @@ export const ProfilPiloteForm: React.FC = ({ selectedPilot, setSelectedPilot, se
     if (!isDefined(reservation)) return {};
     const { debut, fin, originId } = reservation;
     return {
-      debut: debut instanceof Date ? debut.toISOString() : new Date(debut).toISOString(),
-      fin: fin instanceof Date ? fin.toISOString() : new Date(fin).toISOString(),
+      debut: new Date(debut).toISOString(),
+      fin: new Date(fin).toISOString(),
       id: originId,
     };
   }, [reservation]);
@@ -33,7 +33,7 @@ export const ProfilPiloteForm: React.FC = ({ selectedPilot, setSelectedPilot, se
     const { debut, fin, originId } = reservation;
     const endpoint = clientUsingAvailabilityFilter(client) ? "profil_pilotes/disponibles" : "profil_pilotes";
     const filters = clientUsingAvailabilityFilter(client) ? 
-        { debut, fin, timezone, reservationId: originId, "exists[certificatMedical]": true }  : 
+        { debut: new Date(debut).toISOString(), fin: new Date(fin).toISOString(), timezone, reservationId: originId, "exists[certificatMedical]": true }  : 
         { "exists[certificatMedical]": true };
     dataProvider
       .getList(endpoint, { filter: filters })

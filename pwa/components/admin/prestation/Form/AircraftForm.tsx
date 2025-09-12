@@ -20,8 +20,8 @@ export const AircraftForm: React.FC = ({ selectedAircraft, setSelectedAircraft, 
       if (!isDefined(reservation)) return {};
       const { debut, fin, originId } = reservation;
       return {
-        debut: debut instanceof Date ? debut.toISOString() : new Date(debut).toISOString(),
-        fin: fin instanceof Date ? fin.toISOString() : new Date(fin).toISOString(),
+        debut: new Date(debut).toISOString(),
+        fin: new Date(fin).toISOString(),
         id: originId,
       };
     }, [reservation]);
@@ -35,7 +35,7 @@ export const AircraftForm: React.FC = ({ selectedAircraft, setSelectedAircraft, 
           const { debut, fin, originId } = reservation;
           endpoint = clientUsingAvailabilityFilter(client) ? "aeronefs/disponibles" : "aeronefs";
           //@ts-ignore
-          filters = clientUsingAvailabilityFilter(client) ? { debut, fin, timezone, reservationId: originId } : { isAvailable : true };
+          filters = clientUsingAvailabilityFilter(client) ? { debut: new Date(debut).toISOString(), fin: new Date(fin).toISOString(), timezone, reservationId: originId } : { isAvailable : true };
       } 
       dataProvider
         .getList(endpoint, { filter: filters })

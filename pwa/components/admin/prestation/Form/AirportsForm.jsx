@@ -9,8 +9,6 @@ import { getAirportCode } from "../../../../app/lib/client";
 
 export const AirportsForm = ({ client, landings, setLandings, defaultLanding }) => {
 
-    useEffect(() => console.log(landings), [landings]);
-
     const handleAirportChange = (landing, e) => {
         const selectedCode = e.target.value;
         const selectedAirport = client.airports.find(a => a.code === selectedCode || a["@id"] === selectedCode);

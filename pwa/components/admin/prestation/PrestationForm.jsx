@@ -78,7 +78,7 @@ export const PrestationForm = () => {
         } catch (error) {
             notify(`Une erreur bloque l\'enregistrement des vols.`, { type: 'error' });
             redirect('list', 'prestations');
-            console.log(error);
+            console.error(error);
         }
     };
 

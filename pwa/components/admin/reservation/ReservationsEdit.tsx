@@ -238,7 +238,7 @@ export const ReservationsEdit = () => {
           <BooleanInput source="paid" label="Prépayé"/>
           <BooleanInput source="upsell" label="Upsell"/>
           <BooleanInput source="report" label="Report"/>
-          <TextInput source="originId"sx={{ display: 'none' }} />
+          <TextInput source="originId" sx={{ display: 'none' }}/>
       </SimpleForm>
   </Edit>
   )

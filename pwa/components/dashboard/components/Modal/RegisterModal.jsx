@@ -3,12 +3,15 @@ import React, { useEffect, useRef, useState } from "react";
 import DoneIcon from '@mui/icons-material/Done';
 import { useDataProvider } from "react-admin";
 import { CircuitForm } from "../../../admin/prestation/Form/CircuitForm";
-import { generateSafeCode, getRandomColor, isDefined, isDefinedAndNotVoid } from "../../../../app/lib/utils";
+import { generateSafeCode, getFormattedValueForBackEnd, getRandomColor, isDefined, isDefinedAndNotVoid, isNotBlank, isValid } from "../../../../app/lib/utils";
 import { PlusForm } from "../../../admin/prestation/Form/PlusForm";
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
 import { CombinaisonForm } from '../../../admin/prestation/Form/CombinaisonForm';
 import { clientWithGifts, clientWithOptions, clientWithOriginContact, clientWithPartners } from '../../../../app/lib/client';
+import { ProfilPiloteForm } from '../../../admin/prestation/Form/ProfilPiloteForm';
+import { AircraftForm } from "../../../admin/prestation/Form/AircraftForm";
+import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import CreditScoreIcon from '@mui/icons-material/CreditScore';
@@ -35,6 +38,11 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     const timeOptions = { hour: "2-digit", minute: "2-digit" };
     const dateOptions = { year: 'numeric', month: 'long', day: 'numeric'};
     const [options, setOptions] = useState([]);
+    const [pilots, setPilots] = useState([]);
+    const [eligiblePilots, setEligiblePilots] = useState([]);
+    const [aircrafts, setAircrafts] = useState([]);
+    const [selectedPilot, setSelectedPilot] = useState("");
+    const [selectedAircraft, setSelectedAircraft] = useState(""); 
     const [prepayments, setPrepayments] = useState([]);
     const [selectedCircuit, setSelectedCircuit] = useState("");
     const [selectedOptions, setSelectedOptions] = useState([]);
@@ -46,7 +54,35 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     const [selectedOriginContact, setSelectedOriginContact] = useState([]);
     const [creationMode, setCreationMode] = useState('declaration');
     const [selectedPrepayment, setSelectedPrepayment] = useState(defaultPrepayment);
-    const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, paid: false, upsell: false, debut: new Date(slot.start), color: getRandomColor()});
+    const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, paid: false, upsell: false, debut: new Date(slot.start), color: getRandomColor(), position: "-"});
+
+    useEffect(() => {
+        if (isNotBlank(selectedCircuit)) {
+            setConsumer({...consumer, fin: getEndTime(new Date(consumer.debut), selectedCircuit)})
+        }
+    }, [consumer.debut, selectedCircuit]);
+    
+    useEffect(() => {
+        if (isDefined(selectedCircuit)) {
+            let pilotesEligibles = [];
+            if (isDefinedAndNotVoid(pilots)) {
+                const qualificationsRequises = selectedCircuit?.qualifications?.map(q => q['@id']) || [];
+                const needsEncadrant = selectedCircuit?.needsEncadrant;
+                pilotesEligibles = qualificationsRequises.length === 0
+                    ? (needsEncadrant ? pilots.filter(({profil, ...p}) => isDefined(profil.pilotQualifications.find(q => isDefined(q.qualification.encadrant) && q.qualification.encadrant && isValid(q.validUntil, q.dateObtention, consumer.debut)))) : pilots)
+                    : pilots.filter(({profil, ...p}) =>
+                        Array.isArray(profil.pilotQualifications) &&
+                        profil.pilotQualifications
+                            .filter(q => isValid(q.validUntil, q.dateObtention, consumer.debut))
+                            .map(q => q.qualification['@id'])
+                            .some(q => qualificationsRequises.includes(q))
+                );
+            }
+            setEligiblePilots(pilotesEligibles);
+        } else {
+            setEligiblePilots(pilots);
+        }
+    }, [selectedCircuit, pilots]);
 
     useEffect(() => {
         getOptions();
@@ -71,7 +107,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     const getPrepayments = () => {
         dataProvider
             .getList('cadeaux', {filter: { used: false }})
-            .then(({ data }) => setPrepayments([defaultPrepayment, ...data]))
+            .then(({ data }) => setPrepayments([defaultPrepayment, ...data.map(d => ({...d, quantite: d.quantite ?? 1}))]))
     };
 
     const onConsumerChange = e => setConsumer({...consumer, [e.target.name]: e.target.value});
@@ -93,7 +129,10 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                 fin: endTime,
                 contact: clientWithOriginContact(client) && isDefinedAndNotVoid(selectedInitialContact) ? selectedInitialContact.map(c => c['@id']) : [],
                 origine: clientWithPartners(client) && isDefinedAndNotVoid(selectedOriginContact) ? selectedOriginContact.map(o => o['@id']) : [],
-                code: generateSafeCode('RESA')
+                code: generateSafeCode('RESA'),
+                pilote: quantite <= 1 && isNotBlank(selectedPilot) ? getFormattedValueForBackEnd(selectedPilot) : null,
+                avion: quantite <= 1 && isNotBlank(selectedAircraft) ? getFormattedValueForBackEnd(selectedAircraft) : null,
+                position: quantite <= 1 && isNotBlank(consumer?.position) && consumer?.position !== "-" ? consumer.position : null
             }
             for (let i = 0; i < quantite; i++) {
                 const option = clientWithOptions(client) && isDefined(selectedOptions[i]) ? selectedOptions[i]['@id'] : null;
@@ -105,7 +144,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
             setReservations([...reservations, ...newReservations]);
             reinitializeData();
         } catch (error) {
-            console.log(error);
+            console.error(error);
         } finally {
             isOperating.current = false;
         }        
@@ -137,7 +176,10 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                     circuit: circuit['@id'],
                     cadeau: selectedPrepayment['@id'],
                     origine: clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : [],
-                    code: generateSafeCode('RESA')
+                    code: generateSafeCode('RESA'),
+                    pilote: quantite <= 1 && isNotBlank(selectedPilot) ? getFormattedValueForBackEnd(selectedPilot) : null,
+                    avion: quantite <= 1 && isNotBlank(selectedAircraft) ? getFormattedValueForBackEnd(selectedAircraft) : null,
+                    position: quantite <= 1 && isNotBlank(consumer?.position) && consumer?.position !== "-" ? consumer.position : null
                 };
             for (let i = 0; i < data.quantite; i++) {
                 const option = clientWithOptions(client) && isDefinedAndNotVoid(optionsSelected) && isDefined(optionsSelected[i]) ? optionsSelected[i]['@id'] : null;
@@ -152,7 +194,7 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
             setPrepayments(prepayments.filter(p => p.id !== usedPrepayment.id));
             reinitializeData();
         } catch (error) {
-            console.log(error);
+            console.error(error);
         } finally {
             isOperating.current = false;
         }        
@@ -173,10 +215,11 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
         const { circuit, options, option, origine } = prepayment; 
         return {
             ...prepayment, 
-            circuit: isDefined(circuit) ? typeof circuit === 'string' ? circuit : circuit['@id'] : null,
-            options: isDefined(options) ? typeof options === 'string' ? options : options['@id'] : null,
-            option: isDefined(option) ? typeof option === 'string' ? option : option['@id'] : null,
-            origine: isDefinedAndNotVoid(origine) ? origine.map(o => typeof o === 'string' ? o : o['@id']) : [], 
+            circuit: getFormattedValueForBackEnd(circuit),
+            options: getFormattedValueForBackEnd(options),
+            option: getFormattedValueForBackEnd(option),
+            origine: isDefinedAndNotVoid(origine) ? origine.map(o => getFormattedValueForBackEnd(o)) : [],
+            sendEmail: false,
             used: true
         };
     };
@@ -200,7 +243,9 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
     };
 
     const reinitializeData = () => {
-        setConsumer({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, paid: false, upsell: false, debut: new Date((new Date()).setHours(8, 0, 0)), color: getRandomColor()});
+        setConsumer({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, paid: false, upsell: false, debut: new Date((new Date()).setHours(8, 0, 0)), color: getRandomColor(), position: "-"});
+        setSelectedPilot("");
+        setSelectedAircraft("");
         setSelectedCombinaison("");
         setSelectedOptions([]);
         setSection("contact");
@@ -278,8 +323,8 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                                 <li className="me-2">
                                     <a href="#" id="contact" onClick={ onSectionChange }
                                         className={ section === "contact" ? 
-                                          "inline-flex items-center justify-center p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500 group" :
-                                          "inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group"
+                                            "inline-flex items-center justify-center p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500 group" :
+                                            "inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group"
                                         }
                                     >
                                         <svg className={section === "contact" ? "w-4 h-4 me-2 text-blue-600 dark:text-blue-500" : "w-4 h-4 me-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300"} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -291,8 +336,8 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                                     { creationMode === 'declaration' ? 
                                         <a href="#" id="details" onClick={ onSectionChange }
                                             className={ section === "details" ? 
-                                            "inline-flex items-center justify-center p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500 group" :
-                                            "inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group"
+                                                "inline-flex items-center justify-center p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500 group" :
+                                                "inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group"
                                             }
                                         >
                                             <svg className={section === "details" ? "w-4 h-4 me-2 text-blue-600 dark:text-blue-500" : "w-4 h-4 me-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300"} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -308,11 +353,24 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                                     }
                                 </li>  
                                 <li className="me-2">
-                                    <a id="options" className="inline-flex p-4 text-gray-400 rounded-t-lg cursor-not-allowed dark:text-gray-500">
-                                        <svg className={section === "options" ? "w-4 h-4 me-2 text-blue-600 dark:text-blue-500" : "w-4 h-4 me-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300"} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-                                            <path d="M5 11.424V1a1 1 0 1 0-2 0v10.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.228 3.228 0 0 0 0-6.152ZM19.25 14.5A3.243 3.243 0 0 0 17 11.424V1a1 1 0 0 0-2 0v10.424a3.227 3.227 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.243 3.243 0 0 0 2.25-3.076Zm-6-9A3.243 3.243 0 0 0 11 2.424V1a1 1 0 0 0-2 0v1.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0V8.576A3.243 3.243 0 0 0 13.25 5.5Z"/>
-                                        </svg>Options
-                                    </a>
+                                    { (creationMode === 'declaration' && consumer?.quantite <= 1) || (creationMode !== 'declaration' && selectedPrepayment?.quantite <= 1) ? 
+                                        <a href="#" id="options" onClick={ onSectionChange }
+                                            className={ section === "options" ? 
+                                                "inline-flex items-center justify-center p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500 group" :
+                                                "inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group"
+                                            }
+                                        >
+                                            <svg className={section === "details" ? "w-4 h-4 me-2 text-blue-600 dark:text-blue-500" : "w-4 h-4 me-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300"} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M5 11.424V1a1 1 0 1 0-2 0v10.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.228 3.228 0 0 0 0-6.152ZM19.25 14.5A3.243 3.243 0 0 0 17 11.424V1a1 1 0 0 0-2 0v10.424a3.227 3.227 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.243 3.243 0 0 0 2.25-3.076Zm-6-9A3.243 3.243 0 0 0 11 2.424V1a1 1 0 0 0-2 0v1.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0V8.576A3.243 3.243 0 0 0 13.25 5.5Z"/>
+                                            </svg>Options
+                                        </a>
+                                        :
+                                        <a id="options" className="inline-flex p-4 text-gray-400 rounded-t-lg cursor-not-allowed dark:text-gray-500">
+                                            <svg className={section === "options" ? "w-4 h-4 me-2 text-blue-600 dark:text-blue-500" : "w-4 h-4 me-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300"} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+                                                <path d="M5 11.424V1a1 1 0 1 0-2 0v10.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.228 3.228 0 0 0 0-6.152ZM19.25 14.5A3.243 3.243 0 0 0 17 11.424V1a1 1 0 0 0-2 0v10.424a3.227 3.227 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.243 3.243 0 0 0 2.25-3.076Zm-6-9A3.243 3.243 0 0 0 11 2.424V1a1 1 0 0 0-2 0v1.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0V8.576A3.243 3.243 0 0 0 13.25 5.5Z"/>
+                                            </svg>Options
+                                        </a>
+                                    }
                                 </li>
                             </ul>
                         </div>
@@ -503,6 +561,59 @@ export const RegisterModal = ({ visible, setVisible, slot, reservations, setRese
                                     setPreviousPaidValue={ setPreviousPaidValue }
                                     client={ client }
                                 /> 
+                            }
+                            { section === "options" &&
+                                <div>
+                                    <ProfilPiloteForm 
+                                        selectedPilot={ selectedPilot } 
+                                        setSelectedPilot={ setSelectedPilot }
+                                        setPilots={ setPilots }
+                                        eligiblePilots={ eligiblePilots }
+                                        reservation={ consumer }
+                                        autoSelect={ false }
+                                        date={ consumer.debut }
+                                    />
+                                    <AircraftForm 
+                                        selectedAircraft={ selectedAircraft }
+                                        setSelectedAircraft={ setSelectedAircraft }
+                                        aircrafts={ aircrafts }
+                                        setAircrafts={ setAircrafts }
+                                        reservation={ consumer }
+                                        autoSelect={ false }
+                                        resource = "reservations"
+                                    />
+                                    <div className="mb-2">
+                                        <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                                            Position
+                                        </label>
+                                        <div className="relative z-20 bg-white dark:bg-form-input">
+                                            <MilitaryTechIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/>
+                                            <select
+                                                value={ consumer.position }
+                                                onChange={(e) => {
+                                                setConsumer({...consumer, position: e.target.value});
+                                                }}
+                                                className={`relative z-20 w-full appearance-none rounded-lg border border-stroke bg-transparent pl-12 pr-4 py-2 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white h-[41px]`}
+                                            >
+                                                <option value="Leader" className="text-body dark:text-bodydark">
+                                                    Leader
+                                                </option>
+                                                <option value="2"  className="text-body dark:text-bodydark">
+                                                    2
+                                                </option>
+                                                <option value="3" className="text-body dark:text-bodydark">
+                                                    3
+                                                </option>
+                                                <option value="4" className="text-body dark:text-bodydark">
+                                                    4
+                                                </option>
+                                                <option value="-" className="text-body dark:text-bodydark">
+                                                    -
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                             }
                             <div className="flex justify-between items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
                                  <button onClick={ onChangeColor } className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center" style={{ height: "44px" }}>

@@ -109,7 +109,7 @@ export const ProfilesCreate = () => {
     } catch (error) {
       notify(`Une erreur bloque l\'enregistrement du profil du pilote.`, { type: 'error' });
       redirect('list', 'profil_pilotes');
-      console.log(error);
+      console.error(error);
     }
   };
 
