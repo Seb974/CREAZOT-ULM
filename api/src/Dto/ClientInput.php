@@ -148,4 +148,10 @@ final class ClientInput
 
     #[Groups(groups: ['Client:write'])]
     public ?bool $hasExpensesManagement = null;
+
+    #[Groups(groups: ['Client:write'])]
+    public ?\DateTimeInterface $minHours = null;
+
+    #[Groups(groups: ['Client:write'])]
+    public ?\DateTimeInterface $maxHours = null;
 }

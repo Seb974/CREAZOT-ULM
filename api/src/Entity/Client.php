@@ -285,6 +285,14 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?bool $hasExpensesManagement = null;
 
+    #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?\DateTimeInterface $minHours = null;
+
+    #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?\DateTimeInterface $maxHours = null;
+
     public function __construct()
     {
         $this->airports = new ArrayCollection();
@@ -953,6 +961,30 @@ class Client
     public function setHasExpensesManagement(?bool $hasExpensesManagement): static
     {
         $this->hasExpensesManagement = $hasExpensesManagement;
+
+        return $this;
+    }
+
+    public function getMinHours(): ?\DateTimeInterface
+    {
+        return $this->minHours;
+    }
+
+    public function setMinHours(?\DateTimeInterface $minHours): static
+    {
+        $this->minHours = $minHours;
+
+        return $this;
+    }
+
+    public function getMaxHours(): ?\DateTimeInterface
+    {
+        return $this->maxHours;
+    }
+
+    public function setMaxHours(?\DateTimeInterface $maxHours): static
+    {
+        $this->maxHours = $maxHours;
 
         return $this;
     }

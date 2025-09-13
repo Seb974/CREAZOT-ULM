@@ -71,10 +71,10 @@ const CircuitWatcher = ({ circuits }) => {
   return null;
 };
 
-const FilteredPiloteInput = ({ circuits, client, selectedQuantite }) => {
+const FilteredPiloteInput = ({ circuits, client, selectedQuantite, defaultStart = new Date((new Date()).setHours(7,0,0)) }) => {
   const { control, setValue, getValues } = useFormContext();
-  const debut = useWatch({ control, name: "debut", defaultValue: new Date((new Date()).setHours(7,0,0)) }) ?? getValues("debut");
-  const fin = useWatch({ control, name: "fin", defaultValue: new Date((new Date()).setHours(7,0,0)) }) ?? getValues("fin");
+  const debut = useWatch({ control, name: "debut", defaultValue: defaultStart }) ?? getValues("debut");
+  const fin = useWatch({ control, name: "fin", defaultValue: defaultStart }) ?? getValues("fin");
   const circuitId = useWatch({ control, name: "circuit" }) ?? getValues("circuit");
   
   const dataProvider = useDataProvider();
@@ -148,9 +148,9 @@ const FilteredPiloteInput = ({ circuits, client, selectedQuantite }) => {
   );
 };
 
-const FilteredAeronefInput = ({ client, selectedQuantite }) => {
-  const debut = useWatch({ name: "debut", defaultValue: new Date((new Date()).setHours(7,0,0)) });
-  const fin = useWatch({ name: "fin", defaultValue: new Date((new Date()).setHours(7,0,0)) });
+const FilteredAeronefInput = ({ client, selectedQuantite, defaultStart = new Date((new Date()).setHours(7,0,0)) }) => {
+  const debut = useWatch({ name: "debut", defaultValue: defaultStart });
+  const fin = useWatch({ name: "fin", defaultValue: defaultStart });
   const dataProvider = useDataProvider();
 
   const [aeronefs, setAeronefs] = useState([]);
@@ -268,8 +268,8 @@ export const ReservationsCreate = () => {
     if (isOperating.current) return;
     isOperating.current = true;
     try {
-      const selectedCircuit = circuits.find(c => c['@id'] === data.circuit);
-      const selectedOrigines = clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === o))) : [];
+      const selectedCircuit = circuits.find(c => c['@id'] === getFormattedValueForBackEnd(data.circuit));
+      const selectedOrigines = clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === getFormattedValueForBackEnd(o)))) : [];
       const selectedOptions = clientWithOptions(client) ? getSelectedOptions(option, quantite, options) : [];
       data = {
         ...data, 
@@ -345,25 +345,19 @@ export const ReservationsCreate = () => {
   return (
     // @ts-ignore
     <Create redirect="list" mutationMode="pessimistic">
-      <SimpleForm onSubmit={onSubmit} toolbar={<CustomToolbar />} 
-      // defaultValues={{ 
-      //   debut: new Date((new Date()).setHours(7,0,0)), 
-      //   fin: new Date((new Date()).setHours(7,0,0)) ,
-      //   statut: status[0].id, 
-      //   quantite: 1
-      // }} 
+      <SimpleForm onSubmit={onSubmit} toolbar={<CustomToolbar />}
       >
         <ConversionLink client={ client }/>
-        <DateTimeInput source="debut" label="Décollage" validate={required()} defaultValue={ new Date((new Date()).setHours(7,0,0)) }/>
-        <DateTimeInput source="fin" label="Fin" sx={{ display: 'none' }} defaultValue={ new Date((new Date()).setHours(7,0,0)) }/>
+        <DateTimeInput source="debut" label="Décollage" validate={required()} defaultValue={ isNotBlank(debut) ? new Date(debut) : new Date((new Date()).setHours(7,0,0)) }/>
+        <DateTimeInput source="fin" label="Fin" sx={{ display: 'none' }} defaultValue={ new Date(debut) }/>
         <TextInput source="nom" label="Nom & prénom du passager" validate={required()}/>
         <TextInput source="telephone" label="N° de téléphone" validate={required()}/>
         <TextInput source="email" label="Adresse email"/>
         <NumberInput source="quantite" label="Nombre de passager(s)" min={ 1 } defaultValue={ 1 } validate={required()}/>
         <ReferenceInput reference="circuits" source="circuit" label="Circuit"/>
         <OptionInput client={ client } enabledCombinaisons={ enabledCombinaisons }/>
-        <FilteredPiloteInput circuits={ circuits } client={ client } selectedQuantite={ selectedQuantite }/>
-        <FilteredAeronefInput client={ client } selectedQuantite={ selectedQuantite }/>
+        <FilteredPiloteInput circuits={ circuits } client={ client } selectedQuantite={ selectedQuantite }  defaultStart={ isNotBlank(debut) ? new Date(debut) : new Date((new Date()).setHours(7,0,0)) }/>
+        <FilteredAeronefInput client={ client } selectedQuantite={ selectedQuantite } defaultStart={ isNotBlank(debut) ? new Date(debut) : new Date((new Date()).setHours(7,0,0)) }/>
         <PositionInput selectedQuantite={ selectedQuantite }/>
         <SelectInput source="statut" choices={ status } defaultValue={ status[0].id } validate={required()}/>
         <OriginContactInput client={ client }/>

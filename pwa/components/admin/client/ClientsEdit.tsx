@@ -1,4 +1,4 @@
-import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, SimpleFormIterator, ArrayInput, TabbedForm, useRedirect, useNotify } from "react-admin";
+import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, SimpleFormIterator, ArrayInput, TabbedForm, useRedirect, useNotify, TimeInput } from "react-admin";
 import { Edit } from "react-admin";
 import { timezones, fileInputSX, uploadImages, sanitizeData } from "../../../app/lib/client";
 import { Typography, Divider, Box } from '@mui/material';
@@ -59,22 +59,24 @@ export const ClientsEdit = () => {
                     onSubmit={ onSubmit }
                     syncWithLocation={false} 
                     defaultValues={(record) => ({
-                    ...record,
-                    hasPassengerRegistration: false,
-                    hasOptions: false, 
-                    hasPartners: false,
-                    hasGifts: false,
-                    hasReservation: false,
-                    hasLandingManagement: false,
-                    hasEmailConfirmation: false,
-                    hasPaymentManagement: false,
-                    hasMicrotrakTag: false,
-                    hasWebshop: false,
-                    seuilMedical: 30,
-                    seuilQualifications: 30,
-                    hasIndividualFlightLogs: false,
-                    useAvailabilityFilter: false,
-                    hasExpensesManagement: false
+                        ...record,
+                        hasPassengerRegistration: false,
+                        hasOptions: false, 
+                        hasPartners: false,
+                        hasGifts: false,
+                        hasReservation: false,
+                        hasLandingManagement: false,
+                        hasEmailConfirmation: false,
+                        hasPaymentManagement: false,
+                        hasMicrotrakTag: false,
+                        hasWebshop: false,
+                        seuilMedical: 30,
+                        seuilQualifications: 30,
+                        hasIndividualFlightLogs: false,
+                        useAvailabilityFilter: false,
+                        hasExpensesManagement: false,
+                        minHours: (new Date()).setHours(0, 0, 0),
+                        maxHours: (new Date()).setHours(23, 59, 59)
                     })}
                 >   
                     <TabbedForm.Tab label="Informations">
@@ -94,6 +96,14 @@ export const ClientsEdit = () => {
                         <TextInput source="url" label="URL"/>
                         <TextInput source="emailParams" label="Serveur d'email"/>
                         <TextInput source="emailAddressSender" label="Adresse email d'envoi"/>
+                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                            <Box flex={1}>
+                                <TimeInput source="minHours" label="Heure de démarrage"/>
+                            </Box>
+                            <Box flex={1}>
+                                <TimeInput source="maxHours" label="Heure de fin"/>
+                            </Box>
+                        </Box>
                         <BooleanInput source="active" label="Utilisateur actif" />    
                     </TabbedForm.Tab>
                     <TabbedForm.Tab label="Options">

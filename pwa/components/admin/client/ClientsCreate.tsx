@@ -1,4 +1,4 @@
-import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, TabbedForm, required, useRedirect, useNotify } from "react-admin";
+import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, TabbedForm, required, useRedirect, useNotify, TimeInput } from "react-admin";
 import { Create } from "react-admin";
 import { colors, objectToFormData, timezones, fileInputSX, sanitizeData } from "../../../app/lib/client";
 import { Typography, Divider, Box } from '@mui/material';
@@ -60,7 +60,9 @@ export const ClientsCreate = () => {
                     seuilQualifications: 30,
                     hasIndividualFlightLogs: false,
                     useAvailabilityFilter: false,
-                    hasExpensesManagement: false
+                    hasExpensesManagement: false,
+                    minHours: (new Date()).setHours(0, 0, 0),
+                    maxHours: (new Date()).setHours(23, 59, 59)
                 })}
             >
                 <TabbedForm.Tab label="Informations">
@@ -80,6 +82,14 @@ export const ClientsCreate = () => {
                     <TextInput source="url" label="URL"/>
                     <TextInput source="emailServer" label="Serveur d'email"/>
                     <TextInput source="emailAddressSender" label="Adresse email d'envoi"/>
+                    <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                        <Box flex={1}>
+                            <TimeInput source="minHours" label="Heure de démarrage"/>
+                        </Box>
+                        <Box flex={1}>
+                            <TimeInput source="maxHours" label="Heure de fin"/>
+                        </Box>
+                    </Box>
                     <BooleanInput source="active" label="Utilisateur actif" />
                 </TabbedForm.Tab>
                 <TabbedForm.Tab label="Options">

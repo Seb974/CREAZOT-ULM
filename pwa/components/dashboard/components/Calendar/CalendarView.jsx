@@ -20,7 +20,7 @@ moment.locale('fr', { week: { dow: DOW, doy: 1 } });
 
 const localizer = momentLocalizer (moment);
 
-export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisible, reservations, setReservations, rappels, setRappels, setRappelVisible, setRappelSelection, isSmall, dates, setDates }) => {
+export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisible, reservations, setReservations, rappels, setRappels, setRappelVisible, setRappelSelection, isSmall, dates, setDates, client }) => {
 
   const now = new Date();
   const lastSetDates = useRef(null);
@@ -28,20 +28,20 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
   const user = session?.user;
   const dataProvider = useDataProvider();
   const authorizedProfiles = ['pro', 'instructeur', 'secretariat'];
-  const min = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0);
-  const max = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30);
+  const min = client?.minHours ?? new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0);
+  const max = client?.maxHours ??new Date(now.getFullYear(), now.getMonth(), now.getDate(), 20, 0);
 
   const [profile, setProfile] = useState(null);
   const [view, setView] = useState(Views.DAY);
   const [isInitializing, setIsInitializing] = useState(false);
 
   const safeSetDates = (newDates) => {
-    const last = lastSetDates.current;
-    if (!last || last.start.getTime() !== newDates.start.getTime() || last.end.getTime() !== newDates.end.getTime()) {
-      lastSetDates.current = newDates;
-      setDates(newDates);
-    }
-};
+      const last = lastSetDates.current;
+      if (!last || last.start.getTime() !== newDates.start.getTime() || last.end.getTime() !== newDates.end.getTime()) {
+        lastSetDates.current = newDates;
+        setDates(newDates);
+      }
+  };
 
   const formats = {
     eventTimeRangeFormat: ({ start, end }, culture, localizer) => {
@@ -426,10 +426,9 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
     );
   }
 
-
   return (
     <div className="calendar-container col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-12">
-        <div className="row custom_row bg-white rounded-corner p-4">
+        <div className="row custom_row bg-white rounded-corner p-4" style={{ height: '950px', overflowY: 'auto' }}>
             <DragAndDropCalendar
                 className="c-d-sm-down-none"
                 events={ events }

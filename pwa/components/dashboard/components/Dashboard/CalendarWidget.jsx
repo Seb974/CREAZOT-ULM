@@ -68,6 +68,7 @@ export const CalendarWidget = ({ isSmall, client }) => {
                     isSmall={ isSmall }
                     dates={ dates } 
                     setDates={ setDates }
+                    client={ client }
                 />
             </div>
             <RegisterModal 

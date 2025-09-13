@@ -6,7 +6,7 @@ import { ProfilPiloteForm } from '../../../admin/prestation/Form/ProfilPiloteFor
 import { CircuitForm } from "../../../admin/prestation/Form/CircuitForm";
 import { AircraftForm } from "../../../admin/prestation/Form/AircraftForm";
 import { OptionForm } from "../../../admin/prestation/Form/OptionForm";
-import { generateSafeCode, getRandomColor, isDefined, isDefinedAndNotVoid, isNotBlank, isValid } from "../../../../app/lib/utils";
+import { generateSafeCode, getFormattedValueForBackEnd, getRandomColor, isDefined, isDefinedAndNotVoid, isNotBlank, isValid } from "../../../../app/lib/utils";
 import { PlusForm } from "../../../admin/prestation/Form/PlusForm";
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
@@ -67,8 +67,9 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
     }, [toUpdate]);
 
     useEffect(() => {
-        if ( isDefined(toUpdate) && isDefinedAndNotVoid(eligiblePilots) && isDefined(toUpdate.pilote) && (!isDefined(selectedPilot) || selectedPilot === "" || !eligiblePilots.some(p => p['@id'] === selectedPilot['@id'])) ) {
-            const currentPilot = eligiblePilots.find(p => p['@id'] === (typeof toUpdate.pilote === 'string' ? toUpdate.pilote : toUpdate.pilote['@id']));
+        if ( (isDefined(toUpdate?.pilote) && isDefinedAndNotVoid(eligiblePilots) && (!isNotBlank(selectedPilot) || !eligiblePilots.some(p => p['@id'] === selectedPilot['@id']))) || (isDefined(toUpdate?.pilote) && !isDefinedAndNotVoid(eligiblePilots)) ) {
+            const currentPilote = getFormattedValueForBackEnd(toUpdate?.pilote);
+            const currentPilot = eligiblePilots.find(p => p['@id'] === getFormattedValueForBackEnd(toUpdate?.pilote)) ?? currentPilote;
             if (isDefined(currentPilot))
                 setSelectedPilot(currentPilot);
             else
@@ -96,11 +97,14 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
         } else {
             setEligiblePilots(pilots);
         }
-    }, [selectedCircuit, pilots]);
+    }, [selectedCircuit, pilots, toUpdate]);
     
     const onConsumerChange = e => setConsumer({...consumer, [e.target.name]: e.target.value});
 
-    const onClose = () => setToUpdate(null);
+    const onClose = () => {
+        reinitializeData();
+        setToUpdate(null);
+    };
 
     const onDateChange = datetime => setConsumer({...consumer, debut: new Date(datetime[0])});
 
@@ -126,12 +130,12 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
             const reservation = {
                 ...consumer,
                 circuit: selectedCircuit['@id'],
-                option: clientWithOptions(client) && selectedOption !== "" ? selectedOption['@id'] : null,
-                pilote: isDefined(selectedPilot) && selectedPilot !== "" ? selectedPilot['@id'] : null,
-                avion: isDefined(selectedAircraft) && selectedAircraft !== "" ? selectedAircraft['@id'] : null,
+                option: clientWithOptions(client) && selectedOption !== "" ? getFormattedValueForBackEnd(selectedOption) : null,
+                pilote: getFormattedValueForBackEnd(selectedPilot),
+                avion: getFormattedValueForBackEnd(selectedAircraft),
                 fin: getEndTime(consumer.debut, selectedCircuit),
-                contact: clientWithOriginContact(client) && isDefinedAndNotVoid(selectedInitialContact) ? selectedInitialContact.map(c => c['@id']) : [],
-                origine: clientWithPartners(client) && isDefinedAndNotVoid(selectedOriginContact) ? selectedOriginContact.map(o => o['@id']) : [],
+                contact: clientWithOriginContact(client) && isDefinedAndNotVoid(selectedInitialContact) ? selectedInitialContact.map(c => getFormattedValueForBackEnd(c)) : [],
+                origine: clientWithPartners(client) && isDefinedAndNotVoid(selectedOriginContact) ? selectedOriginContact.map(o => getFormattedValueForBackEnd(o)) : [],
                 paid: clientWithGifts(client) && isDefined(selectedCadeau) ? true : consumer.paid,
                 code: isNotBlank(consumer.code) ? consumer.code : generateSafeCode('RESA'),
                 cadeau: selectedCadeau,
@@ -173,10 +177,12 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
         setSelectedPilot("");
         setSelectedOption("");
         setSelectedAircraft("");
+        setSelectedCircuit("");
         setConsumer({nom:"", telephone: "", email: "", quantite:1, statut: "VALIDATED", remarques: "", report: false, paid: false, upsell: false, debut: new Date((new Date()).setHours(8, 0, 0)), color: getRandomColor(), position: "-"});
         setSection("contact");
         setSelectedInitialContact([]);
         setSelectedOriginContact([]);
+        setEligiblePilots([]);
     };
 
     const onBackClick = (e) => {

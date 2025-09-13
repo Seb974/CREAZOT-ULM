@@ -59,6 +59,10 @@ class CreateClientController extends AbstractController
         $dto->useAvailabilityFilter = $this->getBool($request, 'useAvailabilityFilter');
         $dto->hasExpensesManagement = $this->getBool($request, 'hasExpensesManagement');
 
+        // Champs Date et Heure
+        $dto->minHours = $this->getTime($request, 'minHours');
+        $dto->maxHours = $this->getTime($request, 'maxHours');
+
         // Fichiers
         $dto->logo = $request->files->get('logo');
         $dto->favicon = $request->files->get('favicon');
@@ -87,6 +91,20 @@ class CreateClientController extends AbstractController
     {
         $val = $request->request->get($key);
         return $val !== null ? filter_var($val, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : null;
+    }
+
+    private function getTime(Request $request, string $key): ?\DateTimeInterface
+    {
+        $val = $request->request->get($key);
+        if ($val === null || $val === '') {
+            return null;
+        }
+
+        try {
+            return \DateTimeImmutable::createFromFormat('H:i', $val) ?: null;
+        } catch (\Exception $e) {
+            throw new BadRequestHttpException(sprintf('Invalid time format for "%s". Expected HH:MM.', $key));
+        }
     }
 
     private function parseArrayField(Request $request, string $field): array

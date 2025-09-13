@@ -1,6 +1,6 @@
-import { Edit, SelectInput, useDataProvider, DateTimeInput, ReferenceInput, SimpleForm, TextInput, BooleanInput, ArrayInput, SimpleFormIterator } from "react-admin";
+import { Edit, SelectInput, useDataProvider, DateTimeInput, ReferenceInput, SimpleForm, TextInput, BooleanInput, ArrayInput, SimpleFormIterator, ReferenceArrayInput, SelectArrayInput } from "react-admin";
 import { useWatch, useFormContext } from "react-hook-form";
-import { generateSafeCode, isDefined, isDefinedAndNotVoid, isNotBlank, isValid } from "../../../app/lib/utils";
+import { generateSafeCode, getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid, isNotBlank, isValid } from "../../../app/lib/utils";
 import { status, positions } from "../../../app/lib/reservation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useClient } from '../../admin/ClientProvider';
@@ -13,7 +13,6 @@ const FilteredPiloteInput = ({ circuits, client }) => {
   const fin = useWatch({ name: "fin" });
   const id = useWatch({ name: "originId" });
   const dataProvider = useDataProvider();
-  const { setValue, getValues } = useFormContext();
 
   const [pilotes, setPilotes] = useState([]);
 
@@ -65,12 +64,6 @@ const FilteredPiloteInput = ({ circuits, client }) => {
   }), [debut, fin, id]);
 
   useEffect(() => getProfilPilotes(), [getProfilPilotes, filterParams]);
-
-  useEffect(() => {
-    const selectedPiloteId = getValues("pilote.@id");
-    const stillEligible = pilotesEligibles.some(p => p["@id"] === selectedPiloteId);
-    if (!stillEligible) setValue("pilote.@id", null);
-  }, [pilotesEligibles, getValues, setValue]);
 
   return (
     <SelectInput
@@ -182,12 +175,11 @@ export const ReservationsEdit = () => {
 
   const transform = ({circuit, option, debut, avion, pilote, contact, origine, cadeau, paid, ...data}) => {
     setRecordDate(new Date(debut));
-    const selectedPilote = isDefined(pilote) && isDefined(pilote['@id']) ? pilote['@id'] : null;
-    const selectedCircuit = isDefined(circuit) && isDefined(circuit['@id']) ? circuits.find(c => c['@id'] === circuit['@id']) : null;
-    const selectedOption = clientWithOptions(client) && isDefined(option) && isDefined(option['@id']) ? options.find(c => c['@id'] === option['@id']) : null;
-    const seletedContacts = clientWithOriginContact(client) && isDefinedAndNotVoid(contact) ? contact.map(c => c['@id']) : [];
-    const selectedOrigines = clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === o['@id']))) : [];
-    const formattedCadeau = clientWithGifts(client) && isDefined(cadeau) && isDefined(cadeau['@id']) ? cadeau['@id'] : null;
+    const selectedCircuit = isDefined(circuit) ? circuits.find(c => c['@id'] === getFormattedValueForBackEnd(circuit)) : null;
+    const selectedOption = clientWithOptions(client) && isDefined(option) ? options.find(c => c['@id'] === getFormattedValueForBackEnd(option)) : null;
+    const seletedContacts = clientWithOriginContact(client) && isDefinedAndNotVoid(contact) ? contact.map(c => getFormattedValueForBackEnd(c)) : [];
+    const selectedOrigines = clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === getFormattedValueForBackEnd(o)))) : [];
+    const formattedCadeau = clientWithGifts(client) ? getFormattedValueForBackEnd(cadeau) : null;
     return {...data,
         debut: new Date(debut),
         code: isNotBlank(data.code) ? data.code : generateSafeCode('RESA'),
@@ -196,9 +188,9 @@ export const ReservationsEdit = () => {
         circuit: isDefined(circuit) ? circuit['@id'] : null,
         avion: isDefined(avion) ? avion['@id'] : null,
         option: clientWithOptions(client) && isDefined(option) ? option['@id'] : null,
-        pilote: selectedPilote,
+        pilote: getFormattedValueForBackEnd(pilote),
         paid: isDefined(formattedCadeau) ? true : paid,
-        origine: clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origine.map(o => o['@id']) : [],
+        origine: clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origine.map(o => getFormattedValueForBackEnd(o)) : [],
         cadeau: formattedCadeau,
         contact: seletedContacts,
     };
