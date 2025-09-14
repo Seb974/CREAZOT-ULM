@@ -302,9 +302,9 @@ export const ReservationCreate = () => {
       };
 
       for (let i = 0; i < data.quantite; i++) {
-        const option = isDefinedAndNotVoid(selectedOptions) && isDefined(selectedOptions[i]) ? selectedOptions[i]['@id'] : null;
+        const option = isDefined(selectedOptions?.[i]) ? selectedOptions[i] : null;
         const prix = getTotalPrice(circuit, option, origine);
-        const newData = {...data, option, prix };
+        const newData = {...data, option: getFormattedValueForBackEnd(option), prix };
 
         await create('reservations', {data: newData});
         await updatePrepayment(selection);
@@ -331,13 +331,13 @@ export const ReservationCreate = () => {
 
   const getTotalPrice = (circuit, option, origines) => {
       const maxOriginDiscount = isDefinedAndNotVoid(origines) ? getMaxDiscountFromOrigin(origines) : 0;
-      return (isDefined(circuit) && isDefined(circuit.prix) ? circuit.prix : 0) * (1 - (maxOriginDiscount / 100)) + (isDefined(option) && isDefined(option.prix) ? option.prix : 0);
+      return (isDefined(circuit?.prix) ? circuit.prix : 0) * (1 - (maxOriginDiscount / 100)) + (isDefined(option?.prix) ? option.prix : 0);
   };
         
   const getMaxDiscountFromOrigin = origines =>  origines.map(o => o.discount).reduce((max, current) => current > max ? current : max, 0);
 
   const getOptionsArray = (selectedOptions, quantite, bddOptions) => {
-      let options = isDefined(selectedOptions) && isDefinedAndNotVoid(selectedOptions.options) ? selectedOptions.options.map(o => bddOptions.find(option => option['@id'] === o['@id'])) : [];
+      let options = isDefinedAndNotVoid(selectedOptions?.options) ? selectedOptions.options.map(o => bddOptions.find(option => option['@id'] === getFormattedValueForBackEnd(o))) : [];
       const missingInputs = quantite - options.length;
       if (missingInputs > 0) {
         for (let i = 0; i < missingInputs; i++) {

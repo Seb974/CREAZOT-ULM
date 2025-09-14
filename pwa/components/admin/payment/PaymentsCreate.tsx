@@ -1,10 +1,11 @@
-import { ArrayInput, AutocompleteInput, DateInput, NumberInput, SelectInput, SimpleForm, SimpleFormIterator, required, useDataProvider, useGetList, useNotify, useRedirect, TextInput } from "react-admin";
+import { ArrayInput, AutocompleteInput, DateInput, NumberInput, SelectInput, SimpleForm, SimpleFormIterator, required, useDataProvider, useGetList, useNotify, useRedirect, TextInput, ReferenceInput, ReferenceArrayInput } from "react-admin";
 import { Create } from "react-admin";
 import { Typography } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { generateSafeCode, getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
-import { paymentMode } from "../../../app/lib/client";
+import { clientWithOriginContact, clientWithPartners, paymentMode } from "../../../app/lib/client";
+import { useClient } from "../ClientProvider";
 
 const ReservationField = ({ choices = [], isLoading = false, setSelection, defaultDetails }) => {
     const { control, setValue } = useFormContext();
@@ -58,8 +59,26 @@ const ReservationField = ({ choices = [], isLoading = false, setSelection, defau
     );
 };
 
+const PartnersInput = ({ client, reservations }) => { 
+
+    const { control, setValue } = useFormContext();
+
+    if (!clientWithPartners(client)) return null;
+
+    const selectedReservation = useWatch({ control, name: 'reservation' });
+    const selection = useMemo(() => reservations.find(r => r['@id'] === selectedReservation), [selectedReservation, reservations]);
+
+    useEffect(() => {
+        const newOrigineValue = selection?.origine ?? [];
+        setValue("origine", newOrigineValue.map(o => getFormattedValueForBackEnd(o)))
+    }, [selection])
+
+    return <ReferenceArrayInput source="origine" reference="origines" label="Contact initial"/>
+}
+
 export const PaymentsCreate = () => {
 
+    const { client } = useClient();
     const dataProvider = useDataProvider();
     const notify = useNotify();
     const redirect = useRedirect();
@@ -140,14 +159,14 @@ export const PaymentsCreate = () => {
     }, [reservations]);
 
     const onSubmit = async (values: any) => {
-        const {reservation, label, ...formData} = values;
+        const {reservation, origine, label, ...formData} = values;
         const selectedResa = reservationsMemo.find(r => r['@id'] === reservation);
 
         const extra = {
             name: isDefined(selectedResa) ? selectedResa.nom : null,
             label: !isDefined(selectedResa) && isDefined(label) ? label : null,
             reservationCode: isDefined(selectedResa) && isDefined(selectedResa.code) ? selectedResa.code : null,
-            origine: isDefinedAndNotVoid(selectedResa?.origine) ? selectedResa?.origine.map(o => getFormattedValueForBackEnd(o)) : [],
+            origine: clientWithOriginContact(client) && isDefinedAndNotVoid(origine) ? origine.map(o => getFormattedValueForBackEnd(o)) : [],
             reference: generateSafeCode('PAY'),
         };
         const data = {...formData, ...extra };
@@ -187,6 +206,7 @@ export const PaymentsCreate = () => {
                         <NumberInput source="amount" label="Montant (€)" validate={required()}/>
                     </SimpleFormIterator>
                 </ArrayInput>
+                <PartnersInput client={ client } reservations={ reservationsMemo }/>
                 <TextInput source="remarques" label="Remarques" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '80px!important'} }}/>
             </SimpleForm>
         </Create>

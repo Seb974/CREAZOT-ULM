@@ -29,10 +29,11 @@ import { type Contact } from "../../../types/Contact";
 import { useMediaQuery, Theme } from '@mui/material';
 import { type PagedCollection } from "../../../types/collection";
 import { getFirstCharToUpperCase, getShipStyle, isDefined, isDefinedAndNotVoid, isNotBlank, matchesStartOfWord, toLocalDateString } from "../../../app/lib/utils";
-import { paymentMode } from "../../../app/lib/client";
+import { clientWithOriginContact, clientWithPartners, paymentMode } from "../../../app/lib/client";
 import BackupTableIcon from '@mui/icons-material/BackupTable';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { useSessionContext } from "../SessionContextProvider";
+import { useClient } from "../ClientProvider";
 
 
 export interface Props {
@@ -115,7 +116,7 @@ const CustomListActions = ({ showMore, setShowMore, isSmall, resource }) => {
   );
 };
 
-const CustomFilterBar = ({ showMore, isSmall }) => {
+const CustomFilterBar = ({ showMore, isSmall, client }) => {
 
   const { filterValues, setFilters } = useListContext();
   const [formValues, setFormValues] = useState({
@@ -174,13 +175,15 @@ const CustomFilterBar = ({ showMore, isSmall }) => {
                 defaultValue={formValues['intitule']}
                 sx={{ width: isSmall ? '100%' : 200 }}
             />
-            <TextInput
-                source="origine.name"
-                label="Origine"
-                onChange={handleChange}
-                defaultValue={formValues['origine.name']}
-                sx={{ width: isSmall ? '100%' : 200 }}
-            />
+            { clientWithPartners(client) && 
+              <TextInput
+                  source="origine.name"
+                  label="Origine"
+                  onChange={handleChange}
+                  defaultValue={formValues['origine.name']}
+                  sx={{ width: isSmall ? '100%' : 200 }}
+              />
+            }
         </Box>
     </Form>
 };
@@ -310,7 +313,14 @@ const MobileFooter = (props) => {
     );
 }
 
-const CustomDatagrid = () => {
+const PartnersField = ({ client }) => !clientWithPartners(client) ? null : 
+    <FunctionField
+        source="origine"
+        label="Origine de la prestation"
+        render={ record =>  getOrigineList(record) }
+    />
+
+const CustomDatagrid = ({ client }) => {
 
   return (
     <Datagrid body={<CustomBody />} expand={<DetailsExpansion/>}  sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
@@ -322,11 +332,7 @@ const CustomDatagrid = () => {
             { getModeList(details) }</div>
           }
         />
-        <FunctionField
-            source="origine"
-            label="Origine"
-            render={ record =>  getOrigineList(record) }
-        />
+        <PartnersField client={ client } />
         <FunctionField
           source="name"
           label="Total"
@@ -343,6 +349,7 @@ const CustomDatagrid = () => {
 
 
 export const PaymentsList: NextPage<Props> = ({ data, hubURL, page }) => {
+  const { client } = useClient();
   const collection = useMercure(data, hubURL);
   const options = { year: "numeric", month: "numeric", day: "numeric" };
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
@@ -355,7 +362,7 @@ export const PaymentsList: NextPage<Props> = ({ data, hubURL, page }) => {
       title="Paiements"
       resource="payments" 
       actions={<CustomListActions showMore={showMore} setShowMore={setShowMore} isSmall={isSmall} resource="payments"/>}
-      filters={<CustomFilterBar showMore={showMore} isSmall={isSmall}/>}
+      filters={<CustomFilterBar showMore={showMore} isSmall={isSmall} client={client}/>}
       // @ts-ignore
       filterValues={filters}
       filterDefaultValues={defaultFilters}
@@ -372,7 +379,7 @@ export const PaymentsList: NextPage<Props> = ({ data, hubURL, page }) => {
             />
             <MobileFooter/>
           </>
-            : <CustomDatagrid />
+            : <CustomDatagrid client={ client }/>
         }
     </List>
   );

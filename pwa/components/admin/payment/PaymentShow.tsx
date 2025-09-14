@@ -1,26 +1,36 @@
 import { Show, SimpleShowLayout, TextField, NumberField, DateField, FunctionField, ArrayField, Datagrid } from 'react-admin';
 import { getFirstCharToUpperCase, getShipStyle, isDefined, isDefinedAndNotVoid, isNotBlank } from '../../../app/lib/utils';
-import { paymentMode } from '../../../app/lib/client';
+import { clientWithOriginContact, clientWithPartners, paymentMode } from '../../../app/lib/client';
 import Chip from '@mui/material/Chip';
+import { useClient } from '../ClientProvider';
+
+const getOrigineList = ({ origine }) => {
+    if (isDefinedAndNotVoid(origine)) {     
+    return origine
+        .filter(o => (isDefined(o.discount) && o.discount > 0) || (isDefined(o.hasCommission) && o.hasCommission))
+        .map((o, i) => {
+        // @ts-ignore
+        return <Chip key={ i } label={ getFirstCharToUpperCase(o.name) } size="small"/>
+        });
+    }
+    return [];
+};
+
+const PartnersField = ({ client }) => !clientWithPartners(client) ? null : 
+    <FunctionField
+        source="origine"
+        label="Origine de la prestation"
+        render={ record =>  getOrigineList(record) }
+    />
 
 export const PaymentShow = () => {
+
+    const { client } = useClient();
 
     const getChipMode = mode => {
         const modeWithColor = paymentMode.find(p => p.id === mode);
         // @ts-ignore
         return <Chip label={mode.toUpperCase()} size="small" sx={ getShipStyle(modeWithColor) }/>
-    };
-
-    const getOrigineList = ({ origine }) => {
-      if (isDefinedAndNotVoid(origine)) {     
-        return origine
-          .filter(o => (isDefined(o.discount) && o.discount > 0) || (isDefined(o.hasCommission) && o.hasCommission))
-          .map((o, i) => {
-            // @ts-ignore
-            return <Chip key={ i } label={ getFirstCharToUpperCase(o.name) } size="small"/>
-          });
-      }
-      return [];
     };
 
     return (
@@ -59,11 +69,7 @@ export const PaymentShow = () => {
                         />
                     </Datagrid>
                 </ArrayField>
-                <FunctionField
-                    source="origine"
-                    label="Origine de la prestation"
-                    render={ record =>  getOrigineList(record) }
-                />
+                <PartnersField client={ client } />
             </SimpleShowLayout>
         </Show>
     )
