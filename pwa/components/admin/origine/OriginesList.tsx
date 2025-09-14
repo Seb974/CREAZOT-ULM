@@ -4,12 +4,12 @@ import {
   List,
   TextField,
   CreateButton,
-  ExportButton,
   TopToolbar,
   NumberField,
   EditButton,
   SimpleList,
-  ShowButton
+  ShowButton,
+  BooleanField
 } from "react-admin";
 import { useMercure } from "../../../utils/mercure";
 import { type Origine } from "../../../types/Origine";
@@ -94,6 +94,7 @@ export const OriginesList: NextPage<Props> = ({ data, hubURL, page }) => {
             <Datagrid sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
                 <TextField source="name" label="Nom" sortable={ true }/>
                 <NumberField source="discount" options={{ style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2, }} label="Remise" transform={v => v / 100}/>
+                <BooleanField source="hasCommission" label="Rétro-commission" textAlign="center"/>
                 <p className="text-right">
                     <ShowButton />
                     <EditButton />

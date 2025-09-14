@@ -1,19 +1,16 @@
 import { ArrayInput, DateInput, Edit, SelectInput, SimpleFormIterator } from "react-admin";
 import { SimpleForm, TextInput, NumberInput } from "react-admin";
 import { paymentMode } from "../../../app/lib/client";
-import { isDefined } from "../../../app/lib/utils";
+import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 
 export const PaymentsEdit = () => {
 
-   const transform = ({details, ...data}) => {
+   const transform = ({details, origine, ...data}) => {
     return {
       ...data,
+      origine: isDefinedAndNotVoid(origine) ? origine.map(o => getFormattedValueForBackEnd(o)) : [],
       details: details.map((d) => {
-        return {
-        ...d, 
-        prepayment: isDefined(d.prepayment) && isDefined(d.prepayment.code) ? 
-            typeof d.prepayment === 'string' ? d.prepayment : d.prepayment['@id'] :
-            null}
+        return {...d, prepayment: isDefined(d?.prepayment?.code) ? getFormattedValueForBackEnd(d.prepayment) : null }
       })
     };
   };

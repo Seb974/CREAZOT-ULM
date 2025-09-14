@@ -1,14 +1,26 @@
 import { Show, SimpleShowLayout, TextField, NumberField, DateField, FunctionField, ArrayField, Datagrid } from 'react-admin';
-import { getShipStyle, isNotBlank } from '../../../app/lib/utils';
+import { getFirstCharToUpperCase, getShipStyle, isDefined, isDefinedAndNotVoid, isNotBlank } from '../../../app/lib/utils';
 import { paymentMode } from '../../../app/lib/client';
 import Chip from '@mui/material/Chip';
 
 export const PaymentShow = () => {
 
     const getChipMode = mode => {
-    const modeWithColor = paymentMode.find(p => p.id === mode);
-    // @ts-ignore
-    return <Chip label={mode.toUpperCase()} size="small" sx={ getShipStyle(modeWithColor) }/>
+        const modeWithColor = paymentMode.find(p => p.id === mode);
+        // @ts-ignore
+        return <Chip label={mode.toUpperCase()} size="small" sx={ getShipStyle(modeWithColor) }/>
+    };
+
+    const getOrigineList = ({ origine }) => {
+      if (isDefinedAndNotVoid(origine)) {     
+        return origine
+          .filter(o => (isDefined(o.discount) && o.discount > 0) || (isDefined(o.hasCommission) && o.hasCommission))
+          .map((o, i) => {
+            // @ts-ignore
+            return <Chip key={ i } label={ getFirstCharToUpperCase(o.name) } size="small"/>
+          });
+      }
+      return [];
     };
 
     return (
@@ -29,7 +41,6 @@ export const PaymentShow = () => {
                 <ArrayField source="details">
                     <Datagrid
                         optimized
-                        // expand={<LandingDetails />}
                         bulkActionButtons={false}
                         sx={{
                             '& .RaDatagrid-headerCell': { backgroundColor: '#ededed', fontWeight: 'lighter' },
@@ -40,7 +51,6 @@ export const PaymentShow = () => {
                             source="mode"
                             label="Mode de paiement"
                             render={({mode}) => getChipMode(mode)}
-                            // render={record => <p>{record.mode.toUpperCase()}</p>}
                         />
                         <FunctionField
                             source="amount"
@@ -49,6 +59,11 @@ export const PaymentShow = () => {
                         />
                     </Datagrid>
                 </ArrayField>
+                <FunctionField
+                    source="origine"
+                    label="Origine de la prestation"
+                    render={ record =>  getOrigineList(record) }
+                />
             </SimpleShowLayout>
         </Show>
     )

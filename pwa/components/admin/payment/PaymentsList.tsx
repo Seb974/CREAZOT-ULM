@@ -28,7 +28,7 @@ import { useMercure } from "../../../utils/mercure";
 import { type Contact } from "../../../types/Contact";
 import { useMediaQuery, Theme } from '@mui/material';
 import { type PagedCollection } from "../../../types/collection";
-import { getShipStyle, isDefined, isNotBlank, matchesStartOfWord, toLocalDateString } from "../../../app/lib/utils";
+import { getFirstCharToUpperCase, getShipStyle, isDefined, isDefinedAndNotVoid, isNotBlank, matchesStartOfWord, toLocalDateString } from "../../../app/lib/utils";
 import { paymentMode } from "../../../app/lib/client";
 import BackupTableIcon from '@mui/icons-material/BackupTable';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -122,7 +122,8 @@ const CustomFilterBar = ({ showMore, isSmall }) => {
       'date[after]': filterValues['date[after]'] ? toLocalDateString(new Date(filterValues['date[after]'])) : '',
       'date[before]': filterValues['date[before]'] ? toLocalDateString(new Date(filterValues['date[before]'])) : '',
       'details.mode': filterValues['details.mode'] || '',
-      'intitule': filterValues['intitule'] || ''
+      'intitule': filterValues['intitule'] || '',
+      'origine.name': filterValues['origine.name'] || ''
   });
 
   useEffect(() => {
@@ -130,7 +131,8 @@ const CustomFilterBar = ({ showMore, isSmall }) => {
           'date[after]': filterValues['date[after]'] ? toLocalDateString(new Date(filterValues['date[after]'])) : '',
           'date[before]': filterValues['date[before]'] ? toLocalDateString(new Date(filterValues['date[before]'])) : '',
           'details.mode': filterValues['details.mode'] || '',
-          'intitule': filterValues['intitule'] || ''
+          'intitule': filterValues['intitule'] || '',
+          'origine.name': filterValues['origine.name'] || ''
       });
   }, [filterValues]);
 
@@ -170,6 +172,13 @@ const CustomFilterBar = ({ showMore, isSmall }) => {
                 label="Intitulé"
                 onChange={handleChange}
                 defaultValue={formValues['intitule']}
+                sx={{ width: isSmall ? '100%' : 200 }}
+            />
+            <TextInput
+                source="origine.name"
+                label="Origine"
+                onChange={handleChange}
+                defaultValue={formValues['origine.name']}
                 sx={{ width: isSmall ? '100%' : 200 }}
             />
         </Box>
@@ -228,6 +237,18 @@ const getModeList = details => {
   });
 };
 
+const getOrigineList = ({ origine }) => {
+  if (isDefinedAndNotVoid(origine)) {
+    return origine
+      .filter(o => (isDefined(o.discount) && o.discount > 0) || (isDefined(o.hasCommission) && o.hasCommission))
+      .map((o, i) => {
+        // @ts-ignore
+        return <Chip key={ i } label={ getFirstCharToUpperCase(o.name) } size="small"/>
+      });
+  }
+  return [];
+};
+
 const CustomBody = (props) => {
 
     const { data, isLoading, filterValues } = useListContext();
@@ -248,13 +269,13 @@ const CustomBody = (props) => {
         <TableFooter>
           <TableRow sx={{ backgroundColor: '#ededed', fontStyle: 'italic', fontWeight: 'bold', color: '#555'  }}>
               <TableCell colSpan={2}/>
-              <TableCell colSpan={2} sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
+              <TableCell colSpan={3} sx={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555' }}>
                 Total
               </TableCell>
               <TableCell style={{ fontStyle: 'italic', fontWeight: 'bold', color: '#555', textAlign: 'center' }}>
                 <strong>{total.toFixed(2)} €</strong>
               </TableCell>
-              <TableCell />
+              <TableCell/>
             </TableRow>
           </TableFooter>
       </Fragment>
@@ -300,6 +321,11 @@ const CustomDatagrid = () => {
           render={ ({ name, label, details }) =>  <div>{ isNotBlank(name) ? name : (isNotBlank(label) ? label : '') }<br/>
             { getModeList(details) }</div>
           }
+        />
+        <FunctionField
+            source="origine"
+            label="Origine"
+            render={ record =>  getOrigineList(record) }
         />
         <FunctionField
           source="name"

@@ -1,4 +1,4 @@
-import { SimpleForm, TextInput, NumberInput } from "react-admin";
+import { SimpleForm, TextInput, NumberInput, BooleanInput } from "react-admin";
 import { Create } from "react-admin";
 
 export const OriginesCreate = () => {
@@ -7,7 +7,8 @@ export const OriginesCreate = () => {
       <Create>
           <SimpleForm>
               <TextInput source="name" label="Nom"/>
-              <NumberInput source="discount" label="Remise (en %)"/>
+              <NumberInput source="discount" label="Remise Passager (en %)"/>
+              <BooleanInput source="hasCommission" label="Rétro-commission" defaultValue={ false } />
           </SimpleForm>
       </Create>
   )

@@ -65,13 +65,17 @@ class Origine
     #[Groups(groups: ['Origine:write', 'Origine:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     private ?float $discount = null;
 
+    #[ORM\Column(nullable: true)]
     #[Groups(groups: ['Origine:write', 'Origine:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
+    private ?bool $hasCommission = null;
+
+    #[Groups(groups: ['Origine:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     public function getLabel(): ?string
     {
         return $this->name;
     }
 
-    #[Groups(groups: ['Origine:write', 'Origine:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
+    #[Groups(groups: ['Origine:read', 'Cadeau:read', 'Reservation:read', 'PaymentDetail:read', 'Payment:read'])]
     public function getValue(): ?string
     {
         return $this->name;
@@ -102,6 +106,18 @@ class Origine
     public function setDiscount(?float $discount): static
     {
         $this->discount = $discount;
+
+        return $this;
+    }
+
+    public function getHasCommission(): ?bool
+    {
+        return $this->hasCommission;
+    }
+
+    public function setHasCommission(?bool $hasCommission): static
+    {
+        $this->hasCommission = $hasCommission;
 
         return $this;
     }

@@ -25,7 +25,7 @@ final readonly class ProfilPiloteQueryCollectionExtension implements QueryCollec
     {
         if (
             ProfilPilote::class !== $resourceClass
-            || '_api_/profil_pilotes{._format}_get_collection' !== $operation->getName()
+            || !\in_array($operation?->getName(), ['profil_pilotes_list', 'profil_pilotes_available'], true)
             || !$user = $this->security->getUser()
         ) {
             return;

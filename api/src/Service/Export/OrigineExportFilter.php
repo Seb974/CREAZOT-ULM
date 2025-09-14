@@ -26,12 +26,13 @@ class OrigineExportFilter implements ExportFilterInterface
 
     public function formatExport(array $results): array
     {
-        $headers = ['Id', 'Nom', 'Remise'];
+        $headers = ['Id', 'Nom', 'Remise', 'Rétro-commission'];
 
         $rows = array_map(fn(Origine $c) => [
             $c->getId() ?? '',
             $c->getName() ?? '',
-            ($c->getDiscount() ?? '0') . '%'
+            ($c->getDiscount() ?? '0') . '%',
+            $c->getHasCommission() ? 'Oui' : 'Non'
         ], $results);
 
         return [$headers, $rows];

@@ -71,9 +71,11 @@ export const FlightForm = ({ selectedCircuits, setSelectedCircuits, selectedAirc
   const handleAdd = (e) => {
     e.preventDefault();
     if (!disableAdd) {
-      const hasAloneCircuit = selectedCircuits.find(c => !c.circuit.prixFixe || (isDefined(c.circuit.requireLandingDeclaration) && c.circuit.requireLandingDeclaration)) !== undefined;
-      const selection = !hasAloneCircuit ? availableCircuits.filter(({prixFixe, requireLandingDeclaration}) => prixFixe && (!isDefined(requireLandingDeclaration) || !requireLandingDeclaration)) : availableCircuits;
-      setSelectedCircuits([...selectedCircuits, { ident: new Date().valueOf(), circuit: selection[0], quantite: 1, details: selection[0].nom, option: defaultOption, prix: getCircuitPrice(selection[0], defaultOption, selectedFlightTime, selectedAircraft) }])
+      const hasAloneCircuit = selectedCircuits.find(c => !c?.circuit?.prixFixe || (isDefined(c?.circuit?.requireLandingDeclaration) && c?.circuit?.requireLandingDeclaration)) !== undefined;
+      const selection = !hasAloneCircuit ? availableCircuits?.filter(({prixFixe, requireLandingDeclaration}) => prixFixe && (!isDefined(requireLandingDeclaration) || !requireLandingDeclaration)) : availableCircuits;
+      if (isDefinedAndNotVoid(selection)) {
+        setSelectedCircuits([...selectedCircuits, { ident: new Date().valueOf(), circuit: selection[0], quantite: 1, details: selection[0]?.nom, option: defaultOption, prix: getCircuitPrice(selection[0], defaultOption, selectedFlightTime, selectedAircraft) }])
+      }
     }
   };
 

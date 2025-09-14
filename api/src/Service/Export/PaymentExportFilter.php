@@ -55,7 +55,7 @@ class PaymentExportFilter implements ExportFilterInterface
 
     public function formatExport(array $results): array
     {
-        $headers = [ 'Id', 'Date', 'Référence', 'Nom', 'Code de réservation', 'Mode', 'Montant', 'Prépaiement'];
+        $headers = [ 'Id', 'Date', 'Référence', 'Nom', 'Code de réservation', 'Origine', 'Mode', 'Montant', 'Prépaiement'];
 
         $rows = [];
 
@@ -75,6 +75,13 @@ class PaymentExportFilter implements ExportFilterInterface
                     $first ? ($payment->getReference() ?? '') : '',
                     $first ? ($payment->getName() ?? '') : '',
                     $first ? ($payment->getReservationCode() ?? '') : '',
+                    $first ? (count($payment->getOrigine()) > 0
+                        ? implode(', ', $payment->getOrigine()
+                            ->filter(fn($o) => ($o->getDiscount() > 0) || $o->getHasCommission())
+                            ->map(fn($o) => $o->getName())
+                            ->toArray()
+                        ) : ''
+                    ) : '',
                     $this->getPaymentDetailName($detail->getMode()) ?? '',
                     $detail->getAmount(),
                     $this->getPrepaymentInformations($detail->getPrepayment()),

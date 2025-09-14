@@ -33,7 +33,8 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
                 'app.filter.payment.reference',
                 'app.filter.payment.label',
                 'app.filter.payment.mode',
-                'app.filter.payment.intitule'
+                'app.filter.payment.intitule',
+                'app.filter.payment.origine'
             ],
         ),
         new Post(
@@ -100,9 +101,17 @@ class Payment
     #[Groups(groups: ['Payment:write', 'Payment:read'])]
     private ?string $remarques = null;
 
+    /**
+     * @var Collection<int, Origine>
+     */
+    #[ORM\ManyToMany(targetEntity: Origine::class)]
+    #[Groups(groups: ['Payment:write', 'Payment:read'])]
+    private Collection $origine;
+
     public function __construct()
     {
         $this->details = new ArrayCollection();
+        $this->origine = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -208,6 +217,30 @@ class Payment
     public function setRemarques(?string $remarques): static
     {
         $this->remarques = $remarques;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Origine>
+     */
+    public function getOrigine(): Collection
+    {
+        return $this->origine;
+    }
+
+    public function addOrigine(Origine $origine): static
+    {
+        if (!$this->origine->contains($origine)) {
+            $this->origine->add($origine);
+        }
+
+        return $this;
+    }
+
+    public function removeOrigine(Origine $origine): static
+    {
+        $this->origine->removeElement($origine);
 
         return $this;
     }

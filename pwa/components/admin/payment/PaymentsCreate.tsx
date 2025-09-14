@@ -3,7 +3,7 @@ import { Create } from "react-admin";
 import { Typography } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
-import { generateSafeCode, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { generateSafeCode, getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { paymentMode } from "../../../app/lib/client";
 
 const ReservationField = ({ choices = [], isLoading = false, setSelection, defaultDetails }) => {
@@ -145,12 +145,12 @@ export const PaymentsCreate = () => {
 
         const extra = {
             name: isDefined(selectedResa) ? selectedResa.nom : null,
-            reservationCode: isDefined(selectedResa) && isDefined(selectedResa.code) ? selectedResa.code : null,
             label: !isDefined(selectedResa) && isDefined(label) ? label : null,
+            reservationCode: isDefined(selectedResa) && isDefined(selectedResa.code) ? selectedResa.code : null,
+            origine: isDefinedAndNotVoid(selectedResa?.origine) ? selectedResa?.origine.map(o => getFormattedValueForBackEnd(o)) : [],
             reference: generateSafeCode('PAY'),
         };
-        const data = {...formData, ...extra };    
-
+        const data = {...formData, ...extra };
         try {
             await dataProvider.create('payments', { data: data });
             notify('Paiement enregistré avec succès', { type: 'success' });

@@ -393,6 +393,12 @@ services:
             $properties: { details.mode: 'iword_start' } # ]
         tags: [ 'api_platform.filter' ]
 
+    app.filter.payment.origine:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties: { origine.name: 'iword_start' } # ]
+        tags: [ 'api_platform.filter' ]
+
     app.filter.expense.mode:
         parent: 'api_platform.doctrine.orm.search_filter'
         arguments:
