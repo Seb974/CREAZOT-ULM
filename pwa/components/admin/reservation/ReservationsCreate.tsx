@@ -20,16 +20,17 @@ const getEnd = (debut, circuit) => {
   return new Date(start.setHours(start.getHours() + duration.getHours(), start.getMinutes() + duration.getMinutes(), start.getSeconds() + duration.getSeconds()));
 };
 
-const CustomToolbar = () => {
+const CustomToolbar = ({ debut }) => {
   const redirect = useRedirect();
   const { client } = useClient();
   const isSmall = useMediaQuery('(max-width:600px)');
+  const root = isDefined(debut) ? `/convert?debut=${encodeURIComponent(debut)}` : "/convert";
 
   return (
     <Toolbar>
       <SaveButton />
       { !clientWithGifts(client) ? null : 
-        <Button onClick={() => redirect('/convert')} sx={{ ml: 'auto'}}>
+        <Button onClick={() => redirect(root)} sx={{ ml: 'auto'}}>
           { !isSmall ? <CreditScoreIcon className="mr-2"/> : <></> } Convertir un prépaiement
         </Button>
       }
@@ -198,20 +199,28 @@ const PositionInput = ({ selectedQuantite }) => {
 const OptionInput = ({ client, enabledCombinaisons }) => !clientWithOptions(client) ? null : 
     <SelectInput key={ +new Date() }  source="option" choices={ enabledCombinaisons } label="Option" />
     
-  const OriginContactInput = ({ client }) => !clientWithOriginContact(client) ? null : 
-    <ReferenceArrayInput source="contact" reference="contacts" label="Contact initial"/>
-    
-  const PartnersInput = ({ client }) => !clientWithPartners(client) ? null : 
-    <ReferenceArrayInput source="origine" reference="origines" label="Contact initial"/>
+const OriginContactInput = ({ client }) => !clientWithOriginContact(client) ? null : 
+  <ReferenceArrayInput source="contact" reference="contacts" label="Contact initial"/>
+  
+const PartnersInput = ({ client }) => !clientWithPartners(client) ? null : 
+  <ReferenceArrayInput source="origine" reference="origines" label="Contact initial"/>
 
-  const ConversionLink = ({ client }) => !clientWithGifts(client) ? null : 
+const ConversionLink = ({ client, debut }) => {
+  
+  if (!clientWithGifts(client)) return null;
+  
+  const root = isDefined(debut) ? `/convert?debut=${encodeURIComponent(debut)}` : "/convert";
+
+  return (
     <Box display="flex" gap={2} flexWrap="nowrap" width="100%" sx={{ marginBottom: '1em'}}>
         <Box flex={1} display="flex" alignItems="right" justifyContent={"end"}>
-          <Link to="/convert" style={{ textDecoration: 'none', textAlign: 'right' }}>
+          <Link to={ root } style={{ textDecoration: 'none', textAlign: 'right' }}>
             <Typography color="primary">Créer à partir d'un prépaiement</Typography>
           </Link>
         </Box>
     </Box>
+  )
+}
 
 export const ReservationsCreate = () => {
 
@@ -345,9 +354,9 @@ export const ReservationsCreate = () => {
   return (
     // @ts-ignore
     <Create redirect="list" mutationMode="pessimistic">
-      <SimpleForm onSubmit={onSubmit} toolbar={<CustomToolbar />}
+      <SimpleForm onSubmit={onSubmit} toolbar={<CustomToolbar debut={ debut }/>}
       >
-        <ConversionLink client={ client }/>
+        <ConversionLink client={ client } debut={ debut }/>
         <DateTimeInput source="debut" label="Décollage" validate={required()} defaultValue={ isNotBlank(debut) ? new Date(debut) : new Date((new Date()).setHours(7,0,0)) }/>
         <DateTimeInput source="fin" label="Fin" sx={{ display: 'none' }} defaultValue={ new Date(debut) }/>
         <TextInput source="nom" label="Nom & prénom du passager" validate={required()}/>

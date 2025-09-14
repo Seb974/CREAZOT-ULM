@@ -6,8 +6,18 @@ import { MessageInput } from "./MessageInput";
 import { PrixInput } from "./PrixInput";
 import { SendEmailInput } from "./SendEmailInput";
 import { useClient } from '../../admin/ClientProvider';
-import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
-import { clientWithPartners } from "../../../app/lib/client";
+import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { clientWithOptions, clientWithPartners } from "../../../app/lib/client";
+
+const OptionsInput = ({ client }) => !clientWithOptions(client) ? null : 
+    <ReferenceInput reference="combinaisons" source="options.@id" label="Option"/>
+
+const PartnersInput = ({ client }) => !clientWithPartners(client) ? null : 
+    <ArrayInput source="origine" label="Origine de l'appel">
+      <SimpleFormIterator inline disableReordering>
+          <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
+      </SimpleFormIterator>
+    </ArrayInput>
 
 export const CadeauxEdit = () => {
 
@@ -20,21 +30,14 @@ export const CadeauxEdit = () => {
         fin: new Date(data.fin),
         sendEmail: data.gift && data.sendEmail,
         offreur: data.gift ? data.offreur : data.beneficiaire,
-        origine: isDefinedAndNotVoid(data.origine) ? data.origine.map(o => o['@id']) : [],
-        circuit: isDefined(data.circuit) ? typeof data.circuit === 'string' ? data.circuit : data.circuit['@id'] : null,
-        options: isDefined(data.options) ? typeof data.options === 'string' ? data.options : data.options['@id'] : null,
-        option: isDefined(data.option) ? typeof data.option === 'string' ? data.option : data.option['@id'] : null,
+        origine: isDefinedAndNotVoid(data.origine) ? data.origine.map(o => getFormattedValueForBackEnd(o)) : [],
+        circuit: getFormattedValueForBackEnd(data?.circuit),
+        options: getFormattedValueForBackEnd(data?.options),
+        option: getFormattedValueForBackEnd(data.option)
 
     };
     return formattedData;
   };
-
-  const PartnersInput = () => !clientWithPartners(client) ? null : 
-      <ArrayInput source="origine" label="Origine de l'appel">
-        <SimpleFormIterator inline disableReordering>
-            <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
-        </SimpleFormIterator>
-      </ArrayInput>
 
   return (
     <Edit redirect="list" transform={transform} title="Modifier le prépaiement">
@@ -59,8 +62,8 @@ export const CadeauxEdit = () => {
                 <ReferenceInput reference="circuits" source="circuit.@id" label="Circuit"/>
               </Box>
           </Box>
-          <ReferenceInput reference="combinaisons" source="options.@id" label="Option" />
-          <PartnersInput/>
+          <OptionsInput client={ client }/>
+          <PartnersInput client={ client }/>
           <TextInput source="paymentId" label="N° du paiement"/>
           <MessageInput />
           <PrixInput />

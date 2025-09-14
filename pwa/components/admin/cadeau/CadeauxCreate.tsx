@@ -1,4 +1,4 @@
-import { SimpleForm, TextInput, DateInput, ReferenceInput, ArrayInput,  SimpleFormIterator, required, Create, useCreate, useRedirect, useNotify, NumberInput } from "react-admin";
+import { SimpleForm, TextInput, DateInput, ReferenceInput, ArrayInput,  SimpleFormIterator, required, Create, useCreate, useRedirect, useNotify, NumberInput, ReferenceArrayInput, SelectInput } from "react-admin";
 import { Box } from "@mui/material";
 import { PrixInput } from "./PrixInput";
 import { PersonsInput } from "./PersonsInput";
@@ -6,8 +6,14 @@ import { MessageInput } from "./MessageInput";
 import { SendEmailInput } from "./SendEmailInput";
 import { useClient } from '../../admin/ClientProvider';
 import { DateExpirationInput } from "./DateExpirationInput";
-import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
-import { clientWithPartners } from "../../../app/lib/client";
+import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { clientWithOptions, clientWithPartners } from "../../../app/lib/client";
+
+const OptionsInput = ({ client }) => !clientWithOptions(client) ? null : 
+    <ReferenceInput reference="combinaisons" source="options" label="Option" />
+  
+const PartnersInput = ({ client }) => !clientWithPartners(client) ? null : 
+    <ReferenceArrayInput source="origine" reference="origines" label="Contact initial"/>
 
 export const CadeauxCreate = () => {
 
@@ -26,10 +32,10 @@ export const CadeauxCreate = () => {
             fin: new Date(data.fin),
             sendEmail: data.gift && data.sendEmail,
             offreur: data.gift ? data.offreur : data.beneficiaire,
-            origine: isDefinedAndNotVoid(data.origine) ? data.origine.map(o => o['@id']) : [],
-            circuit: isDefined(data.circuit) ? typeof data.circuit === 'string' ? data.circuit : data.circuit['@id'] : null,
-            options: isDefined(data.options) ? typeof data.options === 'string' ? data.options : data.options['@id'] : null,
-            option: isDefined(data.option) ? typeof data.option === 'string' ? data.option : data.option['@id'] : null,
+            origine: clientWithPartners(client) && isDefinedAndNotVoid(data?.origine) ? data.origine.map(o => getFormattedValueForBackEnd(o)) : [],
+            circuit: isDefined(data.circuit) ? getFormattedValueForBackEnd(data.circuit) : null,
+            options: isDefined(data.options) ? getFormattedValueForBackEnd(data.options) : null,
+            option: isDefined(data.option) ? getFormattedValueForBackEnd(data.option) : null,
         };
         create('cadeaux', { data });
         notify('Le bon cadeau a bien été enregistré.', { type: 'info' });
@@ -42,13 +48,6 @@ export const CadeauxCreate = () => {
   };
 
   const getUniqueCode = () => Date.now().toString(36).substr(6) + Math.random().toString(36).substr(2);
-
-  const PartnersInput = () => !clientWithPartners(client) ? null : 
-      <ArrayInput source="origine" label="Origine de l'appel">
-        <SimpleFormIterator inline disableReordering>
-            <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
-        </SimpleFormIterator>
-      </ArrayInput>
 
   return (
     <Create redirect="list" title="Créer un prépaiement">
@@ -72,8 +71,8 @@ export const CadeauxCreate = () => {
               <ReferenceInput reference="circuits" source="circuit" label="Circuit"/>
             </Box>
         </Box>
-        <ReferenceInput reference="combinaisons" source="options" label="Option" />
-        <PartnersInput/>
+        <OptionsInput client={ client }/>
+        <PartnersInput client={ client }/>
         <TextInput source="paymentId" label="N° du paiement"/>
         <MessageInput />
         <PrixInput />

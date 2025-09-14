@@ -1,11 +1,13 @@
-import { DateTimeInput, ReferenceInput, SimpleForm, Create, required, useDataProvider, useCreate, useUpdate, useRedirect, useNotify, SelectInput } from "react-admin";
+import { DateTimeInput, ReferenceInput, SimpleForm, Create, required, useDataProvider, useCreate, useUpdate, useRedirect, useNotify, SelectInput, Toolbar, SaveButton } from "react-admin";
 import { generateSafeCode, getFormattedValueForBackEnd, getRandomColor, isDefined, isDefinedAndNotVoid, isNotBlank, isValid } from "../../../app/lib/utils";
-import { useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useClient } from '../../admin/ClientProvider';
 import { positions, status } from "../../../app/lib/reservation";
 import { useFormContext, useWatch } from 'react-hook-form';
-import { clientUsingAvailabilityFilter, clientWithOptions, clientWithPartners } from "../../../app/lib/client";
+import NoteAltIcon from '@mui/icons-material/NoteAlt';
+import { clientUsingAvailabilityFilter, clientWithGifts, clientWithOptions, clientWithPartners } from "../../../app/lib/client";
+import { Box, Button, Typography, useMediaQuery } from "@mui/material";
 
 const getEnd = (debut, circuit) => {
   const start = new Date(debut);
@@ -32,9 +34,9 @@ const QuantiteWatcher = ({ prepayments }) => {
   return null;
 };
 
-const FilteredPiloteInput = ({ client, prepayments, circuits }) => {
+const FilteredPiloteInput = ({ client, prepayments, circuits, defaultStart = new Date((new Date()).setHours(7,0,0)) }) => {
   const { setValue, getValues } = useFormContext();
-  const debut = useWatch({ name: "debut", defaultValue: new Date((new Date()).setHours(7,0,0)) });
+  const debut = useWatch({ name: "debut", defaultValue: defaultStart });
   const selection = useWatch({ name: "prepayment"});
   
   const dataProvider = useDataProvider();
@@ -47,7 +49,7 @@ const FilteredPiloteInput = ({ client, prepayments, circuits }) => {
 
   const getProfilPilotes = useCallback(() => {
     if (!debut) return;
-    const fin = isDefined(prepayment) ? getEnd(debut, prepayment.circuit) : new Date((new Date()).setHours(7,0,0));
+    const fin = isDefined(prepayment) ? getEnd(debut, prepayment.circuit) : defaultStart;
 
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const endpoint = clientUsingAvailabilityFilter(client) ? "profil_pilotes/disponibles" : "profil_pilotes";
@@ -112,8 +114,8 @@ const FilteredPiloteInput = ({ client, prepayments, circuits }) => {
   );
 };
 
-const FilteredAeronefInput = ({ client, prepayments }) => {
-  const debut = useWatch({ name: "debut", defaultValue: new Date((new Date()).setHours(7,0,0)) });
+const FilteredAeronefInput = ({ client, prepayments, defaultStart = new Date((new Date()).setHours(7,0,0)) }) => {
+  const debut = useWatch({ name: "debut", defaultValue: defaultStart });
   const selection = useWatch({ name: "prepayment"});
   const dataProvider = useDataProvider();
 
@@ -125,7 +127,7 @@ const FilteredAeronefInput = ({ client, prepayments }) => {
 
   const getAeronefs = useCallback(() => {
     if (!debut) return;
-    const fin = isDefined(prepayment) ? getEnd(debut, prepayment.circuit) : new Date((new Date()).setHours(7,0,0));
+    const fin = isDefined(prepayment) ? getEnd(debut, prepayment.circuit) : defaultStart;
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const endpoint = clientUsingAvailabilityFilter(client) ? "aeronefs/disponibles" : "aeronefs";
     const filters = clientUsingAvailabilityFilter(client) ? { debut: new Date(debut).toISOString(), fin: new Date(fin).toISOString(), timezone } : {};
@@ -178,6 +180,42 @@ const PrepaymentHelperText = ({ prepayments }) => {
 
     return `${quantite ?? 1} ${ circuit?.nom } ${ isDefined(options) ? ` avec ${ options.nom }` : ''}`;
 };
+
+const CustomToolbar = ({ debut }) => {
+  const redirect = useRedirect();
+  const { client } = useClient();
+  const isSmall = useMediaQuery('(max-width:600px)');
+
+  const root = isDefined(debut) ? `/reservations/create?debut=${encodeURIComponent(debut)}` : "/reservations/create";
+
+  return (
+    <Toolbar>
+      <SaveButton />
+      { !clientWithGifts(client) ? null : 
+        <Button onClick={() => redirect(root)} sx={{ ml: 'auto'}}>
+          { !isSmall ? <NoteAltIcon className="mr-2"/> : <></> } Saisir manuellement
+        </Button>
+      }
+    </Toolbar>
+  );
+};
+
+const ConversionLink = ({ client, debut }) => {
+  
+  if (!clientWithGifts(client)) return null;
+  
+  const root = isDefined(debut) ? `/reservations/create?debut=${encodeURIComponent(debut)}` : "/reservations/create";
+
+  return (
+    <Box display="flex" gap={2} flexWrap="nowrap" width="100%" sx={{ marginBottom: '1em'}}>
+        <Box flex={1} display="flex" alignItems="right" justifyContent={"end"}>
+          <Link to={ root } style={{ textDecoration: 'none', textAlign: 'right' }}>
+            <Typography color="primary">Créer manuellement</Typography>
+          </Link>
+        </Box>
+    </Box>
+  )
+}
 
 export const ReservationCreate = () => {
 
@@ -332,14 +370,15 @@ export const ReservationCreate = () => {
   return (
     // @ts-ignore
     <Create resource="reservations" redirect="list" mutationMode="pessimistic">
-      <SimpleForm onSubmit={onSubmit} defaultValues={defaultValues}>
-        <DateTimeInput source="debut" defaultValue={ new Date((new Date()).setHours(7,0,0)) } label="Décollage" validate={required()}/>
+      <SimpleForm onSubmit={onSubmit} defaultValues={defaultValues} toolbar={<CustomToolbar debut={ debut }/>}>
+        <ConversionLink client={ client } debut={ debut }/>
+        <DateTimeInput source="debut" defaultValue={ isNotBlank(debut) ? new Date(debut) : new Date((new Date()).setHours(7,0,0)) } label="Décollage" validate={required()}/>
         <ReferenceInput reference="cadeaux" source="prepayment" label="Prépaiement" filter={{ used: false }}>
           <SelectInput optionText="name" label="Prépaiement" validate={required()} helperText={ <PrepaymentHelperText prepayments={ prepayments }/> }/>
         </ReferenceInput>
         <SelectInput source="statut" choices={ status } defaultValue={ status[0].id } validate={required()}/>
-        <FilteredPiloteInput client={ client } prepayments={ prepayments } circuits={ circuits }/>
-        <FilteredAeronefInput client={ client } prepayments={ prepayments }/>
+        <FilteredPiloteInput client={ client } prepayments={ prepayments } circuits={ circuits } defaultStart={ isNotBlank(debut) ? new Date(debut) : new Date((new Date()).setHours(7,0,0)) }/>
+        <FilteredAeronefInput client={ client } prepayments={ prepayments } defaultStart={ isNotBlank(debut) ? new Date(debut) : new Date((new Date()).setHours(7,0,0)) }/>
         <PositionInput prepayments={ prepayments }/>
         <QuantiteWatcher prepayments={ prepayments }/>
       </SimpleForm>

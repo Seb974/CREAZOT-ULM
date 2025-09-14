@@ -1,6 +1,7 @@
 import { useFormContext, useWatch } from 'react-hook-form';
 import { useEffect, useRef, useState } from 'react';
 import { NumberInput, useGetList } from 'react-admin';
+import { getFormattedValueForBackEnd } from '../../../app/lib/utils';
 
 export const PrixInput = () => {
   const { setValue } = useFormContext();
@@ -21,10 +22,10 @@ export const PrixInput = () => {
   useEffect(() => {
     if (circuitsLoading || combinaisonsLoading || originesLoading) return;
 
-    const selectedCircuit = circuits.find(c => c['@id'] === (typeof circuit === 'string' ? circuit : circuit?.['@id']));
-    const selectedOptions = combinaisons.find(o => o['@id'] === (typeof options === 'string' ? options : options?.['@id']));
+    const selectedCircuit = circuits.find(c => c['@id'] === getFormattedValueForBackEnd(circuit));
+    const selectedOptions = combinaisons.find(o => o['@id'] === getFormattedValueForBackEnd(options));
     const selectedOrigines = Array.isArray(origine)
-      ? origines.filter(org => origine.find(o => o['@id'] === org['@id']))
+      ? origines.filter(org => origine.find(o => getFormattedValueForBackEnd(o) === org['@id']))
       : [];
 
     const circuitPrix = selectedCircuit?.prix ?? 0;
