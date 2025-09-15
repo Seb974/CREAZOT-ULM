@@ -118,20 +118,36 @@ const OptionInput = ({ client }) => !clientWithOptions(client) ? null :
 
 const GiftInput = ({ client }) => !clientWithGifts(client) ? null : 
     <ReferenceInput reference="cadeaux" source="cadeau.@id" label="Prépaiement" filter={{ "fin['after']": new Date() }}/>
-  
-  const OriginContactInput = ({ client }) => !clientWithOriginContact(client) ? null : 
-    <ArrayInput source="contact" label="Contact initial">
-      <SimpleFormIterator inline disableReordering>
-          <ReferenceInput reference="contacts" source="@id" label="Contact initial" />
-      </SimpleFormIterator>
-    </ArrayInput>
-  
-  const PartnersInput = ({ client }) => !clientWithPartners(client) ? null : 
-    <ArrayInput source="origine" label="Origine de l'appel">
-      <SimpleFormIterator inline disableReordering>
-          <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
-      </SimpleFormIterator>
-    </ArrayInput>
+
+const OriginContactInput = ({ client }) => { 
+
+    const { setValue, getValues } = useFormContext();
+    const contacts = getValues('contact') ?? [];
+
+    if (!clientWithOriginContact(client)) return null;
+
+    useEffect(() => {
+        const formattedValues = contacts.map(o => getFormattedValueForBackEnd(o));
+        setValue("contacts", formattedValues);
+    }, [contacts, setValue]);
+
+    return <ReferenceArrayInput source="contacts" reference="contacts" label="Origine"/>;
+}
+
+const PartnersInput = ({ client }) => { 
+
+    const { setValue, getValues } = useFormContext();
+    const origines = getValues('origine') ?? [];
+
+    if (!clientWithPartners(client)) return null;
+
+    useEffect(() => {
+        const formattedValues = origines.map(o => getFormattedValueForBackEnd(o));
+        setValue("origineIds", formattedValues);
+    }, [origines, setValue]);
+
+    return <ReferenceArrayInput source="origineIds" reference="origines" label="Origine"/>;
+}
 
 export const ReservationsEdit = () => {
 
@@ -173,12 +189,12 @@ export const ReservationsEdit = () => {
           .then(({ data }) => setOrigines(data));
   }, [dataProvider]);
 
-  const transform = ({circuit, option, debut, avion, pilote, contact, origine, cadeau, paid, ...data}) => {
+  const transform = ({circuit, option, debut, avion, pilote, contacts, origineIds, cadeau, paid, ...data}) => {
     setRecordDate(new Date(debut));
     const selectedCircuit = isDefined(circuit) ? circuits.find(c => c['@id'] === getFormattedValueForBackEnd(circuit)) : null;
     const selectedOption = clientWithOptions(client) && isDefined(option) ? options.find(c => c['@id'] === getFormattedValueForBackEnd(option)) : null;
-    const seletedContacts = clientWithOriginContact(client) && isDefinedAndNotVoid(contact) ? contact.map(c => getFormattedValueForBackEnd(c)) : [];
-    const selectedOrigines = clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === getFormattedValueForBackEnd(o)))) : [];
+    const seletedContacts = clientWithOriginContact(client) && isDefinedAndNotVoid(contacts) ? contacts.map(c => getFormattedValueForBackEnd(c)) : [];
+    const selectedOrigines = clientWithPartners(client) && isDefinedAndNotVoid(origineIds) ? origines.filter(org => isDefined(origineIds.find(o => org['@id'] === getFormattedValueForBackEnd(o)))) : [];
     const formattedCadeau = clientWithGifts(client) ? getFormattedValueForBackEnd(cadeau) : null;
     return {...data,
         debut: new Date(debut),
@@ -190,7 +206,7 @@ export const ReservationsEdit = () => {
         option: clientWithOptions(client) && isDefined(option) ? option['@id'] : null,
         pilote: getFormattedValueForBackEnd(pilote),
         paid: isDefined(formattedCadeau) ? true : paid,
-        origine: clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origine.map(o => getFormattedValueForBackEnd(o)) : [],
+        origine: clientWithPartners(client) && isDefinedAndNotVoid(origineIds) ? origineIds.map(o => getFormattedValueForBackEnd(o)) : [],
         cadeau: formattedCadeau,
         contact: seletedContacts,
     };

@@ -1,4 +1,4 @@
-import { SimpleForm, DateInput, Edit, TextInput, ReferenceInput, ArrayInput, SimpleFormIterator, BooleanInput, NumberInput  } from "react-admin";
+import { SimpleForm, DateInput, Edit, TextInput, ReferenceInput, BooleanInput, NumberInput, ReferenceArrayInput  } from "react-admin";
 import { Box } from "@mui/material";
 import { DateExpirationInput } from "./DateExpirationInput";
 import { PersonsInput } from "./PersonsInput";
@@ -6,18 +6,28 @@ import { MessageInput } from "./MessageInput";
 import { PrixInput } from "./PrixInput";
 import { SendEmailInput } from "./SendEmailInput";
 import { useClient } from '../../admin/ClientProvider';
-import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
+import { getFormattedValueForBackEnd, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { clientWithOptions, clientWithPartners } from "../../../app/lib/client";
+import { useFormContext } from "react-hook-form";
+import { useEffect } from "react";
 
 const OptionsInput = ({ client }) => !clientWithOptions(client) ? null : 
     <ReferenceInput reference="combinaisons" source="options.@id" label="Option"/>
 
-const PartnersInput = ({ client }) => !clientWithPartners(client) ? null : 
-    <ArrayInput source="origine" label="Origine de l'appel">
-      <SimpleFormIterator inline disableReordering>
-          <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
-      </SimpleFormIterator>
-    </ArrayInput>
+const PartnersInput = ({ client }) => { 
+
+    const { setValue, getValues } = useFormContext();
+    const origines = getValues('origine') ?? [];
+
+    if (!clientWithPartners(client)) return null;
+
+    useEffect(() => {
+        const formattedValues = origines.map(o => getFormattedValueForBackEnd(o));
+        setValue("origines", formattedValues);
+    }, [origines, setValue]);
+
+    return <ReferenceArrayInput source="origines" reference="origines" label="Contact initial"/>;
+}
 
 export const CadeauxEdit = () => {
 
@@ -30,7 +40,7 @@ export const CadeauxEdit = () => {
         fin: new Date(data.fin),
         sendEmail: data.gift && data.sendEmail,
         offreur: data.gift ? data.offreur : data.beneficiaire,
-        origine: isDefinedAndNotVoid(data.origine) ? data.origine.map(o => getFormattedValueForBackEnd(o)) : [],
+        origine: isDefinedAndNotVoid(data.origines) ? data.origines.map(o => getFormattedValueForBackEnd(o)) : [],
         circuit: getFormattedValueForBackEnd(data?.circuit),
         options: getFormattedValueForBackEnd(data?.options),
         option: getFormattedValueForBackEnd(data.option)

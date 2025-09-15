@@ -1,24 +1,34 @@
-import { ArrayInput, DateInput, Edit, ReferenceInput, SelectInput, SimpleFormIterator } from "react-admin";
+import { ArrayInput, DateInput, Edit, ReferenceArrayInput, ReferenceInput, SelectArrayInput, SelectInput, SimpleFormIterator, useRecordContext } from "react-admin";
 import { SimpleForm, TextInput, NumberInput } from "react-admin";
 import { clientWithOriginContact, clientWithPartners, paymentMode } from "../../../app/lib/client";
 import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { useClient } from "../ClientProvider";
+import { useFormContext } from "react-hook-form";
+import { useEffect } from "react";
 
-const PartnersInput = ({ client }) => !clientWithPartners(client) ? null : 
-    <ArrayInput source="origine" label="Origine de l'appel">
-      <SimpleFormIterator inline disableReordering>
-          <ReferenceInput reference="origines" source="@id" label="Origine de l'appel" />
-      </SimpleFormIterator>
-    </ArrayInput>
+const PartnersInput = ({ client }) => { 
 
+    const { setValue, getValues } = useFormContext();
+    const origines = getValues('origine') ?? [];
+
+    if (!clientWithPartners(client)) return null;
+
+    useEffect(() => {
+        const formattedValues = origines.map(o => getFormattedValueForBackEnd(o));
+        setValue("origines", formattedValues);
+    }, [origines, setValue]);
+
+    return <ReferenceArrayInput source="origines" reference="origines" label="Contact initial"/>;
+}
+    
 export const PaymentsEdit = () => {
 
   const { client } = useClient();
 
-   const transform = ({details, origine, ...data}) => {
+   const transform = ({details, origines, ...data}) => {
     return {
       ...data,
-      origine: clientWithOriginContact(client) && isDefinedAndNotVoid(origine) ? origine.map(o => getFormattedValueForBackEnd(o)) : [],
+      origine: clientWithOriginContact(client) && isDefinedAndNotVoid(origines) ? origines.map(o => getFormattedValueForBackEnd(o)) : [],
       details: details.map((d) => {
         return {...d, prepayment: isDefined(d?.prepayment?.code) ? getFormattedValueForBackEnd(d.prepayment) : null }
       })

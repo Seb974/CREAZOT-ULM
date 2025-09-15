@@ -40,7 +40,7 @@ class EntretienExportFilter implements ExportFilterInterface
                 $qb->andWhere('e.date <= :before')->setParameter('before', new \DateTimeImmutable($params['date']['before']));
             }
         }
-        return $qb->getQuery()->getResult();
+        return $qb->orderBy('e.date', 'DESC')->getQuery()->getResult();
     }
 
     public function formatExport(array $results): array

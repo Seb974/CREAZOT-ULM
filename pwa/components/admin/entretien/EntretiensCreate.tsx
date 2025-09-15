@@ -3,7 +3,7 @@ import { Create } from "react-admin";
 import { useEffect, useState } from "react";
 import { useWatch, useFormContext } from 'react-hook-form';
 import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
-import { Box, Link } from "@mui/material";
+import { Link } from "@mui/material";
 import { clientWithExpensesManagement, syncDocuments } from "../../../app/lib/client";
 import { useSessionContext } from "../SessionContextProvider";
 import { useClient } from "../ClientProvider";
@@ -42,6 +42,7 @@ const AeronefWatcher = ({ setSelectedAeronef, setIsChangementMoteur }) => {
 
       if (selection && selection.id) {
         const nextValue = !changementMoteur ? selection.entretien : selection.changementMoteur;
+        setValue('horametreIntervention', selection.horametre);
         setValue('horametreNextIntervention', nextValue ?? '');
       }
       return;
@@ -63,7 +64,7 @@ const ExpensesInput = ({ client }) => {
     <ArrayInput source="expenses" label="Dépense(s) associée(s)">
       <SimpleFormIterator disableReordering>
           <ReferenceInput reference="expenses" source="@id" filter={{ relatedToMaintenance: true, 'exists[entretien]': false }}>
-              <SelectInput label="Dépense" optionText="name"/>     {/* optionText="libelle" */}
+              <SelectInput label="Dépense" optionText="name"/>
           </ReferenceInput>
       </SimpleFormIterator>
     </ArrayInput>
@@ -103,6 +104,7 @@ export const EntretiensCreate = () => {
         <ReferenceArrayInput source="intervenants" reference="users" />
         <TextInput source="intervention" label="Détail de l'intervention" multiline sx={{ '& .MuiInputBase-inputMultiline': {height: '200px!important'} }}/>
         <BooleanInput source="changementMoteur" label="Changement du moteur" defaultValue={ false }/>
+        <NumberInput source="horametreIntervention" label="Horamètre à l'intervention" defaultValue={ 0 }/>
         <NumberInput key={ isDefined(selectedAeronef) ? selectedAeronef.id : 0 } source="horametreNextIntervention" label="Prochaine intervention" helperText={isDefined(selectedAeronef) && isDefined(selectedAeronef.horametre) ? `Horamètre actuel : ${ selectedAeronef.horametre.toFixed(2) }h` : ''}/>
         <ExpensesInput client={ client }/>
         <FileInput source="documents" multiple={ true } label="Documents associés">

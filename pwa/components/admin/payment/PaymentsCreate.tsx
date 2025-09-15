@@ -70,8 +70,8 @@ const PartnersInput = ({ client, reservations }) => {
 
     useEffect(() => {
         const newOrigineValue = selection?.origine ?? [];
-        setValue("origine", newOrigineValue.map(o => getFormattedValueForBackEnd(o)))
-    }, [selection])
+        setValue("origine", newOrigineValue.map(o => getFormattedValueForBackEnd(o)));
+    }, [selection]);
 
     return <ReferenceArrayInput source="origine" reference="origines" label="Contact initial"/>
 }

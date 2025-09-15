@@ -10,7 +10,7 @@ const getOrigineList = ({ origine }) => {
         .filter(o => (isDefined(o.discount) && o.discount > 0) || (isDefined(o.hasCommission) && o.hasCommission))
         .map((o, i) => {
         // @ts-ignore
-        return <Chip key={ i } label={ getFirstCharToUpperCase(o.name) } size="small"/>
+        return <Chip key={ i } label={ getFirstCharToUpperCase(o.name) } size="small" sx={{ marginRight: '1em' }}/>
         });
     }
     return [];

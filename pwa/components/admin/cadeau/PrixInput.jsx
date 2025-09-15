@@ -13,7 +13,7 @@ export const PrixInput = () => {
   const quantite = useWatch({ name: "quantite" }) || 1;
   const circuit = useWatch({ name: "circuit" });
   const options = useWatch({ name: "options" });
-  const origine = useWatch({ name: "origine" });
+  const origine = useWatch({ name: "origines" });
   const prixActuel = useWatch({ name: "prix" });
 
   const [manualOverride, setManualOverride] = useState(false);
