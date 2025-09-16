@@ -27,17 +27,17 @@ class LandingExportFilter implements ExportFilterInterface
         if (!empty($params['airport'])) {
             $qb->andWhere(
                 $qb->expr()->orX(
-                    'l.airportCode LIKE :airport',
-                    'l.airportName LIKE :airport'
+                    'LOWER(l.airportCode) LIKE :airport',
+                    'LOWER(l.airportName) LIKE :airport'
                 )
-            )->setParameter('airport', "%{$params['airport']}%");
+            )->setParameter('airport', '%' . strtolower($params['airport']) . '%');
         }
 
         // Aeronef
         $aer = $params['aeronef'] ?? ($params['aeronef_immatriculation'] ?? null);
         if (!empty($aer)) {
-            $qb->andWhere('COALESCE(aer.immatriculation, \'\') LIKE :imm')
-                ->setParameter('imm', "%$aer%");
+            $qb->andWhere('LOWER(COALESCE(aer.immatriculation, \'\')) LIKE :imm')
+                ->setParameter('imm', '%' . strtolower($aer) . '%');
         }
 
         // Pilote
