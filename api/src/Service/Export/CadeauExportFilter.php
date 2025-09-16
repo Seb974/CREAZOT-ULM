@@ -39,8 +39,8 @@ class CadeauExportFilter implements ExportFilterInterface
                     break;
                 case 'circuit':
                 case 'circuit_code':
-                    $qb->andWhere('circuit.code LIKE :circuitCode')
-                    ->setParameter('circuitCode', "%$value%");
+                    $qb->andWhere('LOWER(circuit.code) LIKE :circuitCode')
+                    ->setParameter('circuitCode', '%' . strtolower($value) . '%');
                     break;
 
                 case 'fin':

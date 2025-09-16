@@ -26,8 +26,8 @@ class PrestationExportFilter implements ExportFilterInterface
         // Aeronef
         $aer = $params['aeronef'] ?? ($params['aeronef_immatriculation'] ?? null);
         if (!empty($aer)) {
-            $qb->andWhere('COALESCE(aer.immatriculation, \'\') LIKE :imm')
-                ->setParameter('imm', "%$aer%");
+            $qb->andWhere('LOWER(COALESCE(aer.immatriculation, \'\')) LIKE :imm')
+                ->setParameter('imm', '%' . strtolower($aer) . '%');
         }
 
         // Pilote

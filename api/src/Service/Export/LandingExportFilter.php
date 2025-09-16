@@ -43,8 +43,8 @@ class LandingExportFilter implements ExportFilterInterface
         // Pilote
         $pil = $params['pilote'] ?? ($params['pilote_firstName'] ?? null);
         if (!empty($pil)) {
-            $qb->andWhere('COALESCE(pil.firstName, \'\') LIKE :pil')
-                ->setParameter('pil', "%$pil%");
+            $qb->andWhere('LOWER(COALESCE(pil.firstName, \'\')) LIKE :pil')
+                ->setParameter('pil', '%' . strtolower($pil) . '%');
         }
 
         // Date
