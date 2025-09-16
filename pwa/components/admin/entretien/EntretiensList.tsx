@@ -24,7 +24,7 @@ import { type Circuit } from "../../../types/Circuit";
 import { type PagedCollection } from "../../../types/collection";
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { useMediaQuery, Theme, Box } from '@mui/material';
-import { isDefined } from "../../../app/lib/utils";
+import { isDefined, isNotBlank } from "../../../app/lib/utils";
 import { useSessionContext } from "../SessionContextProvider";
 import BackupTableIcon from '@mui/icons-material/BackupTable';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -124,17 +124,19 @@ const CustomFilterBar = ({ showMore, isSmall }) => {
     const { filterValues, setFilters } = useListContext();
     const [formValues, setFormValues] = useState({
       'aeronef.immatriculation': filterValues['aeronef.immatriculation'] || '',
-      changementMoteur: isDefined(filterValues.changementMoteur) ? filterValues.changementMoteur : ''
+      changementMoteur: isNotBlank(filterValues?.changementMoteur) && filterValues?.changementMoteur ? true : ''
+      
     });
 
     useEffect(() => {
-      showMore ? handleBooleanChange({target: {name: 'changementMoteur', checked: false}}) : handleBooleanChange({target: {name: 'changementMoteur', checked: ''}}); 
+      handleBooleanChange({target: {name: 'changementMoteur', checked: ''}})
     }, [showMore]);
   
     useEffect(() => {
         setFormValues({
           'aeronef.immatriculation': filterValues['aeronef.immatriculation'] || '',
-          changementMoteur: isDefined(filterValues.changementMoteur) ? filterValues.changementMoteur : ''
+          changementMoteur: isNotBlank(filterValues?.changementMoteur) && filterValues?.changementMoteur ? true : ''
+          
         });
     }, [filterValues]);
   
@@ -147,7 +149,8 @@ const CustomFilterBar = ({ showMore, isSmall }) => {
 
     const handleBooleanChange = (e) => {
       const { name, checked } = e.target;
-      const newValues = { ...formValues, [name]: checked };
+      const newValue = isNotBlank(checked) && checked ? true : '';
+      const newValues = { ...formValues, [name]: newValue };
       setFormValues(newValues);
       setFilters(newValues); 
   };
@@ -166,7 +169,8 @@ const CustomFilterBar = ({ showMore, isSmall }) => {
                     source="changementMoteur"
                     label="Changement moteur"
                     onChange={handleBooleanChange}
-                    defaultChecked={formValues['changementMoteur']}
+                    //@ts-ignore
+                    defaultChecked={ formValues['changementMoteur'] ?? false }
                     sx={{ width: isSmall ? '100%' : 300, marginBottom: '0.5em' }}
                 />
             </Box>
