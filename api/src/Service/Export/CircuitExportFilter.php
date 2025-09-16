@@ -24,7 +24,7 @@ class CircuitExportFilter implements ExportFilterInterface
         return $qb->getQuery()->getResult();
     }
 
-    public function formatExport(array $results): array
+    public function formatExport(array $results, string $format = 'csv'): array
     {
         $headers = ['Id', 'Code', 'Nom', 'Code e-commerce', 'Type de vol', 'Durée', 'Prix Fixe', 
             'Prix', 'Coût',  'Option(s) possible(s)', 'Qualification(s) nécessaire(s)', 

@@ -61,7 +61,7 @@ class LandingExportFilter implements ExportFilterInterface
         return $qb->getQuery()->getResult();
     }
 
-    public function formatExport(array $results): array
+    public function formatExport(array $results, string $format = 'csv'): array
     {
         $headers = ['Id', 'Date', 'Aeronef', 'Lieu', 'Nb touches', 'Nb complets'];
 

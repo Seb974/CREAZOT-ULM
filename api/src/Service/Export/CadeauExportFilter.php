@@ -63,7 +63,7 @@ class CadeauExportFilter implements ExportFilterInterface
         return $qb->getQuery()->getResult();
     }
 
-    public function formatExport(array $results): array
+    public function formatExport(array $results, string $format = 'csv'): array
     {
         $headers = ['Id', 'Code', 'Reference du paiement', 'Date', 'Fin de validité',
             'Beneficiaire', 'Offreur', 'Telephone', 'Email', 'Quantite', 'Circuit',

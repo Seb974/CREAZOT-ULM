@@ -62,7 +62,6 @@ class MediaObject
     public ?string $contentUrl = null;
 
     #[Vich\UploadableField(mapping: 'media_object', fileNameProperty: 'filePath')]
-    // #[Assert\NotNull]
     #[Assert\File(
         maxSize: '200M',
         mimeTypes: [

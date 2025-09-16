@@ -10,6 +10,7 @@ use App\Entity\Landing;
 use App\Entity\Airport;
 use App\Entity\Camera;
 use App\Entity\Cadeau;
+use App\Entity\Expense;
 use App\Entity\Circuit;
 use App\Entity\Origine;
 use App\Entity\Payment;
@@ -52,6 +53,7 @@ class ExportController extends AbstractController
             'disponibilites'=> Disponibilite::class,
             'airports'      => Airport::class,
             'cameras'       => Camera::class,
+            'expenses'      => Expense::class,
         ];
 
         if (!isset($map[$entity]))
@@ -62,8 +64,9 @@ class ExportController extends AbstractController
 
     private function handleExport(Request $request, string $entityClass, string $filenameBase): Response
     {
+        $format = strtolower($request->query->get('format', 'csv'));
         $results = $this->exportFilterManager->getResults($entityClass, $request);
-        [$headers, $rows] = $this->exportFilterManager->formatExport($entityClass, $results);
+        [$headers, $rows] = $this->exportFilterManager->formatExport($entityClass, $results, $format);
 
         return $this->export($request, $headers, $rows, $filenameBase);
     }
@@ -104,8 +107,8 @@ class ExportController extends AbstractController
                 table {
                     border-collapse: collapse;
                     width: 100%;
-                    font-size: 9pt;      /* ajuste la taille du texte */
-                    word-wrap: break-word; /* coupe les longs mots */
+                    font-size: 9pt;
+                    word-wrap: break-word;
                 }
                 th, td {
                     border: 1px solid #000;
@@ -114,6 +117,10 @@ class ExportController extends AbstractController
                 }
                 thead {
                     background-color: #f2f2f2;
+                }
+                a {
+                    color: #1a0dab;
+                    text-decoration: underline;
                 }
             </style>
             <table>

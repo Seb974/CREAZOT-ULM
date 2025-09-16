@@ -2,13 +2,16 @@
 
 namespace App\Service\Export;
 
+use App\Entity\User;
 use App\Entity\ProfilPilote;
+use App\Entity\CertificatMedical;
+use App\Service\Export\ExportUtils;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 class ProfilPiloteExportFilter implements ExportFilterInterface
 {
-    public function __construct(private EntityManagerInterface $em) {}
+    public function __construct(private EntityManagerInterface $em, private ExportUtils $exportUtils) {}
 
     public function supports(string $entityClass): bool
     {
@@ -24,10 +27,10 @@ class ProfilPiloteExportFilter implements ExportFilterInterface
         return $qb->getQuery()->getResult();
     }
 
-    public function formatExport(array $results): array
+    public function formatExport(array $results, string $format = 'csv'): array
     {
-        $headers = ['Id', 'Nom', 'E-mail', 'Heures de vol', 'Certificat Médical', 'Obtention', 'Fin de validité', 'Médecin',
-        'Qualification', 'Obtention', 'Fin de validité', 'Créé le', 'Créé par', 'Modifié le', 'Modifié par'];
+        $headers = ['Id', 'Identité', 'Heures de vol', 'Certificat Médical', 'Obtention', 'Fin de validité',
+        'Qualification', 'Obtention', 'Fin de validité', 'Autres documents', 'Créé le', 'Créé par', 'Modifié le', 'Modifié par'];
 
         $rows = [];
 
@@ -35,22 +38,26 @@ class ProfilPiloteExportFilter implements ExportFilterInterface
             $pilote = $profil->getPilote();
             $certificatMedical = $profil->getCertificatMedical();
             $qualifications = $profil->getPilotQualifications();
+            $documents = $this->exportUtils->getLinkList($profil->getDocuments(), $format);
             $first = true;
 
             if (count($qualifications ) > 0) {
                 foreach ($qualifications as $q) { 
                     $rows[] = [
                         $first ? $profil->getId() ?? '' : '',
-                        $first ? $pilote?->getFirstName() ?? '' : '',
-                        $first ? $pilote?->getEmail() ?? '' : '',
+                        $first ? $this->getIndentity($pilote, $format) ?? '' : '',
                         $first ? $this->getDecimalToHourMinute($profil?->getTotalFlightHours()) ?? '' : '',
-                        $first ? $this->getCertificatName($certificatMedical?->getType()) ?? '' : '',
+                        $first ? $this->getMedicalCertificate($certificatMedical, $format) ?? '' : '',
                         $first ? $certificatMedical?->getDateObtention()?->format('Y-m-d') ?? '' : '',
                         $first ? $this->getValidity($certificatMedical?->getValidUntil()) ?? '' : '',
-                        $first ? $certificatMedical?->getMedecin() ?? '' : '',
-                        $q->getQualification()?->getNom() ?? '',
+                        $this->exportUtils->makeLink(
+                            $q->getDocument(), 
+                            $q->getQualification()?->getNom(),
+                            $format
+                        ) ?? '',
                         $q->getDateObtention()?->format('Y-m-d') ?? '',
                         $this->getValidity($q->getValidUntil()) ?? '',
+                        $first ? $documents ?? '' : '',
                         $first ? $profil->getCreatedAt()?->format('Y-m-d H:i') ?? '' : '',
                         $first ? $profil->getCreatedBy()?->getFirstName() ?? '' : '',
                         $first ? $profil->getUpdatedAt()?->format('Y-m-d H:i') ?? '' : '',
@@ -62,16 +69,15 @@ class ProfilPiloteExportFilter implements ExportFilterInterface
             } else {
                 $rows[] = [
                     $profil->getId() ?? '',
-                    $pilote?->getFirstName() ?? '',
-                    $pilote?->getEmail() ?? '',
+                    $this->getIndentity($pilote, $format) ?? '',
                     $this->getDecimalToHourMinute($profil?->getTotalFlightHours()) ?? '',
-                    $this->getCertificatName($certificatMedical?->getType()) ?? '',
+                    $this->getMedicalCertificate($certificatMedical, $format) ?? '',
                     $certificatMedical?->getDateObtention()?->format('Y-m-d') ?? '',
                     $this->getValidity($certificatMedical?->getValidUntil()) ?? '',
-                    $certificatMedical?->getMedecin() ?? '',
                     '',
                     '',
                     '',
+                    $documents ?? '',
                     $profil->getCreatedAt()?->format('Y-m-d H:i') ?? '',
                     $profil->getCreatedBy()?->getFirstName() ?? '',
                     $profil->getUpdatedAt()?->format('Y-m-d H:i') ?? '',
@@ -81,6 +87,39 @@ class ProfilPiloteExportFilter implements ExportFilterInterface
         }
 
         return [$headers, $rows];
+    }
+
+    private function getIndentity(?User $pilote, string $format): string 
+    {
+        if (is_null($pilote)) return '';
+
+        $firstName = $pilote->getFirstName() ?? '';
+        $email = $pilote->getEmail() ?? '';
+
+        return $this->getBrokenLines($firstName, $email, $format);
+    }
+
+    private function getMedicalCertificate(?CertificatMedical $certificatMedical, string $format): string 
+    {
+        if (is_null($certificatMedical)) return '';
+
+        $document = $certificatMedical->getDocument();
+        $type = $this->getCertificatName($certificatMedical->getType());
+
+        $documentLink = $this->exportUtils->makeLink($document, $type, $format) ?? '';
+        $medecin = $certificatMedical->getMedecin() ?? '';
+        $medecin = !empty($medecin) ? 'Délivré par ' . $medecin : '';
+
+        return $this->getBrokenLines($documentLink, $medecin, $format);
+    }
+
+    private function getBrokenLines(string $line1, string $line2, string $format): string 
+    {
+        if (!empty($line1) && !empty($line2)) {
+            return $line1 . ($format === 'csv' ? "\n" : '<br>') . $line2;
+        }
+
+        return $line1 ?: $line2;
     }
 
     private function getDecimalToHourMinute(float $decimalDuration): string

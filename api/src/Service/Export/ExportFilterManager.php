@@ -25,11 +25,11 @@ class ExportFilterManager
         return [];
     }
 
-    public function formatExport(string $entityClass, array $results): array
+    public function formatExport(string $entityClass, array $results, string $format = 'csv'): array
     {
         foreach ($this->filters as $filter) {
             if ($filter->supports($entityClass)) {
-                return $filter->formatExport($results);
+                return $filter->formatExport($results, $format);
             }
         }
 

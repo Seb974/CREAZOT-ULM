@@ -60,7 +60,7 @@ class ReservationExportFilter implements ExportFilterInterface
         return $qb->getQuery()->getResult();
     }
 
-    public function formatExport(array $results): array
+    public function formatExport(array $results, string $format = 'csv'): array
     {
        $headers = ['Id', 'Code', 'Reference du paiement', 'Debut', 'Fin', 'Nom', 'Telephone',
             'Email', 'Quantite', 'Circuit', 'Option', 'Statut', 'Prix', 'Pilote', 'Aeronef', 

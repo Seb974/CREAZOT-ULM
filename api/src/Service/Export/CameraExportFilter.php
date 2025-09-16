@@ -24,7 +24,7 @@ class CameraExportFilter implements ExportFilterInterface
         return $qb->getQuery()->getResult();
     }
 
-    public function formatExport(array $results): array
+    public function formatExport(array $results, string $format = 'csv'): array
     {
         $headers = ['Id', 'Code', 'Nom'];
 

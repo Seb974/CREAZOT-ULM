@@ -9,6 +9,7 @@ parameters:
     image.client_dir: '/srv/api/public/images/client'
     image.shared_dir: '/srv/api/public/images'
     image.public_dir: '/srv/api/public'
+    media.dir: '/media'
     # image.client_dir: '%kernel.project_dir%/public/images/client'
     # image.shared_dir: '%kernel.project_dir%/public/images'
     # image.public_dir: '%kernel.project_dir%/public'
@@ -38,6 +39,10 @@ services:
         arguments:
             $webhookSecret: '%wix.webhook_secret%'
 
+    App\Service\Export\ExportUtils:
+        arguments:
+            $mediaUrl: '%media.dir%'
+
     App\DataTransformer\ClientInputDataTransformer:
         arguments:
             $persistProcessor: '@api_platform.doctrine.orm.state.persist_processor'
@@ -52,6 +57,7 @@ services:
     App\Service\Export\OrigineExportFilter: ~
     App\Service\Export\AeronefExportFilter: ~
     App\Service\Export\CircuitExportFilter: ~
+    App\Service\Export\ExpenseExportFilter: ~
     App\Service\Export\LandingExportFilter: ~
     App\Service\Export\PaymentExportFilter: ~
     App\Service\Export\AirportExportFilter: ~
@@ -72,6 +78,7 @@ services:
                 - '@App\Service\Export\OrigineExportFilter'
                 - '@App\Service\Export\AeronefExportFilter'
                 - '@App\Service\Export\CircuitExportFilter'
+                - '@App\Service\Export\ExpenseExportFilter'
                 - '@App\Service\Export\LandingExportFilter'
                 - '@App\Service\Export\PaymentExportFilter'
                 - '@App\Service\Export\AirportExportFilter'

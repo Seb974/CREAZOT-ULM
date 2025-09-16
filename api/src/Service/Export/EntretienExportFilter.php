@@ -3,12 +3,14 @@
 namespace App\Service\Export;
 
 use App\Entity\Entretien;
+use App\Service\Export\ExportUtils;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\HttpFoundation\Request;
 
 class EntretienExportFilter implements ExportFilterInterface
 {
-    public function __construct(private EntityManagerInterface $em) {}
+    public function __construct(private EntityManagerInterface $em, private ExportUtils $exportUtils) {}
 
     public function supports(string $entityClass): bool
     {
@@ -43,9 +45,9 @@ class EntretienExportFilter implements ExportFilterInterface
         return $qb->orderBy('e.date', 'DESC')->getQuery()->getResult();
     }
 
-    public function formatExport(array $results): array
+    public function formatExport(array $results, string $format = 'csv'): array
     {
-       $headers = ['Id', 'Date', 'Aéronef', 'Horamètre intervention', 'Intervention', 'Changement Moteur', 'Intervenants', 'Créé le', 'Créé par', 'Modifié le', 'Modifié par'];
+       $headers = ['Id', 'Date', 'Aéronef', 'Horamètre intervention', 'Intervention', 'Changement Moteur', 'Intervenants', 'Factures', 'Autres documents', 'Créé le', 'Créé par', 'Modifié le', 'Modifié par'];
 
         $rows = array_map(fn(Entretien $e) => [
             $e->getId(),
@@ -55,6 +57,8 @@ class EntretienExportFilter implements ExportFilterInterface
             $e->getIntervention() ?? '',
             $e->isChangementMoteur() ? 'Oui' : 'Non',
             implode(', ', array_map(fn($u) => $u->getFirstName(), $e->getIntervenants()->toArray())),
+            $this->getExpensesDocuments($e->getExpenses(), $format),
+            $this->exportUtils->getLinkList($e->getDocuments(), $format),
             $e->getCreatedAt()?->format('Y-m-d H:i') ?? '' ,
             $e->getCreatedBy()?->getFirstName() ?? '',
             $e->getUpdatedAt()?->format('Y-m-d H:i') ?? '' ,
@@ -62,5 +66,21 @@ class EntretienExportFilter implements ExportFilterInterface
         ], $results);
 
         return [$headers, $rows];
+    }
+
+    private function getExpensesDocuments(?Collection $expenses, string $format): string 
+    {
+        if (!$expenses || $expenses->isEmpty()) return '';
+
+        $linkList = '';
+        foreach ($expenses as $expense) {
+            $doc = $expense->getDocument();
+            if (!\is_null($doc)) {
+                $linkList .= $this->exportUtils->makeLink($doc, null, $format);
+                $linkList .= $format === 'csv' ? "\n" : '<br>';
+            }
+        }
+        return rtrim($linkList, $format === 'csv' ? "\n" : '<br>');
+
     }
 }

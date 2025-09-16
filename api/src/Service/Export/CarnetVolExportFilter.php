@@ -47,7 +47,7 @@ class CarnetVolExportFilter implements ExportFilterInterface
         return $qb->getQuery()->getResult();
     }
 
-    public function formatExport(array $results): array
+    public function formatExport(array $results, string $format = 'csv'): array
     {
        $headers = [ 'Id','Date', 'Pilote', 'Aéronef', 'Type de vol', 'Durée', 'Lieu départ', 
                     'Lieux arrivée', 'Créé le', 'Créé par', 'Modifié le', 'Modifié par'];

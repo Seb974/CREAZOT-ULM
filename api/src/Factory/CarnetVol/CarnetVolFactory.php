@@ -92,8 +92,14 @@ class CarnetVolFactory
         if (empty($airport)) return "";
 
         $code = $airport['code'] ?? "";
-        $name = !empty($airport['name']) ? " - " . $airport['name'] : "";
-        return $code . $name;
+        $name = $airport['name'] ?? "";
+
+        if (!empty($code) && !empty($name)) {
+            if (str_starts_with($name, $code)) return $name;
+
+            return $code . " - " . $name;
+        }
+        return $code ?: $name;
     }
 
     private function getMainAirport(Client $client): array

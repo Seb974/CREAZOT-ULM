@@ -51,7 +51,7 @@ class PrestationExportFilter implements ExportFilterInterface
         return $qb->getQuery()->getResult();
     }
 
-    public function formatExport(array $results): array
+    public function formatExport(array $results, string $format = 'csv'): array
     {
         $headers = [ 'Id', 'Date', 'Pilote', 'Aeronef', 'Horametre départ', 'Duree', 'Horametre fin',
         'Vol Id', 'Circuit', 'Type de vol', 'Quantite', 'Duree Théorique du Vol', 'Vol Modifié le',

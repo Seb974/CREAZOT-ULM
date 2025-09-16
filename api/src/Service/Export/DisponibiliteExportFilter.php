@@ -50,7 +50,7 @@ class DisponibiliteExportFilter implements ExportFilterInterface
         return $qb->getQuery()->getResult();
     }
 
-    public function formatExport(array $results): array
+    public function formatExport(array $results, string $format = 'csv'): array
     {
         $headers = ['Id', 'Pilote', 'Type', 'Debut', 'Fin', 'Motif'];
 
