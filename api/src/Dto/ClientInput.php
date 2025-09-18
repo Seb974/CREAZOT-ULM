@@ -154,4 +154,7 @@ final class ClientInput
 
     #[Groups(groups: ['Client:write'])]
     public ?\DateTimeInterface $maxHours = null;
+
+    #[Groups(groups: ['Client:write'])]
+    public ?bool $hasGroupUpdate = null;
 }

@@ -1,11 +1,32 @@
-import { Edit, SelectInput, useDataProvider, DateTimeInput, ReferenceInput, SimpleForm, TextInput, BooleanInput, ArrayInput, SimpleFormIterator, ReferenceArrayInput, SelectArrayInput } from "react-admin";
+import { Edit, SelectInput, useDataProvider, DateTimeInput, ReferenceInput, SimpleForm, TextInput, BooleanInput, ArrayInput, SimpleFormIterator, ReferenceArrayInput, SelectArrayInput, useRedirect, useNotify } from "react-admin";
 import { useWatch, useFormContext } from "react-hook-form";
 import { generateSafeCode, getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid, isNotBlank, isValid } from "../../../app/lib/utils";
 import { status, positions } from "../../../app/lib/reservation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useClient } from '../../admin/ClientProvider';
 import { useLocation } from 'react-router-dom';
-import { clientWithOptions, clientWithGifts, clientWithOriginContact, clientWithPartners, clientUsingAvailabilityFilter } from "../../../app/lib/client";
+import { Toolbar, SaveButton, DeleteButton } from 'react-admin';
+import { Checkbox, FormControlLabel, useMediaQuery } from '@mui/material';
+import { clientWithOptions, clientWithGifts, clientWithOriginContact, clientWithPartners, clientUsingAvailabilityFilter, clientWithGroupUpdate } from "../../../app/lib/client";
+
+const ReservationEditToolbar = ({ record, applyToGroup, setApplyToGroup, isSmall, client, ...props }) => {
+    
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => setApplyToGroup(event.target.checked);
+
+    return (
+        <Toolbar {...props} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+            <SaveButton {...props}/>
+            { clientWithGroupUpdate(client) && 
+              <FormControlLabel
+                  control={ <Checkbox checked={applyToGroup} onChange={handleChange} color="primary"/> }
+                  label={isSmall ? "Groupe" : "Appliquer au groupe"}
+                  style={{ marginRight: '16px' }}
+              />
+            }
+            <DeleteButton {...props} />
+        </Toolbar>
+    );
+};
 
 const FilteredPiloteInput = ({ circuits, client }) => {
   const circuitId = useWatch({ name: "circuit.@id" });
@@ -155,12 +176,16 @@ export const ReservationsEdit = () => {
   const location = useLocation();
   const dataProvider = useDataProvider();
   const origin = location?.state?.state?.origin;
+  // @ts-ignore
+  const isSmall = useMediaQuery(theme => theme.breakpoints.down('sm'));
+
+  const redirect = useRedirect();
+  const notify = useNotify();
 
   const [circuits, setCircuits] = useState([]);
   const [options, setOptions] = useState([]);
   const [origines, setOrigines] = useState([]);
-  
-  const [recordDate, setRecordDate] = useState(new Date());
+  const [applyToGroup, setApplyToGroup] = useState(false);
 
   useEffect(() => {
     getCircuits();
@@ -189,8 +214,33 @@ export const ReservationsEdit = () => {
           .then(({ data }) => setOrigines(data));
   }, [dataProvider]);
 
+  const handleSubmit = async reservation => {
+      try {
+        const formattedData = await transform(reservation);
+
+        //@ts-ignore
+        formattedData.applyToGroup = applyToGroup;
+
+        //@ts-ignore
+        const { data } = await dataProvider.update('reservations', { id: reservation.id, data: formattedData });
+
+        if (!data || !data['@id']) {
+            notify(`Erreur inattendue : l'aéroport n'a pas été mis à jour`, { type: 'warning' });
+            return;
+        }
+        if (origin === 'calendar') {
+          const debut = new Date(reservation.debut);
+          redirect(`/?scroll=calendar&date=${debut.toJSON().slice(0, 10) || ''}`)
+        } else {
+          redirect('list', 'reservations');
+        }
+      } catch (error) {
+          console.error(error);
+          notify(`Erreur lors de la mise à jour`, { type: 'error' });
+      }
+  };
+
   const transform = ({circuit, option, debut, avion, pilote, contacts, origineIds, cadeau, paid, ...data}) => {
-    setRecordDate(new Date(debut));
     const selectedCircuit = isDefined(circuit) ? circuits.find(c => c['@id'] === getFormattedValueForBackEnd(circuit)) : null;
     const selectedOption = clientWithOptions(client) && isDefined(option) ? options.find(c => c['@id'] === getFormattedValueForBackEnd(option)) : null;
     const seletedContacts = clientWithOriginContact(client) && isDefinedAndNotVoid(contacts) ? contacts.map(c => getFormattedValueForBackEnd(c)) : [];
@@ -226,8 +276,12 @@ export const ReservationsEdit = () => {
   };
 
   return (
-  <Edit transform={transform} mutationMode="pessimistic" redirect={ origin === 'calendar' ? `/?scroll=calendar&date=${recordDate.toJSON().slice(0, 10) || ''}` : 'list' }>
-      <SimpleForm>
+    <Edit>
+      <SimpleForm 
+        // @ts-ignore
+        toolbar={<ReservationEditToolbar applyToGroup={applyToGroup} setApplyToGroup={setApplyToGroup} isSmall={isSmall} client={client}/>} 
+        onSubmit={handleSubmit}
+      >
           <DateTimeInput source="debut" defaultValue={ new Date((new Date()).setHours(8, 0, 0)) } label="Date"/>
           <TextInput source="nom" label="Nom & prénom du passager"/>
           <TextInput source="telephone" label="N° de téléphone"/>
@@ -248,6 +302,6 @@ export const ReservationsEdit = () => {
           <BooleanInput source="report" label="Report"/>
           <TextInput source="originId" sx={{ display: 'none' }}/>
       </SimpleForm>
-  </Edit>
+    </Edit>
   )
 };

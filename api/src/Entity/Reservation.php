@@ -420,6 +420,12 @@ class Reservation
         return $this->contact;
     }
 
+    public function setContact(Collection $contacts): self
+    {
+        $this->contact = $contacts;
+        return $this;
+    }
+
     public function addContact(Contact $contact): static
     {
         if (!$this->contact->contains($contact)) {
@@ -442,6 +448,12 @@ class Reservation
     public function getOrigine(): Collection
     {
         return $this->origine;
+    }
+
+    public function setOrigine(Collection $origines): self
+    {
+        $this->origine = $origines;
+        return $this;
     }
 
     public function addOrigine(Origine $origine): static

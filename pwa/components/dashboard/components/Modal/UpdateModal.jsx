@@ -10,10 +10,11 @@ import { generateSafeCode, getFormattedValueForBackEnd, getRandomColor, isDefine
 import { PlusForm } from "../../../admin/prestation/Form/PlusForm";
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
-import { clientWithGifts, clientWithOptions, clientWithOriginContact, clientWithPartners } from '../../../../app/lib/client';
+import { clientWithGifts, clientWithGroupUpdate, clientWithOptions, clientWithOriginContact, clientWithPartners } from '../../../../app/lib/client';
 import CreditCardOffIcon from '@mui/icons-material/CreditCardOff';
 import CreditScoreIcon from '@mui/icons-material/CreditScore';
 import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
+import { Checkbox } from '@mui/material';
 
 export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservations, client }) => {
 
@@ -34,6 +35,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
     const [previousPaidValue, setPreviousPaidValue] = useState(false);
     const [selectedInitialContact, setSelectedInitialContact] = useState([]);
     const [selectedOriginContact, setSelectedOriginContact] = useState([]);
+    const [applyToGroup, setApplyToGroup] = useState(false);
     const [consumer, setConsumer] = useState({nom:"", telephone: "", email: "", quantite: 1, statut: "VALIDATED", remarques: "", report: false, paid: false, upsell: false, debut: new Date((new Date()).setHours(8, 0, 0)), color: getRandomColor(), position: "-", cadeau: defaultCadeau['@id']});
 
     useEffect(() => {
@@ -139,11 +141,12 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                 paid: clientWithGifts(client) && isDefined(selectedCadeau) ? true : consumer.paid,
                 code: isNotBlank(consumer.code) ? consumer.code : generateSafeCode('RESA'),
                 cadeau: selectedCadeau,
-                prix
+                prix, 
+                applyToGroup
             };
-            const updatedReservation = await dataProvider.update('reservations', {id: reservation.id, data: reservation});
+            const data = await dataProvider.update('reservations', {id: reservation.id, data: reservation});
             const updatedReservations = reservations
-                                            .map(r => r['@id'] === updatedReservation.data['@id'] ? updatedReservation.data : r)
+                                            .map(r => getUpdatedGroupOrReservation(r, data, applyToGroup))
                                             .filter(r => isDefined(r.statut) && !r.statut.includes("CANCEL"));
             setReservations(updatedReservations);
             reinitializeData();
@@ -155,9 +158,24 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
         }
     };
 
+    const getUpdatedGroupOrReservation = (currentReservation, payload, isGroupUpdate) => {
+        if (currentReservation['@id'] === payload?.data?.['@id']) {
+            return payload?.data;
+        } else {
+            const { code, nom, telephone, circuit, debut, fin, color, statut, remarques, report, email, paid, upsell, contact, origine, option } = payload.data;
+            if (!isGroupUpdate || currentReservation.code !== code) {
+                return currentReservation;
+            } else {
+                const newGroupedReservation = { ...currentReservation, nom, telephone, circuit, debut, fin, color, statut, remarques, report, email, paid, upsell, contact, origine};
+                const newPrice = getFinalPrice(circuit, currentReservation.option, origine);
+                return {...newGroupedReservation, prix: newPrice};
+            }
+        }
+    };
+
     const getFinalPrice = (selectedCircuit, selectedOption, selectedOriginContact) => {
         const maxOriginDiscount = isDefinedAndNotVoid(selectedOriginContact) ? getMaxDiscountFromOrigin(selectedOriginContact) : 0;
-        return selectedCircuit.prix * (1 - (maxOriginDiscount / 100)) + (selectedOption.prix || 0);
+        return selectedCircuit?.prix * (1 - (maxOriginDiscount / 100)) + (selectedOption?.prix ?? 0);
     };
     
     const getMaxDiscountFromOrigin = selectedOriginContact =>  selectedOriginContact.map(o => o.discount).reduce((max, current) => current > max ? current : max, 0);
@@ -183,6 +201,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
         setSelectedInitialContact([]);
         setSelectedOriginContact([]);
         setEligiblePilots([]);
+        setApplyToGroup(false);
     };
 
     const onBackClick = (e) => {
@@ -225,7 +244,7 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                         </div>
                     
                     <div className="p-4 md:p-5">
-                    <div className="border-b border-gray-200 dark:border-gray-700 mb-4">
+                        <div className="border-b border-gray-200 dark:border-gray-700 mb-4">
                             <ul className="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400">
                                 <li className="me-2">
                                     <a href="#" id="contact" onClick={ onSectionChange }
@@ -252,198 +271,225 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                                     </a>
                                 </li>
                                 <li className="me-2">
-                                    <a href="#" id="options" onClick={ onSectionChange }
-                                        className={ section === "options" ? 
-                                          "inline-flex items-center justify-center p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500 group" :
-                                          "inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group"
-                                        }
-                                    >
-                                        <svg className={section === "options" ? "w-4 h-4 me-2 text-blue-600 dark:text-blue-500" : "w-4 h-4 me-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300"} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-                                            <path d="M5 11.424V1a1 1 0 1 0-2 0v10.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.228 3.228 0 0 0 0-6.152ZM19.25 14.5A3.243 3.243 0 0 0 17 11.424V1a1 1 0 0 0-2 0v10.424a3.227 3.227 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.243 3.243 0 0 0 2.25-3.076Zm-6-9A3.243 3.243 0 0 0 11 2.424V1a1 1 0 0 0-2 0v1.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0V8.576A3.243 3.243 0 0 0 13.25 5.5Z"/>
-                                        </svg>Options
-                                    </a>
+                                    { !applyToGroup ? 
+                                        <a href="#" id="options" onClick={ onSectionChange }
+                                            className={ section === "options" ? 
+                                                "inline-flex items-center justify-center p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500 group" :
+                                                "inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group"
+                                            }
+                                        >
+                                            <svg className={section === "options" ? "w-4 h-4 me-2 text-blue-600 dark:text-blue-500" : "w-4 h-4 me-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300"} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M5 11.424V1a1 1 0 1 0-2 0v10.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.228 3.228 0 0 0 0-6.152ZM19.25 14.5A3.243 3.243 0 0 0 17 11.424V1a1 1 0 0 0-2 0v10.424a3.227 3.227 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.243 3.243 0 0 0 2.25-3.076Zm-6-9A3.243 3.243 0 0 0 11 2.424V1a1 1 0 0 0-2 0v1.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0V8.576A3.243 3.243 0 0 0 13.25 5.5Z"/>
+                                            </svg>Options
+                                        </a>
+                                        :
+                                        <a id="options" className="inline-flex p-4 text-gray-400 rounded-t-lg cursor-not-allowed dark:text-gray-500">
+                                            <svg className={section === "options" ? "w-4 h-4 me-2 text-blue-600 dark:text-blue-500" : "w-4 h-4 me-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300"} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+                                                <path d="M5 11.424V1a1 1 0 1 0-2 0v10.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.228 3.228 0 0 0 0-6.152ZM19.25 14.5A3.243 3.243 0 0 0 17 11.424V1a1 1 0 0 0-2 0v10.424a3.227 3.227 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.243 3.243 0 0 0 2.25-3.076Zm-6-9A3.243 3.243 0 0 0 11 2.424V1a1 1 0 0 0-2 0v1.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0V8.576A3.243 3.243 0 0 0 13.25 5.5Z"/>
+                                            </svg>Options
+                                        </a>
+                                    }
                                 </li>
                             </ul>
                         </div>
                         <form className="space-y-4">
-                            { section === "contact" && 
-                                <div className="space-y-4" style={{ zIndex: 3000 }}>
-                                    <div>
-                                        <label htmlFor="debut" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date et heure de décollage</label>
-                                        <Flatpickr
-                                            name="debut"
-                                            value={ consumer.debut }
-                                            onChange={ onDateChange }
-                                            className="form-control form-control-sm border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                                            options={{
-                                                enableTime: true,
-                                                time_24hr: true,
-                                                dateFormat: "d/m/Y - H:i",
-                                                mode: "single",
-                                                minDate: new Date(consumer.debut) < new Date((new Date).setHours(6, 0, 0)) ? new Date(consumer.debut) : new Date((new Date).setHours(6, 0, 0)),
-                                                minTime:"06:00",
-                                                maxTime:"18:00",
-                                                locale: French,
-                                                static: true
-                                            }}
-                                            style={{ height: "41px" }}
-                                        />
+                            <div id="formContent">
+                                { section === "contact" && 
+                                    <div className="space-y-4 min-h-[443px]" style={{ zIndex: 3000 }}>
+                                        <div className="my-4">
+                                            <label htmlFor="debut" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date et heure de décollage</label>
+                                            <Flatpickr
+                                                name="debut"
+                                                value={ consumer.debut }
+                                                onChange={ onDateChange }
+                                                className="form-control form-control-sm border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                options={{
+                                                    enableTime: true,
+                                                    time_24hr: true,
+                                                    dateFormat: "d/m/Y - H:i",
+                                                    mode: "single",
+                                                    minDate: new Date(consumer.debut) < new Date((new Date).setHours(6, 0, 0)) ? new Date(consumer.debut) : new Date((new Date).setHours(6, 0, 0)),
+                                                    minTime:"06:00",
+                                                    maxTime:"18:00",
+                                                    locale: French,
+                                                    static: true
+                                                }}
+                                                style={{ height: "41px" }}
+                                            />
+                                        </div>
+                                        <div className="my-4">
+                                            <label htmlFor="nom" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du contact</label>
+                                            <input 
+                                                type="text" 
+                                                name="nom" 
+                                                id="nom"
+                                                value={ consumer.nom }
+                                                onChange={ onConsumerChange }
+                                                className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
+                                                placeholder="Nom"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="my-4">
+                                            <label htmlFor="telephone" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">N° de téléphone</label>
+                                            <input 
+                                                type="text" 
+                                                name="telephone" 
+                                                id="telephone"
+                                                value={ consumer.telephone }
+                                                onChange={ onConsumerChange }
+                                                className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
+                                                placeholder="N° de téléphone" 
+                                                required
+                                            />
+                                        </div>
+                                        <div className="my-4">
+                                            <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Adresse email</label>
+                                            <input 
+                                                type="email" 
+                                                name="email" 
+                                                id="email"
+                                                value={ consumer.email }
+                                                onChange={ onConsumerChange }
+                                                className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
+                                                placeholder="Email"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="my-4">
+                                            <CircuitForm 
+                                                selectedCircuit={ selectedCircuit } 
+                                                setSelectedCircuit={ setSelectedCircuit }
+                                                getOnlyId={ false }
+                                                isUpdate={ true }
+                                                reservation={ toUpdate }
+                                            />
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label htmlFor="nom" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du contact</label>
-                                        <input 
-                                            type="text" 
-                                            name="nom" 
-                                            id="nom"
-                                            value={ consumer.nom }
-                                            onChange={ onConsumerChange }
-                                            className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
-                                            placeholder="Nom"
-                                            required
-                                        />
+                                }
+                                { section === "details" && 
+                                    <div className="min-h-[443px]">
+                                        <PlusForm 
+                                            consumer={ consumer } 
+                                            setConsumer={ setConsumer } 
+                                            selectedInitialContact={ selectedInitialContact }
+                                            setSelectedInitialContact={ setSelectedInitialContact }
+                                            selectedOriginContact={ selectedOriginContact }
+                                            setSelectedOriginContact={ setSelectedOriginContact }
+                                            previousPaidValue={ previousPaidValue }
+                                            setPreviousPaidValue={ setPreviousPaidValue }
+                                            client={ client }
+                                        /> 
                                     </div>
-                                    <div>
-                                        <label htmlFor="telephone" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">N° de téléphone</label>
-                                        <input 
-                                            type="text" 
-                                            name="telephone" 
-                                            id="telephone"
-                                            value={ consumer.telephone }
-                                            onChange={ onConsumerChange }
-                                            className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
-                                            placeholder="N° de téléphone" 
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Adresse email</label>
-                                        <input 
-                                            type="email" 
-                                            name="email" 
-                                            id="email"
-                                            value={ consumer.email }
-                                            onChange={ onConsumerChange }
-                                            className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
-                                            placeholder="Email"
-                                            required
-                                        />
-                                    </div>
-                                    <CircuitForm 
-                                        selectedCircuit={ selectedCircuit } 
-                                        setSelectedCircuit={ setSelectedCircuit }
-                                        getOnlyId={ false }
-                                        isUpdate={ true }
-                                        reservation={ toUpdate }
-                                    /> 
-                                </div>
-                            }
-                            { section === "details" && 
-                                <PlusForm 
-                                    consumer={ consumer } 
-                                    setConsumer={ setConsumer } 
-                                    selectedInitialContact={ selectedInitialContact }
-                                    setSelectedInitialContact={ setSelectedInitialContact }
-                                    selectedOriginContact={ selectedOriginContact }
-                                    setSelectedOriginContact={ setSelectedOriginContact }
-                                    previousPaidValue={ previousPaidValue }
-                                    setPreviousPaidValue={ setPreviousPaidValue }
-                                    client={ client }
-                                /> 
-                            }
-                            { section === "options" &&
-                                <div>
-                                    { clientWithGifts(client) &&
-                                        <div className="mb-2">
+                                }
+                                { section === "options" &&
+                                    <div className="min-h-[502px]">
+                                        { clientWithGifts(client) &&
+                                            <div className="mb-4">
+                                                <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                                                    Prépaiement
+                                                </label>
+                                                <div className="relative z-20 bg-white dark:bg-form-input">
+                                                    { consumer.cadeau['@id'] === defaultCadeau['@id'] ? 
+                                                        <CreditCardOffIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/> :
+                                                        <CreditScoreIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/>
+                                                    }
+                                                    <select
+                                                        value={ consumer.cadeau['@id'] }
+                                                        onChange={ onBonCadeauChange }
+                                                        className={`relative z-20 w-full appearance-none rounded-lg border border-stroke bg-transparent pl-12 pr-4 py-2 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white h-[41px]`}
+                                                    >
+                                                        { validCadeaux.map((cadeau, i) => (
+                                                            <option key={ i } value={ cadeau['@id'] } className="text-body dark:text-bodydark">
+                                                                { cadeau.name }
+                                                            </option>
+                                                        ))}
+                                                    </select>
+
+                                                </div>
+                                            </div>
+                                        }
+                                        { clientWithOptions(client) && 
+                                            <div className="my-4">
+                                                <OptionForm 
+                                                    selectedOption={ selectedOption } 
+                                                    setSelectedOption={ setSelectedOption }
+                                                    isUpdate={ true }
+                                                    reservation={ toUpdate }
+                                                />
+                                            </div>
+                                        }
+                                        <div className="my-4">
+                                            <ProfilPiloteForm 
+                                                selectedPilot={ selectedPilot } 
+                                                setSelectedPilot={ setSelectedPilot }
+                                                setPilots={ setPilots }
+                                                eligiblePilots={ eligiblePilots }
+                                                reservation={ toUpdate }
+                                                autoSelect={ false }
+                                                date={ consumer.debut }
+                                            />
+                                        </div>
+                                        <div className="my-4">
+                                            <AircraftForm 
+                                                selectedAircraft={ selectedAircraft }
+                                                setSelectedAircraft={ setSelectedAircraft }
+                                                aircrafts={ aircrafts }
+                                                setAircrafts={ setAircrafts }
+                                                reservation={ toUpdate }
+                                                autoSelect={ false }
+                                                resource = "reservations"
+                                            />
+                                        </div>
+                                        <div className="my-4">
                                             <label className="mb-2 block text-sm font-medium text-black dark:text-white">
-                                                Prépaiement
+                                                Position
                                             </label>
                                             <div className="relative z-20 bg-white dark:bg-form-input">
-                                                { consumer.cadeau['@id'] === defaultCadeau['@id'] ? 
-                                                    <CreditCardOffIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/> :
-                                                    <CreditScoreIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/>
-                                                }
+                                                <MilitaryTechIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/>
                                                 <select
-                                                    value={ consumer.cadeau['@id'] }
-                                                    onChange={ onBonCadeauChange }
+                                                    value={ consumer.position }
+                                                    onChange={(e) => {
+                                                    setConsumer({...consumer, position: e.target.value});
+                                                    }}
                                                     className={`relative z-20 w-full appearance-none rounded-lg border border-stroke bg-transparent pl-12 pr-4 py-2 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white h-[41px]`}
                                                 >
-                                                    { validCadeaux.map((cadeau, i) => (
-                                                        <option key={ i } value={ cadeau['@id'] } className="text-body dark:text-bodydark">
-                                                            { cadeau.name }
-                                                        </option>
-                                                    ))}
+                                                    <option value="Leader" className="text-body dark:text-bodydark">
+                                                        Leader
+                                                    </option>
+                                                    <option value="2"  className="text-body dark:text-bodydark">
+                                                        2
+                                                    </option>
+                                                    <option value="3" className="text-body dark:text-bodydark">
+                                                        3
+                                                    </option>
+                                                    <option value="4" className="text-body dark:text-bodydark">
+                                                        4
+                                                    </option>
+                                                    <option value="-" className="text-body dark:text-bodydark">
+                                                        -
+                                                    </option>
                                                 </select>
-
                                             </div>
                                         </div>
-                                    }
-                                    { clientWithOptions(client) && 
-                                        <OptionForm 
-                                            selectedOption={ selectedOption } 
-                                            setSelectedOption={ setSelectedOption }
-                                            isUpdate={ true }
-                                            reservation={ toUpdate }
-                                        /> 
-                                    }
-                                    <ProfilPiloteForm 
-                                        selectedPilot={ selectedPilot } 
-                                        setSelectedPilot={ setSelectedPilot }
-                                        setPilots={ setPilots }
-                                        eligiblePilots={ eligiblePilots }
-                                        reservation={ toUpdate }
-                                        autoSelect={ false }
-                                        date={ consumer.debut }
-                                    />
-                                    <AircraftForm 
-                                        selectedAircraft={ selectedAircraft }
-                                        setSelectedAircraft={ setSelectedAircraft }
-                                        aircrafts={ aircrafts }
-                                        setAircrafts={ setAircrafts }
-                                        reservation={ toUpdate }
-                                        autoSelect={ false }
-                                        resource = "reservations"
-                                    />
-                                    <div className="mb-2">
-                                        <label className="mb-2 block text-sm font-medium text-black dark:text-white">
-                                            Position
-                                        </label>
-                                        <div className="relative z-20 bg-white dark:bg-form-input">
-                                            <MilitaryTechIcon className="absolute left-4 top-1/2 z-30 -translate-y-1/2 opacity-80"/>
-                                            <select
-                                                value={ consumer.position }
-                                                onChange={(e) => {
-                                                setConsumer({...consumer, position: e.target.value});
-                                                }}
-                                                className={`relative z-20 w-full appearance-none rounded-lg border border-stroke bg-transparent pl-12 pr-4 py-2 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white h-[41px]`}
-                                            >
-                                                <option value="Leader" className="text-body dark:text-bodydark">
-                                                    Leader
-                                                </option>
-                                                <option value="2"  className="text-body dark:text-bodydark">
-                                                    2
-                                                </option>
-                                                <option value="3" className="text-body dark:text-bodydark">
-                                                    3
-                                                </option>
-                                                <option value="4" className="text-body dark:text-bodydark">
-                                                    4
-                                                </option>
-                                                <option value="-" className="text-body dark:text-bodydark">
-                                                    -
-                                                </option>
-                                            </select>
-                                        </div>
                                     </div>
+                                }
+                            </div>
+                            { clientWithGroupUpdate(client) && section !== "options" &&
+                                <div className="flex items-center justify-end space-x-1">
+                                    <label className="text-xs italic text-teal-700">Appliquer au groupe</label>
+                                    <Checkbox className="text-xs italic text-teal-700" checked={ applyToGroup } onChange={() => setApplyToGroup(!applyToGroup) } />
                                 </div>
                             }
-
-                            <div className="flex justify-between items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-                                <button onClick={ onChangeColor } className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center" style={{ height: "44px" }}>
-                                    <span className="flex justify-between items-center"><div className="border-solid rounded-lg mr-2" style={{ height: "20px", width: "40px", backgroundColor: consumer.color }}></div>{ "Changer" }</span>
-                                </button>
-                                <button onClick={ onSubmit } className="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
-                                    <><DoneIcon className="mr-2"/>{ "Réserver" }</>
-                                </button>
+                            <div className="border-t border-gray-200 rounded-b dark:border-gray-600">
+                                <div className="flex justify-between items-center pt-3 pb-4 md:pb-5">
+                                    <button onClick={ onChangeColor } className="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center" style={{ height: "44px" }}>
+                                        <span className="flex justify-between items-center"><div className="border-solid rounded-lg mr-2" style={{ height: "20px", width: "40px", backgroundColor: consumer.color }}></div>{ "Changer" }</span>
+                                    </button>
+                                    <button onClick={ onSubmit } className="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                                        <><DoneIcon className="mr-2"/>{ "Réserver" }</>
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>

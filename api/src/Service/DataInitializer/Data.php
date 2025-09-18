@@ -38,7 +38,8 @@ class Data
         'seuilQualifications' => 90,
         'hasIndividualFlightLogs' => true,
         'useAvailabilityFilter' => false,
-        'hasExpensesManagement' => false
+        'hasExpensesManagement' => false,
+        'hasGroupUpdate'  => false
     ];
 
     private $natures = [

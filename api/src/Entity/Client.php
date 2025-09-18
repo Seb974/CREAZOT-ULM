@@ -293,6 +293,10 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?\DateTimeInterface $maxHours = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasGroupUpdate = null;
+
     public function __construct()
     {
         $this->airports = new ArrayCollection();
@@ -985,6 +989,18 @@ class Client
     public function setMaxHours(?\DateTimeInterface $maxHours): static
     {
         $this->maxHours = $maxHours;
+
+        return $this;
+    }
+
+    public function getHasGroupUpdate(): ?bool
+    {
+        return $this->hasGroupUpdate;
+    }
+
+    public function setHasGroupUpdate(?bool $hasGroupUpdate): static
+    {
+        $this->hasGroupUpdate = $hasGroupUpdate;
 
         return $this;
     }

@@ -58,6 +58,7 @@ class CreateClientController extends AbstractController
         $dto->hasIndividualFlightLogs = $this->getBool($request, 'hasIndividualFlightLogs');
         $dto->useAvailabilityFilter = $this->getBool($request, 'useAvailabilityFilter');
         $dto->hasExpensesManagement = $this->getBool($request, 'hasExpensesManagement');
+        $dto->hasGroupUpdate = $this->getBool($request, 'hasGroupUpdate');
 
         // Champs Date et Heure
         $dto->minHours = $this->getTime($request, 'minHours');

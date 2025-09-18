@@ -75,6 +75,7 @@ export const ClientsEdit = () => {
                         hasIndividualFlightLogs: false,
                         useAvailabilityFilter: false,
                         hasExpensesManagement: false,
+                        hasGroupUpdate: false,
                         minHours: (new Date()).setHours(0, 0, 0),
                         maxHours: (new Date()).setHours(23, 59, 59)
                     })}
@@ -159,6 +160,9 @@ export const ClientsEdit = () => {
                             <Box flex={1}>
                                 <BooleanInput source="hasExpensesManagement" label="Gestion des dépenses" fullWidth/>
                             </Box>
+                            <Box flex={1}>
+                            <BooleanInput source="hasGroupUpdate" label="Mise à jour des groupes" fullWidth/>
+                        </Box>
                         </Box>
                         <Divider sx={{ mt: 2, borderBottomWidth: 2, borderColor: '#666' }} />
                     </TabbedForm.Tab>

@@ -331,6 +331,10 @@ export const clientWithExpensesManagement = client => {
     return isDefined(client) && isDefined(client.hasExpensesManagement) && client.hasExpensesManagement;
 };
 
+export const clientWithGroupUpdate = client => {
+    return isDefined(client) && isDefined(client.hasGroupUpdate) && client.hasGroupUpdate;
+};
+
 export const getDefaultLanding = client => {
     if (isDefined(client) && isDefinedAndNotVoid(client.airports) && clientWithLandingManagement(client)) {
         const mainAirport = client.airports.find(airport => airport.main);

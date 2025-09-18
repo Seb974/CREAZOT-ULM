@@ -46,6 +46,7 @@ export const ClientShow = () => {
                     <BooleanField source="hasPaymentManagement" label="Gestion des paiements" textAlign="center"/>
                     <BooleanField source="hasGifts" label="Gestion des prépaiements" textAlign="center"/>
                     <BooleanField source="hasExpensesManagement" label="Gestion des dépenses" textAlign="center"/>
+                    <BooleanField source="hasGroupUpdate" label="Mise à jour des groupes" textAlign="center"/>
                 </TabbedShowLayout.Tab>  
                 <TabbedShowLayout.Tab label="Dashboard">
                     <FunctionField 
