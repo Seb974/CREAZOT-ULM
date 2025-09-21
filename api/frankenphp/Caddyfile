@@ -31,6 +31,10 @@
 	handle /images/* {
 		root * /srv/api/public
 		file_server
+		header {
+        	Cache-Control "no-store, must-revalidate"
+        	ETag off
+    	}
 	}
 
 	handle /media/* {
