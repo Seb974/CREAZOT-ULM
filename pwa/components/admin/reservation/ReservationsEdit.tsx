@@ -20,7 +20,7 @@ const ReservationEditToolbar = ({ applyToGroup, setApplyToGroup, isSmall, client
             <SaveButton {...props}/>
             { clientWithGroupUpdate(client) && 
               <FormControlLabel
-                  control={ <Checkbox checked={applyToGroup} onChange={handleChange} color="primary" disabled={ record?.quantite <= 1 }/> }
+                  control={ <Checkbox checked={applyToGroup} onChange={handleChange} color="primary" disabled={ isDefined(record?.quantite) && record.quantite <= 1 }/> }
                   label={isSmall ? "Groupe" : "Appliquer au groupe"}
                   style={{ marginRight: '16px' }}
               />
