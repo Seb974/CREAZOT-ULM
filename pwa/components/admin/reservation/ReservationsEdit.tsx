@@ -1,4 +1,4 @@
-import { Edit, SelectInput, useDataProvider, DateTimeInput, ReferenceInput, SimpleForm, TextInput, BooleanInput, ArrayInput, SimpleFormIterator, ReferenceArrayInput, SelectArrayInput, useRedirect, useNotify } from "react-admin";
+import { Edit, SelectInput, useDataProvider, DateTimeInput, ReferenceInput, SimpleForm, TextInput, BooleanInput, ArrayInput, SimpleFormIterator, ReferenceArrayInput, SelectArrayInput, useRedirect, useNotify, useRecordContext } from "react-admin";
 import { useWatch, useFormContext } from "react-hook-form";
 import { generateSafeCode, getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid, isNotBlank, isValid } from "../../../app/lib/utils";
 import { status, positions } from "../../../app/lib/reservation";
@@ -9,8 +9,10 @@ import { Toolbar, SaveButton, DeleteButton } from 'react-admin';
 import { Checkbox, FormControlLabel, useMediaQuery } from '@mui/material';
 import { clientWithOptions, clientWithGifts, clientWithOriginContact, clientWithPartners, clientUsingAvailabilityFilter, clientWithGroupUpdate } from "../../../app/lib/client";
 
-const ReservationEditToolbar = ({ record, applyToGroup, setApplyToGroup, isSmall, client, ...props }) => {
-    
+const ReservationEditToolbar = ({ applyToGroup, setApplyToGroup, isSmall, client, ...props }) => {
+
+    const record = useRecordContext(props);
+
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => setApplyToGroup(event.target.checked);
 
     return (
@@ -18,7 +20,7 @@ const ReservationEditToolbar = ({ record, applyToGroup, setApplyToGroup, isSmall
             <SaveButton {...props}/>
             { clientWithGroupUpdate(client) && 
               <FormControlLabel
-                  control={ <Checkbox checked={applyToGroup} onChange={handleChange} color="primary"/> }
+                  control={ <Checkbox checked={applyToGroup} onChange={handleChange} color="primary" disabled={ record?.quantite <= 1 }/> }
                   label={isSmall ? "Groupe" : "Appliquer au groupe"}
                   style={{ marginRight: '16px' }}
               />

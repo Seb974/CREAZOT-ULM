@@ -477,8 +477,8 @@ export const UpdateModal = ({ toUpdate, setToUpdate, reservations, setReservatio
                             </div>
                             { clientWithGroupUpdate(client) && section !== "options" &&
                                 <div className="flex items-center justify-end space-x-1">
-                                    <label className="text-xs italic text-teal-700">Appliquer au groupe</label>
-                                    <Checkbox className="text-xs italic text-teal-700" checked={ applyToGroup } onChange={() => setApplyToGroup(!applyToGroup) } />
+                                    <label className={`text-xs italic text-teal-700 ' ${consumer.quantite > 1 ? '' : 'line-through decoration-teal-700 decoration-1 '}>`}>Appliquer au groupe</label>
+                                    <Checkbox checked={ applyToGroup } onChange={() => setApplyToGroup(!applyToGroup) } disabled={ consumer.quantite <= 1 } />
                                 </div>
                             }
                             <div className="border-t border-gray-200 rounded-b dark:border-gray-600">
