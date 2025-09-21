@@ -281,7 +281,8 @@ export const ReservationsCreate = () => {
       const selectedOrigines = clientWithPartners(client) && isDefinedAndNotVoid(origine) ? origines.filter(org => isDefined(origine.find(o => org['@id'] === getFormattedValueForBackEnd(o)))) : [];
       const selectedOptions = clientWithOptions(client) ? getSelectedOptions(option, quantite, options) : [];
       data = {
-        ...data, 
+        ...data,
+        quantite,
         remarques: isDefined(remarques) ? remarques : '', 
         fin: getEnd(data.debut, selectedCircuit),
         color: getRandomColor(),
