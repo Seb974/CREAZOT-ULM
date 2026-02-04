@@ -1,31 +1,38 @@
-services:
+services:        
   php:
-    image: ${IMAGES_PREFIX:-}app-php
+    image: ${PHP_DOCKER_IMAGE}
     depends_on:
       - database
     restart: unless-stopped
     environment:
       APP_ENV: dev
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: y4qKkbOmvj6RMCHgAVaTH6tVfXYf5zmI
-      POSTGRES_DB: app
+      APP_SECRET: ${APP_SECRET:-!ChangeMe!}
       POSTGRES_VERSION: 16
       POSTGRES_CHARSET: utf8
-      CADDY_MERCURE_JWT_SECRET: d8b0bhdnQDlbbdM70I0aTBvgrBUe3X
       PWA_UPSTREAM: pwa:3000
       OIDC_UPSTREAM: keycloak:8080
-      APP_NAME: admin.planetair974.re
-      SERVER_NAME: ${APP_NAME:-admin.planetair974.re, localhost}, php:80
-      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-d8b0bhdnQDlbbdM70I0aTBvgrBUe3X}
-      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-d8b0bhdnQDlbbdM70I0aTBvgrBUe3X}
+      OIDC_AUD: api-platform-api
+      OIDC_API_CLIENT_ID: api-platform-api
+      OIDC_SWAGGER_CLIENT_ID: api-platform-swagger
+      OIDC_API_CLIENT_SECRET: ${OIDC_API_CLIENT_SECRET:-!ChangeMe!}
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://app:!ChangeMe!@database:5432/app?serverVersion=16&charset=utf8}
+      CADDY_MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeMe!}
+      APP_NAME: ${APP_NAME:-localhost}
+      SERVER_NAME: ${SERVER_NAME:-localhost}, localhost, php:80
+      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeMe!}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeMe!}
       TRUSTED_PROXIES: ${TRUSTED_PROXIES:-127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
-      TRUSTED_HOSTS: ^${SERVER_NAME:-private\.planetair974\.re|localhost|keycloak}|keycloak|php$$
-      DATABASE_URL: postgresql://app:y4qKkbOmvj6RMCHgAVaTH6tVfXYf5zmI@database:5432/app?serverVersion=16&charset=utf8
-      MERCURE_URL: ${CADDY_MERCURE_URL:-http://php/.well-known/mercure}
-      MERCURE_PUBLIC_URL: https://${SERVER_NAME:-admin.planetair974.re}/.well-known/mercure
-      MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-d8b0bhdnQDlbbdM70I0aTBvgrBUe3X}
-      OIDC_SERVER_URL: ${OIDC_SERVER_URL:-https://admin.planetair974.re/oidc/realms/planetair974}
-      OIDC_SERVER_URL_INTERNAL: ${OIDC_SERVER_URL_INTERNAL:-http://keycloak:8080/oidc/realms/planetair974}
+      TRUSTED_HOSTS: ^${SERVER_NAME:-localhost}|keycloak|php$$
+      MERCURE_URL: ${MERCURE_URL:-http://php/.well-known/mercure}
+      MERCURE_PUBLIC_URL: https://${SERVER_NAME:-localhost}/.well-known/mercure
+      MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeMe!}
+      OIDC_SERVER_URL: ${OIDC_SERVER_URL:-http://localhost:8080/realms/demo}
+      OIDC_SERVER_URL_INTERNAL: ${OIDC_SERVER_URL_INTERNAL:-http://keycloak:8080/realms/demo}
+      CORS_ALLOW_ORIGIN: ^https?://(${SERVER_NAME:-localhost}|localhost|keyclaok|127\.0\.0\.1)(:[0-9]+)?$$
+      MICROTRAK_API_KEY: ${MICROTRAK_API_KEY:-!ChangeMe!}
     ports:
       # HTTP
       - target: 80
@@ -35,85 +42,70 @@ services:
       - target: 443
         published: ${HTTPS_PORT:-443}
         protocol: tcp
-      # HTTP/3
-      - target: 443
-        published: ${HTTP3_PORT:-443}
-        protocol: udp
+    # ACTIVER UNIQUEMENT EN DEV LOCAL
+    volumes:
+      - ./api/public/images:/srv/api/public/images
+      - ./api/public/media:/srv/api/public/media
+      - caddy_data:/data/caddy
+      - caddy_config:/config
 
   pwa:
-    image: ${IMAGES_PREFIX:-}app-pwa
+    image: ${PWA_DOCKER_IMAGE}
     environment:
-      DEFINED_AUTH_SECRET: pVk4mV6fQnXcyh88RM1wa7ifs5F1RXpJ
-      NEXT_PUBLIC_ENTRYPOINT: http://php
-      NEXT_PUBLIC_OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-api-platform-pwa}
-      NEXT_PUBLIC_OIDC_SERVER_URL: ${OIDC_SERVER_URL:-https://admin.planetair974.re/oidc/realms/planetair974}
-      NEXT_PUBLIC_OIDC_SERVER_URL_INTERNAL: ${OIDC_SERVER_URL_INTERNAL:-http://keycloak:8080/oidc/realms/planetair974}
-      NEXT_PUBLIC_OIDC_AUTHORIZATION_CLIENT_ID: ${OIDC_AUTHORIZATION_CLIENT_ID:-api-platform-api}
-      AUTH_SECRET: ${DEFINED_AUTH_SECRET:-pVk4mV6fQnXcyh88RM1wa7ifs5F1RXpJ}
-      NEXTAUTH_URL: ${AUTH_URL:-https://admin.planetair974.re} # /api/auth
       AUTH_TRUST_HOST: "true"
+      NEXT_PUBLIC_ENTRYPOINT: http://php
       NEXT_SHARP_PATH: /srv/app/node_modules/sharp
+      NEXT_PUBLIC_OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-api-platform-pwa}
+      NEXT_PUBLIC_OIDC_SERVER_URL: ${OIDC_SERVER_URL:-http://localhost:8080/realms/demo}
+      NEXT_PUBLIC_OIDC_SERVER_URL_INTERNAL: ${OIDC_SERVER_URL_INTERNAL:-http://keycloak:8080/realms/demo}
+      NEXT_PUBLIC_OIDC_AUTHORIZATION_CLIENT_ID: ${OIDC_AUTHORIZATION_CLIENT_ID:-api-platform-api}
+      AUTH_SECRET: ${AUTH_SECRET:-!ChangeMe!}
+      NEXTAUTH_URL: ${AUTH_URL:-https://localhost}
 
-###> doctrine/doctrine-bundle ###
   database:
-    image: postgres:${POSTGRES_VERSION:-16}-alpine
+    image: postgres:16.4-alpine
     environment:
-      - POSTGRES_DB=app
-      # You should definitely change the password in production
-      - POSTGRES_PASSWORD=y4qKkbOmvj6RMCHgAVaTH6tVfXYf5zmI
-      - POSTGRES_USER=app
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
     volumes:
       - db_data:/var/lib/postgresql/data
-      # you may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./api/docker/db/data:/var/lib/postgresql/data
-###< doctrine/doctrine-bundle ###
-
-# Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
-###> symfony/mercure-bundle ###
-###< symfony/mercure-bundle ###
+      - ../dump:/dump
 
   keycloak-database:
-    image: postgres:${KEYCLOAK_POSTGRES_VERSION:-16}-alpine
+    image: postgres:16.4-alpine
     environment:
-      KEYCLOAK_POSTGRES_PASSWORD: 1KAOIhLvptiy5Kq8e5ttRyaZHwXNIyD
       POSTGRES_DB: ${KEYCLOAK_POSTGRES_DB:-keycloak}
-      # You should definitely change the password in production
-      POSTGRES_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD:-1KAOIhLvptiy5Kq8e5ttRyaZHwXNIyD}
+      POSTGRES_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD:-!ChangeMe!}
       POSTGRES_USER: ${KEYCLOAK_POSTGRES_USER:-keycloak}
     volumes:
       - keycloak_db_data:/var/lib/postgresql/data
 
   keycloak:
-    image: app_keycloak
+    image: ${KEYCLOAK_DOCKER_IMAGE}
     environment:
-      KEYCLOAK_POSTGRES_PASSWORD: 1KAOIhLvptiy5Kq8e5ttRyaZHwXNIyD
-      KEYCLOAK_ADMINISTRATION_PASSWORD: Aeroprakt22
-      KEYCLOAK_DATABASE_HOST: keycloak-database
-      KEYCLOAK_DATABASE_NAME: ${KEYCLOAK_POSTGRES_DB:-keycloak}
-      KEYCLOAK_DATABASE_USER: ${KEYCLOAK_POSTGRES_USER:-keycloak}
-      KEYCLOAK_DATABASE_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD:-1KAOIhLvptiy5Kq8e5ttRyaZHwXNIyD}
-      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER:-admin}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMINISTRATION_PASSWORD:-Aeroprakt22}
-      # Must finish with a trailing slash (https://github.com/bitnami/charts/issues/10885#issuecomment-1414279144)
-      KEYCLOAK_HTTP_RELATIVE_PATH: /oidc/
-      # https://www.keycloak.org/server/hostname
-      KC_HOSTNAME_URL: https://${SERVER_NAME:-admin.planetair974.re}/oidc/
-      KC_HOSTNAME_ADMIN_URL: https://${SERVER_NAME:-admin.planetair974.re}/oidc/
-      # https://www.keycloak.org/server/features
+      KC_DB: postgres
+      KC_HTTP_RELATIVE_PATH: /
+      KC_DB_URL_HOST: keycloak-database
+      KC_DB_URL_DATABASE: ${KEYCLOAK_POSTGRES_DB:-keycloak}
+      KC_DB_USERNAME: ${KEYCLOAK_POSTGRES_USER:-keycloak}
+      KC_DB_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD:-!ChangeMe!}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-!ChangeMe!}
+      KC_HOSTNAME_URL: ${KEYCLOAK_HOSTNAME:-http://localhost:8080/} 
+      KC_HOSTNAME_ADMIN_URL: ${KEYCLOAK_HOSTNAME:-http://localhost:8080/} 
       KC_FEATURES: "scripts"
+      KC_PROXY: edge
+      KC_HTTP_ENABLED: "true"
     depends_on:
       - keycloak-database
     ports:
-      - target: 8080
-        published: 8080
-        protocol: tcp
+      - "8080:8080"
+    command:
+      - start
 
 volumes:
   caddy_data:
   caddy_config:
-###> doctrine/doctrine-bundle ###
-  db_data:
-###< doctrine/doctrine-bundle ###
-###> symfony/mercure-bundle ###
-###< symfony/mercure-bundle ###
   keycloak_db_data:
+  db_data:

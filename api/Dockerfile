@@ -5,8 +5,10 @@
 
 # Versions
 # hadolint ignore=DL3007
-FROM dunglas/frankenphp:1-php8.3 AS frankenphp_upstream
-FROM composer/composer:2-bin AS composer_upstream
+# FROM dunglas/frankenphp:1-php8.3 AS frankenphp_upstream
+FROM dunglas/frankenphp@sha256:c4be6f4617e0cc59eecaffb3805a7017ac928c01e2e2e8120b4beddfd10207e9 AS frankenphp_upstream
+# FROM composer/composer:2-bin AS composer_upstream
+FROM composer/composer@sha256:5107a53c864a9fb2579406968b95c4746a906db9c018779e1b63a40ec96a145c AS composer_upstream
 
 
 # The different stages of this Dockerfile are meant to be built into separate images
@@ -119,4 +121,5 @@ COPY init.sh /usr/local/bin/init.sh
 RUN chmod +x /usr/local/bin/init.sh
 
 # Utiliser le script comme point d'entrée
+# ⚠️ Remplace volontairement l'entrypoint FrankenPHP
 ENTRYPOINT ["/usr/local/bin/init.sh"]

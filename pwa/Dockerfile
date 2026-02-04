@@ -2,7 +2,8 @@
 
 
 # Versions
-FROM node:21-alpine AS node_upstream
+# FROM node:21-alpine AS node_upstream
+FROM node@sha256:09e2b3d9726018aecf269bd35325f46bf75046a643a66d28360ec71132750ec8 AS node_upstream
 
 
 # Base stage for dev and build
@@ -15,8 +16,8 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /srv/app
 
 RUN corepack enable && \
-	corepack prepare --activate pnpm@latest && \
-	pnpm config -g set store-dir /.pnpm-store
+    corepack prepare pnpm@10.28.2 --activate && \
+    pnpm config -g set store-dir /.pnpm-store
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry

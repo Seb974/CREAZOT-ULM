@@ -1,4 +1,4 @@
-# Production environment override
+# # Production environment override
 services:
   php:
     image: ${PHP_DOCKER_IMAGE}
@@ -7,36 +7,43 @@ services:
       target: frankenphp_prod
     environment:
       APP_ENV: prod
-      POSTGRES_DB: app
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: y4qKkbOmvj6RMCHgAVaTH6tVfXYf5zmI
-      APP_SECRET_ID: Gt2cYITO0xV4yl6qS0q8SxZK2eXY8zAu
-      APP_SECRET: ${APP_SECRET_ID:-Gt2cYITO0xV4yl6qS0q8SxZK2eXY8zAu}
-      CADDY_MERCURE_JWT_SECRET: d8b0bhdnQDlbbdM70I0aTBvgrBUe3X
-      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-d8b0bhdnQDlbbdM70I0aTBvgrBUe3X}
-      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-d8b0bhdnQDlbbdM70I0aTBvgrBUe3X}
-      DATABASE_URL: postgresql://app:y4qKkbOmvj6RMCHgAVaTH6tVfXYf5zmI@database:5432/app?serverVersion=16&charset=utf8
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+      APP_SECRET: ${APP_SECRET:-!ChangeMe!}
+      CADDY_MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeMe!}
+      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeMe!}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeMe!}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://app:!ChangeMe!@database:5432/app?serverVersion=16&charset=utf8}
+    volumes:
+      - ./api/public/images:/srv/api/public/images
+      - ./api/public/media:/app/public/media
+      - ./api/public/favicon.ico:/srv/api/public/favicon.ico
+      - ./api/public/apple-touch-icon.png:/srv/api/public/apple-touch-icon.png
+      - caddy_data:/data/caddy
+      - caddy_config:/config
+  
   pwa:
     image: ${PWA_DOCKER_IMAGE}
     build:
       context: ./pwa
       target: prod
       args:
-        AUTH_SECRET: ${AUTH_SECRET:-pVk4mV6fQnXcyh88RM1wa7ifs5F1RXpJ}
-        # https://nextjs.org/docs/app/building-your-application/configuring/environment-variables#bundling-environment-variables-for-the-browser
-        NEXT_PUBLIC_OIDC_SERVER_URL: ${NEXT_PUBLIC_OIDC_SERVER_URL:-https://admin.planetair974.re/oidc/realms/planetair974}
+        AUTH_SECRET: ${AUTH_SECRET:-!ChangeMe!}
+        NEXT_PUBLIC_OIDC_SERVER_URL: ${OIDC_SERVER_URL:-http://localhost:8080/realms/demo}
     environment:
-      DEFINED_AUTH_SECRET: pVk4mV6fQnXcyh88RM1wa7ifs5F1RXpJ
-      AUTH_SECRET: ${DEFINED_AUTH_SECRET:-pVk4mV6fQnXcyh88RM1wa7ifs5F1RXpJ}
-      NEXT_PUBLIC_OIDC_SERVER_URL: ${OIDC_SERVER_URL:-https://admin.planetair974.re/oidc/realms/planetair974}
+      AUTH_SECRET: ${AUTH_SECRET:-!ChangeMe!}
+      NEXT_PUBLIC_OIDC_SERVER_URL: ${OIDC_SERVER_URL:-http://localhost:8080/realms/demo}
+    volumes:
+      - ./api/public/images:/srv/api/public/images:ro
 
   database:
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-y4qKkbOmvj6RMCHgAVaTH6tVfXYf5zmI}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
 
   keycloak-database:
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-1KAOIhLvptiy5Kq8e5ttRyaZHwXNIyD}
+      POSTGRES_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD:-!ChangeMe!}
 
   keycloak:
     image: ${KEYCLOAK_DOCKER_IMAGE}
@@ -44,6 +51,17 @@ services:
       context: ./helm/api-platform/keycloak/
       target: keycloak
     environment:
+      KC_DB: postgres
+      KC_HTTP_RELATIVE_PATH: /
       KEYCLOAK_PRODUCTION: "true"
-      KEYCLOAK_ADMINISTRATION_PASSWORD: Aeroprakt22
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMINISTRATION_PASSWORD:-Aeroprakt22}
+      KC_DB_URL_HOST: keycloak-database
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-!ChangeMe!}
+      KC_DB_URL_DATABASE: ${KEYCLOAK_POSTGRES_DB:-keycloak}
+      KC_DB_USERNAME: ${KEYCLOAK_POSTGRES_USER:-keycloak}
+      KC_DB_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD:-!ChangeMe!}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER:-admin}
+      KC_HOSTNAME_URL: ${KEYCLOAK_HOSTNAME:-http://localhost:8080/} 
+      KC_HOSTNAME_ADMIN_URL: ${KEYCLOAK_HOSTNAME:-http://localhost:8080/}
+      KC_FEATURES: "scripts"
+      KC_PROXY: edge
+      KC_HTTP_ENABLED: "true"
