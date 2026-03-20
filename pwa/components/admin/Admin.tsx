@@ -43,11 +43,23 @@ import airportResourceProps from "./airport";
 import cameraResourceProps from "./camera";
 import expenseResourceProps from "./expense";
 
+const getClientHeaders = () => {
+  try {
+    const raw = sessionStorage.getItem('client');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.id) return { 'X-Client-Id': String(parsed.id) };
+    }
+  } catch (e) {}
+  return {};
+};
+
 const apiDocumentationParser = (session: Session) => async () => {
   try {
     return await parseHydraDocumentation(ENTRYPOINT, {
       headers: {
         Authorization: `Bearer ${session?.accessToken}`,
+        ...getClientHeaders(),
       },
     });
   } catch (result) {
@@ -89,6 +101,7 @@ const AdminAdapter = ({
         ...options,
         headers: {
           Authorization: `Bearer ${session?.accessToken}`,
+          ...getClientHeaders(),
         },
       }),
     apiDocumentationParser: apiDocumentationParser(session),

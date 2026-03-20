@@ -9,6 +9,8 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -100,6 +102,19 @@ class User implements UserInterface
 
     #[ORM\Column(type: 'string', length: 255, unique: true, nullable: true)]
     private ?string $keycloakId = null;
+
+    /**
+     * @var Collection<int, Client>
+     */
+    #[ORM\ManyToMany(targetEntity: Client::class, inversedBy: 'users')]
+    #[ORM\JoinTable(name: 'user_client')]
+    #[Groups(groups: ['User:read'])]
+    private Collection $clients;
+
+    public function __construct()
+    {
+        $this->clients = new ArrayCollection();
+    }
 
     public function getId(): ?Uuid
     {
@@ -197,5 +212,34 @@ class User implements UserInterface
     {
         $this->keycloakId = $keycloakId;
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Client>
+     */
+    public function getClients(): Collection
+    {
+        return $this->clients;
+    }
+
+    public function addClient(Client $client): static
+    {
+        if (!$this->clients->contains($client)) {
+            $this->clients->add($client);
+        }
+
+        return $this;
+    }
+
+    public function removeClient(Client $client): static
+    {
+        $this->clients->removeElement($client);
+
+        return $this;
+    }
+
+    public function hasClient(Client $client): bool
+    {
+        return $this->clients->contains($client);
     }
 }

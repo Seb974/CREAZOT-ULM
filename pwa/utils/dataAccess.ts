@@ -54,6 +54,16 @@ export const fetchApi = async <TData>(
     init.headers = { ...init.headers, Authorization: `Bearer ${session?.accessToken}` };
   }
 
+  const clientData = typeof window !== 'undefined' ? sessionStorage.getItem('client') : null;
+  if (clientData) {
+    try {
+      const parsed = JSON.parse(clientData);
+      if (parsed?.id) {
+        init.headers = { ...init.headers, 'X-Client-Id': String(parsed.id) };
+      }
+    } catch (e) {}
+  }
+
   const resp = await fetch(ENTRYPOINT + id, init);
   if (resp.status === 204) return;
 

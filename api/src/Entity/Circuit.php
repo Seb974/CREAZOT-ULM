@@ -52,8 +52,9 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     paginationEnabled: false,
     mercure: true
 )]
-class Circuit
+class Circuit implements TenantAwareInterface
 {
+    use TenantAwareTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

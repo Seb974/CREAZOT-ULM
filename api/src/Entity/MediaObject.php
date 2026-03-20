@@ -52,8 +52,9 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
         )
     ]
 )]
-class MediaObject
+class MediaObject implements TenantAwareInterface
 {
+    use TenantAwareTrait;
     #[ORM\Id, ORM\Column, ORM\GeneratedValue]
     private ?int $id = null;
 

@@ -14,6 +14,7 @@ import Payment from "./Payment";
 import { useSessionContext } from "../../admin/SessionContextProvider";
 import CarnetVol from "./CarnetVol";
 import { clientWithIndividualFlightLogs, clientWithPaymentManagement, clientWithReservationManagement } from "../../../app/lib/client";
+import ClientSelector from '../ClientSelector';
 
 const CustomAppBar = () => {
 
@@ -83,6 +84,7 @@ const CustomAppBar = () => {
         }
       >
         <TitlePortal />
+        <ClientSelector />
         <div className="flex-1">
           <Link to="/">
             <div style={{ position: "relative", width: 50, height: 50 }}>

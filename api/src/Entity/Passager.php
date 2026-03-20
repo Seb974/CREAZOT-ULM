@@ -53,8 +53,9 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     collectDenormalizationErrors: true,
     mercure: true,
 )]
-class Passager
+class Passager implements TenantAwareInterface
 {
+    use TenantAwareTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

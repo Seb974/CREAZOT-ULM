@@ -3,8 +3,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 const ClientContext = createContext(null);
 
 export const ClientProvider = ({ children }) => {
-
     const [client, setClient] = useState(null);
+    const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -14,27 +14,28 @@ export const ClientProvider = ({ children }) => {
             const parsedClient = JSON.parse(storedClient);
             if (parsedClient && typeof parsedClient === 'object' && parsedClient.id) {
                 setClient(parsedClient);
-                setLoading(false);
-                return;
             }
-        } catch (e) {
-            console.warn("Données client corrompues dans sessionStorage", e);
-        }
-        fetchClientData();
+        } catch (e) {}
+        fetchClients();
     }, []);
 
-    const fetchClientData = async () => {
+    const fetchClients = async () => {
         try {
-            const res = await fetch("/clients?page=1&itemsPerPage=1&order[id]=asc", {
+            const res = await fetch("/clients?pagination=false", {
                 method: "GET",
-                headers: { "Content-Type": "application/json"}
+                headers: { "Content-Type": "application/json" }
             });
             const data = await res.json();
-            setClient(data['hydra:member'][0]);
-            sessionStorage.setItem("client", JSON.stringify(data['hydra:member'][0]));
+            const memberList = data['hydra:member'] || [];
+            setClients(memberList);
+            if (!sessionStorage.getItem('client') && memberList.length > 0) {
+                setClient(memberList[0]);
+                sessionStorage.setItem("client", JSON.stringify(memberList[0]));
+            }
             setLoading(false);
         } catch (e) {
-            console.error("Erreur de récupération client", e);
+            console.error("Erreur de récupération clients", e);
+            setLoading(false);
         }
     };
 
@@ -43,8 +44,16 @@ export const ClientProvider = ({ children }) => {
         sessionStorage.setItem("client", JSON.stringify(newClient));
     };
 
+    const switchClient = (clientId) => {
+        const found = clients.find(c => c.id === clientId);
+        if (found) {
+            updateClient(found);
+            window.location.reload();
+        }
+    };
+
     return (
-        <ClientContext.Provider value={{ client, loading, error, updateClient }}>
+        <ClientContext.Provider value={{ client, clients, loading, error, updateClient, switchClient }}>
             { children }
         </ClientContext.Provider>
     );

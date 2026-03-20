@@ -20,6 +20,8 @@ use ApiPlatform\Metadata\Patch;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
+use App\Entity\TenantAwareInterface;
+use App\Entity\TenantAwareTrait;
 
 #[ORM\Entity(repositoryClass: PrestationRepository::class)]
 #[ApiResource(
@@ -64,8 +66,9 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     security: 'is_granted("OIDC_USER")',
     mercure: true,
 )]
-class Prestation
+class Prestation implements TenantAwareInterface
 {
+    use TenantAwareTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

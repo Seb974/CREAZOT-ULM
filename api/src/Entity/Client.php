@@ -297,10 +297,17 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?bool $hasGroupUpdate = null;
 
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'clients')]
+    private Collection $users;
+
     public function __construct()
     {
         $this->airports = new ArrayCollection();
         $this->cameras = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     #[Groups(groups: ['Client:read'])]
@@ -1001,6 +1008,33 @@ class Client
     public function setHasGroupUpdate(?bool $hasGroupUpdate): static
     {
         $this->hasGroupUpdate = $hasGroupUpdate;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): static
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->addClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): static
+    {
+        if ($this->users->removeElement($user)) {
+            $user->removeClient($this);
+        }
 
         return $this;
     }

@@ -20,6 +20,8 @@ use ApiPlatform\Metadata\ApiProperty;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
+use App\Entity\TenantAwareInterface;
+use App\Entity\TenantAwareTrait;
 
 #[ORM\Entity(repositoryClass: VolRepository::class)]
 #[ApiResource(
@@ -61,8 +63,9 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     security: 'is_granted("OIDC_USER")',
     mercure: true
 )]
-class Vol
+class Vol implements TenantAwareInterface
 {
+    use TenantAwareTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
