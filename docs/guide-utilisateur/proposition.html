@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C6L — Proposition Commerciale FFPLUM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sky: #0ea5e9;
+            --sky-dark: #0369a1;
+            --sky-deep: #0c4a6e;
+            --navy: #0f172a;
+            --navy-light: #1e293b;
+            --gold: #f59e0b;
+            --gold-light: #fbbf24;
+            --emerald: #10b981;
+            --rose: #f43f5e;
+            --violet: #8b5cf6;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: var(--slate-800);
+            background: var(--slate-50);
+            -webkit-font-smoothing: antialiased;
+            padding-top: 56px;
+        }
+
+        /* ====== NAV ====== */
+        nav {
+            position: fixed; top: 0; width: 100%; z-index: 100;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 0 40px; height: 56px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-left { display: flex; align-items: center; gap: 20px; }
+        .nav-logo { font-size: 1.4rem; font-weight: 800; color: white; letter-spacing: -1px; text-decoration: none; }
+        .nav-logo b { color: var(--gold); }
+        .nav-sep { color: var(--slate-600); font-size: 1.2rem; font-weight: 300; }
+        .nav-page { color: var(--gold-light); font-size: 0.85rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+        .nav-links { display: flex; gap: 6px; align-items: center; }
+        .nav-links a { color: var(--slate-400); text-decoration: none; font-size: 0.75rem; font-weight: 500; padding: 6px 12px; border-radius: 6px; transition: all 0.2s; }
+        .nav-links a:hover { color: white; background: rgba(255,255,255,0.08); }
+        .nav-links .btn-back { background: var(--sky); color: white; font-weight: 600; padding: 6px 16px; }
+        .nav-links .btn-back:hover { background: var(--sky-dark); }
+
+        /* ====== HERO ====== */
+        .prop-hero {
+            background: linear-gradient(135deg, var(--navy) 0%, #1a1a2e 50%, var(--sky-deep) 100%);
+            color: white; padding: 100px 80px; position: relative; overflow: hidden;
+        }
+        .prop-hero::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(ellipse 50% 50% at 75% 40%, rgba(245,158,11,0.08), transparent),
+                        radial-gradient(ellipse 40% 40% at 25% 70%, rgba(14,165,233,0.06), transparent);
+        }
+        .prop-hero-content { position: relative; z-index: 2; max-width: 700px; }
+        .prop-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(245,158,11,0.12); color: var(--gold-light);
+            padding: 8px 18px; border-radius: 100px; font-size: 0.8rem; font-weight: 600;
+            border: 1px solid rgba(245,158,11,0.25); margin-bottom: 24px;
+        }
+        .prop-hero h1 { font-size: 3.2rem; font-weight: 900; letter-spacing: -2px; line-height: 1.1; margin-bottom: 20px; }
+        .prop-hero h1 b { background: linear-gradient(135deg, var(--gold), var(--gold-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .prop-hero p { color: var(--slate-400); font-size: 1.1rem; line-height: 1.7; margin-bottom: 30px; }
+        .prop-meta { display: flex; gap: 32px; flex-wrap: wrap; }
+        .prop-meta-item { font-size: 0.85rem; }
+        .prop-meta-item span { color: var(--slate-500); }
+        .prop-meta-item strong { color: white; }
+
+        /* ====== SECTION TABS ====== */
+        .section-tabs {
+            background: white; border-bottom: 1px solid var(--slate-200);
+            padding: 0 80px; display: flex; gap: 0; position: sticky; top: 56px; z-index: 50;
+        }
+        .section-tab {
+            padding: 16px 24px; font-size: 0.85rem; font-weight: 600; color: var(--slate-500);
+            text-decoration: none; border-bottom: 3px solid transparent; transition: all 0.2s;
+        }
+        .section-tab:hover { color: var(--navy); border-bottom-color: var(--slate-300); }
+        .section-tab.option-a { border-bottom-color: var(--sky); color: var(--sky-dark); }
+        .section-tab.option-b { border-bottom-color: var(--emerald); color: #059669; }
+
+        /* ====== CONTAINER ====== */
+        .container { max-width: 1100px; margin: 0 auto; padding: 50px 80px; }
+
+        /* ====== OPTION HEADER ====== */
+        .option-header {
+            padding: 40px; border-radius: 16px; margin-bottom: 40px; position: relative; overflow: hidden;
+        }
+        .option-header.blue { background: linear-gradient(135deg, var(--sky-deep), var(--sky-dark)); color: white; }
+        .option-header.green { background: linear-gradient(135deg, #064e3b, #059669); color: white; }
+        .option-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; opacity: 0.7; margin-bottom: 10px; }
+        .option-header h2 { font-size: 2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 12px; border: none; }
+        .option-header h2::before { display: none; }
+        .option-header p { opacity: 0.8; font-size: 1rem; max-width: 600px; }
+        .option-total {
+            position: absolute; right: 40px; top: 50%; transform: translateY(-50%);
+            text-align: right;
+        }
+        .option-total .amount { font-size: 2.5rem; font-weight: 900; }
+        .option-total .label { font-size: 0.85rem; opacity: 0.7; }
+
+        /* ====== HEADINGS ====== */
+        h2 { color: var(--navy); font-size: 1.5rem; font-weight: 800; margin: 40px 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--slate-200); letter-spacing: -0.5px; }
+        h2::before { content: "●"; color: var(--sky); margin-right: 10px; }
+        h3 { color: var(--slate-700); font-size: 1.1rem; font-weight: 700; margin: 24px 0 14px; }
+        p { margin-bottom: 12px; font-size: 0.95rem; line-height: 1.7; }
+        ul { margin: 10px 0 15px 25px; }
+        li { margin-bottom: 6px; font-size: 0.93rem; }
+
+        /* ====== TABLE ====== */
+        table { width: 100%; border-collapse: collapse; margin: 16px 0 28px; font-size: 0.88rem; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        th { background: var(--navy); color: white; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { padding: 12px 16px; border-bottom: 1px solid var(--slate-100); }
+        tr:nth-child(even) { background: var(--slate-50); }
+        tr:hover { background: rgba(14,165,233,0.03); }
+        tr.total-row { background: var(--slate-100); font-weight: 700; }
+        tr.total-row td { border-top: 2px solid var(--slate-300); font-size: 1rem; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .price { font-weight: 700; color: var(--navy); font-variant-numeric: tabular-nums; }
+        .price-gold { font-weight: 700; color: #b45309; }
+
+        /* ====== CARDS ====== */
+        .highlight-box {
+            padding: 24px 28px; border-radius: 12px; margin: 24px 0;
+        }
+        .highlight-box.blue { background: rgba(14,165,233,0.06); border-left: 4px solid var(--sky); }
+        .highlight-box.gold { background: rgba(245,158,11,0.06); border-left: 4px solid var(--gold); }
+        .highlight-box.green { background: rgba(16,185,129,0.06); border-left: 4px solid var(--emerald); }
+        .highlight-box.rose { background: rgba(244,63,94,0.06); border-left: 4px solid var(--rose); }
+
+        .pricing-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 30px 0;
+        }
+        .pricing-card {
+            background: white; border: 1px solid var(--slate-200); border-radius: 14px;
+            padding: 28px; text-align: center; transition: all 0.3s;
+        }
+        .pricing-card:hover { border-color: var(--sky); box-shadow: 0 12px 30px rgba(14,165,233,0.1); transform: translateY(-4px); }
+        .pricing-card.featured { border-color: var(--gold); border-width: 2px; position: relative; }
+        .pricing-card.featured::before {
+            content: 'Recommandé'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: var(--gold); color: var(--navy); font-size: 0.7rem; font-weight: 700;
+            padding: 4px 14px; border-radius: 100px; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .pricing-card h4 { font-size: 1.1rem; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+        .pricing-card .card-price { font-size: 2rem; font-weight: 900; color: var(--sky-dark); margin: 12px 0 6px; }
+        .pricing-card .card-price span { font-size: 0.9rem; font-weight: 500; color: var(--slate-500); }
+        .pricing-card .card-desc { font-size: 0.85rem; color: var(--slate-500); margin-bottom: 16px; }
+        .pricing-card ul { text-align: left; list-style: none; margin: 0; padding: 0; }
+        .pricing-card li { padding: 6px 0; font-size: 0.85rem; color: var(--slate-600); border-bottom: 1px solid var(--slate-100); }
+        .pricing-card li::before { content: '✓ '; color: var(--emerald); font-weight: 700; }
+
+        .vs-divider {
+            text-align: center; margin: 60px 0; position: relative;
+        }
+        .vs-divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--slate-200); }
+        .vs-badge {
+            position: relative; display: inline-block;
+            background: var(--navy); color: white; font-weight: 800; font-size: 1.2rem;
+            padding: 10px 28px; border-radius: 100px; letter-spacing: 2px;
+        }
+
+        /* ====== TIMELINE ====== */
+        .timeline { margin: 30px 0; }
+        .timeline-item {
+            display: flex; gap: 20px; padding: 16px 0; border-left: 3px solid var(--slate-200);
+            margin-left: 12px; padding-left: 24px; position: relative;
+        }
+        .timeline-item::before {
+            content: ''; position: absolute; left: -8px; top: 20px;
+            width: 13px; height: 13px; border-radius: 50%; background: var(--sky);
+            border: 3px solid white; box-shadow: 0 0 0 2px var(--sky);
+        }
+        .timeline-item .t-period { min-width: 120px; font-weight: 700; color: var(--sky-dark); font-size: 0.9rem; }
+        .timeline-item .t-content h4 { font-size: 0.95rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+        .timeline-item .t-content p { font-size: 0.85rem; color: var(--slate-500); margin: 0; }
+
+        /* ====== FOOTER ====== */
+        footer {
+            background: var(--navy); color: white; padding: 40px 80px;
+            display: flex; justify-content: space-between; align-items: center; margin-top: 60px;
+        }
+        footer .f-logo { font-size: 1.6rem; font-weight: 800; letter-spacing: -1px; }
+        footer .f-logo b { color: var(--gold); }
+        footer .f-info { text-align: right; font-size: 0.85rem; color: var(--slate-500); }
+
+        /* ====== RESPONSIVE ====== */
+        @media (max-width: 1024px) {
+            .prop-hero { padding: 60px 40px; }
+            .option-total { display: none; }
+            .container { padding: 30px 40px; }
+            .pricing-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .section-tabs { padding: 0 20px; overflow-x: auto; }
+            footer { padding: 30px 40px; }
+        }
+        @media (max-width: 600px) {
+            nav { padding: 0 20px; }
+            .nav-links { display: none; }
+            .prop-hero { padding: 40px 20px; }
+            .prop-hero h1 { font-size: 2rem; }
+            .container { padding: 20px; }
+            .section-tabs { display: none; }
+            .pricing-grid { grid-template-columns: 1fr !important; }
+        }
+
+        @media print {
+            nav, .section-tabs { display: none; }
+            body { padding-top: 0; }
+            .prop-hero { page-break-after: always; }
+            .option-header { page-break-before: always; }
+            .vision-section { page-break-before: always; color: black; background: white !important; }
+            .vision-section::before { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ====== NAV ====== -->
+<nav>
+    <div class="nav-left">
+        <a href="index.html" class="nav-logo" title="Accueil">C<b>6</b>L</a>
+        <span class="nav-sep">/</span>
+        <span class="nav-page">Proposition</span>
+    </div>
+    <div class="nav-links">
+        <a href="#option-a">Option A — Rachat</a>
+        <a href="#option-b">Option B — Partenariat</a>
+        <a href="#simulation">Simulation</a>
+        <a href="#planning">Planning</a>
+        <a href="index.html" class="btn-back">← Accueil</a>
+    </div>
+</nav>
+
+<!-- ====== HERO ====== -->
+<section class="prop-hero">
+    <div class="prop-hero-content">
+        <div class="prop-badge">Proposition Commerciale — Confidentiel</div>
+        <h1>C<b>6</b>L pour la<br><b>FFPLUM</b></h1>
+        <p>
+            Proposition de mise à disposition de la plateforme C6L Gestion 4.0 pour l'ensemble des clubs ULM fédérés.
+            Deux options structurantes : rachat de la solution ou partenariat de distribution.
+        </p>
+        <div class="prop-meta">
+            <div class="prop-meta-item"><span>Destinataire</span><br><strong>FFPLUM — Direction</strong></div>
+            <div class="prop-meta-item"><span>Émetteur</span><br><strong>CREAZOT</strong></div>
+            <div class="prop-meta-item"><span>Date</span><br><strong>Février 2026</strong></div>
+            <div class="prop-meta-item"><span>Validité</span><br><strong>90 jours</strong></div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== TABS ====== -->
+<div class="section-tabs">
+    <a href="#option-a" class="section-tab option-a">Option A — Rachat</a>
+    <a href="#option-b" class="section-tab option-b">Option B — Partenariat</a>
+    <a href="#simulation" class="section-tab" style="color:var(--gold);">Simulation 5 ans</a>
+    <a href="#planning" class="section-tab">Planning</a>
+    <a href="#conditions" class="section-tab">Conditions</a>
+</div>
+
+<!-- ============================================================ -->
+<!-- OPTION A : RACHAT                                            -->
+<!-- ============================================================ -->
+<div class="container" id="option-a">
+
+    <div class="option-header blue">
+        <div class="option-label">Option A</div>
+        <h2>Rachat de la solution C6L</h2>
+        <p>Acquisition complète de la plateforme. La FFPLUM devient propriétaire du code source et de la marque, avec rebranding intégral sous identité fédérale.</p>
+        <div class="option-total">
+            <div class="label">Investissement initial</div>
+            <div class="amount">287 000 € HT</div>
+            <div class="label">+ 54 000 € HT / an</div>
+        </div>
+    </div>
+
+    <!-- A1 : Valorisation app existante -->
+    <h2>A1. Valorisation de l'application existante</h2>
+
+    <div class="highlight-box blue">
+        <strong>Méthode d'évaluation</strong> — Coût de remplacement déprécié. Estimation du temps de développement nécessaire pour recréer la solution à l'identique, pondéré par la maturité et la spécialisation métier.
+    </div>
+
+    <h3>Périmètre technique livré</h3>
+    <table>
+        <thead><tr><th>Composant</th><th>Technologies</th><th>Estimation effort (j/h)</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Backend API</strong><br>29 entités, filtres, sécurité, validations</td><td>Symfony 6 / API Platform / PHP 8.2</td><td class="text-center">120 j</td></tr>
+            <tr><td><strong>Frontend PWA</strong><br>10 modules, dashboard, 50+ composants</td><td>Next.js 14 / React Admin / MUI</td><td class="text-center">140 j</td></tr>
+            <tr><td><strong>Authentification SSO</strong><br>Multi-tenant, rôles, realm custom</td><td>Keycloak / OIDC / NextAuth</td><td class="text-center">40 j</td></tr>
+            <tr><td><strong>Intégrations tierces</strong><br>METAR/TAF, Windy, M&Radar, Microtrak, Wix</td><td>APIs REST / Webhooks</td><td class="text-center">45 j</td></tr>
+            <tr><td><strong>Infrastructure</strong><br>CI/CD, Helm charts, Docker, Caddy</td><td>Kubernetes / Docker / GitHub Actions</td><td class="text-center">35 j</td></tr>
+            <tr><td><strong>Tests & Qualité</strong><br>E2E, unitaires, fixtures, documentation</td><td>Playwright / PHPUnit / OpenAPI</td><td class="text-center">30 j</td></tr>
+            <tr class="total-row"><td><strong>Total effort estimé</strong></td><td></td><td class="text-center"><strong>410 j/h</strong></td></tr>
+        </tbody>
+    </table>
+
+    <h3>Chiffrage du rachat</h3>
+    <table>
+        <thead><tr><th>Poste</th><th>Détail</th><th class="text-right">Montant HT</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Licence code source</strong></td><td>Code complet (API + PWA + Infra), propriété pleine</td><td class="text-right price">140 000 €</td></tr>
+            <tr><td><strong>Documentation technique</strong></td><td>Architecture, schémas API, guides déploiement</td><td class="text-right">Inclus</td></tr>
+            <tr><td><strong>Transfert de compétences</strong></td><td>10 jours d'accompagnement technique</td><td class="text-right price">7 000 €</td></tr>
+            <tr><td><strong>Rebranding FFPLUM</strong></td><td>Remplacement logo, nom, charte graphique, domaine</td><td class="text-right price">5 000 €</td></tr>
+            <tr class="total-row"><td><strong>Sous-total rachat</strong></td><td></td><td class="text-right price">152 000 €</td></tr>
+        </tbody>
+    </table>
+
+    <!-- A2 : Développements CDC -->
+    <h2>A2. Développements complémentaires — CDC FFPLUM</h2>
+
+    <div class="highlight-box gold">
+        <strong>Référence</strong> — Basé sur l'<a href="scope.html" style="color:#b45309;">analyse SCOPE</a> (72% de couverture actuelle). TJM appliqué : <strong>700 € HT</strong>.
+    </div>
+
+    <h3>Phase OPS — Prioritaire (Juin 2026)</h3>
+    <table>
+        <thead><tr><th>Développement</th><th>Complexité</th><th class="text-center">Jours</th><th class="text-right">Montant HT</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Adaptation vocabulaire ULM</strong><br>Terminologie, labels, traductions</td><td>Faible</td><td class="text-center">6</td><td class="text-right price">4 200 €</td></tr>
+            <tr><td><strong>Types d'activité VLO / VLD</strong><br>Classification réglementaire des vols</td><td>Moyenne</td><td class="text-center">12</td><td class="text-right price">8 400 €</td></tr>
+            <tr><td><strong>Connecteur Exalto</strong><br>Synchronisation licences FFPLUM</td><td>Moyenne</td><td class="text-center">18</td><td class="text-right price">12 600 €</td></tr>
+            <tr><td><strong>Export format DGAC</strong><br>Rapports réglementaires conformes</td><td>Moyenne</td><td class="text-center">12</td><td class="text-right price">8 400 €</td></tr>
+            <tr><td><strong>Module MANEX</strong><br>Activités particulières, autorisations</td><td>Haute</td><td class="text-center">25</td><td class="text-right price">17 500 €</td></tr>
+            <tr><td><strong>Signature numérique</strong><br>Signature électronique & horodatage</td><td>Moyenne</td><td class="text-center">12</td><td class="text-right price">8 400 €</td></tr>
+            <tr><td><strong>Audit log complet</strong><br>Traçabilité auteur + horodatage</td><td>Moyenne</td><td class="text-center">10</td><td class="text-right price">7 000 €</td></tr>
+            <tr><td><strong>Blocages automatiques</strong><br>Empêcher vol si document expiré</td><td>Moyenne</td><td class="text-center">7</td><td class="text-right price">4 900 €</td></tr>
+            <tr><td><strong>Activation MFA Keycloak</strong><br>Configuration authentification multi-facteur</td><td>Faible</td><td class="text-center">3</td><td class="text-right price">2 100 €</td></tr>
+            <tr class="total-row"><td><strong>Sous-total Phase OPS</strong></td><td></td><td class="text-center"><strong>105 j</strong></td><td class="text-right price">73 500 €</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Phase V2/V3 — Évolutions (post-lancement)</h3>
+    <table>
+        <thead><tr><th>Développement</th><th>Complexité</th><th class="text-center">Jours</th><th class="text-right">Montant HT</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Connecteur DSAC</strong><br>Déclarations autorités</td><td>Haute</td><td class="text-center">20</td><td class="text-right price">14 000 €</td></tr>
+            <tr><td><strong>Module Formation avancé</strong><br>Livrets, programmes, examens</td><td>Haute</td><td class="text-center">30</td><td class="text-right price">21 000 €</td></tr>
+            <tr><td><strong>Statistiques fédérales</strong><br>Consolidation multi-clubs, dashboards</td><td>Moyenne</td><td class="text-center">18</td><td class="text-right price">12 600 €</td></tr>
+            <tr><td><strong>Notifications SMS</strong><br>Alertes critiques par SMS</td><td>Faible</td><td class="text-center">5</td><td class="text-right price">3 500 €</td></tr>
+            <tr class="total-row"><td><strong>Sous-total V2/V3</strong></td><td></td><td class="text-center"><strong>73 j</strong></td><td class="text-right price">51 100 €</td></tr>
+        </tbody>
+    </table>
+
+    <div class="highlight-box rose">
+        <strong>Investissement développement total</strong> : Phase OPS <strong>73 500 €</strong> + V2/V3 <strong>51 100 €</strong> = <strong>124 600 €</strong>
+    </div>
+
+    <!-- A3 : Récapitulatif -->
+    <h2>A3. Récapitulatif Option A — Rachat</h2>
+
+    <table>
+        <thead><tr><th>Poste</th><th class="text-right">Montant HT</th></tr></thead>
+        <tbody>
+            <tr><td>Rachat solution (licence + transfert + rebranding)</td><td class="text-right price">152 000 €</td></tr>
+            <tr><td>Développements Phase OPS (obligatoire)</td><td class="text-right price">73 500 €</td></tr>
+            <tr><td>Développements Phase V2/V3 (optionnel)</td><td class="text-right price-gold">51 100 €</td></tr>
+            <tr><td>Mise en production + déploiement 700 clubs</td><td class="text-right price">10 400 €</td></tr>
+            <tr class="total-row"><td><strong>Total investissement initial</strong></td><td class="text-right price" style="font-size:1.2rem;">287 000 €</td></tr>
+        </tbody>
+    </table>
+
+    <!-- A4 : Maintenance annuelle -->
+    <h2>A4. Maintenance & Support annuel</h2>
+
+    <table>
+        <thead><tr><th>Poste</th><th>Détail</th><th class="text-right">Montant HT / an</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Hébergement Kubernetes</strong></td><td>Cluster haute disponibilité, 700 tenants, backups, CDN</td><td class="text-right price">18 000 €</td></tr>
+            <tr><td><strong>Support N1/N2</strong></td><td>Helpdesk, tickets, résolution incidents (5j/7)</td><td class="text-right price">14 400 €</td></tr>
+            <tr><td><strong>Maintenance corrective</strong></td><td>Corrections bugs, mises à jour sécurité, dépendances</td><td class="text-right price">10 800 €</td></tr>
+            <tr><td><strong>Monitoring & SLA</strong></td><td>Supervision 24/7, alertes, SLA 99.5%</td><td class="text-right price">7 200 €</td></tr>
+            <tr><td><strong>Évolutions mineures</strong></td><td>5 jours/an d'évolutions incluses</td><td class="text-right price">3 500 €</td></tr>
+            <tr class="total-row"><td><strong>Total annuel</strong></td><td></td><td class="text-right price" style="font-size:1.1rem;">53 900 €</td></tr>
+        </tbody>
+    </table>
+
+    <div class="highlight-box blue">
+        <strong>Coût par club</strong> — Rapporté aux ~700 clubs : <strong>77 € HT / club / an</strong> soit <strong>6,40 € HT / club / mois</strong> pour la maintenance et le support.
+    </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SÉPARATEUR                                                   -->
+<!-- ============================================================ -->
+<div class="vs-divider">
+    <span class="vs-badge">OU</span>
+</div>
+
+<!-- ============================================================ -->
+<!-- OPTION B : PARTENARIAT                                       -->
+<!-- ============================================================ -->
+<div class="container" id="option-b">
+
+    <div class="option-header green">
+        <div class="option-label">Option B</div>
+        <h2>Partenariat de distribution</h2>
+        <p>La FFPLUM labellise C6L comme solution officielle ULM. Les clubs bénéficient de -10% et la FFPLUM perçoit 10% de commission. CREAZOT conserve la propriété, assure la maintenance et construit avec la fédération une plateforme fédératrice de l'écosystème ULM.</p>
+        <div class="option-total">
+            <div class="label">Investissement initial</div>
+            <div class="amount">73 500 € HT</div>
+            <div class="label">clubs : 36 à 47 €/aéronef/mois</div>
+        </div>
+    </div>
+
+    <h2>B1. Principe du partenariat</h2>
+
+    <div class="highlight-box green">
+        <strong>Modèle gagnant-gagnant</strong> — La FFPLUM labellise C6L comme « Solution officielle de gestion ULM ». CREAZOT conserve sa solution, assure la maintenance et gagne en visibilité. Les clubs accèdent à un outil professionnel à tarif préférentiel (-10%). La FFPLUM perçoit 10% de commission proportionnelle.
+    </div>
+
+    <table>
+        <thead><tr><th>Aspect</th><th>Détail</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Marque</strong></td><td>La solution reste sous le nom <strong>C6L by CREAZOT</strong> — pas de rebranding</td></tr>
+            <tr><td><strong>Propriété</strong></td><td>CREAZOT reste propriétaire du code source et de la marque</td></tr>
+            <tr><td><strong>Distribution</strong></td><td>La FFPLUM labellise et distribue la solution à ses clubs affiliés</td></tr>
+            <tr><td><strong>Hébergement</strong></td><td>CREAZOT héberge et opère l'infrastructure</td></tr>
+            <tr><td><strong>Support</strong></td><td>CREAZOT assure le support technique direct</td></tr>
+            <tr><td><strong>Évolutions</strong></td><td>CREAZOT maintient et fait évoluer la plateforme</td></tr>
+        </tbody>
+    </table>
+
+    <h2>B2. Adaptations CDC — Chiffrage</h2>
+
+    <p>Les développements spécifiques au cahier des charges FFPLUM restent facturés à la fédération, identiques à la Phase OPS de l'Option A :</p>
+
+    <table>
+        <thead><tr><th>Développement</th><th class="text-center">Jours</th><th class="text-right">Montant HT</th></tr></thead>
+        <tbody>
+            <tr><td>Adaptation vocabulaire ULM</td><td class="text-center">6</td><td class="text-right price">4 200 €</td></tr>
+            <tr><td>Types d'activité VLO / VLD</td><td class="text-center">12</td><td class="text-right price">8 400 €</td></tr>
+            <tr><td>Connecteur Exalto</td><td class="text-center">18</td><td class="text-right price">12 600 €</td></tr>
+            <tr><td>Export format DGAC</td><td class="text-center">12</td><td class="text-right price">8 400 €</td></tr>
+            <tr><td>Module MANEX</td><td class="text-center">25</td><td class="text-right price">17 500 €</td></tr>
+            <tr><td>Signature numérique</td><td class="text-center">12</td><td class="text-right price">8 400 €</td></tr>
+            <tr><td>Audit log + blocages + MFA</td><td class="text-center">20</td><td class="text-right price">14 000 €</td></tr>
+            <tr class="total-row"><td><strong>Total adaptations CDC</strong></td><td class="text-center"><strong>105 j</strong></td><td class="text-right price" style="font-size:1.1rem;">73 500 €</td></tr>
+        </tbody>
+    </table>
+
+    <div class="highlight-box gold">
+        <strong>Délai de livraison</strong> — 4 à 5 mois après signature, objectif <strong>Septembre 2026</strong>.
+    </div>
+
+    <h2>B3. Modèle économique pour les clubs</h2>
+
+    <p>Tarification simple et transparente : <strong>un prix par aéronef / mois</strong>, dégressif selon la taille de la flotte. <strong>Essai gratuit 30 jours</strong>, remise <strong>-10% pour les clubs FFPLUM</strong>. Toutes les fonctionnalités sont incluses.</p>
+
+    <h3>Grille tarifaire — par aéronef / mois HT</h3>
+    <table>
+        <thead><tr><th>Taille de flotte</th><th class="text-right">Tarif public</th><th class="text-right" style="background:var(--emerald); color:white;">Tarif FFPLUM (-10%)</th></tr></thead>
+        <tbody>
+            <tr><td><strong>1 à 2 aéronefs</strong></td><td class="text-right price">52 € / aéronef / mois</td><td class="text-right" style="color:var(--emerald); font-weight:700;">47 € / aéronef / mois</td></tr>
+            <tr><td><strong>3 à 5 aéronefs</strong></td><td class="text-right price">49 € / aéronef / mois</td><td class="text-right" style="color:var(--emerald); font-weight:700;">44 € / aéronef / mois</td></tr>
+            <tr><td><strong>6 à 10 aéronefs</strong></td><td class="text-right price">43 € / aéronef / mois</td><td class="text-right" style="color:var(--emerald); font-weight:700;">39 € / aéronef / mois</td></tr>
+            <tr><td><strong>11 aéronefs et +</strong></td><td class="text-right price">40 € / aéronef / mois</td><td class="text-right" style="color:var(--emerald); font-weight:700;">36 € / aéronef / mois</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Exemples de facturation mensuelle (tarifs FFPLUM)</h3>
+    <table>
+        <thead><tr><th>Profil du club</th><th class="text-center">Aéronefs</th><th class="text-right">Tarif unitaire</th><th class="text-right">Mensualité</th><th class="text-right" style="background:var(--gold); color:var(--navy);">Coût annuel</th></tr></thead>
+        <tbody>
+            <tr><td>Petit club / école</td><td class="text-center">2</td><td class="text-right">47 €</td><td class="text-right price">94 €</td><td class="text-right price">1 128 €</td></tr>
+            <tr style="background:rgba(245,158,11,0.04);"><td><strong>Club typique FFPLUM</strong></td><td class="text-center"><strong>4</strong></td><td class="text-right">44 €</td><td class="text-right price" style="font-weight:800;">176 €</td><td class="text-right price" style="font-weight:800;">2 112 €</td></tr>
+            <tr><td>Club actif</td><td class="text-center">7</td><td class="text-right">39 €</td><td class="text-right price">273 €</td><td class="text-right price">3 276 €</td></tr>
+            <tr><td>Grande structure</td><td class="text-center">15</td><td class="text-right">36 €</td><td class="text-right price">540 €</td><td class="text-right price">6 480 €</td></tr>
+        </tbody>
+    </table>
+
+    <div class="highlight-box blue">
+        <strong>Tout inclus</strong> — Chaque aéronef donne accès à l'ensemble des fonctionnalités : dashboard météo METAR, carnets de vol, réservations, maintenance, pilotes, passagers RGPD, prépaiements, bons cadeaux, alertes validités, exports, support email + visio. Aucune option payante.
+    </div>
+
+    <h3>Services complémentaires</h3>
+    <table>
+        <thead><tr><th>Service</th><th>Tarif HT</th><th>Détail</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Pack Setup & Onboarding</strong></td><td class="price">400 €</td><td>Configuration initiale, import données, visio de prise en main (one-shot)</td></tr>
+            <tr><td><strong>Formation visio</strong></td><td class="price">250 € / session</td><td>Formation équipe dirigeante ou pilotes (1h30)</td></tr>
+            <tr><td><strong>Base de connaissance</strong></td><td style="color:var(--emerald); font-weight:600;">Incluse</td><td>Documentation en ligne, tutoriels vidéo, FAQ</td></tr>
+            <tr><td><strong>Développement spécifique</strong></td><td class="price">700 € / jour</td><td>Fonctionnalités sur mesure hors CDC</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Revenus FFPLUM — Commission 10% sur les abonnements clubs</h3>
+
+    <div class="highlight-box green">
+        <strong>Modèle proportionnel</strong> — CREAZOT reverse <strong>10%</strong> du chiffre d'affaires abonnements à la FFPLUM. La commission est proportionnelle : 0 club = 0 € de coût pour la fédération. Hypothèse : revenu moyen ~176 €/mois par club (flotte moyenne ~4 aéronefs).
+    </div>
+
+    <table>
+        <thead><tr><th>Clubs actifs</th><th class="text-right">Commission FFPLUM / mois</th><th class="text-right" style="background:var(--gold); color:var(--navy);">Commission FFPLUM / an</th></tr></thead>
+        <tbody>
+            <tr><td><strong>50 clubs</strong></td><td class="text-right price-gold">880 €</td><td class="text-right price-gold">10 560 €</td></tr>
+            <tr><td><strong>100 clubs</strong></td><td class="text-right price-gold">1 760 €</td><td class="text-right price-gold">21 120 €</td></tr>
+            <tr><td><strong>200 clubs</strong></td><td class="text-right price-gold">3 520 €</td><td class="text-right price-gold">42 240 €</td></tr>
+            <tr><td><strong>300 clubs</strong></td><td class="text-right price-gold">5 280 €</td><td class="text-right price-gold">63 360 €</td></tr>
+            <tr><td><strong>400 clubs</strong></td><td class="text-right price-gold">7 040 €</td><td class="text-right price-gold">84 480 €</td></tr>
+            <tr style="background:rgba(245,158,11,0.08);"><td><strong>500 clubs</strong></td><td class="text-right price-gold" style="font-size:1.05rem;">8 800 €</td><td class="text-right price-gold" style="font-size:1.1rem;">105 600 €</td></tr>
+        </tbody>
+    </table>
+
+    <h2>B4. Comparatif des deux options</h2>
+
+    <table>
+        <thead><tr><th>Critère</th><th>Option A — Rachat</th><th>Option B — Partenariat</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Investissement initial</strong></td><td class="price">287 000 €</td><td class="price" style="color:#059669;">73 500 €</td></tr>
+            <tr><td><strong>Coût annuel FFPLUM</strong></td><td>53 900 € / an</td><td>0 € (porté par CREAZOT)</td></tr>
+            <tr><td><strong>Propriété du code</strong></td><td>FFPLUM (pleine propriété)</td><td>CREAZOT (licence d'usage)</td></tr>
+            <tr><td><strong>Risque technique</strong></td><td>Porté par la FFPLUM</td><td>Porté par CREAZOT</td></tr>
+            <tr><td><strong>Maintenance</strong></td><td>À charge FFPLUM (ou sous-traitée)</td><td>Incluse par CREAZOT</td></tr>
+            <tr><td><strong>Évolutions</strong></td><td>À financer par la FFPLUM</td><td>Roadmap mutualisée</td></tr>
+            <tr><td><strong>Coût pour les clubs</strong></td><td>Défini par la FFPLUM</td><td>36 à 47 € / aéronef / mois (tarif FFPLUM -10%)</td></tr>
+            <tr><td><strong>Revenus FFPLUM</strong></td><td>Potentiel via cotisation clubs</td><td>10% commission CA clubs</td></tr>
+            <tr><td><strong>Délai opérationnel</strong></td><td>~5 mois</td><td>~5 mois</td></tr>
+        </tbody>
+    </table>
+
+    <!-- ============================================================ -->
+    <!-- B5 : SIMULATION FINANCIÈRE                                   -->
+    <!-- ============================================================ -->
+    <h2 id="simulation">B5. Projection des revenus FFPLUM</h2>
+
+    <div class="highlight-box blue">
+        <strong>Hypothèses</strong> — Marché adressable : 700 clubs FFPLUM. Tarif par aéronef/mois (36 à 47 € FFPLUM). Revenu moyen par club : ~176 €/mois (flotte moyenne ~4 aéronefs). Commission FFPLUM : 10%. Tous les tarifs sont HT.
+    </div>
+
+    <h3>Trajectoire d'adoption prévisionnelle</h3>
+    <table>
+        <thead><tr><th></th><th class="text-center">An 1</th><th class="text-center">An 2</th><th class="text-center">An 3</th><th class="text-center">An 4</th><th class="text-center">An 5</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Nouveaux clubs / an</strong></td><td class="text-center">40</td><td class="text-center">60</td><td class="text-center">100</td><td class="text-center">120</td><td class="text-center">100</td></tr>
+            <tr style="font-weight:700;"><td><strong>Total clubs cumulés</strong></td><td class="text-center" style="color:var(--sky-dark);">40</td><td class="text-center" style="color:var(--sky-dark);">100</td><td class="text-center" style="color:var(--sky-dark);">200</td><td class="text-center" style="color:var(--sky-dark);">320</td><td class="text-center" style="color:var(--sky-dark);">420</td></tr>
+            <tr><td><strong>Taux de pénétration</strong></td><td class="text-center">6%</td><td class="text-center">14%</td><td class="text-center">29%</td><td class="text-center">46%</td><td class="text-center">60%</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Revenus FFPLUM — Commission 10%</h3>
+    <table>
+        <thead><tr><th></th><th class="text-right">An 1</th><th class="text-right">An 2</th><th class="text-right">An 3</th><th class="text-right">An 4</th><th class="text-right">An 5</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Clubs actifs (fin année)</strong></td><td class="text-center">40</td><td class="text-center">100</td><td class="text-center">200</td><td class="text-center">320</td><td class="text-center">420</td></tr>
+            <tr><td><strong>Commission / mois (fin année)</strong></td><td class="text-right price-gold">704 €</td><td class="text-right price-gold">1 760 €</td><td class="text-right price-gold">3 520 €</td><td class="text-right price-gold">5 632 €</td><td class="text-right price-gold">7 392 €</td></tr>
+            <tr><td><strong>Commission annuelle</strong></td><td class="text-right price-gold">4 224 €</td><td class="text-right price-gold">14 784 €</td><td class="text-right price-gold">31 680 €</td><td class="text-right price-gold">54 912 €</td><td class="text-right price-gold">78 144 €</td></tr>
+            <tr style="font-weight:700; background:rgba(245,158,11,0.06);"><td><strong>Cumulé</strong></td><td class="text-right">4 224 €</td><td class="text-right">19 008 €</td><td class="text-right">50 688 €</td><td class="text-right" style="color:var(--emerald);">105 600 €</td><td class="text-right" style="color:var(--emerald);">183 744 €</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Retour sur investissement CDC (73 500 €)</h3>
+    <table>
+        <thead><tr><th></th><th class="text-right">An 1</th><th class="text-right">An 2</th><th class="text-right">An 3</th><th class="text-right">An 4</th><th class="text-right">An 5</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Commissions cumulées</strong></td><td class="text-right">4 224 €</td><td class="text-right">19 008 €</td><td class="text-right">50 688 €</td><td class="text-right" style="color:var(--emerald); font-weight:700;">105 600 €</td><td class="text-right" style="color:var(--emerald); font-weight:700;">183 744 €</td></tr>
+            <tr><td><strong>Solde vs investissement</strong></td><td class="text-right" style="color:var(--rose);">- 69 276 €</td><td class="text-right" style="color:var(--rose);">- 54 492 €</td><td class="text-right" style="color:var(--rose);">- 22 812 €</td><td class="text-right" style="color:var(--emerald); font-weight:700;">+ 32 100 €</td><td class="text-right" style="color:var(--emerald); font-weight:700;">+ 110 244 €</td></tr>
+            <tr style="font-weight:700; background:rgba(245,158,11,0.06);"><td><strong>% investissement récupéré</strong></td><td class="text-right">6%</td><td class="text-right">26%</td><td class="text-right">69%</td><td class="text-right" style="color:var(--emerald);">144% ✓</td><td class="text-right" style="color:var(--emerald);">250% ✓</td></tr>
+        </tbody>
+    </table>
+
+    <div class="highlight-box green">
+        <strong>Bilan pour la FFPLUM</strong> — L'investissement de <strong>73 500 €</strong> pour le développement CDC est récupéré <strong>dès l'an 4</strong> via les commissions à 10%. À partir de l'an 5 (420 clubs), la FFPLUM perçoit <strong>~78 000 €/an</strong> de revenus récurrents. Pendant toute la durée, les clubs bénéficient d'un outil professionnel à tarif préférentiel (-10%) sans aucun risque technique ni coût de maintenance.
+    </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- PLANNING                                                     -->
+<!-- ============================================================ -->
+<div class="container" id="planning">
+    <h2>Planning prévisionnel</h2>
+
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="t-period">Avril 2026</div>
+            <div class="t-content">
+                <h4>Phase 0 — Contractualisation</h4>
+                <p>Validation du périmètre, signature, mise en place des environnements</p>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="t-period">Avril — Mai 2026</div>
+            <div class="t-content">
+                <h4>Phase 1 — Adaptations métier</h4>
+                <p>Vocabulaire ULM, VLO/VLD, blocages automatiques, MFA, audit log</p>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="t-period">Mai — Juin 2026</div>
+            <div class="t-content">
+                <h4>Phase 2 — Connecteurs & conformité</h4>
+                <p>Connecteur Exalto, export DGAC, signature numérique</p>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="t-period">Juillet — Août 2026</div>
+            <div class="t-content">
+                <h4>Phase 3 — Module MANEX & recette</h4>
+                <p>Activités particulières, tests avec clubs pilotes, recette fonctionnelle</p>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="t-period">Septembre 2026</div>
+            <div class="t-content">
+                <h4>Go Live — Mise en production</h4>
+                <p>Déploiement progressif, onboarding premiers clubs, support renforcé</p>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="t-period">S2 2026 →</div>
+            <div class="t-content">
+                <h4>Phase V2/V3 — Évolutions</h4>
+                <p>Formation avancée, connecteur DSAC, statistiques fédérales, SMS</p>
+            </div>
+        </div>
+        <div class="timeline-item" style="border-left-color: var(--violet); border-left-style: dashed;">
+            <div class="t-period" style="color:var(--violet);">2027 →</div>
+            <div class="t-content">
+                <h4 style="color:var(--violet);">Hub Pilotes — Mise en réseau</h4>
+                <p>Profils pilotes enrichis, matching clubs-pilotes, annuaire fédéral vivant, mobilité inter-clubs</p>
+                <p style="font-size:0.8rem; color:var(--slate-400); font-style:italic; margin-top:4px;">Axe d'évolution stratégique — ne fait pas partie de la présente proposition tarifaire</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CONDITIONS                                                   -->
+<!-- ============================================================ -->
+<div class="container" id="conditions">
+    <h2>Conditions générales</h2>
+
+    <table>
+        <thead><tr><th style="width:30%">Condition</th><th>Détail</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Validité de l'offre</strong></td><td>90 jours à compter de la date d'émission</td></tr>
+            <tr><td><strong>Modalités de paiement</strong></td><td>30% à la commande, 40% à la livraison Phase OPS, 30% à la recette</td></tr>
+            <tr><td><strong>Délai de réalisation</strong></td><td>4 à 5 mois pour la Phase OPS à compter de la date de signature</td></tr>
+            <tr><td><strong>Garantie</strong></td><td>12 mois de garantie corrective post-livraison (bugs uniquement)</td></tr>
+            <tr><td><strong>Propriété intellectuelle</strong></td><td>Option A : transfert intégral — Option B : licence d'usage illimitée</td></tr>
+            <tr><td><strong>Commission FFPLUM</strong></td><td>Option B : 10% du CA abonnements clubs, versée trimestriellement</td></tr>
+            <tr><td><strong>Confidentialité</strong></td><td>NDA réciproque, engagement de confidentialité des données clubs</td></tr>
+            <tr><td><strong>Réversibilité</strong></td><td>Option B : export complet des données à tout moment, préavis 6 mois</td></tr>
+            <tr><td><strong>Essai gratuit</strong></td><td>30 jours sans engagement pour chaque nouveau club</td></tr>
+        </tbody>
+    </table>
+
+    <div class="highlight-box gold">
+        <strong>Prochaine étape</strong> — Nous restons à votre disposition pour une présentation détaillée de la solution et une démonstration live avec un club pilote. Contact : <strong>contact@creazot.re</strong>
+    </div>
+</div>
+
+<!-- ====== FOOTER ====== -->
+<footer>
+    <div>
+        <div class="f-logo">C<b>6</b>L</div>
+        <div style="color:var(--slate-500); font-size:0.85rem; margin-top:5px;">Proposition Commerciale — FFPLUM</div>
+    </div>
+    <div class="f-info">
+        <div>© 2026 CREAZOT — Tous droits réservés</div>
+        <div style="margin-top:4px; font-size:0.8rem;">Document confidentiel</div>
+    </div>
+</footer>
+
+</body>
+</html>

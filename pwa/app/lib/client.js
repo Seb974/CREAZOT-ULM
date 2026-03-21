@@ -208,7 +208,7 @@ export const syncDocuments = async (documents, session) => {
   return results;
 };
 
-export const uploadImages = async (data, session) => {
+export const uploadImages = async (data, session, clientId = null) => {
     const uploadPromises = images.map(async (image) => {
         const value = data[image.name];
     
@@ -219,11 +219,11 @@ export const uploadImages = async (data, session) => {
             : null;
     
         if (file) {
-          // Nouveau fichier envoyé
           const opacity = image.type === 'pdfbackground' ? data.opacity : image.opacity;
           const formData = new FormData();
           formData.append('file', file);
           formData.append('type', image.type);
+          if (clientId) formData.append('clientId', String(clientId));
           if (opacity !== null && opacity !== undefined) {
             formData.append('opacity', opacity);
           }

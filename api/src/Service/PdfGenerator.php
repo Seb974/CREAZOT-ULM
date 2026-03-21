@@ -6,6 +6,7 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use Twig\Environment;
 use App\Entity\Cadeau;
+use App\Entity\Client;
 use App\Service\ClientGetter;
 
 class PdfGenerator
@@ -21,20 +22,18 @@ class PdfGenerator
 
     public function generate(Cadeau $data): string
     {
-        $client = $this->clientGetter->get();
+        $client = $data->getClient() ?? $this->clientGetter->get();
         $dompdf = new Dompdf();
 
-        // Options
         $options = new Options();
         $options->set('defaultFont', 'DejaVu Sans');
         $options->set('isHtml5ParserEnabled', true);
         $options->set('isRemoteEnabled', true);
         $dompdf->setOptions($options);
 
-        // Rendu HTML
         $html = $this->twig->render('bon_cadeau/pdf.html.twig', [
             'cadeau' => $data,
-            'encoded_image' => $this->getEncodedImage(),
+            'encoded_image' => $this->getEncodedImage($client),
             'client' => $client
         ]);
 
@@ -42,20 +41,28 @@ class PdfGenerator
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
-        // Retourne le contenu binaire du PDF
         return $dompdf->output();
     }
 
-    private function getEncodedImage()
+    private function getEncodedImage(?Client $client = null): ?string
     {
-        $imagePath = __DIR__.'/../../public/images/Plane.png';
+        $imagePath = null;
 
-        $encodedImage = null;
-        if (file_exists($imagePath)) {
-            $imageData = file_get_contents($imagePath);
-            $encodedImage = 'data:image/png;base64,' . base64_encode($imageData);
+        if ($client && $client->getPdfBackground()) {
+            $candidatePath = __DIR__ . '/../../public' . $client->getPdfBackground();
+            if (file_exists($candidatePath)) {
+                $imagePath = $candidatePath;
+            }
         }
 
-        return $encodedImage;
+        if (!$imagePath) {
+            $imagePath = __DIR__ . '/../../public/images/Plane.png';
+        }
+
+        if (file_exists($imagePath)) {
+            return 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath));
+        }
+
+        return null;
     }
 }

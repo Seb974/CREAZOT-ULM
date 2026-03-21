@@ -37,6 +37,7 @@
     "next": "^14.2.10",
     "next-auth": "5.0.0-beta.16",
     "picocolors": "^1.0.1",
+    "playwright": "^1.58.2",
     "postcss": "^8.4.41",
     "ra-i18n-polyglot": "^5.1.1",
     "ra-input-rich-text": "^5.8.1",

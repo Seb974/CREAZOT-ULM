@@ -99,7 +99,7 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
       return session;
     }
   },
-  secret:"pVk4mV6fQnXcyh88RM1wa7ifs5F1RXpJ",
+  secret: process.env.AUTH_SECRET,
   pages: {
     signIn: '/auth/signin',
     signOut: '/auth/signout',

@@ -39,7 +39,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     security: 'is_granted("OIDC_USER")',
     mercure: true
 )]
-class Airport
+class Airport implements TenantAwareInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C6L — Plateforme de Gestion Aéronautique</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sky: #0ea5e9;
+            --sky-dark: #0369a1;
+            --sky-deep: #0c4a6e;
+            --navy: #0f172a;
+            --navy-light: #1e293b;
+            --gold: #f59e0b;
+            --gold-light: #fbbf24;
+            --emerald: #10b981;
+            --rose: #f43f5e;
+            --violet: #8b5cf6;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--navy);
+            color: white;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 70% 50% at 50% 0%, rgba(14,165,233,0.12), transparent),
+                radial-gradient(ellipse 50% 40% at 80% 80%, rgba(139,92,246,0.06), transparent),
+                radial-gradient(ellipse 40% 30% at 10% 90%, rgba(245,158,11,0.05), transparent);
+        }
+
+        .page::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: -3px;
+            margin-bottom: 12px;
+        }
+
+        .logo b {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 1.15rem;
+            color: var(--slate-400);
+            font-weight: 300;
+            margin-bottom: 60px;
+            line-height: 1.7;
+        }
+
+        .tagline strong {
+            color: var(--slate-300);
+            font-weight: 500;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 40px 32px 36px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            opacity: 0;
+            transition: opacity 0.35s;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255,255,255,0.15);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        }
+
+        .card:hover::before { opacity: 1; }
+
+        .card-guide::before { background: linear-gradient(90deg, var(--sky), var(--sky-dark)); }
+        .card-scope::before { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+        .card-proposition::before { background: linear-gradient(90deg, var(--emerald), #34d399); }
+        .card-vision::before { background: linear-gradient(90deg, var(--violet), #a78bfa); }
+
+        .card-guide:hover { border-color: rgba(14,165,233,0.3); background: rgba(14,165,233,0.05); }
+        .card-scope:hover { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.05); }
+        .card-proposition:hover { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); }
+        .card-vision:hover { border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.05); }
+
+        .card-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 24px;
+        }
+
+        .card-guide .card-icon { background: rgba(14,165,233,0.12); color: var(--sky); }
+        .card-scope .card-icon { background: rgba(245,158,11,0.12); color: var(--gold); }
+        .card-proposition .card-icon { background: rgba(16,185,129,0.12); color: var(--emerald); }
+        .card-vision .card-icon { background: rgba(139,92,246,0.12); color: var(--violet); }
+
+        .card-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .card-guide .card-label { color: var(--sky); }
+        .card-scope .card-label { color: var(--gold); }
+        .card-proposition .card-label { color: var(--emerald); }
+        .card-vision .card-label { color: var(--violet); }
+
+        .card h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+            line-height: 1.25;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            color: var(--slate-400);
+            line-height: 1.7;
+            flex: 1;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .card-tag {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.05);
+            color: var(--slate-400);
+        }
+
+        .card-arrow {
+            position: absolute;
+            bottom: 32px;
+            right: 28px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: all 0.35s;
+        }
+
+        .card-guide .card-arrow { background: rgba(14,165,233,0.15); color: var(--sky); }
+        .card-scope .card-arrow { background: rgba(245,158,11,0.15); color: var(--gold); }
+        .card-proposition .card-arrow { background: rgba(16,185,129,0.15); color: var(--emerald); }
+        .card-vision .card-arrow { background: rgba(139,92,246,0.15); color: var(--violet); }
+
+        .card:hover .card-arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .footer-info {
+            font-size: 0.8rem;
+            color: var(--slate-500);
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .footer-info a {
+            color: var(--slate-400);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-info a:hover { color: white; }
+
+        .footer-sep {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--slate-600);
+        }
+
+        @media (max-width: 900px) {
+            .cards {
+                grid-template-columns: 1fr;
+                max-width: 460px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .logo { font-size: 3rem; }
+            .page { padding: 40px 24px; }
+        }
+
+        @media (max-width: 600px) {
+            .logo { font-size: 2.5rem; }
+            .tagline { font-size: 1rem; margin-bottom: 40px; }
+            .card { padding: 28px 24px 28px; }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="page">
+    <div class="content">
+
+        <h1 class="logo">C<b>6</b>L</h1>
+        <p class="tagline">
+            Plateforme de <strong>gestion aéronautique</strong> tout-en-un.<br>
+            Conçue pour les clubs ULM et aéroclubs — propulsée par CREAZOT.
+        </p>
+
+        <div class="cards">
+
+            <a href="guide.html" class="card card-guide">
+                <div class="card-icon">📖</div>
+                <div class="card-label">Produit</div>
+                <h2>Guide Utilisateur</h2>
+                <p>
+                    Découvrez les 10 modules de C6L : dashboard météo, carnets de vol,
+                    réservations, maintenance, pilotes, passagers et plus encore.
+                </p>
+                <div class="card-tags">
+                    <span class="card-tag">10 modules</span>
+                    <span class="card-tag">29 entités</span>
+                    <span class="card-tag">Captures écran</span>
+                </div>
+                <div class="card-arrow">→</div>
+            </a>
+
+            <a href="scope.html" class="card card-scope">
+                <div class="card-icon">📊</div>
+                <div class="card-label">Analyse</div>
+                <h2>SCOPE — Couverture CDC</h2>
+                <p>
+                    Analyse fonctionnelle détaillée : couverture du cahier des charges FFPLUM,
+                    benchmark concurrentiel, scoring par domaine.
+                </p>
+                <div class="card-tags">
+                    <span class="card-tag">72% couverture</span>
+                    <span class="card-tag">Benchmark</span>
+                    <span class="card-tag">Scoring</span>
+                </div>
+                <div class="card-arrow">→</div>
+            </a>
+
+            <a href="proposition.html" class="card card-proposition">
+                <div class="card-icon">📋</div>
+                <div class="card-label">Commercial</div>
+                <h2>Proposition FFPLUM</h2>
+                <p>
+                    Deux options structurantes — rachat ou partenariat. Tarification
+                    par aéronef, simulation financière sur 5 ans et planning.
+                </p>
+                <div class="card-tags">
+                    <span class="card-tag">2 options</span>
+                    <span class="card-tag">Simulation 5 ans</span>
+                    <span class="card-tag">Planning</span>
+                </div>
+                <div class="card-arrow">→</div>
+            </a>
+
+            <a href="vision.html" class="card card-vision">
+                <div class="card-icon">🔮</div>
+                <div class="card-label">Stratégie</div>
+                <h2>Vision stratégique</h2>
+                <p>
+                    Au-delà de l'outil : une plateforme fédératrice. Conformité
+                    réglementaire, Hub Pilotes et positionnement de la FFPLUM.
+                </p>
+                <div class="card-tags">
+                    <span class="card-tag">Réglementation 2025</span>
+                    <span class="card-tag">Hub Pilotes</span>
+                    <span class="card-tag">Fédérateur</span>
+                </div>
+                <div class="card-arrow">→</div>
+            </a>
+
+        </div>
+
+        <div class="footer-info">
+            <span>© 2026 CREAZOT</span>
+            <span class="footer-sep"></span>
+            <span>Document confidentiel — FFPLUM</span>
+            <span class="footer-sep"></span>
+            <a href="mailto:contact@creazot.re">contact@creazot.re</a>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

@@ -27,7 +27,7 @@ class FileUploader
         private readonly Filesystem $filesystem
     ) {}
 
-    public function upload(UploadedFile $file, string $type, ?float $opacity = null): string
+    public function upload(UploadedFile $file, string $type, ?float $opacity = null, ?int $clientId = null): string
     {
         $type = trim(strtolower($type));
 
@@ -36,7 +36,8 @@ class FileUploader
         }
 
         $isSharedAsset = in_array($type, ['favicon', 'apple-touch-icon']);
-        $targetDir = $isSharedAsset ? $this->publicDir : $this->clientDirectory;
+        $baseDir = $isSharedAsset ? $this->publicDir : $this->clientDirectory;
+        $targetDir = $clientId ? sprintf('%s/%d', rtrim($baseDir, '/'), $clientId) : $baseDir;
 
         if (!$this->filesystem->exists($targetDir)) {
             $this->filesystem->mkdir($targetDir, 0755);
@@ -45,12 +46,10 @@ class FileUploader
         $filename = self::FIXED_FILENAMES[$type];
         $filePath = sprintf('%s/%s', rtrim($targetDir, '/'), $filename);
 
-        // Supprimer le fichier existant s'il y en a un
         if ($this->filesystem->exists($filePath)) {
             $this->filesystem->remove($filePath);
         }
 
-        // Traitements par type
         switch ($type) {
             case 'logo':
             case 'mapicon':
@@ -73,18 +72,18 @@ class FileUploader
                 break;
         
             case 'favicon':
-                // On génère à la fois favicon.ico ET apple-touch-icon.png à partir du même fichier
-                // Génération du .ico (et retour de ce chemin)
                 $this->generateFavicon($file, $filePath);
-        
-                // Génération silencieuse du apple-touch-icon.png
-                $applePath = rtrim($this->sharedDirectory, '/') . '/apple-touch-icon.png';
+
+                $appleDir = $clientId ? sprintf('%s/%d', rtrim($this->sharedDirectory, '/'), $clientId) : $this->sharedDirectory;
+                if (!$this->filesystem->exists($appleDir)) {
+                    $this->filesystem->mkdir($appleDir, 0755);
+                }
+                $applePath = rtrim($appleDir, '/') . '/apple-touch-icon.png';
                 $filtered = $this->filterManager->applyFilter($this->createBinaryFromFile($file), 'apple_touch_icon');
                 $this->filesystem->dumpFile($applePath, $filtered->getContent());
                 break;
         
             default:
-                // Cas sans traitement spécifique : simple déplacement
                 $file->move($targetDir, $filename);
                 break;
         }

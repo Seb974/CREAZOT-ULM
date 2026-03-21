@@ -1,23 +1,12 @@
 import { AuthProvider } from "react-admin";
-import { jwtDecode } from "jwt-decode";
 import { getSession, signIn, signOut } from "next-auth/react";
 
 import { NEXT_PUBLIC_OIDC_SERVER_URL } from "../../config/keycloak";
 
-// @ts-ignore
-const parseJwt = (token) => {
-  try {
-    return JSON.parse(atob(token.split('.')[1]));
-  } catch (e) {
-    return null;
-  }
-};
-
 const authProvider: AuthProvider = {
-  // Nothing to do here, this function will never be called
   login: async () => Promise.resolve(),
   logout: async () => {
-    const session = getSession();
+    const session = await getSession();
     if (!session) {
       return;
     }
@@ -30,12 +19,11 @@ const authProvider: AuthProvider = {
     });
   },
   checkError: async (error) => {
-    const session = getSession();
+    const session = await getSession();
     const status = error.status;
     // @ts-ignore
     if (!session || session?.error === "RefreshAccessTokenError" || status === 401) {
       await signIn("keycloak");
-
       return;
     }
 
@@ -44,23 +32,22 @@ const authProvider: AuthProvider = {
     }
   },
   checkAuth: async () => {
-    const session = getSession();
+    const session = await getSession();
     // @ts-ignore
     if (!session || session?.error === "RefreshAccessTokenError") {
       await signIn("keycloak");
-
       return;
     }
 
     return Promise.resolve();
   },
   getPermissions: () => Promise.resolve(),
+  // @ts-ignore
   getIdentity: async () => {
-    const session = getSession();
+    const session = await getSession();
     // @ts-ignore
-    return isDefined(session) && isDefined(session.user) ? session.user : null;
+    return session?.user ?? null;
   },
-  // Nothing to do here, this function will never be called
   handleCallback: () => Promise.resolve(),
 };
 

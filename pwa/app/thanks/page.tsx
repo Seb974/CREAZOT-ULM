@@ -1,7 +1,6 @@
 "use client"
 
 import { isDefined } from "../lib/utils";
-import Image from 'next/image';
 import { CircularProgress } from '@mui/material';
 import { useEffect, useState } from "react";
 
@@ -79,7 +78,11 @@ const renderWithVariables = (html) => {
       </div>
     :
     <div className="text-center mx-2">
-        {/* <h2 className="mt-6 mb-4 text-6xl font-semibold text-red-500">Merci { name } !</h2> */}
+        { isDefined(client) && isDefined(client.thanksImage) && (
+          <div className="mt-6 mb-4 flex justify-center">
+            <img src={client.thanksImage} alt="Merci" className="max-w-full h-auto rounded-lg" />
+          </div>
+        )}
         { isDefined(client) && isDefined(client.thanksMessage) &&
           <div dangerouslySetInnerHTML={{ __html: renderWithImageAlignment(client.thanksMessage) }} />
         }

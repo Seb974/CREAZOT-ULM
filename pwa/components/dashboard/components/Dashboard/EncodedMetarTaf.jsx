@@ -49,10 +49,12 @@ export const EncodedMetarTaf = ({ code }) => {
             <h2><b>TAF</b></h2>
             { isDefined(taf) && taf !== "" &&
                 <p>
-                    <i className="text-xs">
-                        Du {new Date(taf.timestamp.from).toLocaleDateString()} {new Date(taf.timestamp.from).toLocaleTimeString()}{" "}
-                        au {new Date(taf.timestamp.to).toLocaleDateString()} {new Date(taf.timestamp.to).toLocaleTimeString()}
-                    </i>
+                    { taf.timestamp &&
+                        <i className="text-xs">
+                            Du {new Date(taf.timestamp.from).toLocaleDateString()} {new Date(taf.timestamp.from).toLocaleTimeString()}{" "}
+                            au {new Date(taf.timestamp.to).toLocaleDateString()} {new Date(taf.timestamp.to).toLocaleTimeString()}
+                        </i>
+                    }
                     <br/>
                     {taf.raw_text} 
                 </p>

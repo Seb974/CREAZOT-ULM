@@ -10,6 +10,7 @@ use ApiPlatform\Validator\ValidatorInterface;
 use App\Dto\ClientInput;
 use App\Entity\Client;
 use App\Service\FileUploader;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ClientInputDataTransformer implements ProcessorInterface
@@ -18,7 +19,8 @@ class ClientInputDataTransformer implements ProcessorInterface
         private readonly ProcessorInterface $persistProcessor,
         private readonly ValidatorInterface $validator,
         private readonly FileUploader $fileUploader,
-        private readonly ProviderInterface $itemProvider
+        private readonly ProviderInterface $itemProvider,
+        private readonly EntityManagerInterface $entityManager
     ) {}
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Client
@@ -78,33 +80,45 @@ class ClientInputDataTransformer implements ProcessorInterface
             $client->setMinHours($data->minHours);
             $client->setMaxHours($data->maxHours);
 
-            // Uploads de fichiers
+            $hasFileUploads = ($data->logo instanceof UploadedFile)
+                || ($data->favicon instanceof UploadedFile)
+                || ($data->pdfBackground instanceof UploadedFile)
+                || ($data->thanksImage instanceof UploadedFile)
+                || ($data->mapIcon instanceof UploadedFile);
+
+            if (!$shouldHydrateExistingClient && $hasFileUploads) {
+                $this->entityManager->persist($client);
+                $this->entityManager->flush();
+            }
+
+            $clientId = $client->getId();
+
             if ($data->logo instanceof UploadedFile) {
-                $client->setLogo($this->fileUploader->upload($data->logo, 'logo'));
+                $client->setLogo($this->fileUploader->upload($data->logo, 'logo', null, $clientId));
             } elseif ($data->logo === 'DELETE') {
                 $client->setLogo(null);
             }
 
             if ($data->favicon instanceof UploadedFile) {
-                $client->setFavicon($this->fileUploader->upload($data->favicon, 'favicon'));
+                $client->setFavicon($this->fileUploader->upload($data->favicon, 'favicon', null, $clientId));
             } elseif ($data->favicon === 'DELETE') {
                 $client->setFavicon(null);
             }
 
             if ($data->pdfBackground instanceof UploadedFile) {
-                $client->setPdfBackground($this->fileUploader->upload($data->pdfBackground, 'pdfBackground', $data->opacity));
+                $client->setPdfBackground($this->fileUploader->upload($data->pdfBackground, 'pdfBackground', $data->opacity, $clientId));
             } elseif ($data->pdfBackground === 'DELETE') {
                 $client->setPdfBackground(null);
             }
 
             if ($data->thanksImage instanceof UploadedFile) {
-                $client->setThanksImage($this->fileUploader->upload($data->thanksImage, 'thanksImage'));
+                $client->setThanksImage($this->fileUploader->upload($data->thanksImage, 'thanksImage', null, $clientId));
             } elseif ($data->thanksImage === 'DELETE') {
                 $client->setThanksImage(null);
             }
 
             if ($data->mapIcon instanceof UploadedFile) {
-                $client->setMapIcon($this->fileUploader->upload($data->mapIcon, 'mapIcon'));
+                $client->setMapIcon($this->fileUploader->upload($data->mapIcon, 'mapIcon', null, $clientId));
             } elseif ($data->mapIcon === 'DELETE') {
                 $client->setMapIcon(null);
             }

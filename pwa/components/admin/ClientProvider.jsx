@@ -48,7 +48,6 @@ export const ClientProvider = ({ children }) => {
         const found = clients.find(c => c.id === clientId);
         if (found) {
             updateClient(found);
-            window.location.reload();
         }
     };
 

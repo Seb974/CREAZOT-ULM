@@ -37,7 +37,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     security: 'is_granted("OIDC_USER")',
     mercure: true
 )]
-class Camera
+class Camera implements TenantAwareInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

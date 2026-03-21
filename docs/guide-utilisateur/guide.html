@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C6L — Gestion Aéronautique</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sky: #0ea5e9;
+            --sky-dark: #0369a1;
+            --sky-deep: #0c4a6e;
+            --navy: #0f172a;
+            --navy-light: #1e293b;
+            --gold: #f59e0b;
+            --gold-light: #fbbf24;
+            --emerald: #10b981;
+            --rose: #f43f5e;
+            --violet: #8b5cf6;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            --radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--slate-800);
+            background: white;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ====== NAVIGATION STICKY ====== */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 0 40px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -1px;
+            text-decoration: none;
+        }
+
+        .nav-logo b { color: var(--gold); }
+
+        .nav-links {
+            display: flex;
+            gap: 6px;
+        }
+
+        .nav-links a {
+            color: var(--slate-400);
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .nav-scope {
+            background: var(--gold);
+            color: var(--navy);
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 6px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .nav-scope:hover { background: var(--gold-light); }
+
+        /* ====== HERO / COUVERTURE ====== */
+        .hero {
+            min-height: 100vh;
+            background: var(--navy);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 100px 80px;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 70% 40%, rgba(14,165,233,0.15), transparent),
+                radial-gradient(ellipse 60% 50% at 20% 80%, rgba(139,92,246,0.08), transparent);
+        }
+
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 560px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(14,165,233,0.15);
+            color: var(--sky);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(14,165,233,0.3);
+            margin-bottom: 30px;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--emerald);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .hero-title {
+            font-size: 4.5rem;
+            font-weight: 900;
+            color: white;
+            line-height: 1;
+            letter-spacing: -3px;
+            margin-bottom: 25px;
+        }
+
+        .hero-title b {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-desc {
+            font-size: 1.2rem;
+            color: var(--slate-400);
+            line-height: 1.7;
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+        }
+
+        .hero-stat {
+            text-align: left;
+        }
+
+        .hero-stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .hero-stat-label {
+            font-size: 0.8rem;
+            color: var(--slate-500);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .hero-visual {
+            position: absolute;
+            right: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48%;
+            z-index: 2;
+        }
+
+        .hero-screenshot {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+        }
+
+        .hero-screenshot-glow {
+            position: absolute;
+            inset: -2px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--sky), var(--violet));
+            opacity: 0.3;
+            filter: blur(20px);
+            z-index: -1;
+        }
+
+        /* ====== SECTION ATOUTS ====== */
+        .atouts {
+            padding: 100px 80px;
+            background: white;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--sky);
+            margin-bottom: 12px;
+        }
+
+        .section-heading {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--navy);
+            letter-spacing: -1.5px;
+            line-height: 1.15;
+            margin-bottom: 15px;
+        }
+
+        .section-sub {
+            font-size: 1.1rem;
+            color: var(--slate-500);
+            max-width: 500px;
+            line-height: 1.7;
+            margin-bottom: 50px;
+        }
+
+        .atouts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .atout {
+            padding: 32px 28px;
+            border-radius: var(--radius);
+            border: 1px solid var(--slate-200);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .atout:hover {
+            border-color: var(--sky);
+            box-shadow: 0 20px 40px rgba(14,165,233,0.1);
+            transform: translateY(-4px);
+        }
+
+        .atout::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--sky), var(--violet));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .atout:hover::before { opacity: 1; }
+
+        .atout-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 18px;
+        }
+
+        .atout h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 8px;
+        }
+
+        .atout p {
+            font-size: 0.9rem;
+            color: var(--slate-500);
+            line-height: 1.6;
+        }
+
+        /* ====== SECTIONS FONCTIONNELLES ====== */
+        .feature-section {
+            padding: 80px;
+            position: relative;
+        }
+
+        .feature-section:nth-child(odd) {
+            background: var(--slate-50);
+        }
+
+        .feature-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-row.reverse {
+            direction: rtl;
+        }
+
+        .feature-row.reverse > * {
+            direction: ltr;
+        }
+
+        .feature-text { }
+
+        .feature-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            margin-bottom: 18px;
+        }
+
+        .feature-text h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: var(--navy);
+            margin-bottom: 16px;
+            line-height: 1.15;
+        }
+
+        .feature-text > p {
+            font-size: 1rem;
+            color: var(--slate-500);
+            line-height: 1.7;
+            margin-bottom: 28px;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--slate-700);
+        }
+
+        .feature-item::before {
+            content: '✓';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            background: rgba(16,185,129,0.1);
+            color: var(--emerald);
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .feature-tip {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 18px;
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border-radius: 10px;
+            border-left: 3px solid var(--gold);
+            font-size: 0.85rem;
+            color: #92400e;
+        }
+
+        .feature-tip b { white-space: nowrap; }
+
+        /* Screenshot avec cadre navigateur */
+        .browser-frame {
+            background: var(--navy);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .browser-bar {
+            height: 36px;
+            background: var(--navy-light);
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            gap: 8px;
+        }
+
+        .browser-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .browser-dot.red { background: #ef4444; }
+        .browser-dot.yellow { background: #eab308; }
+        .browser-dot.green { background: #22c55e; }
+
+        .browser-url {
+            margin-left: 12px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 6px;
+            padding: 4px 14px;
+            font-size: 0.7rem;
+            color: var(--slate-500);
+            flex: 1;
+            max-width: 300px;
+        }
+
+        /* Zone de capture — centrage intelligent */
+        .screen-crop {
+            overflow: hidden;
+            height: 500px;
+        }
+
+        .screen-crop img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            display: block;
+        }
+
+        /* Pas de crop (page login etc.) */
+        .screen-no-crop {
+            overflow: hidden;
+        }
+
+        .screen-no-crop img {
+            width: 100%;
+            display: block;
+            object-fit: contain;
+        }
+
+        /* Variante : galerie multi-screenshots */
+        .screenshot-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .screenshot-gallery .browser-frame {
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+
+        .screenshot-gallery .browser-bar { height: 28px; }
+        .screenshot-gallery .browser-dot { width: 8px; height: 8px; }
+
+        .screenshot-gallery .screen-crop {
+            height: 380px;
+        }
+
+        /* ====== SECTION DASHBOARD SPECIALE ====== */
+        .dashboard-section {
+            padding: 80px;
+            background: linear-gradient(180deg, var(--navy) 0%, var(--sky-deep) 100%);
+            color: white;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 50px;
+            align-items: start;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .meteo-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .meteo-card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .meteo-card-header {
+            padding: 10px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .meteo-card img {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* ====== FOOTER ====== */
+        footer {
+            background: var(--navy);
+            color: white;
+            padding: 50px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        footer .f-logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        footer .f-logo b { color: var(--gold); }
+
+        footer .f-info {
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--slate-500);
+        }
+
+        /* ====== RESPONSIVE ====== */
+        @media (max-width: 1024px) {
+            .hero { padding: 100px 40px; }
+            .hero-visual { display: none; }
+            .hero-content { max-width: 100%; }
+            .feature-row, .feature-row.reverse { grid-template-columns: 1fr; direction: ltr; }
+            .atouts-grid { grid-template-columns: repeat(2, 1fr); }
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 600px) {
+            .atouts-grid { grid-template-columns: 1fr; }
+            .feature-list { grid-template-columns: 1fr; }
+            nav { padding: 0 20px; }
+            .nav-links { display: none; }
+            .hero-title { font-size: 3rem; }
+        }
+
+        /* ====== PRINT ====== */
+        @media print {
+            nav { display: none; }
+            .hero { min-height: auto; page-break-after: always; }
+            .feature-section { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ====== NAVIGATION ====== -->
+<nav>
+    <a href="index.html" class="nav-logo">C<b>6</b>L</a>
+    <div class="nav-links">
+        <a href="#dashboard">Dashboard</a>
+        <a href="#reservations">Réservations</a>
+        <a href="#prepaiements">Prépaiements</a>
+        <a href="#paiements">Paiements</a>
+        <a href="#vols">Vols</a>
+        <a href="#passagers">Passagers</a>
+        <a href="#flotte">Flotte</a>
+        <a href="#pilotes">Pilotes</a>
+        <a href="#admin">Admin</a>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+        <a href="scope.html" class="nav-scope">SCOPE</a>
+        <!-- <a href="proposition.html" class="nav-scope" style="background:var(--emerald);">Proposition</a> -->
+    </div>
+</nav>
+
+<!-- ====== HERO ====== -->
+<section class="hero" id="top">
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+        <div class="hero-badge">Version 4.0 — Disponible</div>
+        <h1 class="hero-title">C<b>6</b>L<br>Gestion<br>Aéronautique</h1>
+        <p class="hero-desc">
+            La plateforme tout-en-un pour les clubs ULM et aéroclubs. 
+            Réservations, météo temps réel, maintenance, pilotes — 
+            simplifiez votre exploitation.
+        </p>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="hero-stat-value">10</div>
+                <div class="hero-stat-label">Modules intégrés</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">29</div>
+                <div class="hero-stat-label">Entités gérées</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value">100%</div>
+                <div class="hero-stat-label">Web & Mobile</div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div style="position:relative;">
+            <div class="hero-screenshot-glow"></div>
+            <img src="screenshots/01-dashboard-principal.png" alt="C6L Dashboard" class="hero-screenshot">
+        </div>
+    </div>
+</section>
+
+<!-- ====== ATOUTS ====== -->
+<section class="atouts" id="atouts">
+    <div class="section-label">Pourquoi C6L</div>
+    <h2 class="section-heading">Conçu pour l'aéronautique.<br>Pensé pour le terrain.</h2>
+    <p class="section-sub">Chaque fonctionnalité a été développée avec des exploitants d'aéroclubs et de bases ULM.</p>
+
+    <div class="atouts-grid">
+        <div class="atout">
+            <div class="atout-icon" style="background:rgba(14,165,233,0.1);">🌤️</div>
+            <h3>Météo Aéronautique</h3>
+            <p>METAR & TAF temps réel, carte Windy, radar M&Radar, caméras terrain. Toutes vos sources météo en un point.</p>
+        </div>
+        <div class="atout">
+            <div class="atout-icon" style="background:rgba(245,158,11,0.1);">📋</div>
+            <h3>Conformité Réglementaire</h3>
+            <p>Qualifications pilotes, certificats médicaux, validités. Alertes automatiques J-30 et J-7 — zéro oubli.</p>
+        </div>
+        <div class="atout">
+            <div class="atout-icon" style="background:rgba(16,185,129,0.1);">🔧</div>
+            <h3>Maintenance Préventive</h3>
+            <p>Suivi horamètres, butées entretien et changement moteur. Alertes visuelles avant dépassement.</p>
+        </div>
+        <div class="atout">
+            <div class="atout-icon" style="background:rgba(139,92,246,0.1);">📅</div>
+            <h3>Planning Intelligent</h3>
+            <p>Réservations, disponibilités pilotes, calendrier visuel. Conversion automatique des bons cadeaux.</p>
+        </div>
+        <div class="atout">
+            <div class="atout-icon" style="background:rgba(244,63,94,0.1);">🏢</div>
+            <h3>Multi-Structure</h3>
+            <p>Un outil, plusieurs clubs. Données isolées, personnalisation complète par structure (logo, modules, couleurs).</p>
+        </div>
+        <div class="atout">
+            <div class="atout-icon" style="background:rgba(14,165,233,0.1);">🔐</div>
+            <h3>Sécurité & RGPD</h3>
+            <p>SSO Keycloak, authentification multi-facteur, hébergement Europe, consentement passagers intégré.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ====== DASHBOARD ====== -->
+<section class="dashboard-section" id="dashboard">
+    <div class="dashboard-grid">
+        <div>
+            <div class="section-label" style="color: var(--sky);">Module 01</div>
+            <h2 style="font-size:2.4rem; font-weight:800; margin-bottom:16px; letter-spacing:-1px;">
+                Tableau de Bord<br>Opérationnel
+            </h2>
+            <p style="color:var(--slate-400); line-height:1.7; margin-bottom:30px;">
+                Votre centre de commande. Conditions de vol, météo temps réel, calendrier des réservations — 
+                toutes les informations critiques pour vos décisions quotidiennes.
+            </p>
+
+            <div style="display:flex; gap:12px; margin-bottom:30px; flex-wrap:wrap;">
+                <span style="background:rgba(16,185,129,0.15); color:#34d399; padding:6px 14px; border-radius:8px; font-size:0.8rem; font-weight:600;">METAR & TAF</span>
+                <span style="background:rgba(14,165,233,0.15); color:#38bdf8; padding:6px 14px; border-radius:8px; font-size:0.8rem; font-weight:600;">Boussole VFR</span>
+                <span style="background:rgba(245,158,11,0.15); color:#fbbf24; padding:6px 14px; border-radius:8px; font-size:0.8rem; font-weight:600;">3 sources météo</span>
+                <span style="background:rgba(139,92,246,0.15); color:#a78bfa; padding:6px 14px; border-radius:8px; font-size:0.8rem; font-weight:600;">Calendrier</span>
+            </div>
+
+            <div class="meteo-cards">
+                <div class="meteo-card">
+                    <div class="meteo-card-header" style="background:rgba(14,165,233,0.15); color:#38bdf8;">
+                        🌍 Windy
+                    </div>
+                    <img src="screenshots/16-dashboard-calendrier.png" alt="Windy" style="object-position: center 35%;">
+                </div>
+                <div class="meteo-card">
+                    <div class="meteo-card-header" style="background:rgba(139,92,246,0.15); color:#a78bfa;">
+                        🌧️ M&Radar
+                    </div>
+                    <img src="screenshots/18-dashboard-cams.png" alt="M&Radar" style="object-position: center 25%;">
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="browser-frame" style="box-shadow: 0 30px 70px rgba(0,0,0,0.4);">
+                <div class="browser-bar">
+                    <span class="browser-dot red"></span>
+                    <span class="browser-dot yellow"></span>
+                    <span class="browser-dot green"></span>
+                    <div class="browser-url">c6l.app/admin</div>
+                </div>
+                <div class="screen-crop" style="height:520px;">
+                    <img src="screenshots/01-dashboard-principal.png" alt="Dashboard">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== RÉSERVATIONS ====== -->
+<section class="feature-section" id="reservations">
+    <div class="feature-row">
+        <div class="feature-text">
+            <span class="feature-tag" style="background:rgba(14,165,233,0.1); color:var(--sky);">Module 02</span>
+            <h2>Réservations</h2>
+            <p>Gérez l'intégralité du cycle de réservation. Du premier contact client jusqu'au vol, avec affectation pilote et aéronef.</p>
+            <div class="feature-list">
+                <div class="feature-item">Vue liste avec filtres</div>
+                <div class="feature-item">Création rapide</div>
+                <div class="feature-item">Conversion prépaiement</div>
+                <div class="feature-item">Export CSV & PDF</div>
+                <div class="feature-item">Affectation pilote</div>
+                <div class="feature-item">Statuts visuels</div>
+            </div>
+            <div class="feature-tip">
+                <b>💡 Astuce</b> — Utilisez "Créer à partir d'un prépaiement" pour convertir un bon cadeau avec tous les détails pré-remplis.
+            </div>
+        </div>
+        <div class="browser-frame">
+            <div class="browser-bar">
+                <span class="browser-dot red"></span>
+                <span class="browser-dot yellow"></span>
+                <span class="browser-dot green"></span>
+                <div class="browser-url">c6l.app/admin/reservations</div>
+            </div>
+            <div class="screen-crop">
+                <img src="screenshots/02-reservations-liste.png" alt="Réservations">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== PRÉPAIEMENTS ====== -->
+<section class="feature-section" id="prepaiements">
+    <div class="feature-row reverse">
+        <div class="feature-text">
+            <span class="feature-tag" style="background:rgba(245,158,11,0.1); color:var(--gold);">Module 03</span>
+            <h2>Prépaiements &<br>Bons Cadeaux</h2>
+            <p>Émettez et suivez vos bons cadeaux. Synchronisation automatique avec votre boutique en ligne Wix.</p>
+            <div class="feature-list">
+                <div class="feature-item">Code unique infalsifiable</div>
+                <div class="feature-item">Date d'expiration</div>
+                <div class="feature-item">Génération PDF</div>
+                <div class="feature-item">Import Wix automatique</div>
+            </div>
+            <div class="feature-tip">
+                <b>💡 Astuce</b> — Les achats effectués sur votre site Wix sont synchronisés automatiquement.
+            </div>
+        </div>
+        <div class="browser-frame">
+            <div class="browser-bar">
+                <span class="browser-dot red"></span>
+                <span class="browser-dot yellow"></span>
+                <span class="browser-dot green"></span>
+                <div class="browser-url">c6l.app/admin/prepaiements</div>
+            </div>
+            <div class="screen-crop">
+                <img src="screenshots/03-prepaiements-liste.png" alt="Prépaiements">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== PAIEMENTS ====== -->
+<section class="feature-section" id="paiements">
+    <div class="feature-row">
+        <div class="feature-text">
+            <span class="feature-tag" style="background:rgba(16,185,129,0.1); color:var(--emerald);">Module 04</span>
+            <h2>Paiements</h2>
+            <p>Enregistrez et suivez tous vos encaissements. Identification visuelle par mode, traçabilité complète.</p>
+            <div class="feature-list">
+                <div class="feature-item">CB, Espèces, Virement, Chèque</div>
+                <div class="feature-item">Badges visuels par mode</div>
+                <div class="feature-item">Traçabilité partenaires</div>
+                <div class="feature-item">Export comptable CSV</div>
+            </div>
+            <div class="feature-tip">
+                <b>💡 Astuce</b> — Les paiements web (WIX) sont automatiquement liés aux prépaiements correspondants.
+            </div>
+        </div>
+        <div class="browser-frame">
+            <div class="browser-bar">
+                <span class="browser-dot red"></span>
+                <span class="browser-dot yellow"></span>
+                <span class="browser-dot green"></span>
+                <div class="browser-url">c6l.app/admin/paiements</div>
+            </div>
+            <div class="screen-crop">
+                <img src="screenshots/04-paiements-liste.png" alt="Paiements">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== CARNETS DE VOLS ====== -->
+<section class="feature-section" id="vols">
+    <div class="feature-row reverse">
+        <div class="feature-text">
+            <span class="feature-tag" style="background:rgba(139,92,246,0.1); color:var(--violet);">Module 05</span>
+            <h2>Carnets de Vols</h2>
+            <p>Le carnet de vol numérique complet. Horamètres, durées, atterrissages — tout est tracé automatiquement.</p>
+            <div class="feature-list">
+                <div class="feature-item">Horamètres automatiques</div>
+                <div class="feature-item">Multi-pilotes par vol</div>
+                <div class="feature-item">Suivi atterrissages</div>
+                <div class="feature-item">Statistiques globales</div>
+            </div>
+            <div class="feature-tip">
+                <b>💡 Astuce</b> — Les heures de vol sont automatiquement cumulées dans le profil de chaque pilote.
+            </div>
+        </div>
+        <div class="screenshot-gallery">
+            <div class="browser-frame">
+                <div class="browser-bar">
+                    <span class="browser-dot red"></span>
+                    <span class="browser-dot yellow"></span>
+                    <span class="browser-dot green"></span>
+                </div>
+                <div class="screen-crop">
+                    <img src="screenshots/05-carnets-vols-prestations.png" alt="Prestations">
+                </div>
+            </div>
+            <div class="browser-frame">
+                <div class="browser-bar">
+                    <span class="browser-dot red"></span>
+                    <span class="browser-dot yellow"></span>
+                    <span class="browser-dot green"></span>
+                </div>
+                <div class="screen-crop">
+                    <img src="screenshots/06-vols-liste.png" alt="Vols">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== PASSAGERS ====== -->
+<section class="feature-section" id="passagers">
+    <div class="feature-row">
+        <div class="feature-text">
+            <span class="feature-tag" style="background:rgba(244,63,94,0.1); color:var(--rose);">Module 06</span>
+            <h2>Passagers</h2>
+            <p>Base de données passagers avec inscription publique et consentement RGPD intégré.</p>
+            <div class="feature-list">
+                <div class="feature-item">Formulaire d'inscription public</div>
+                <div class="feature-item">Consentement RGPD</div>
+                <div class="feature-item">Export CSV & PDF</div>
+                <div class="feature-item">Historique des vols</div>
+            </div>
+            <div class="feature-tip">
+                <b>💡 Astuce</b> — Le texte de consentement RGPD est personnalisable dans Administration > Client.
+            </div>
+        </div>
+        <div class="browser-frame">
+            <div class="browser-bar">
+                <span class="browser-dot red"></span>
+                <span class="browser-dot yellow"></span>
+                <span class="browser-dot green"></span>
+                <div class="browser-url">c6l.app/admin/passagers</div>
+            </div>
+            <div class="screen-crop">
+                <img src="screenshots/08-passagers-liste.png" alt="Passagers">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== FLOTTE & MAINTENANCE ====== -->
+<section class="feature-section" id="flotte">
+    <div class="feature-row reverse">
+        <div class="feature-text">
+            <span class="feature-tag" style="background:rgba(16,185,129,0.1); color:var(--emerald);">Module 07</span>
+            <h2>Flotte &<br>Maintenance</h2>
+            <p>Gérez votre parc d'aéronefs. Suivi des horamètres, butées entretien, changements moteur avec alertes visuelles.</p>
+            <div class="feature-list">
+                <div class="feature-item">Horamètres temps réel</div>
+                <div class="feature-item">Alertes visuelles (rouge)</div>
+                <div class="feature-item">Butées multiples</div>
+                <div class="feature-item">Statut en/hors service</div>
+                <div class="feature-item">Historique entretiens</div>
+                <div class="feature-item">Changement moteur</div>
+            </div>
+            <div class="feature-tip">
+                <b>⚠️ Important</b> — Les temps affichés en <b style="color:#ef4444">rouge</b> (+8h54) indiquent un dépassement de butée. Planifiez l'entretien immédiatement.
+            </div>
+        </div>
+        <div class="screenshot-gallery">
+            <div class="browser-frame">
+                <div class="browser-bar">
+                    <span class="browser-dot red"></span>
+                    <span class="browser-dot yellow"></span>
+                    <span class="browser-dot green"></span>
+                </div>
+                <div class="screen-crop">
+                    <img src="screenshots/10-aeronefs-flotte.png" alt="Flotte">
+                </div>
+            </div>
+            <div class="browser-frame">
+                <div class="browser-bar">
+                    <span class="browser-dot red"></span>
+                    <span class="browser-dot yellow"></span>
+                    <span class="browser-dot green"></span>
+                </div>
+                <div class="screen-crop">
+                    <img src="screenshots/09-maintenance-entretiens.png" alt="Maintenance">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== PILOTES ====== -->
+<section class="feature-section" id="pilotes">
+    <div class="feature-row">
+        <div class="feature-text">
+            <span class="feature-tag" style="background:rgba(14,165,233,0.1); color:var(--sky);">Module 08</span>
+            <h2>Pilotes</h2>
+            <p>Profils pilotes complets avec qualifications, certificats médicaux, cumul d'heures de vol et alertes automatiques.</p>
+            <div class="feature-list">
+                <div class="feature-item">Qualifications (badges)</div>
+                <div class="feature-item">Certificats médicaux</div>
+                <div class="feature-item">Alertes J-30 / J-7</div>
+                <div class="feature-item">Cumul heures automatique</div>
+                <div class="feature-item">Disponibilités</div>
+                <div class="feature-item">Export données</div>
+            </div>
+            <div class="feature-tip">
+                <b>💡 Astuce</b> — Le certificat médical affiche <b style="color:#10b981">✓ vert</b> (valide) ou <b style="color:#ef4444">✗ rouge</b> (expiré/manquant).
+            </div>
+        </div>
+        <div class="browser-frame">
+            <div class="browser-bar">
+                <span class="browser-dot red"></span>
+                <span class="browser-dot yellow"></span>
+                <span class="browser-dot green"></span>
+                <div class="browser-url">c6l.app/admin/pilotes</div>
+            </div>
+            <div class="screen-crop">
+                <img src="screenshots/11-pilotes-profils.png" alt="Pilotes">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== ADMINISTRATION ====== -->
+<section class="feature-section" id="admin">
+    <div class="feature-row reverse">
+        <div class="feature-text">
+            <span class="feature-tag" style="background:rgba(139,92,246,0.1); color:var(--violet);">Module 09</span>
+            <h2>Administration &<br>Configuration</h2>
+            <p>Personnalisez votre environnement. Circuits, tarifs, partenaires, qualifications et paramètres de votre structure.</p>
+            <div class="feature-list">
+                <div class="feature-item">Catalogue circuits & tarifs</div>
+                <div class="feature-item">Options (photo, vidéo)</div>
+                <div class="feature-item">Gestion partenaires</div>
+                <div class="feature-item">Référentiel qualifications</div>
+                <div class="feature-item">Config multi-tenant</div>
+                <div class="feature-item">Personnalisation RGPD</div>
+            </div>
+            <div class="feature-tip">
+                <b>💡 Astuce</b> — La section Client permet de personnaliser votre structure : logo, couleurs, modules actifs.
+            </div>
+        </div>
+        <div class="screenshot-gallery">
+            <div class="browser-frame">
+                <div class="browser-bar">
+                    <span class="browser-dot red"></span>
+                    <span class="browser-dot yellow"></span>
+                    <span class="browser-dot green"></span>
+                </div>
+                <div class="screen-crop">
+                    <img src="screenshots/14-admin-circuits.png" alt="Circuits">
+                </div>
+            </div>
+            <div class="browser-frame">
+                <div class="browser-bar">
+                    <span class="browser-dot red"></span>
+                    <span class="browser-dot yellow"></span>
+                    <span class="browser-dot green"></span>
+                </div>
+                <div class="screen-crop">
+                    <img src="screenshots/13-admin-client-config.png" alt="Configuration">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== SÉCURITÉ ====== -->
+<section class="feature-section" id="securite" style="background: var(--navy); color: white;">
+    <div class="feature-row">
+        <div class="feature-text">
+            <span class="feature-tag" style="background:rgba(244,63,94,0.15); color:var(--rose);">Module 10</span>
+            <h2 style="color:white;">Sécurité &<br>Authentification</h2>
+            <p style="color:var(--slate-400);">Authentification SSO via Keycloak, gestion des rôles, sessions sécurisées. Conforme RGPD.</p>
+            <div class="feature-list">
+                <div class="feature-item" style="color:var(--slate-300);">SSO Keycloak</div>
+                <div class="feature-item" style="color:var(--slate-300);">Multi-facteur (MFA)</div>
+                <div class="feature-item" style="color:var(--slate-300);">Rôles utilisateurs</div>
+                <div class="feature-item" style="color:var(--slate-300);">Session persistante</div>
+                <div class="feature-item" style="color:var(--slate-300);">Hébergement Europe</div>
+                <div class="feature-item" style="color:var(--slate-300);">Consentement RGPD</div>
+            </div>
+        </div>
+        <div class="browser-frame">
+            <div class="browser-bar">
+                <span class="browser-dot red"></span>
+                <span class="browser-dot yellow"></span>
+                <span class="browser-dot green"></span>
+                <div class="browser-url">c6l.app/login</div>
+            </div>
+            <div class="screen-no-crop">
+                <img src="screenshots/01-page-accueil.png" alt="Connexion">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== FOOTER ====== -->
+<footer>
+    <div>
+        <div class="f-logo">C<b>6</b>L</div>
+        <div style="color:var(--slate-500); font-size:0.85rem; margin-top:5px;">Gestion Aéronautique v4.0</div>
+    </div>
+    <div class="f-info">
+        <div>© 2026 CREAZOT — Tous droits réservés</div>
+        <div style="margin-top:4px; font-size:0.8rem;">La Réunion, France</div>
+    </div>
+</footer>
+
+</body>
+</html>

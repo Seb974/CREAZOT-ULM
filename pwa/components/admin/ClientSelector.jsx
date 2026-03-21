@@ -1,9 +1,11 @@
 import React from 'react';
+import { useRefresh } from 'react-admin';
 import { useClient } from './ClientProvider';
 import { Select, MenuItem, Box, Typography } from '@mui/material';
 
 const ClientSelector = () => {
     const { client, clients, switchClient } = useClient();
+    const refresh = useRefresh();
 
     if (!clients || clients.length <= 1) return null;
 
@@ -14,9 +16,10 @@ const ClientSelector = () => {
         const value = event.target.value;
         if (value === '__all__') {
             sessionStorage.removeItem('client');
-            window.location.reload();
+            refresh();
         } else {
             switchClient(parseInt(value, 10));
+            refresh();
         }
     };
 

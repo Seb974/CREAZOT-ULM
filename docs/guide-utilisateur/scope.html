@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C6L — SCOPE Analyse Fonctionnelle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sky: #0ea5e9;
+            --sky-dark: #0369a1;
+            --sky-deep: #0c4a6e;
+            --navy: #0f172a;
+            --navy-light: #1e293b;
+            --gold: #f59e0b;
+            --gold-light: #fbbf24;
+            --emerald: #10b981;
+            --rose: #f43f5e;
+            --violet: #8b5cf6;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: var(--slate-800);
+            background: var(--slate-50);
+            -webkit-font-smoothing: antialiased;
+            padding-top: 56px;
+        }
+
+        /* ====== NAVIGATION STICKY ====== */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 0 40px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-left { display: flex; align-items: center; gap: 20px; }
+        .nav-logo { font-size: 1.4rem; font-weight: 800; color: white; letter-spacing: -1px; text-decoration: none; }
+        .nav-logo b { color: var(--gold); }
+        .nav-sep { color: var(--slate-600); font-size: 1.2rem; font-weight: 300; }
+        .nav-page { color: var(--sky); font-size: 0.85rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+        .nav-links { display: flex; gap: 6px; align-items: center; }
+        .nav-links a {
+            color: var(--slate-400);
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover { color: white; background: rgba(255,255,255,0.08); }
+        .nav-links .btn-guide {
+            background: var(--sky);
+            color: white;
+            font-weight: 600;
+            padding: 6px 16px;
+        }
+        .nav-links .btn-guide:hover { background: var(--sky-dark); }
+
+        /* ====== HERO SCOPE ====== */
+        .scope-hero {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--sky-deep) 100%);
+            color: white;
+            padding: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+        .scope-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 80% 30%, rgba(14,165,233,0.12), transparent),
+                radial-gradient(ellipse 40% 40% at 20% 70%, rgba(139,92,246,0.06), transparent);
+        }
+        .scope-hero-content { position: relative; z-index: 2; max-width: 800px; }
+        .scope-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(245,158,11,0.15);
+            color: var(--gold-light);
+            padding: 8px 18px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(245,158,11,0.3);
+            margin-bottom: 24px;
+        }
+        .scope-hero h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+        .scope-hero h1 b {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .scope-hero p { color: var(--slate-400); font-size: 1.1rem; line-height: 1.7; max-width: 600px; }
+
+        .score-banner {
+            position: absolute;
+            right: 80px;
+            top: 50%;
+            transform: translateY(-50%);
+            text-align: center;
+            z-index: 2;
+        }
+        .score-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--emerald), #059669);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 60px rgba(16,185,129,0.3);
+        }
+        .score-circle .score-num { font-size: 3.5rem; font-weight: 900; color: white; line-height: 1; }
+        .score-circle .score-lbl { font-size: 0.8rem; font-weight: 600; color: rgba(255,255,255,0.8); margin-top: 4px; }
+
+        /* ====== STATS BAR ====== */
+        .stats-bar {
+            background: white;
+            border-bottom: 1px solid var(--slate-200);
+            padding: 30px 80px;
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+        }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: 800; color: var(--navy); }
+        .stat-label { font-size: 0.8rem; font-weight: 500; color: var(--slate-500); margin-top: 2px; }
+        .stat-value.green { color: var(--emerald); }
+        .stat-value.amber { color: var(--gold); }
+        .stat-value.red { color: var(--rose); }
+
+        /* ====== CONTAINER ====== */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 80px 60px;
+        }
+
+        /* ====== LEGEND ====== */
+        .legend {
+            display: flex;
+            gap: 24px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            padding: 16px 24px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--slate-200);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--slate-600);
+        }
+
+        /* ====== TOC ====== */
+        .toc {
+            background: white;
+            border: 1px solid var(--slate-200);
+            border-radius: 12px;
+            padding: 24px 32px;
+            margin: 30px 0;
+        }
+        .toc h3 {
+            color: var(--sky-dark);
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .toc ul { list-style: none; margin: 0; padding: 0; }
+        .toc li { padding: 8px 0; border-bottom: 1px dashed var(--slate-200); }
+        .toc li:last-child { border-bottom: none; }
+        .toc a { color: var(--slate-600); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+        .toc a:hover { color: var(--sky); }
+
+        /* ====== HEADINGS ====== */
+        h2 {
+            color: var(--navy);
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin: 50px 0 20px 0;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--slate-200);
+            letter-spacing: -0.5px;
+        }
+        h2::before {
+            content: "●";
+            color: var(--sky);
+            margin-right: 10px;
+        }
+        h3 {
+            color: var(--slate-700);
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 28px 0 16px 0;
+        }
+        h4 {
+            color: var(--sky-dark);
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 20px 0 10px 0;
+        }
+        p { margin-bottom: 12px; font-size: 0.95rem; line-height: 1.7; }
+        ul { margin: 10px 0 15px 25px; }
+        li { margin-bottom: 6px; font-size: 0.93rem; }
+
+        /* ====== TABLES ====== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0 28px 0;
+            font-size: 0.88rem;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        th {
+            background: var(--navy);
+            color: white;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--slate-100);
+        }
+        tr:nth-child(even) { background: var(--slate-50); }
+        tr:hover { background: rgba(14,165,233,0.03); }
+
+        /* ====== TAGS ====== */
+        .entity-tag {
+            display: inline-block;
+            background: rgba(14,165,233,0.1);
+            color: var(--sky-dark);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.82rem;
+            margin: 2px;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-weight: 500;
+        }
+        .tech-tag {
+            display: inline-block;
+            background: rgba(16,185,129,0.1);
+            color: #059669;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.82rem;
+            margin: 2px;
+            font-weight: 500;
+        }
+        .status-covered {
+            display: inline-block;
+            background: rgba(16,185,129,0.1);
+            color: #059669;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        .status-partial {
+            display: inline-block;
+            background: rgba(245,158,11,0.1);
+            color: #b45309;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        .status-todo {
+            display: inline-block;
+            background: rgba(244,63,94,0.1);
+            color: #dc2626;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        /* ====== ALERT BOXES ====== */
+        .alert-box {
+            background: rgba(245,158,11,0.06);
+            border-left: 4px solid var(--gold);
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            font-size: 0.92rem;
+        }
+        .alert-box.info {
+            background: rgba(14,165,233,0.06);
+            border-left-color: var(--sky);
+        }
+        .alert-box.success {
+            background: rgba(16,185,129,0.06);
+            border-left-color: var(--emerald);
+        }
+
+        /* ====== DOMAIN GRID ====== */
+        .domain-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .domain-card {
+            background: white;
+            border: 1px solid var(--slate-200);
+            border-radius: 12px;
+            padding: 18px;
+            border-left: 4px solid var(--sky);
+            transition: all 0.2s;
+        }
+        .domain-card:hover { border-left-color: var(--gold); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+        .domain-card h4 { color: var(--sky-dark); margin-bottom: 8px; }
+        .domain-card p { color: var(--slate-500); font-size: 0.88rem; margin-bottom: 0; }
+
+        /* ====== DEV CARDS ====== */
+        .dev-card {
+            background: rgba(244,63,94,0.04);
+            border: 1px solid rgba(244,63,94,0.15);
+            border-radius: 12px;
+            padding: 18px;
+            margin: 12px 0;
+        }
+        .dev-card h4 { color: var(--rose); margin-bottom: 8px; font-size: 0.95rem; }
+        .dev-card ul { margin: 8px 0 0 20px; color: var(--slate-600); font-size: 0.88rem; }
+
+        /* ====== FOOTER ====== */
+        footer {
+            background: var(--navy);
+            color: white;
+            padding: 40px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 60px;
+        }
+        footer .f-logo { font-size: 1.6rem; font-weight: 800; letter-spacing: -1px; }
+        footer .f-logo b { color: var(--gold); }
+        footer .f-info { text-align: right; font-size: 0.85rem; color: var(--slate-500); }
+
+        /* ====== RESPONSIVE ====== */
+        @media (max-width: 1024px) {
+            .scope-hero { padding: 60px 40px; }
+            .score-banner { display: none; }
+            .container { padding: 30px 40px; }
+            .stats-bar { padding: 24px 40px; gap: 30px; flex-wrap: wrap; }
+            .domain-grid { grid-template-columns: 1fr; }
+            footer { padding: 30px 40px; }
+        }
+        @media (max-width: 600px) {
+            nav { padding: 0 20px; }
+            .nav-links { display: none; }
+            .scope-hero { padding: 40px 20px; }
+            .scope-hero h1 { font-size: 2rem; }
+            .container { padding: 20px; }
+            .stats-bar { gap: 20px; }
+        }
+
+        /* ====== PRINT ====== */
+        @media print {
+            nav { display: none; }
+            body { padding-top: 0; }
+            .scope-hero { page-break-after: always; }
+            table { page-break-inside: avoid; }
+            h2 { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ====== NAVIGATION ====== -->
+<nav>
+    <div class="nav-left">
+        <a href="index.html" class="nav-logo" title="Accueil">C<b>6</b>L</a>
+        <span class="nav-sep">/</span>
+        <span class="nav-page">Scope</span>
+    </div>
+    <div class="nav-links">
+        <a href="#contexte">Contexte</a>
+        <a href="#exigences-ops">OPS</a>
+        <a href="#technique">Technique</a>
+        <a href="#recapitulatif">Synthèse</a>
+        <a href="#conclusion">Conclusion</a>
+        <a href="proposition.html" style="background:var(--emerald); color:white; font-weight:600; padding:6px 16px; border-radius:6px;">Proposition</a>
+        <a href="index.html" class="btn-guide">← Accueil</a>
+    </div>
+</nav>
+
+<!-- ====== HERO ====== -->
+<section class="scope-hero">
+    <div class="scope-hero-content">
+        <div class="scope-badge">Analyse Fonctionnelle — FFPLUM</div>
+        <h1>SCOPE <b>C6L</b><br>vs CDC Fédéral</h1>
+        <p>Adéquation de C6L Gestion 4.0 avec le cahier des charges de la FFPLUM pour la gestion des ~700 clubs ULM français. Conformité VLO/VLD — Arrêté février 2025.</p>
+    </div>
+    <div class="score-banner">
+        <div class="score-circle">
+            <div class="score-num">72%</div>
+            <div class="score-lbl">Couverture</div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== STATS BAR ====== -->
+<div class="stats-bar">
+    <div class="stat-item">
+        <div class="stat-value">~700</div>
+        <div class="stat-label">Clubs cibles</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value green">30</div>
+        <div class="stat-label">Exigences couvertes</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value amber">14</div>
+        <div class="stat-label">Adaptations partielles</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value red">11</div>
+        <div class="stat-label">À développer</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">Sept. 2026</div>
+        <div class="stat-label">Échéance cible</div>
+    </div>
+</div>
+
+<!-- ====== CONTENT ====== -->
+<div class="container">
+
+    <div class="legend">
+        <div class="legend-item"><span class="status-covered">🟢 Couvert</span> Fonctionnalité présente</div>
+        <div class="legend-item"><span class="status-partial">🟡 Partiel</span> Adaptation nécessaire</div>
+        <div class="legend-item"><span class="status-todo">🔴 À développer</span> Développement requis</div>
+    </div>
+
+    <!-- Table des matières -->
+    <div class="toc">
+        <h3>Sommaire</h3>
+        <ul>
+            <li><a href="#contexte">1. Contexte et Enjeux FFPLUM</a></li>
+            <li><a href="#exigences-ops">2. Analyse des Exigences Obligatoires (OPS)</a></li>
+            <li><a href="#exigences-bonus">3. Analyse des Exigences Bonus (V2/V3)</a></li>
+            <li><a href="#technique">4. Analyse Technique</a></li>
+            <li><a href="#recapitulatif">5. Tableau Récapitulatif</a></li>
+            <li><a href="#developpements">6. Synthèse des Développements Nécessaires</a></li>
+            <li><a href="#conclusion">7. Conclusion et Recommandations</a></li>
+        </ul>
+    </div>
+
+    <!-- Section 1: Contexte -->
+    <h2 id="contexte">1. Contexte et Enjeux FFPLUM</h2>
+    
+    <h3>1.1 La FFPLUM</h3>
+    <p>La <strong>Fédération Française d'ULM (FFPLUM)</strong> est la fédération délégataire pour l'aviation ultralégère en France. Elle regroupe environ 700 clubs et structures associées, représentant une communauté importante de pilotes, instructeurs et passionnés d'ULM.</p>
+
+    <h3>1.2 Contexte Réglementaire</h3>
+    <div class="alert-box">
+        <strong>Arrêté du 17 février 2025</strong><br>
+        Nouvelle réglementation encadrant les activités VLO (Vol Local) et VLD (Vol de Découverte) pour les ULM. Cette réglementation impose une traçabilité accrue et une gestion documentaire rigoureuse.
+    </div>
+
+    <h3>1.3 Objectifs du Projet</h3>
+    <ul>
+        <li><strong>Application fédérale unifiée</strong> pour l'ensemble des clubs affiliés</li>
+        <li><strong>Conformité réglementaire</strong> avec l'arrêté VLO/VLD de février 2025</li>
+        <li><strong>Solution opérationnelle</strong> attendue pour septembre 2026</li>
+        <li><strong>Stratégie d'acquisition</strong> : rachat ou partenariat avec solution existante</li>
+    </ul>
+
+    <h3>1.4 Périmètre Fonctionnel Recherché</h3>
+    <div class="domain-grid">
+        <div class="domain-card">
+            <h4>Gestion Activités</h4>
+            <p>VLO, VLD, Activités Particulières, conformité MANEX</p>
+        </div>
+        <div class="domain-card">
+            <h4>Gestion Documentaire</h4>
+            <p>Pilotes, machines, structures, validités automatiques</p>
+        </div>
+        <div class="domain-card">
+            <h4>Traçabilité</h4>
+            <p>Carnets de vol, historique complet, exports DGAC</p>
+        </div>
+        <div class="domain-card">
+            <h4>Planification</h4>
+            <p>Réservations, planning, disponibilités pilotes/machines</p>
+        </div>
+    </div>
+
+    <!-- Section 2: Exigences OPS -->
+    <h2 id="exigences-ops">2. Analyse des Exigences Obligatoires (OPS)</h2>
+
+    <h3>2.1 Gestion des Activités Réglementées</h3>
+    <table>
+        <thead>
+            <tr>
+                <th style="width:25%">Exigence FFPLUM</th>
+                <th style="width:35%">Couverture C6L</th>
+                <th style="width:15%">Statut</th>
+                <th style="width:25%">Écart / Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Gestion VLO</strong><br>(Vol Local)</td>
+                <td><span class="entity-tag">Vol</span> <span class="entity-tag">CarnetVol</span> <span class="entity-tag">Prestation</span><br>Carnets de vol avec suivi heures, pilotes, machines</td>
+                <td><span class="status-covered">🟢 Couvert</span></td>
+                <td>Ajouter type d'activité "VLO" et champs spécifiques réglementaires</td>
+            </tr>
+            <tr>
+                <td><strong>Gestion VLD</strong><br>(Vol de Découverte)</td>
+                <td><span class="entity-tag">Prestation</span> <span class="entity-tag">Passager</span> <span class="entity-tag">Circuit</span><br>Gestion passagers, circuits, réservations</td>
+                <td><span class="status-covered">🟢 Couvert</span></td>
+                <td>Adapter le vocabulaire et ajouter champs VLD spécifiques</td>
+            </tr>
+            <tr>
+                <td><strong>Activités Particulières</strong><br>(MANEX)</td>
+                <td>Non disponible actuellement</td>
+                <td><span class="status-todo">🔴 À développer</span></td>
+                <td>Nouveau module : gestion MANEX, autorisations, déclarations</td>
+            </tr>
+            <tr>
+                <td><strong>Suivi réglementaire</strong></td>
+                <td><span class="tech-tag">PilotValidityChecker</span><br>Alertes validités existantes</td>
+                <td><span class="status-partial">🟡 Partiel</span></td>
+                <td>Étendre aux règles VLO/VLD spécifiques</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>2.2 Gestion Documentaire</h3>
+    <table>
+        <thead><tr><th style="width:25%">Exigence FFPLUM</th><th style="width:35%">Couverture C6L</th><th style="width:15%">Statut</th><th style="width:25%">Écart / Action</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Documents pilotes</strong></td><td><span class="entity-tag">ProfilPilote</span> <span class="entity-tag">Qualification</span> <span class="entity-tag">CertificatMedical</span><br>Profils complets, qualifications, certificats avec validités</td><td><span class="status-covered">🟢 Couvert</span></td><td>Fonctionnalité mature, adaptation vocabulaire ULM</td></tr>
+            <tr><td><strong>Documents machines</strong></td><td><span class="entity-tag">Aeronef</span> <span class="entity-tag">Entretien</span><br>Cartes d'identification, CDN, assurances, entretiens</td><td><span class="status-covered">🟢 Couvert</span></td><td>Vérifier conformité nomenclature ULM</td></tr>
+            <tr><td><strong>Documents structures</strong></td><td><span class="entity-tag">Client</span><br>Configuration multi-tenant par structure</td><td><span class="status-partial">🟡 Partiel</span></td><td>Ajouter : agréments, déclarations, documents fédéraux</td></tr>
+            <tr><td><strong>Gestion validités</strong></td><td><span class="tech-tag">Alertes automatiques</span><br>Notifications avant expiration</td><td><span class="status-covered">🟢 Couvert</span></td><td>Système d'alertes opérationnel</td></tr>
+            <tr><td><strong>Stockage documents</strong></td><td><span class="tech-tag">FileUploader</span><br>Upload et stockage fichiers</td><td><span class="status-covered">🟢 Couvert</span></td><td>Vérifier capacités de stockage pour ~700 clubs</td></tr>
+        </tbody>
+    </table>
+
+    <h3>2.3 Système d'Alertes et Blocages</h3>
+    <table>
+        <thead><tr><th style="width:25%">Exigence FFPLUM</th><th style="width:35%">Couverture C6L</th><th style="width:15%">Statut</th><th style="width:25%">Écart / Action</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Alertes validités</strong></td><td><span class="tech-tag">PilotValidityChecker</span><br>Alertes proactives : médical, qualifications, maintenance</td><td><span class="status-covered">🟢 Couvert</span></td><td>Système existant et éprouvé</td></tr>
+            <tr><td><strong>Blocage automatique</strong></td><td>Logique de blocage à implémenter</td><td><span class="status-partial">🟡 Partiel</span></td><td>Renforcer les blocages : empêcher vol si document expiré</td></tr>
+            <tr><td><strong>Notifications multi-canal</strong></td><td><span class="tech-tag">Email</span> <span class="tech-tag">Mercure</span><br>Email et notifications temps réel</td><td><span class="status-partial">🟡 Partiel</span></td><td>Ajouter SMS pour alertes critiques</td></tr>
+            <tr><td><strong>Dashboard alertes</strong></td><td><span class="tech-tag">Dashboard</span><br>Vue globale des alertes</td><td><span class="status-covered">🟢 Couvert</span></td><td>Dashboard opérationnel existant</td></tr>
+        </tbody>
+    </table>
+
+    <h3>2.4 Traçabilité</h3>
+    <table>
+        <thead><tr><th style="width:25%">Exigence FFPLUM</th><th style="width:35%">Couverture C6L</th><th style="width:15%">Statut</th><th style="width:25%">Écart / Action</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Carnets de vol</strong></td><td><span class="entity-tag">CarnetVol</span> <span class="entity-tag">Vol</span><br>Enregistrement complet : pilote, machine, durée, horamètres</td><td><span class="status-covered">🟢 Couvert</span></td><td>Fonctionnalité core mature</td></tr>
+            <tr><td><strong>Historique modifications</strong></td><td><span class="tech-tag">Doctrine</span><br>Timestamps created/updated</td><td><span class="status-partial">🟡 Partiel</span></td><td>Implémenter audit log complet avec auteur</td></tr>
+            <tr><td><strong>Export DGAC</strong></td><td><span class="tech-tag">CSV</span> <span class="tech-tag">PDF</span><br>Exports multi-formats existants</td><td><span class="status-todo">🔴 À développer</span></td><td>Créer format d'export conforme DGAC</td></tr>
+            <tr><td><strong>Signature numérique</strong></td><td>Non disponible</td><td><span class="status-todo">🔴 À développer</span></td><td>Implémenter signature électronique des documents</td></tr>
+        </tbody>
+    </table>
+
+    <!-- Section 3: Exigences Bonus -->
+    <h2 id="exigences-bonus">3. Analyse des Exigences Bonus (V2/V3)</h2>
+
+    <h3>3.1 Planning et Réservations</h3>
+    <table>
+        <thead><tr><th style="width:25%">Exigence FFPLUM</th><th style="width:35%">Couverture C6L</th><th style="width:15%">Statut</th><th style="width:25%">Écart / Action</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Réservation machines</strong></td><td><span class="entity-tag">Reservation</span> <span class="entity-tag">Aeronef</span><br>Système de réservation complet avec créneaux</td><td><span class="status-covered">🟢 Couvert</span></td><td>Fonctionnalité existante et mature</td></tr>
+            <tr><td><strong>Disponibilités pilotes</strong></td><td><span class="entity-tag">Disponibilite</span><br>Gestion créneaux disponibilité/indisponibilité</td><td><span class="status-covered">🟢 Couvert</span></td><td>Module disponibilités opérationnel</td></tr>
+            <tr><td><strong>Vue calendrier</strong></td><td><span class="tech-tag">CalendarWidget</span><br>Vue calendrier interactive</td><td><span class="status-covered">🟢 Couvert</span></td><td>Widget calendrier intégré</td></tr>
+            <tr><td><strong>Gestion conflits</strong></td><td>Contrôle chevauchements</td><td><span class="status-partial">🟡 Partiel</span></td><td>Renforcer détection et résolution conflits</td></tr>
+        </tbody>
+    </table>
+
+    <h3>3.2 Formation</h3>
+    <table>
+        <thead><tr><th style="width:25%">Exigence FFPLUM</th><th style="width:35%">Couverture C6L</th><th style="width:15%">Statut</th><th style="width:25%">Écart / Action</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Suivi élèves</strong></td><td><span class="entity-tag">ProfilPilote</span> <span class="entity-tag">CarnetVol</span><br>Profils avec heures de vol, progression</td><td><span class="status-partial">🟡 Partiel</span></td><td>Ajouter : livret de progression, objectifs formation</td></tr>
+            <tr><td><strong>Suivi instructeurs</strong></td><td><span class="entity-tag">Qualification</span><br>Qualifications instructeur avec validités</td><td><span class="status-covered">🟢 Couvert</span></td><td>Gestion qualifications existante</td></tr>
+            <tr><td><strong>Programmes formation</strong></td><td>Non disponible</td><td><span class="status-todo">🔴 À développer</span></td><td>Module programmes et curricula de formation</td></tr>
+            <tr><td><strong>Examens et brevets</strong></td><td>Non disponible</td><td><span class="status-todo">🔴 À développer</span></td><td>Module suivi examens théoriques et pratiques</td></tr>
+        </tbody>
+    </table>
+
+    <h3>3.3 Maintenance Avancée</h3>
+    <table>
+        <thead><tr><th style="width:25%">Exigence FFPLUM</th><th style="width:35%">Couverture C6L</th><th style="width:15%">Statut</th><th style="width:25%">Écart / Action</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Suivi entretiens</strong></td><td><span class="entity-tag">Entretien</span><br>Planning maintenance, interventions</td><td><span class="status-covered">🟢 Couvert</span></td><td>Module maintenance opérationnel</td></tr>
+            <tr><td><strong>Potentiels moteur</strong></td><td><span class="entity-tag">Aeronef</span><br>Horamètres et suivi potentiel</td><td><span class="status-covered">🟢 Couvert</span></td><td>Suivi horamètre existant</td></tr>
+            <tr><td><strong>Alertes maintenance</strong></td><td><span class="tech-tag">Alertes automatiques</span><br>Notifications avant échéances</td><td><span class="status-covered">🟢 Couvert</span></td><td>Système d'alertes fonctionnel</td></tr>
+            <tr><td><strong>Gestion pièces</strong></td><td>Non disponible</td><td><span class="status-todo">🔴 À développer</span></td><td>Module gestion stock pièces détachées (optionnel)</td></tr>
+        </tbody>
+    </table>
+
+    <!-- Section 4: Technique -->
+    <h2 id="technique">4. Analyse Technique</h2>
+
+    <h3>4.1 Architecture et Standards</h3>
+    <table>
+        <thead><tr><th style="width:25%">Exigence FFPLUM</th><th style="width:35%">Couverture C6L</th><th style="width:15%">Statut</th><th style="width:25%">Écart / Action</th></tr></thead>
+        <tbody>
+            <tr><td><strong>PWA</strong></td><td><span class="tech-tag">Next.js 14</span> <span class="tech-tag">PWA</span><br>Application web progressive avec support offline</td><td><span class="status-covered">🟢 Couvert</span></td><td>Architecture PWA native</td></tr>
+            <tr><td><strong>API REST</strong></td><td><span class="tech-tag">API Platform</span> <span class="tech-tag">OpenAPI</span><br>API REST/Hydra avec documentation automatique</td><td><span class="status-covered">🟢 Couvert</span></td><td>API Platform mature, documentation OpenAPI</td></tr>
+            <tr><td><strong>MFA</strong></td><td><span class="tech-tag">Keycloak</span> <span class="tech-tag">OIDC</span><br>SSO centralisé Keycloak</td><td><span class="status-partial">🟡 Partiel</span></td><td>Activer MFA dans configuration Keycloak</td></tr>
+            <tr><td><strong>Multi-tenant</strong></td><td><span class="entity-tag">Client</span><br>Architecture multi-tenant native</td><td><span class="status-covered">🟢 Couvert</span></td><td>Point fort majeur pour 700 clubs</td></tr>
+            <tr><td><strong>Scalabilité</strong></td><td><span class="tech-tag">Kubernetes</span> <span class="tech-tag">Helm</span><br>Infrastructure containerisée orchestrée</td><td><span class="status-covered">🟢 Couvert</span></td><td>Architecture cloud-native prête</td></tr>
+        </tbody>
+    </table>
+
+    <h3>4.2 Conformité RGPD</h3>
+    <table>
+        <thead><tr><th style="width:25%">Exigence FFPLUM</th><th style="width:35%">Couverture C6L</th><th style="width:15%">Statut</th><th style="width:25%">Écart / Action</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Consentement</strong></td><td><span class="entity-tag">Passager</span><br>Gestion consentement avec texte personnalisable</td><td><span class="status-covered">🟢 Couvert</span></td><td>Module RGPD passagers opérationnel</td></tr>
+            <tr><td><strong>Droit à l'oubli</strong></td><td>Suppression données</td><td><span class="status-partial">🟡 Partiel</span></td><td>Formaliser procédure d'anonymisation</td></tr>
+            <tr><td><strong>Export données</strong></td><td><span class="tech-tag">CSV</span> <span class="tech-tag">PDF</span><br>Exports multi-formats</td><td><span class="status-covered">🟢 Couvert</span></td><td>Portabilité données assurée</td></tr>
+            <tr><td><strong>Hébergement HDS</strong></td><td>À définir selon hébergeur</td><td><span class="status-partial">🟡 Partiel</span></td><td>Valider hébergement conforme (données santé)</td></tr>
+        </tbody>
+    </table>
+
+    <h3>4.3 Connecteurs et Intégrations</h3>
+    <table>
+        <thead><tr><th style="width:25%">Exigence FFPLUM</th><th style="width:35%">Couverture C6L</th><th style="width:15%">Statut</th><th style="width:25%">Écart / Action</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Connecteur Exalto</strong></td><td>Non disponible</td><td><span class="status-todo">🔴 À développer</span></td><td>Développer intégration API Exalto (licences FFPLUM)</td></tr>
+            <tr><td><strong>Connecteur DSAC</strong></td><td>Non disponible</td><td><span class="status-todo">🔴 À développer</span></td><td>Développer interface DSAC pour déclarations</td></tr>
+            <tr><td><strong>Accès DGAC</strong></td><td>Non disponible</td><td><span class="status-todo">🔴 À développer</span></td><td>Implémenter accès lecture seule données DGAC</td></tr>
+            <tr><td><strong>AeroGLIGLI</strong></td><td>Non disponible</td><td><span class="status-todo">🔴 À développer</span></td><td>Évaluer nécessité et développer si requis</td></tr>
+            <tr><td><strong>Statistiques fédérales</strong></td><td>Non disponible</td><td><span class="status-todo">🔴 À développer</span></td><td>Module consolidation et remontée statistiques FFPLUM</td></tr>
+        </tbody>
+    </table>
+
+    <!-- Section 5: Récapitulatif -->
+    <h2 id="recapitulatif">5. Tableau Récapitulatif</h2>
+
+    <div class="alert-box info">
+        <strong>Légende des statuts</strong><br>
+        🟢 Couvert (30 exigences) — Fonctionnalité présente et opérationnelle<br>
+        🟡 Partiel (14 exigences) — Fonctionnalité existante nécessitant adaptation<br>
+        🔴 À développer (11 exigences) — Développement nouveau requis
+    </div>
+
+    <table>
+        <thead><tr><th style="width:30%">Domaine Fonctionnel</th><th style="width:15%">🟢 Couvert</th><th style="width:15%">🟡 Partiel</th><th style="width:15%">🔴 À dev</th><th style="width:25%">Couverture</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Gestion Pilotes</strong></td><td>4</td><td>1</td><td>0</td><td><span class="status-covered">90%</span></td></tr>
+            <tr><td><strong>Gestion Machines</strong></td><td>4</td><td>1</td><td>0</td><td><span class="status-covered">85%</span></td></tr>
+            <tr><td><strong>Carnets de vol</strong></td><td>3</td><td>1</td><td>0</td><td><span class="status-covered">85%</span></td></tr>
+            <tr><td><strong>Alertes / Validités</strong></td><td>3</td><td>1</td><td>0</td><td><span class="status-covered">80%</span></td></tr>
+            <tr><td><strong>Planning / Réservations</strong></td><td>4</td><td>1</td><td>0</td><td><span class="status-covered">85%</span></td></tr>
+            <tr><td><strong>Activités VLO/VLD</strong></td><td>0</td><td>3</td><td>1</td><td><span class="status-partial">60%</span></td></tr>
+            <tr><td><strong>Formation</strong></td><td>1</td><td>1</td><td>2</td><td><span class="status-partial">45%</span></td></tr>
+            <tr><td><strong>Connecteurs externes</strong></td><td>0</td><td>0</td><td>5</td><td><span class="status-todo">0%</span></td></tr>
+            <tr><td><strong>Traçabilité avancée</strong></td><td>1</td><td>1</td><td>2</td><td><span class="status-partial">40%</span></td></tr>
+            <tr><td><strong>Architecture / Sécurité</strong></td><td>5</td><td>2</td><td>0</td><td><span class="status-covered">85%</span></td></tr>
+            <tr><td><strong>RGPD</strong></td><td>2</td><td>2</td><td>0</td><td><span class="status-covered">75%</span></td></tr>
+            <tr><td><strong>Maintenance</strong></td><td>3</td><td>0</td><td>1</td><td><span class="status-covered">80%</span></td></tr>
+            <tr style="background:var(--slate-100); font-weight:bold;"><td><strong>TOTAL</strong></td><td>30</td><td>14</td><td>11</td><td><span class="status-partial">72%</span></td></tr>
+        </tbody>
+    </table>
+
+    <!-- Section 6: Développements -->
+    <h2 id="developpements">6. Synthèse des Développements Nécessaires</h2>
+
+    <h3>6.1 Développements Prioritaires (OPS — Phase 1)</h3>
+
+    <div class="dev-card"><h4>🔴 Module Activités Particulières / MANEX</h4><ul><li>Gestion des autorisations MANEX</li><li>Déclarations d'activités particulières</li><li>Contrôle conformité réglementaire</li></ul></div>
+    <div class="dev-card"><h4>🔴 Connecteur Exalto</h4><ul><li>Synchronisation licences FFPLUM</li><li>Vérification validité licences en temps réel</li><li>Import automatique données fédérales</li></ul></div>
+    <div class="dev-card"><h4>🔴 Export Format DGAC</h4><ul><li>Génération fichiers conformes aux exigences DGAC</li><li>Carnets de vol format officiel</li><li>Rapports d'activité réglementaires</li></ul></div>
+    <div class="dev-card"><h4>🔴 Signature Numérique</h4><ul><li>Signature électronique des documents officiels</li><li>Horodatage certifié</li><li>Archivage légal</li></ul></div>
+
+    <h3>6.2 Adaptations Prioritaires (OPS — Phase 1)</h3>
+    <div class="domain-grid">
+        <div class="domain-card"><h4>🟡 Vocabulaire ULM</h4><p>Adapter la terminologie : brevets → licences, certificats, qualifications ULM spécifiques</p></div>
+        <div class="domain-card"><h4>🟡 Types d'activité VLO/VLD</h4><p>Ajouter classification des vols selon réglementation février 2025</p></div>
+        <div class="domain-card"><h4>🟡 Blocages automatiques</h4><p>Renforcer les contrôles bloquants si documents expirés</p></div>
+        <div class="domain-card"><h4>🟡 Audit log complet</h4><p>Traçabilité complète avec auteur et horodatage</p></div>
+    </div>
+
+    <h3>6.3 Développements Bonus (V2/V3)</h3>
+    <div class="dev-card"><h4>🔴 Connecteur DSAC</h4><ul><li>Interface déclarations vers autorités</li><li>Remontée statistiques officielles</li></ul></div>
+    <div class="dev-card"><h4>🔴 Module Formation Avancé</h4><ul><li>Livrets de progression élèves</li><li>Programmes de formation type</li><li>Suivi examens théoriques et pratiques</li></ul></div>
+    <div class="dev-card"><h4>🔴 Statistiques Fédérales</h4><ul><li>Consolidation données multi-clubs</li><li>Tableaux de bord fédéraux</li><li>Exports agrégés</li></ul></div>
+
+    <h3>6.4 Estimation Effort</h3>
+    <table>
+        <thead><tr><th style="width:40%">Module / Développement</th><th style="width:20%">Complexité</th><th style="width:20%">Priorité</th><th style="width:20%">Phase</th></tr></thead>
+        <tbody>
+            <tr><td>Adaptation vocabulaire ULM</td><td>Faible</td><td>Haute</td><td>OPS</td></tr>
+            <tr><td>Types activité VLO/VLD</td><td>Moyenne</td><td>Haute</td><td>OPS</td></tr>
+            <tr><td>Connecteur Exalto</td><td>Moyenne</td><td>Haute</td><td>OPS</td></tr>
+            <tr><td>Export format DGAC</td><td>Moyenne</td><td>Haute</td><td>OPS</td></tr>
+            <tr><td>Module MANEX</td><td>Haute</td><td>Moyenne</td><td>OPS</td></tr>
+            <tr><td>Signature numérique</td><td>Moyenne</td><td>Moyenne</td><td>OPS</td></tr>
+            <tr><td>Audit log complet</td><td>Moyenne</td><td>Moyenne</td><td>OPS</td></tr>
+            <tr><td>Activation MFA Keycloak</td><td>Faible</td><td>Moyenne</td><td>OPS</td></tr>
+            <tr><td>Connecteur DSAC</td><td>Haute</td><td>Basse</td><td>V2</td></tr>
+            <tr><td>Module Formation</td><td>Haute</td><td>Basse</td><td>V2</td></tr>
+            <tr><td>Statistiques fédérales</td><td>Moyenne</td><td>Basse</td><td>V2</td></tr>
+        </tbody>
+    </table>
+
+    <!-- Section 7: Conclusion -->
+    <h2 id="conclusion">7. Conclusion et Recommandations</h2>
+
+    <div class="alert-box success">
+        <strong>Points forts de C6L Gestion 4.0</strong>
+        <ul>
+            <li><strong>Architecture multi-tenant native</strong> — Parfaitement adaptée pour ~700 clubs</li>
+            <li><strong>Gestion pilotes/qualifications/certificats</strong> — Fonctionnalité mature et éprouvée</li>
+            <li><strong>Carnets de vol et aéronefs</strong> — Module core robuste</li>
+            <li><strong>Système d'alertes automatiques</strong> — Notifications proactives</li>
+            <li><strong>Planning et réservations</strong> — Fonctionnalité complète</li>
+            <li><strong>Architecture moderne</strong> — Symfony 6, Next.js 14, Keycloak, Kubernetes</li>
+            <li><strong>RGPD intégré</strong> — Gestion consentement passagers</li>
+        </ul>
+    </div>
+
+    <h3>7.1 Synthèse de l'Adéquation</h3>
+    <p>Avec un <strong>score de couverture de 72%</strong>, C6L Gestion 4.0 constitue une base solide pour répondre aux besoins de la FFPLUM. Les fonctionnalités cœur (gestion pilotes, machines, carnets de vol, maintenance, planning) sont matures et opérationnelles.</p>
+    <p>Les développements nécessaires concernent principalement :</p>
+    <ul>
+        <li><strong>Les spécificités réglementaires ULM</strong> (VLO/VLD, MANEX) — Adaptation métier</li>
+        <li><strong>Les connecteurs fédéraux</strong> (Exalto, DSAC) — Intégrations tierces</li>
+        <li><strong>La traçabilité avancée</strong> (signature numérique, exports DGAC) — Conformité</li>
+    </ul>
+
+    <h3>7.2 Recommandations</h3>
+    <div class="domain-grid">
+        <div class="domain-card"><h4>1. Phase OPS (Septembre 2026)</h4><p>Se concentrer sur les adaptations métier ULM et le connecteur Exalto pour une conformité réglementaire minimale.</p></div>
+        <div class="domain-card"><h4>2. Partenariat technique</h4><p>Collaboration étroite avec la FFPLUM pour définir précisément les formats et protocoles d'échange.</p></div>
+        <div class="domain-card"><h4>3. Pilote avec clubs</h4><p>Tester avec 3-5 clubs pilotes avant déploiement national pour valider l'adéquation fonctionnelle.</p></div>
+        <div class="domain-card"><h4>4. Évolutivité</h4><p>L'architecture permet d'intégrer les modules V2/V3 (formation, statistiques) sans refonte majeure.</p></div>
+    </div>
+
+    <h3>7.3 Avantages Stratégiques</h3>
+    <table>
+        <thead><tr><th style="width:30%">Critère CDC</th><th style="width:70%">Position C6L</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Pas de dev from scratch</strong></td><td>✅ Solution existante et opérationnelle, base de code mature</td></tr>
+            <tr><td><strong>Délai Semestre 2 2026 — Phase 1</strong></td><td>✅ Réaliste avec focus sur OPS et adaptations prioritaires</td></tr>
+            <tr><td><strong>Rachat/Partenariat</strong></td><td>✅ Solution adaptable, équipe technique disponible</td></tr>
+            <tr><td><strong>Évolutivité</strong></td><td>✅ Architecture extensible pour phases V2/V3</td></tr>
+        </tbody>
+    </table>
+
+</div>
+
+<!-- ====== FOOTER ====== -->
+<footer>
+    <div>
+        <div class="f-logo">C<b>6</b>L</div>
+        <div style="color:var(--slate-500); font-size:0.85rem; margin-top:5px;">SCOPE — Analyse Fonctionnelle FFPLUM</div>
+    </div>
+    <div class="f-info">
+        <div>© 2026 CREAZOT — Tous droits réservés</div>
+        <div style="margin-top:4px; font-size:0.8rem;">Document confidentiel — Préparation appel d'offres</div>
+    </div>
+</footer>
+
+</body>
+</html>

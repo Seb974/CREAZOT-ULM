@@ -19,7 +19,7 @@ export const ClientsEdit = () => {
         const previousData = cachedClient ? JSON.parse(cachedClient) : null;
 
         const sanitizedData = sanitizeData(data, previousData);
-        const images = await uploadImages(sanitizedData, session);
+        const images = await uploadImages(sanitizedData, session, data.id);
         // @ts-ignore
         const updatedClient = { ...sanitizedData, ...Object.fromEntries(images.map(img => [img.name, img.path || null])) };
 

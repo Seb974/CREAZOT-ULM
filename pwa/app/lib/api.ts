@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const ENV = (!process.env.NEXT_PUBLIC_NODE_ENV || process.env.NEXT_PUBLIC_NODE_ENV === "development") ? "development" : "production" ;
-export const API_DOMAIN = "https://admin.planetair974.re";
+export const API_DOMAIN = typeof window !== "undefined" ? window.origin : (process.env.NEXT_PUBLIC_ENTRYPOINT || "");
 
 export async function get(route: string) {
     return axios.get(API_DOMAIN + route);

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C6L — Vision Stratégique FFPLUM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sky: #0ea5e9;
+            --sky-dark: #0369a1;
+            --sky-deep: #0c4a6e;
+            --navy: #0f172a;
+            --navy-light: #1e293b;
+            --gold: #f59e0b;
+            --gold-light: #fbbf24;
+            --emerald: #10b981;
+            --rose: #f43f5e;
+            --violet: #8b5cf6;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: white;
+            background: var(--navy);
+            -webkit-font-smoothing: antialiased;
+            padding-top: 56px;
+        }
+
+        /* ====== NAV ====== */
+        nav {
+            position: fixed; top: 0; width: 100%; z-index: 100;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 0 40px; height: 56px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-left { display: flex; align-items: center; gap: 20px; }
+        .nav-logo { font-size: 1.4rem; font-weight: 800; color: white; letter-spacing: -1px; text-decoration: none; }
+        .nav-logo b { color: var(--gold); }
+        .nav-sep { color: var(--slate-600); font-size: 1.2rem; font-weight: 300; }
+        .nav-page { color: #c4b5fd; font-size: 0.85rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+        .nav-links { display: flex; gap: 6px; align-items: center; }
+        .nav-links a { color: var(--slate-400); text-decoration: none; font-size: 0.75rem; font-weight: 500; padding: 6px 12px; border-radius: 6px; transition: all 0.2s; }
+        .nav-links a:hover { color: white; background: rgba(255,255,255,0.08); }
+        .nav-links .btn-back { background: var(--violet); color: white; font-weight: 600; padding: 6px 16px; }
+        .nav-links .btn-back:hover { background: #7c3aed; }
+
+        /* ====== HERO ====== */
+        .vision-hero {
+            background: linear-gradient(135deg, var(--navy) 0%, #1a1a2e 50%, #1e1b4b 100%);
+            color: white; padding: 100px 80px 60px; position: relative; overflow: hidden;
+        }
+        .vision-hero::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(ellipse 50% 50% at 75% 40%, rgba(139,92,246,0.12), transparent),
+                        radial-gradient(ellipse 40% 40% at 25% 70%, rgba(14,165,233,0.06), transparent);
+        }
+        .vision-hero-content { position: relative; z-index: 2; max-width: 700px; }
+        .vision-hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(139,92,246,0.12); color: #c4b5fd;
+            padding: 8px 18px; border-radius: 100px; font-size: 0.8rem; font-weight: 600;
+            border: 1px solid rgba(139,92,246,0.25); margin-bottom: 24px;
+            letter-spacing: 1px; text-transform: uppercase;
+        }
+        .vision-hero h1 { font-size: 3.2rem; font-weight: 900; letter-spacing: -2px; line-height: 1.1; margin-bottom: 20px; }
+        .vision-hero h1 b { background: linear-gradient(135deg, #c4b5fd, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .vision-hero p { color: var(--slate-400); font-size: 1.1rem; line-height: 1.7; }
+
+        /* ====== VISION CONTENT ====== */
+        .vision-section {
+            background: linear-gradient(135deg, #0f172a 0%, #1a1a2e 40%, #0c4a6e 100%);
+            color: white; padding: 70px 80px; position: relative; overflow: hidden;
+        }
+        .vision-section::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(ellipse 60% 50% at 80% 30%, rgba(139,92,246,0.1), transparent),
+                        radial-gradient(ellipse 50% 40% at 20% 70%, rgba(14,165,233,0.08), transparent);
+        }
+        .vision-inner { position: relative; z-index: 2; max-width: 1100px; margin: 0 auto; }
+
+        .phase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 40px; }
+        .phase-card { border-radius: 16px; padding: 36px; position: relative; overflow: hidden; }
+        .phase-card.phase-1 { background: rgba(14,165,233,0.08); border: 1px solid rgba(14,165,233,0.2); }
+        .phase-card.phase-2 { background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.2); }
+        .phase-tag {
+            display: inline-block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.5px; padding: 5px 12px; border-radius: 6px; margin-bottom: 16px;
+        }
+        .phase-1 .phase-tag { background: rgba(14,165,233,0.2); color: #7dd3fc; }
+        .phase-2 .phase-tag { background: rgba(139,92,246,0.2); color: #c4b5fd; }
+        .phase-card h3 { font-size: 1.3rem; font-weight: 800; color: white; margin-bottom: 10px; letter-spacing: -0.5px; }
+        .phase-card .phase-desc { color: var(--slate-400); font-size: 0.9rem; line-height: 1.7; margin-bottom: 20px; }
+        .phase-features { list-style: none; margin: 0; padding: 0; }
+        .phase-features li {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 8px 0; font-size: 0.88rem; color: var(--slate-300); border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .phase-features li:last-child { border: none; }
+        .phase-features .feat-icon {
+            flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center; font-size: 0.7rem; margin-top: 1px;
+        }
+        .phase-1 .feat-icon { background: rgba(14,165,233,0.2); color: #7dd3fc; }
+        .phase-2 .feat-icon { background: rgba(139,92,246,0.2); color: #c4b5fd; }
+
+        .vision-arrow {
+            display: flex; align-items: center; justify-content: center; gap: 16px;
+            margin: 10px 0; color: var(--slate-500); font-size: 0.85rem;
+        }
+        .vision-arrow::before, .vision-arrow::after {
+            content: ''; flex: 1; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(139,92,246,0.3), transparent);
+        }
+
+        .vision-bottom {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px; padding: 28px 32px; display: flex; align-items: flex-start; gap: 20px;
+        }
+        .vision-bottom-icon {
+            flex-shrink: 0; width: 48px; height: 48px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--gold), #f59e0b); color: var(--navy);
+            display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 900;
+        }
+        .vision-bottom h4 { font-size: 1rem; font-weight: 700; color: white; margin-bottom: 6px; }
+        .vision-bottom p { font-size: 0.88rem; color: var(--slate-400); line-height: 1.7; margin: 0; }
+
+        /* ====== FOOTER ====== */
+        footer {
+            background: var(--navy); color: white; padding: 40px 80px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        footer .f-logo { font-size: 1.6rem; font-weight: 800; letter-spacing: -1px; }
+        footer .f-logo b { color: var(--gold); }
+        footer .f-info { text-align: right; font-size: 0.85rem; color: var(--slate-500); }
+
+        /* ====== RESPONSIVE ====== */
+        @media (max-width: 1024px) {
+            .vision-hero { padding: 60px 40px; }
+            .vision-section { padding: 50px 40px; }
+            .phase-grid { grid-template-columns: 1fr; }
+            .vision-hero h1 { font-size: 2.2rem; }
+            footer { padding: 30px 40px; }
+        }
+        @media (max-width: 600px) {
+            nav { padding: 0 20px; }
+            .nav-links { display: none; }
+            .vision-hero { padding: 40px 20px; }
+            .vision-hero h1 { font-size: 1.8rem; }
+            .vision-section { padding: 40px 20px; }
+        }
+        @media print {
+            nav { display: none; }
+            body { padding-top: 0; }
+            .vision-section { color: black; background: white !important; }
+            .vision-section::before { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ====== NAV ====== -->
+<nav>
+    <div class="nav-left">
+        <a href="index.html" class="nav-logo" title="Accueil">C<b>6</b>L</a>
+        <span class="nav-sep">/</span>
+        <span class="nav-page">Vision</span>
+    </div>
+    <div class="nav-links">
+        <a href="guide.html">Guide</a>
+        <a href="scope.html">SCOPE</a>
+        <a href="proposition.html">Proposition</a>
+        <a href="index.html" class="btn-back">← Accueil</a>
+    </div>
+</nav>
+
+<!-- ====== HERO ====== -->
+<section class="vision-hero">
+    <div class="vision-hero-content">
+        <div class="vision-hero-badge">Vision stratégique</div>
+        <h1>Au-delà de l'outil :<br><b>une plateforme fédératrice</b></h1>
+        <p>
+            C6L n'est pas un simple logiciel de gestion. C'est une infrastructure numérique qui positionne la FFPLUM
+            au centre de l'écosystème ULM français — d'abord par la conformité réglementaire, puis par la mise en réseau
+            de l'ensemble de la communauté.
+        </p>
+    </div>
+</section>
+
+<!-- ====== PHASES ====== -->
+<section class="vision-section">
+    <div class="vision-inner">
+
+        <div class="phase-grid">
+
+            <div class="phase-card phase-1">
+                <div class="phase-tag">Phase 1 — Immédiat</div>
+                <h3>Conformité réglementaire</h3>
+                <p class="phase-desc">
+                    La réglementation de <strong style="color:#7dd3fc;">février 2025</strong> impose de nouvelles exigences aux clubs ULM.
+                    En déployant C6L, la FFPLUM apporte à ses clubs une réponse concrète et opérationnelle à ces évolutions.
+                </p>
+                <ul class="phase-features">
+                    <li>
+                        <span class="feat-icon">✓</span>
+                        <span><strong style="color:white;">Traçabilité complète</strong> — Audit log horodaté de chaque opération, signature numérique des documents</span>
+                    </li>
+                    <li>
+                        <span class="feat-icon">✓</span>
+                        <span><strong style="color:white;">Exports réglementaires</strong> — Formats DGAC et DSAC, rapports conformes prêts à transmettre</span>
+                    </li>
+                    <li>
+                        <span class="feat-icon">✓</span>
+                        <span><strong style="color:white;">Blocages automatiques</strong> — Impossible de voler sans documents valides (licence, médical, qualifications)</span>
+                    </li>
+                    <li>
+                        <span class="feat-icon">✓</span>
+                        <span><strong style="color:white;">Alertes proactives</strong> — Échéances de validité, entretiens aéronefs, renouvellements</span>
+                    </li>
+                    <li>
+                        <span class="feat-icon">✓</span>
+                        <span><strong style="color:white;">RGPD natif</strong> — Consentements, droit à l'effacement, export des données personnelles</span>
+                    </li>
+                </ul>
+                <div style="margin-top:20px; padding:16px; background:rgba(14,165,233,0.1); border-radius:10px;">
+                    <div style="font-size:0.82rem; color:#7dd3fc; font-weight:600;">Impact pour la fédération</div>
+                    <div style="font-size:0.9rem; color:var(--slate-300); margin-top:6px;">
+                        La FFPLUM <strong style="color:white;">se positionne comme facilitateur</strong> de la mise en conformité.
+                        Elle ne se contente pas d'informer sur la réglementation : elle fournit l'outil pour l'appliquer.
+                    </div>
+                </div>
+            </div>
+
+            <div class="phase-card phase-2">
+                <div class="phase-tag">Phase 2 — Évolution</div>
+                <h3>Hub Pilotes — Connecter l'écosystème</h3>
+                <p class="phase-desc">
+                    Par son effet centralisateur, la fédération se retrouve <strong style="color:#c4b5fd;">au cœur du réseau</strong>.
+                    La brique « Pilote » transforme C6L en plateforme de mise en relation entre clubs et pilotes.
+                </p>
+                <ul class="phase-features">
+                    <li>
+                        <span class="feat-icon">●</span>
+                        <span><strong style="color:white;">Profil pilote enrichi</strong> — Heures de vol, qualifications, types d'aéronefs pratiqués, zones géographiques, disponibilités</span>
+                    </li>
+                    <li>
+                        <span class="feat-icon">●</span>
+                        <span><strong style="color:white;">Besoins clubs</strong> — Recherche de pilotes pour missions ponctuelles (événements, baptêmes) ou régulières (instructeurs, saisons)</span>
+                    </li>
+                    <li>
+                        <span class="feat-icon">●</span>
+                        <span><strong style="color:white;">Matching intelligent</strong> — Mise en correspondance automatique entre l'offre (pilotes disponibles) et la demande (clubs en recherche)</span>
+                    </li>
+                    <li>
+                        <span class="feat-icon">●</span>
+                        <span><strong style="color:white;">Mobilité inter-clubs</strong> — Un pilote peut découvrir de nouveaux clubs, voler ailleurs en France, élargir son expérience</span>
+                    </li>
+                    <li>
+                        <span class="feat-icon">●</span>
+                        <span><strong style="color:white;">Annuaire fédéral vivant</strong> — Vision en temps réel de la communauté ULM : combien de pilotes actifs, quelles qualifications, quelle répartition géographique</span>
+                    </li>
+                </ul>
+                <div style="margin-top:20px; padding:16px; background:rgba(139,92,246,0.1); border-radius:10px;">
+                    <div style="font-size:0.82rem; color:#c4b5fd; font-weight:600;">Impact pour la fédération</div>
+                    <div style="font-size:0.9rem; color:var(--slate-300); margin-top:6px;">
+                        La mission de la FFPLUM — <strong style="color:white;">promouvoir l'ULM à l'échelle nationale</strong> — prend une dimension opérationnelle.
+                        La fédération ne se contente plus de représenter : elle <strong style="color:white;">connecte activement</strong> les acteurs entre eux.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="vision-arrow">De l'outil de gestion à la plateforme communautaire</div>
+
+        <div class="vision-bottom">
+            <div class="vision-bottom-icon">→</div>
+            <div>
+                <h4>La FFPLUM au centre de l'écosystème</h4>
+                <p>
+                    Chaque club connecté renforce le réseau. Chaque pilote inscrit enrichit la communauté.
+                    La fédération dispose d'une <strong style="color:white;">vision consolidée sans précédent</strong> de l'activité ULM en France :
+                    heures de vol agrégées, cartographie des compétences, anticipation des besoins en formation.
+                    Cette donnée, anonymisée et consolidée, devient un atout stratégique dans les discussions avec la DGAC,
+                    les assureurs et les partenaires institutionnels.
+                    <br><br>
+                    <strong style="color:var(--gold-light);">La légitimité de la fédération ne repose plus seulement sur la représentation —
+                    elle repose sur la capacité à connecter, à outiller et à fédérer concrètement.</strong>
+                </p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ====== FOOTER ====== -->
+<footer>
+    <div>
+        <div class="f-logo">C<b>6</b>L</div>
+        <div style="color:var(--slate-500); font-size:0.85rem; margin-top:5px;">Vision Stratégique — FFPLUM</div>
+    </div>
+    <div class="f-info">
+        <div>© 2026 CREAZOT — Tous droits réservés</div>
+        <div style="margin-top:4px; font-size:0.8rem;">Document confidentiel</div>
+    </div>
+</footer>
+
+</body>
+</html>
