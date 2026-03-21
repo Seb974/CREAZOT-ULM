@@ -1,7 +1,8 @@
-import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, SimpleFormIterator, ArrayInput, TabbedForm, useRedirect, useNotify, TimeInput } from "react-admin";
+import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, SimpleFormIterator, ArrayInput, TabbedForm, useRedirect, useNotify, TimeInput, ReferenceInput, AutocompleteInput, ReferenceArrayInput, CheckboxGroupInput, DateTimeInput, NumberField } from "react-admin";
 import { Edit } from "react-admin";
 import { timezones, fileInputSX, uploadImages, sanitizeData } from "../../../app/lib/client";
-import { Typography, Divider, Box } from '@mui/material';
+import { Typography, Divider, Box, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ColorPreview } from './ColorPreview';
 import { ThanksOptions } from './ThanksOptions';
 import { useClient } from '../../admin/ClientProvider';
@@ -250,7 +251,37 @@ export const ClientsEdit = () => {
                             </Box>
                         </Box>
                     </TabbedForm.Tab>
-                    
+                    <TabbedForm.Tab label="Abonnement">
+                        <ReferenceInput source="pricingCategory" reference="pricing-categories">
+                            <AutocompleteInput optionText="name" label="Grille tarifaire" fullWidth />
+                        </ReferenceInput>
+                        <ReferenceArrayInput source="modulePacks" reference="module-packs">
+                            <CheckboxGroupInput optionText="name" label="Packs de modules" />
+                        </ReferenceArrayInput>
+                        <SelectInput source="subscriptionStatus" label="Statut de l'abonnement" choices={[
+                            { id: "trial", name: "Essai" },
+                            { id: "active", name: "Actif" },
+                            { id: "suspended", name: "Suspendu" },
+                            { id: "cancelled", name: "Annulé" },
+                        ]} />
+                        <DateTimeInput source="trialEndsAt" label="Fin de la période d'essai" />
+                        <NumberInput source="maxAeronefs" label="Nombre max d'aéronefs" />
+                        <Box sx={{ mt: 2, p: 2, backgroundColor: "#f5f5f5", borderRadius: 1 }}>
+                            <Typography variant="subtitle2" color="text.secondary">
+                                Prix mensuel de base (calculé)
+                            </Typography>
+                            <NumberField source="monthlyBasePrice" options={{ style: 'currency', currency: 'EUR' }} />
+                        </Box>
+                        <Accordion sx={{ mt: 3, width: "100%" }}>
+                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                <Typography>Odoo (Phase 3)</Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <TextInput source="odooCustomerId" label="ID client Odoo" fullWidth />
+                                <TextInput source="odooSubscriptionId" label="ID abonnement Odoo" fullWidth />
+                            </AccordionDetails>
+                        </Accordion>
+                    </TabbedForm.Tab>
                 </TabbedForm>
             </Edit>
         </div>

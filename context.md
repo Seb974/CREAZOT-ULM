@@ -235,7 +235,7 @@ image.public_dir: '/srv/api/public'                  # racine publique
 | Route | Fonction |
 |-------|----------|
 | `/` | Formulaire inscription passager (RGPD) |
-| `/thanks` | Page de remerciement |
+| `/thanks` | Page de remerciement (affiche `thanksImage` + `thanksMessage` du client) |
 | `/admin` | Interface d'administration complète |
 | `/auth/signin` | Redirection automatique vers Keycloak (plus de page MissingCSRF) |
 
@@ -372,13 +372,15 @@ Performances mesurées en production :
 2. **Architecture mature** — Stack API Platform complète, bien structurée
 3. **Personnalisation client** — Entité Client riche (40+ champs, modules activables)
 4. **Images par client** — Stockage isolé `images/client/{id}/` avec fallback vers les defaults
-5. **Production optimisée** — PWA buildée en mode production (`next build` + `node server.js`), démarrage en 83ms, pages pré-compilées
-6. **Sécurité auth** — Secret NextAuth via variable d'environnement `AUTH_SECRET`, `getSession()` correctement awaité
-7. **Zéro URL hardcodée** — `API_DOMAIN` résolu dynamiquement (`window.origin` / `NEXT_PUBLIC_ENTRYPOINT`), liens internes en relatif dans `FormLayout.tsx`
-8. **Temps réel** — Mercure pour les mises à jour live
-9. **Exports complets** — CSV/PDF pour 17 entités
-10. **Intégrations** — Wix (bons cadeaux), Microtrak (GPS), METAR (météo)
-11. **CI/CD robuste** — Tests automatisés, déploiement K8s
+5. **PDF personnalisés par client** — `PdfGenerator` utilise `client->getPdfBackground()` (fond PDF par client, fallback `Plane.png`), résolution du client via l'entité Cadeau (fonctionne en contexte HTTP et non-HTTP)
+6. **Production optimisée** — PWA buildée en mode production (`next build` + `node server.js`), démarrage en 83ms, pages pré-compilées
+7. **PWA installable** — `manifest.json` (standalone, icônes, start_url), métadonnées Apple Web App dans le layout
+8. **Sécurité auth** — Secret NextAuth via variable d'environnement `AUTH_SECRET`, `getSession()` correctement awaité
+9. **Zéro URL hardcodée** — `API_DOMAIN` résolu dynamiquement (`window.origin` / `NEXT_PUBLIC_ENTRYPOINT`), liens internes en relatif dans `FormLayout.tsx`
+10. **Temps réel** — Mercure pour les mises à jour live
+11. **Exports complets** — CSV/PDF pour 17 entités
+12. **Intégrations** — Wix (bons cadeaux), Microtrak (GPS), METAR (météo)
+13. **CI/CD robuste** — Tests automatisés, déploiement K8s
 
 ## Points d'attention
 
@@ -400,16 +402,18 @@ Performances mesurées en production :
 
 7. ~~**thanksImage non utilisée sur la page de remerciement**~~ → **Corrigé** : la page `/thanks` (`pwa/app/thanks/page.tsx`) affiche désormais `client.thanksImage` via un `<img>` conditionnel avant le `thanksMessage`. Import inutilisé `Image` de Next.js supprimé.
 
-### 🟢 Mineurs (dette technique)
+### ~~🟢 Mineurs — CORRIGÉS~~
 
-8. **Pas de vrai PWA** — Pas de `manifest.json` ni de service worker dans le code. Le titre "PWA" du dossier est hérité d'API Platform mais les fonctionnalités PWA (installation, offline, push notifications) ne sont pas implémentées.
+8. ~~**Pas de vrai PWA**~~ → **Corrigé** : ajout d'un `manifest.json` dans `pwa/public/` (nom, icônes, `start_url: /admin`, `display: standalone`). Métadonnées PWA ajoutées dans `layout.tsx` via l'export `metadata` Next.js (`manifest`, `appleWebApp`). Le `<html lang>` est passé de `en` à `fr`.
 
-9. **Double config Tailwind** — Deux fichiers coexistent : `tailwind.config.js` et `tailwind.config.ts`. Un seul devrait être conservé.
+9. ~~**Double config Tailwind**~~ → **Corrigé** : les éléments uniques de `tailwind.config.js` (couleurs `cyan`, config `container`, plugin `@tailwindcss/forms`) ont été fusionnés dans `tailwind.config.ts`. Le fichier `.js` a été supprimé.
 
-10. **Dépendances dupliquées** — `react-query` (ancienne version) et `@tanstack/react-query` (nouvelle version) sont toutes les deux installées. Seule `@tanstack/react-query` devrait être conservée.
+10. ~~**Dépendances dupliquées**~~ → **Corrigé** : `react-query` (v3, inutilisé) supprimé de `package.json`. Seul `@tanstack/react-query` (v5) est conservé. Aucun import de l'ancien package n'existait dans le code.
+
+### 🟡 Mineurs (dette technique restante)
 
 11. **Deux libs de formulaires** — `formik` et `react-hook-form` coexistent dans les dépendances. Les formulaires devraient être unifiés sur une seule lib.
 
-12. **`ClientProvider.fetchClients()` sans auth** — L'appel `fetch("/clients?pagination=false")` dans le `ClientProvider` ne passe pas de header `Authorization`. Il fonctionne car le cookie de session NextAuth est envoyé automatiquement, mais l'appel pourrait échouer si les cookies sont expirés ou bloqués.
+12. ~~**`ClientProvider.fetchClients()` sans auth**~~ → **Non-issue** : le endpoint `GET /clients` est volontairement public (`security` commenté sur l'`ApiResource`, seuls `Post`/`Put`/`Delete` requièrent `OIDC_ADMIN`). C'est nécessaire car la page publique `/thanks` (inscription passager) fait aussi un `fetch('/clients')`. Pas de header `Authorization` requis.
 
 13. ~~**`pdfBackground` non utilisé dans la génération PDF**~~ → **Corrigé** : `PdfGenerator::generate()` résout le client depuis l'entité Cadeau (`$data->getClient()`) avec fallback sur `ClientGetter` (header HTTP). `getEncodedImage()` utilise `client->getPdfBackground()` pour charger l'image du client, avec fallback sur `Plane.png` partagé. Fonctionne en contexte HTTP et non-HTTP (CLI, workers).

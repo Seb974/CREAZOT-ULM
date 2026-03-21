@@ -1,5 +1,6 @@
 import type { Config } from 'tailwindcss'
 const colors = require("tailwindcss/colors");
+const forms = require("@tailwindcss/forms");
 
 const config: Config = {
   content: [
@@ -24,6 +25,11 @@ const config: Config = {
         current: "currentColor",
         transparent: "transparent",
         white: "#FFFFFF",
+        cyan: {
+          200: "#bceff3",
+          500: "#46b6bf",
+          700: "#0f929a",
+        },
         black: {
           // ...colors.black,
           DEFAULT: "#1C2434",
@@ -338,8 +344,12 @@ const config: Config = {
         line3: "line 7s infinite linear",
       },
     },
+    container: {
+      padding: "2rem",
+      center: true,
+    },
   },
   darkMode: "class",
-  plugins: [],
+  plugins: [forms],
 }
 export default config

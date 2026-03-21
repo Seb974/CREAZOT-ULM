@@ -42,6 +42,11 @@ import disponibiliteResourceProps from "./disponibilite";
 import airportResourceProps from "./airport";
 import cameraResourceProps from "./camera";
 import expenseResourceProps from "./expense";
+import pricingCategoryResourceProps from "./pricingCategory";
+import pricingTierResourceProps from "./pricingTier";
+import modulePackResourceProps from "./modulePack";
+import modulePackPriceResourceProps from "./modulePackPrice";
+import SubscriptionDashboard from "./subscription/SubscriptionDashboard";
 
 const getClientHeaders = () => {
   try {
@@ -165,10 +170,15 @@ const AdminWithOIDC = () => {
         <ResourceGuesser name="airports" {...airportResourceProps}/>
         <ResourceGuesser name="cameras" {...cameraResourceProps}/>
         <ResourceGuesser name="expenses" {...expenseResourceProps}/>
+        <ResourceGuesser name="pricing-categories" {...pricingCategoryResourceProps}/>
+        <ResourceGuesser name="pricing-tiers" {...pricingTierResourceProps}/>
+        <ResourceGuesser name="module-packs" {...modulePackResourceProps}/>
+        <ResourceGuesser name="module-pack-prices" {...modulePackPriceResourceProps}/>
         <CustomRoutes>
           <Route path="/landings" element={<LandingsList />} />
           <Route path="/convert" element={<ReservationCreate />} />
           <Route path="/convert/:id" element={<ReservationCreate />} />
+          <Route path="/subscriptions" element={<SubscriptionDashboard />} />
         </CustomRoutes>
       </AdminAdapter>
   );

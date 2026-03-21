@@ -28,6 +28,12 @@ import { clientUsingAvailabilityFilter, clientWithExpensesManagement } from "../
 import ConnectingAirportsIcon from '@mui/icons-material/ConnectingAirports';
 import VideoCameraBackIcon from '@mui/icons-material/VideoCameraBack';
 import InsertInvitationIcon from '@mui/icons-material/InsertInvitation';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import CategoryIcon from '@mui/icons-material/Category';
+import LayersIcon from '@mui/icons-material/Layers';
+import ExtensionIcon from '@mui/icons-material/Extension';
+import PriceChangeIcon from '@mui/icons-material/PriceChange';
+import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
 
 const CustomMenu = () => {
 
@@ -36,6 +42,7 @@ const CustomMenu = () => {
   const { client } = useClient();
   const [superAdminOpen, setSuperAdminOpen] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const [tarificationOpen, setTarificationOpen] = useState(false);
   const [openSidebar] = useSidebarState();
 
   const handleSuperAdminClick = e => {
@@ -46,6 +53,11 @@ const CustomMenu = () => {
   const handleOptionsClick = e => {
     e.preventDefault();
     setOptionsOpen(!optionsOpen);
+  };
+
+  const handleTarificationClick = e => {
+    e.preventDefault();
+    setTarificationOpen(!tarificationOpen);
   };
 
   return (
@@ -258,6 +270,54 @@ const CustomMenu = () => {
                   sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
                 />
             }
+        </Collapse>
+      }
+
+      {/* @ts-ignore */}
+      { isDefined(session) && isDefined(user) && user.roles.find(r => r === "super_admin") &&
+          <MenuItemLink
+              to="#"
+              onClick={ handleTarificationClick }
+              primaryText="Tarification"
+              leftIcon={<MonetizationOnIcon className="h-[24px] w-[24px]"/>}
+              dense={ !openSidebar }
+              sx={{ cursor: 'pointer', backgroundColor: tarificationOpen ? '#EFF2F5' : '#F9FAFB' }}
+          >
+          </MenuItemLink>
+      }
+      {/* @ts-ignore */}
+      { isDefined(session) && isDefined(user) && user.roles.find(r => r === "super_admin") &&
+        <Collapse in={ tarificationOpen } timeout="auto" unmountOnExit>
+            <Menu.Item
+              to="/pricing-categories"
+              primaryText="Grilles tarifaires"
+              leftIcon={<CategoryIcon />}
+              sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+            />
+            <Menu.Item
+              to="/pricing-tiers"
+              primaryText="Paliers"
+              leftIcon={<LayersIcon />}
+              sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+            />
+            <Menu.Item
+              to="/module-packs"
+              primaryText="Packs de modules"
+              leftIcon={<ExtensionIcon />}
+              sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+            />
+            <Menu.Item
+              to="/module-pack-prices"
+              primaryText="Prix des packs"
+              leftIcon={<PriceChangeIcon />}
+              sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+            />
+            <Menu.Item
+              to="/subscriptions"
+              primaryText="Abonnements"
+              leftIcon={<SubscriptionsIcon />}
+              sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+            />
         </Collapse>
       }
     </Menu>

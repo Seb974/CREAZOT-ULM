@@ -263,6 +263,42 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?bool $useAvailabilityFilter = null;
 
+    #[ORM\ManyToOne(targetEntity: PricingCategory::class)]
+    #[Groups(groups: ['Client:read', 'Client:write'])]
+    private ?PricingCategory $pricingCategory = null;
+
+    /**
+     * @var Collection<int, ModulePack>
+     */
+    #[ORM\ManyToMany(targetEntity: ModulePack::class)]
+    #[ORM\JoinTable(name: 'client_module_pack')]
+    #[Groups(groups: ['Client:read', 'Client:write'])]
+    private Collection $modulePacks;
+
+    #[ORM\Column(length: 20, nullable: true, options: ['default' => 'trial'])]
+    #[Groups(groups: ['Client:read', 'Client:write'])]
+    private ?string $subscriptionStatus = 'trial';
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:read', 'Client:write'])]
+    private ?\DateTimeImmutable $trialEndsAt = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:read', 'Client:write'])]
+    private ?int $maxAeronefs = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:read'])]
+    private ?float $monthlyBasePrice = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Groups(groups: ['Client:read', 'Client:write'])]
+    private ?string $odooCustomerId = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Groups(groups: ['Client:read', 'Client:write'])]
+    private ?string $odooSubscriptionId = null;
+
     /**
      * @var Collection<int, Airport>
      */
@@ -308,6 +344,7 @@ class Client
         $this->airports = new ArrayCollection();
         $this->cameras = new ArrayCollection();
         $this->users = new ArrayCollection();
+        $this->modulePacks = new ArrayCollection();
     }
 
     #[Groups(groups: ['Client:read'])]
@@ -1035,6 +1072,114 @@ class Client
         if ($this->users->removeElement($user)) {
             $user->removeClient($this);
         }
+
+        return $this;
+    }
+
+    public function getPricingCategory(): ?PricingCategory
+    {
+        return $this->pricingCategory;
+    }
+
+    public function setPricingCategory(?PricingCategory $pricingCategory): static
+    {
+        $this->pricingCategory = $pricingCategory;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ModulePack>
+     */
+    public function getModulePacks(): Collection
+    {
+        return $this->modulePacks;
+    }
+
+    public function addModulePack(ModulePack $modulePack): static
+    {
+        if (!$this->modulePacks->contains($modulePack)) {
+            $this->modulePacks->add($modulePack);
+        }
+
+        return $this;
+    }
+
+    public function removeModulePack(ModulePack $modulePack): static
+    {
+        $this->modulePacks->removeElement($modulePack);
+
+        return $this;
+    }
+
+    public function getSubscriptionStatus(): ?string
+    {
+        return $this->subscriptionStatus;
+    }
+
+    public function setSubscriptionStatus(?string $subscriptionStatus): static
+    {
+        $this->subscriptionStatus = $subscriptionStatus;
+
+        return $this;
+    }
+
+    public function getTrialEndsAt(): ?\DateTimeImmutable
+    {
+        return $this->trialEndsAt;
+    }
+
+    public function setTrialEndsAt(?\DateTimeImmutable $trialEndsAt): static
+    {
+        $this->trialEndsAt = $trialEndsAt;
+
+        return $this;
+    }
+
+    public function getMaxAeronefs(): ?int
+    {
+        return $this->maxAeronefs;
+    }
+
+    public function setMaxAeronefs(?int $maxAeronefs): static
+    {
+        $this->maxAeronefs = $maxAeronefs;
+
+        return $this;
+    }
+
+    public function getMonthlyBasePrice(): ?float
+    {
+        return $this->monthlyBasePrice;
+    }
+
+    public function setMonthlyBasePrice(?float $monthlyBasePrice): static
+    {
+        $this->monthlyBasePrice = $monthlyBasePrice;
+
+        return $this;
+    }
+
+    public function getOdooCustomerId(): ?string
+    {
+        return $this->odooCustomerId;
+    }
+
+    public function setOdooCustomerId(?string $odooCustomerId): static
+    {
+        $this->odooCustomerId = $odooCustomerId;
+
+        return $this;
+    }
+
+    public function getOdooSubscriptionId(): ?string
+    {
+        return $this->odooSubscriptionId;
+    }
+
+    public function setOdooSubscriptionId(?string $odooSubscriptionId): static
+    {
+        $this->odooSubscriptionId = $odooSubscriptionId;
 
         return $this;
     }

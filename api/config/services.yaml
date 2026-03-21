@@ -90,6 +90,10 @@ services:
                 - '@App\Service\Export\ProfilPiloteExportFilter'
                 - '@App\Service\Export\DisponibiliteExportFilter'
 
+    App\EventListener\SubscriptionGuardListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, priority: 5 }
+
 when@test:
     services:
         App\Tests\Api\Security\:

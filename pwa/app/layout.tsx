@@ -11,7 +11,13 @@ import { Providers } from "./providers";
 import { auth } from "./auth";
 
 export const metadata: Metadata = {
-  title: 'Planetair974 - Administration'
+  title: 'Planetair974 - Administration',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Planetair Gestion',
+  },
 }
  
 export const viewport: Viewport = {
@@ -25,7 +31,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const session = await auth();
 
   return (
-    <html lang="en">
+    <html lang="fr">
       <body>
         <SessionProvider session={session} basePath='/api/auth'>
           <Providers>
