@@ -33,9 +33,9 @@ Nginx 1.18 (Ubuntu) en reverse proxy devant Docker. Config :
 
 ---
 
-## Backend — 28 entités métier
+## Backend — 32 entités métier
 
-Le domaine couvre la gestion complète d'une base ULM.
+Le domaine couvre la gestion complète d'une base ULM + un moteur de tarification SaaS.
 
 ### Coeur métier
 
@@ -81,6 +81,15 @@ Le domaine couvre la gestion complète d'une base ULM.
 | **Rappel** | Rappels/alertes planifiées | ✅ TenantAware |
 | **MediaObject** | Fichiers uploadés (photos, documents) | ✅ TenantAware |
 | **Nature** | Types de vol (code, label) | Global (référentiel partagé) |
+
+### Tarification SaaS
+
+| Entité | Rôle | Tenant |
+|--------|------|--------|
+| **PricingCategory** | Grille tarifaire (ex: "Public", "FFPLUM", "Offre Été") | Global |
+| **PricingTier** | Palier par nb d'aéronefs (min/max → prix unitaire) | Global (ManyToOne PricingCategory) |
+| **ModulePack** | Pack de fonctionnalités (JSON des flags has*) | Global |
+| **ModulePackPrice** | Prix d'un pack dans une grille (unique pack×catégorie) | Global (ManyToOne ModulePack + PricingCategory) |
 
 ---
 
@@ -199,6 +208,94 @@ image.public_dir: '/srv/api/public'                  # racine publique
 
 ---
 
+## Moteur de tarification SaaS — Implémenté
+
+### Modèle économique
+
+```
+Facture mensuelle = (Nb aéronefs × tarif unitaire du palier)
+                  + (somme des packs de modules activés)
+                  - remise maintenance (% par aéronef isAvailable=false)
+```
+
+### Architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  PricingCategory (grille)  ←──  PricingTier (paliers)        │
+│       ↑                    ←──  ModulePackPrice (prix/grille)│
+│       │                              ↑                       │
+│  Client.pricingCategory              │                       │
+│  Client.modulePacks ──────→ ModulePack (packs de modules)    │
+│  Client.subscriptionStatus (trial/active/suspended/cancelled)│
+│  Client.trialEndsAt                                          │
+│  Client.maxAeronefs (quota)                                  │
+│  Client.monthlyBasePrice (cache)                             │
+│  Client.odooCustomerId (Phase 3)                             │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Champs ajoutés à Client
+
+| Champ | Type | Rôle |
+|-------|------|------|
+| `pricingCategory` | ManyToOne → PricingCategory | Grille tarifaire du client |
+| `modulePacks` | ManyToMany → ModulePack (table `client_module_pack`) | Packs activés |
+| `subscriptionStatus` | string(20), default `trial` | Statut abonnement |
+| `trialEndsAt` | DateTimeImmutable (nullable) | Fin de période d'essai |
+| `maxAeronefs` | int (nullable) | Quota (null = illimité) |
+| `monthlyBasePrice` | float (nullable, read-only) | Prix/aéronef calculé |
+| `odooCustomerId` | string(50) (nullable) | ID Odoo (Phase 3) |
+| `odooSubscriptionId` | string(50) (nullable) | ID abonnement Odoo (Phase 3) |
+
+### Composants backend
+
+| Composant | Fichier | Rôle |
+|-----------|---------|------|
+| **AeronefQuotaSubscriber** | `EventSubscriber/AeronefQuotaSubscriber.php` | Bloque POST /aeronefs si quota atteint (403) |
+| **PricingCalculatorService** | `Service/PricingCalculatorService.php` | Calcul palier + remise maintenance + total mensuel |
+| **ModulePackSyncSubscriber** | `EventSubscriber/ModulePackSyncSubscriber.php` | Synchro packs → flags has* sur Client (PUT) |
+| **TrialExpirationCommand** | `Command/TrialExpirationCommand.php` | `app:trial:expire` — cron suspension auto trial expiré |
+| **SubscriptionGuardListener** | `EventListener/SubscriptionGuardListener.php` | Bloque API si abonnement suspendu (bypass super-admin) |
+
+### Flux de calcul
+
+```
+POST /aeronefs
+  → AeronefQuotaSubscriber (PRE_WRITE)
+  → Vérifie count < maxAeronefs
+  → Si OK → PricingCalculatorService.recalculateForClient()
+    → findApplicableTier(category, count)
+    → calcul aeronefs: active × price + maintenance × price × (1 - discount%)
+    → calcul packs: Σ modulePackPrices pour la category du client
+    → met à jour client.monthlyBasePrice
+```
+
+### Panel Admin (super_admin)
+
+| Page | Route | Fonction |
+|------|-------|----------|
+| Grilles tarifaires | `/pricing-categories` | CRUD + paliers inline |
+| Paliers | `/pricing-tiers` | CRUD (min/max aéronefs, prix) |
+| Packs de modules | `/module-packs` | CRUD + sélecteur des 14 flags has* |
+| Prix des packs | `/module-pack-prices` | Prix par pack × grille |
+| Abonnements | `/subscriptions` | Dashboard KPIs + tableau clients |
+| Onglet Client | dans ClientsEdit | Grille, packs, statut, quota, trial |
+
+### Packs de modules (configuration initiale)
+
+| Pack | Modules (flags Client) | Par défaut |
+|------|----------------------|------------|
+| Base | *(fonctionnalités de base toujours actives)* | Oui |
+| Réservations | `hasReservation`, `hasOptions`, `hasEmailConfirmation` | Non |
+| Commerce | `hasGifts`, `hasWebshop`, `hasPartners` | Non |
+| Passagers | `hasPassengerRegistration`, `hasOriginContact` | Non |
+| Finances | `hasPaymentManagement`, `hasExpensesManagement` | Non |
+| Tracking GPS | `hasMicrotrakTag` | Non |
+| Avancé | `hasLandingManagement`, `hasIndividualFlightLogs`, `hasGroupUpdate` | Non |
+
+---
+
 ## Backend — Logique métier clé
 
 ### Contrôleurs spécialisés
@@ -217,13 +314,20 @@ image.public_dir: '/srv/api/public'                  # racine publique
 - **CarnetVolEditSubscriber** — Ajout heures de vol au profil pilote
 - **EntitiesMetaSubscriber** — Timestamps créé/modifié sur les entités
 - **TenantAssignSubscriber** — Auto-assign `client_id` sur les nouvelles entités tenant-aware
+- **AeronefQuotaSubscriber** — Validation quota aéronefs avant écriture (403 si dépassé)
+- **ModulePackSyncSubscriber** — Recalcul flags `has*` quand les packs d'un Client changent
+
+### Commandes CLI
+
+- **`app:trial:expire`** — Suspend les comptes en trial expiré (cron quotidien)
 
 ### Sécurité
 
 - Authentification **OIDC** via Keycloak (Bearer token)
 - Hiérarchie de rôles : `OIDC_USER → ROLE_USER`, `OIDC_ADMIN → ROLE_ADMIN`
 - **ClientTenantVoter** : vérifie `User.hasClient(entity.getClient())`
-- **ROLE_SUPER_ADMIN** : accès à tous les tenants
+- **ROLE_SUPER_ADMIN** : accès à tous les tenants, bypass SubscriptionGuard
+- **SubscriptionGuardListener** : bloque l'API si client `suspended`/`cancelled` (priority 5)
 - Endpoint Wix sans auth (vérifié par HMAC)
 
 ---
@@ -369,18 +473,20 @@ Performances mesurées en production :
 ## Points forts
 
 1. **Multi-tenant opérationnel** — 20 entités isolées par client, filtre Doctrine global, sélecteur frontend
-2. **Architecture mature** — Stack API Platform complète, bien structurée
-3. **Personnalisation client** — Entité Client riche (40+ champs, modules activables)
-4. **Images par client** — Stockage isolé `images/client/{id}/` avec fallback vers les defaults
-5. **PDF personnalisés par client** — `PdfGenerator` utilise `client->getPdfBackground()` (fond PDF par client, fallback `Plane.png`), résolution du client via l'entité Cadeau (fonctionne en contexte HTTP et non-HTTP)
-6. **Production optimisée** — PWA buildée en mode production (`next build` + `node server.js`), démarrage en 83ms, pages pré-compilées
-7. **PWA installable** — `manifest.json` (standalone, icônes, start_url), métadonnées Apple Web App dans le layout
-8. **Sécurité auth** — Secret NextAuth via variable d'environnement `AUTH_SECRET`, `getSession()` correctement awaité
-9. **Zéro URL hardcodée** — `API_DOMAIN` résolu dynamiquement (`window.origin` / `NEXT_PUBLIC_ENTRYPOINT`), liens internes en relatif dans `FormLayout.tsx`
-10. **Temps réel** — Mercure pour les mises à jour live
-11. **Exports complets** — CSV/PDF pour 17 entités
-12. **Intégrations** — Wix (bons cadeaux), Microtrak (GPS), METAR (météo)
-13. **CI/CD robuste** — Tests automatisés, déploiement K8s
+2. **Moteur de tarification SaaS** — Grilles dynamiques, paliers par aéronef, packs de modules, quota, trial, suspension, panel admin complet
+3. **Architecture mature** — Stack API Platform complète, 32 entités, bien structurée
+4. **Personnalisation client** — Entité Client riche (50+ champs, modules activables via packs)
+5. **Images par client** — Stockage isolé `images/client/{id}/` avec fallback vers les defaults
+6. **PDF personnalisés par client** — `PdfGenerator` utilise `client->getPdfBackground()` (fond PDF par client, fallback `Plane.png`), résolution du client via l'entité Cadeau (fonctionne en contexte HTTP et non-HTTP)
+7. **Production optimisée** — PWA buildée en mode production (`next build` + `node server.js`), démarrage en 83ms, pages pré-compilées
+8. **PWA installable** — `manifest.json` (standalone, icônes, start_url), métadonnées Apple Web App dans le layout
+9. **Sécurité auth** — Secret NextAuth via variable d'environnement `AUTH_SECRET`, `getSession()` correctement awaité
+10. **Zéro URL hardcodée** — `API_DOMAIN` résolu dynamiquement (`window.origin` / `NEXT_PUBLIC_ENTRYPOINT`), liens internes en relatif dans `FormLayout.tsx`
+11. **Temps réel** — Mercure pour les mises à jour live
+12. **Exports complets** — CSV/PDF pour 17 entités
+13. **Intégrations** — Wix (bons cadeaux), Microtrak (GPS), METAR (météo)
+14. **CI/CD robuste** — Tests automatisés, déploiement K8s
+15. **Prêt pour Odoo** — Champs `odooCustomerId`/`odooSubscriptionId` sur Client (Phase 3)
 
 ## Points d'attention
 
@@ -417,3 +523,26 @@ Performances mesurées en production :
 12. ~~**`ClientProvider.fetchClients()` sans auth**~~ → **Non-issue** : le endpoint `GET /clients` est volontairement public (`security` commenté sur l'`ApiResource`, seuls `Post`/`Put`/`Delete` requièrent `OIDC_ADMIN`). C'est nécessaire car la page publique `/thanks` (inscription passager) fait aussi un `fetch('/clients')`. Pas de header `Authorization` requis.
 
 13. ~~**`pdfBackground` non utilisé dans la génération PDF**~~ → **Corrigé** : `PdfGenerator::generate()` résout le client depuis l'entité Cadeau (`$data->getClient()`) avec fallback sur `ClientGetter` (header HTTP). `getEncodedImage()` utilise `client->getPdfBackground()` pour charger l'image du client, avec fallback sur `Plane.png` partagé. Fonctionne en contexte HTTP et non-HTTP (CLI, workers).
+
+---
+
+## Prochaines étapes
+
+### Déploiement tarification (Phase 1)
+
+1. **Migration Doctrine** : `php bin/console doctrine:migrations:diff` puis `doctrine:migrations:migrate`
+2. **Données initiales** : créer les grilles "Public" et "FFPLUM" avec leurs paliers, les 7 packs de modules avec leurs prix
+3. **Cron** : configurer `app:trial:expire` en cron quotidien sur le serveur
+4. **Tests** : créer une grille → des paliers → assigner à un client → vérifier quota et calcul
+
+### Phase 2 — Données & Tests
+
+- Fixtures/seed pour les grilles et packs par défaut
+- Tests unitaires PricingCalculatorService
+- Tests fonctionnels AeronefQuotaSubscriber
+
+### Phase 3 — Intégration Odoo
+
+- Webhook création client → Odoo (crée client + facture)
+- Webhook paiement Odoo → app (active/suspend l'abonnement)
+- Sync bidirectionnelle statut abonnement
