@@ -11,12 +11,13 @@ import { Providers } from "./providers";
 import { auth } from "./auth";
 
 export const metadata: Metadata = {
-  title: 'Planetair974 - Administration',
+  title: 'C6L — Gestion Aéronautique',
+  description: 'La plateforme tout-en-un pour les clubs ULM et aéroclubs.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Planetair Gestion',
+    title: 'C6L Gestion',
   },
 }
  

@@ -2,16 +2,15 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 
 const navLinks = [
-  { label: "Fonctionnalités", href: "/features" },
+  { label: "Fonctionnalités", href: "/#features" },
+  { label: "Modules", href: "/#modules" },
   { label: "Tarifs", href: "/pricing" },
-  { label: "Contact", href: "/contact" },
 ];
 
 export default function SiteNavbar() {
@@ -30,33 +29,40 @@ export default function SiteNavbar() {
         scrolled ? "bg-white shadow-md" : "bg-transparent"
       }`}
     >
-      <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 h-20">
-        {/* Logo */}
-        <Link href="/" className="text-2xl font-bold text-cyan-700 no-underline hover:opacity-80 transition-opacity">
-          C6L
+      <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 h-16">
+        <Link href="/" className="text-2xl font-bold no-underline hover:opacity-80 transition-opacity">
+          <span className={scrolled ? "text-gray-900" : "text-white"}>C</span>
+          <span className="text-cyan-700">6</span>
+          <span className={scrolled ? "text-gray-900" : "text-white"}>L</span>
         </Link>
 
-        {/* Desktop nav links */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-gray-700 no-underline hover:text-cyan-700 transition-colors"
+              className={`text-sm font-medium no-underline transition-colors ${
+                scrolled
+                  ? "text-gray-700 hover:text-cyan-700"
+                  : "text-gray-300 hover:text-white"
+              }`}
             >
               {link.label}
             </Link>
           ))}
         </div>
 
-        {/* Desktop CTA buttons */}
         <div className="hidden md:flex items-center gap-3">
-          <button
-            onClick={() => signIn("keycloak")}
-            className="px-5 py-2 text-sm font-medium text-cyan-700 border border-cyan-700 rounded-lg hover:bg-cyan-700 hover:text-white transition-colors"
+          <Link
+            href="/admin"
+            className={`px-5 py-2 text-sm font-medium rounded-lg no-underline transition-colors ${
+              scrolled
+                ? "border border-cyan-700 text-cyan-700 hover:bg-cyan-700 hover:text-white"
+                : "border border-white/60 text-white hover:bg-white hover:text-gray-900"
+            }`}
           >
             Connexion
-          </button>
+          </Link>
           <Link
             href="/register"
             className="px-5 py-2 text-sm font-medium text-white bg-cyan-700 rounded-lg no-underline hover:bg-cyan-500 transition-colors"
@@ -65,15 +71,17 @@ export default function SiteNavbar() {
           </Link>
         </div>
 
-        {/* Mobile hamburger */}
         <div className="md:hidden">
-          <IconButton onClick={() => setDrawerOpen(true)} aria-label="Menu">
+          <IconButton
+            onClick={() => setDrawerOpen(true)}
+            aria-label="Menu"
+            sx={{ color: scrolled ? "inherit" : "white" }}
+          >
             <MenuIcon />
           </IconButton>
         </div>
       </nav>
 
-      {/* Mobile drawer */}
       <Drawer
         anchor="right"
         open={drawerOpen}
@@ -100,15 +108,13 @@ export default function SiteNavbar() {
 
           <hr className="my-4 border-gray-200" />
 
-          <button
-            onClick={() => {
-              setDrawerOpen(false);
-              signIn("keycloak");
-            }}
-            className="mx-4 px-4 py-3 text-sm font-medium text-cyan-700 border border-cyan-700 rounded-lg hover:bg-cyan-700 hover:text-white transition-colors"
+          <Link
+            href="/admin"
+            onClick={() => setDrawerOpen(false)}
+            className="mx-4 px-4 py-3 text-sm font-medium text-center text-cyan-700 border border-cyan-700 rounded-lg no-underline hover:bg-cyan-700 hover:text-white transition-colors"
           >
             Connexion
-          </button>
+          </Link>
           <Link
             href="/register"
             onClick={() => setDrawerOpen(false)}

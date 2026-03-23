@@ -112,7 +112,7 @@ export default function Page() {
       </section>
 
       {/* ── Pourquoi C6L ── */}
-      <section className="bg-gray-50 py-24">
+      <section id="features" className="bg-gray-50 py-24 scroll-mt-20">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">
@@ -149,7 +149,7 @@ export default function Page() {
       </section>
 
       {/* ── 10 Modules ── */}
-      <section className="bg-gray-950 py-24">
+      <section id="modules" className="bg-gray-950 py-24 scroll-mt-20">
         <div className="mx-auto max-w-7xl px-6">
           <h2 className="text-center text-3xl font-bold text-white md:text-4xl">
             10 modules intégrés
