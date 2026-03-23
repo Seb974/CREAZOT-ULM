@@ -20,14 +20,7 @@
         color: #EE4222;
     }
 
-    footer {
-        position: absolute;
-        bottom: 0;
-        margin-left: 2%!important;
-        margin-right: 2%!important;
-        width: 96%;
-        background-color: #F9FAFB;
-    }
+    /* footer positioning handled per-layout via Tailwind */
 
     .form-error-message {
         font-size: 0.7rem;

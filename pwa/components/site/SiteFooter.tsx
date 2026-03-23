@@ -12,6 +12,7 @@ const footerLinks = [
   {
     title: "Support",
     links: [
+      { label: "Guide utilisateur", href: "/guide" },
       { label: "Contact", href: "/contact" },
       { label: "contact@creazot.com", href: "mailto:contact@creazot.com" },
     ],

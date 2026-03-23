@@ -62,7 +62,7 @@ const stats = [
 
 export default function Page() {
   return (
-    <div className="min-h-screen font-sans">
+    <div className="flex min-h-screen flex-col font-sans">
       {/* ── Hero Section ── */}
       <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-cyan-900">
         <SiteNavbar />

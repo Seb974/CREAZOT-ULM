@@ -11,6 +11,7 @@ const navLinks = [
   { label: "Fonctionnalités", href: "/#features" },
   { label: "Modules", href: "/#modules" },
   { label: "Tarifs", href: "/pricing" },
+  { label: "Guide", href: "/guide" },
 ];
 
 export default function SiteNavbar() {
