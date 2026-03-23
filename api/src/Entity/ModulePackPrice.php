@@ -49,7 +49,6 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
         AbstractNormalizer::GROUPS => ['ModulePackPrice:write'],
     ],
     collectDenormalizationErrors: true,
-    security: 'is_granted("OIDC_USER")',
     mercure: true
 )]
 class ModulePackPrice

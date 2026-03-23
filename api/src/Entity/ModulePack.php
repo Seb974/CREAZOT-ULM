@@ -51,7 +51,6 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
         AbstractNormalizer::GROUPS => ['ModulePack:write'],
     ],
     collectDenormalizationErrors: true,
-    security: 'is_granted("OIDC_USER")',
     mercure: true
 )]
 class ModulePack

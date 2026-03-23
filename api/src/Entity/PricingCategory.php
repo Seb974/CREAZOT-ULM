@@ -52,7 +52,6 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
         AbstractNormalizer::GROUPS => ['PricingCategory:write'],
     ],
     collectDenormalizationErrors: true,
-    security: 'is_granted("OIDC_USER")',
     mercure: true
 )]
 class PricingCategory

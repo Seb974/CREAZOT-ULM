@@ -48,7 +48,6 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
         AbstractNormalizer::GROUPS => ['PricingTier:write'],
     ],
     collectDenormalizationErrors: true,
-    security: 'is_granted("OIDC_USER")',
     mercure: true
 )]
 class PricingTier
