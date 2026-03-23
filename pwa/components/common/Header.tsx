@@ -12,7 +12,9 @@ export const Header = () => {
   const pathname = usePathname();
     const { session, status } = useSessionContext();
 
-  if (pathname === "/" || pathname.match(/^\/admin/) || pathname.match(/^\/thanks/)) return <></>;
+  const hiddenPaths = ["/admin", "/thanks", "/auth", "/oidc", "/register", "/features", "/pricing", "/contact"];
+  if (pathname === "/" || hiddenPaths.some(p => pathname.startsWith(p))) return <></>;
+  if (pathname.match(/^\/[a-z0-9-]+$/i) || pathname.match(/^\/[a-z0-9-]+\/thanks/i)) return <></>;
 
   return (
     <header className="bg-neutral-100 sticky top-0 z-10">

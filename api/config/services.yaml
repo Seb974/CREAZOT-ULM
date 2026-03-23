@@ -90,6 +90,13 @@ services:
                 - '@App\Service\Export\ProfilPiloteExportFilter'
                 - '@App\Service\Export\DisponibiliteExportFilter'
 
+    App\Service\KeycloakAdminService:
+        arguments:
+            $keycloakBaseUrl: '%env(KEYCLOAK_BASE_URL)%'
+            $keycloakRealm: '%env(KEYCLOAK_REALM)%'
+            $keycloakAdminUser: '%env(KEYCLOAK_ADMIN_USER)%'
+            $keycloakAdminPassword: '%env(KEYCLOAK_ADMIN_PASSWORD)%'
+
     App\EventListener\SubscriptionGuardListener:
         tags:
             - { name: kernel.event_listener, event: kernel.request, priority: 5 }

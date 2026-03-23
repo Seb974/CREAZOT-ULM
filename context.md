@@ -275,12 +275,21 @@ POST /aeronefs
 
 | Page | Route | Fonction |
 |------|-------|----------|
-| Grilles tarifaires | `/pricing-categories` | CRUD + paliers inline |
-| Paliers | `/pricing-tiers` | CRUD (min/max aéronefs, prix) |
-| Packs de modules | `/module-packs` | CRUD + sélecteur des 14 flags has* |
-| Prix des packs | `/module-pack-prices` | Prix par pack × grille |
+| Grilles tarifaires | `/pricing-categories` | CRUD + tableau enrichi des paliers inline (grille courante surlignée en bleu, autres grilles en comparaison atténuée, ligne maintenance, boutons édition inline) |
+| Paliers | `/pricing-tiers` | Matrice pleine page : colonnes = grilles tarifaires (avec chips remise), lignes = paliers (min/max aéronefs), prix en gros caractères, ligne maintenance jaune, simulation bleue (4 aéronefs dont 1 en maintenance), légende, boutons édition inline |
+| Packs de modules | `/module-packs` | CRUD + sélecteur des 14 flags has* + tableau tarification inline (paliers aéronefs + prix du pack par grille) |
+| Prix des packs | `/module-pack-prices` | Dashboard matrice complète : section paliers aéronefs par grille + section packs de modules avec prix par grille, chips "Inclus", boutons édition inline |
 | Abonnements | `/subscriptions` | Dashboard KPIs + tableau clients |
 | Onglet Client | dans ClientsEdit | Grille, packs, statut, quota, trial |
+
+### Composants frontend tarification (React-Admin / Material-UI)
+
+| Composant | Fichier | Pattern |
+|-----------|---------|---------|
+| **PricingTiersList** | `pricingTier/PricingTiersList.tsx` | Matrice pleine page : fetch `pricing-categories` + `pricing-tiers` via `useDataProvider`, rendu `Table` MUI avec en-têtes dynamiques par grille, prix en `Typography h5`, ligne maintenance jaune, ligne simulation bleue (4 aéronefs dont 1 maintenance avec calcul automatique), légende, `IconButton` édition inline |
+| **PricingCategoriesEdit** | `pricingCategory/PricingCategoriesEdit.tsx` | Formulaire CRUD + composant `PricingTiersTable` inline : grille courante surlignée (colonne bleue `#e3f2fd`), autres grilles atténuées (`opacity: 0.55`) pour comparaison, `useRecordContext` pour résoudre la catégorie courante, boutons édition inline |
+| **ModulePackPricesList** | `modulePackPrice/ModulePackPricesList.tsx` | Dashboard 2 sections : (1) paliers aéronefs par grille, (2) matrice packs × grilles avec prix, chips "Inclus" pour 0€, couleurs dynamiques `BRAND_COLORS` par slug, boutons créer/éditer inline |
+| **ModulePacksEdit** | `modulePack/ModulePacksEdit.tsx` | Formulaire CRUD + composant `PricingTable` inline : reproduit le dashboard dans le contexte d'un seul pack, fetch croisé `pricing-categories` + `pricing-tiers` + `module-pack-prices`, affiche les paliers aéronefs et le prix du pack par grille |
 
 ### Packs de modules (configuration initiale)
 
@@ -338,10 +347,32 @@ POST /aeronefs
 
 | Route | Fonction |
 |-------|----------|
-| `/` | Formulaire inscription passager (RGPD) |
-| `/thanks` | Page de remerciement (affiche `thanksImage` + `thanksMessage` du client) |
+| `/` | Landing page "Planetair Gestion" — accès admin + message passagers |
+| `/{slug}` | Formulaire inscription passager (RGPD) — résolution du client par slug URL |
+| `/{slug}/thanks` | Page de remerciement personnalisée (affiche `thanksImage` + `thanksMessage` du client résolu) |
 | `/admin` | Interface d'administration complète |
 | `/auth/signin` | Redirection automatique vers Keycloak (plus de page MissingCSRF) |
+
+### Résolution du tenant public (formulaire passager)
+
+Le formulaire passager est accessible via `/{slug}` (ex: `/aix-ulm`, `/skyquest`).
+
+**Flux complet** :
+```
+c6l.creazot.com/{slug}
+  → [slug]/page.tsx (route dynamique Next.js)
+  → GET /clients?slug={slug} → résolution client-side (filtrage par slug)
+  → Si pas trouvé → page 404 personnalisée
+  → Si hasPassengerRegistration = false → redirect /admin
+  → Sinon → FormLayout (logo, nom, footer du client) + Form
+  → POST /passagers (header X-Client-Id: {id})
+  → TenantAssignSubscriber assigne le client automatiquement
+  → Redirect → /{slug}/thanks?firstname={prenom}
+```
+
+**Champs hidden dans le formulaire** : `clientId` et `slug` (transmis via `formData` à `createPassenger`)
+
+**Bouton rapide admin** : icône ↗ dans l'AppBar (visible si `client.slug` + `hasPassengerRegistration`), ouvre `/{slug}` dans un nouvel onglet
 
 ### Flux d'authentification
 
@@ -487,6 +518,7 @@ Performances mesurées en production :
 13. **Intégrations** — Wix (bons cadeaux), Microtrak (GPS), METAR (météo)
 14. **CI/CD robuste** — Tests automatisés, déploiement K8s
 15. **Prêt pour Odoo** — Champs `odooCustomerId`/`odooSubscriptionId` sur Client (Phase 3)
+16. **UX admin tarification** — Tableaux en matrices pleine page (Material-UI Table), colonnes = grilles tarifaires, lignes = paliers ou packs, prix en gros caractères avec boutons d'édition inline, ligne de simulation automatique, comparaison entre grilles (surlignage + atténuation), chips de remise, design cohérent sur les 4 pages (PricingTiers, PricingCategories, ModulePackPrices, ModulePacksEdit)
 
 ## Points d'attention
 
@@ -528,12 +560,12 @@ Performances mesurées en production :
 
 ## Prochaines étapes
 
-### Déploiement tarification (Phase 1)
+### ~~Déploiement tarification (Phase 1) — TERMINÉ~~
 
-1. **Migration Doctrine** : `php bin/console doctrine:migrations:diff` puis `doctrine:migrations:migrate`
-2. **Données initiales** : créer les grilles "Public" et "FFPLUM" avec leurs paliers, les 7 packs de modules avec leurs prix
-3. **Cron** : configurer `app:trial:expire` en cron quotidien sur le serveur
-4. **Tests** : créer une grille → des paliers → assigner à un client → vérifier quota et calcul
+- ~~Migration Doctrine~~ → schéma appliqué via `doctrine:schema:update --force`
+- ~~Données initiales~~ → grilles "Tarif Public" et "FFPLUM -15%", 4 paliers chacune, 7 packs de modules, prix par pack×grille insérés en base
+- ~~Panel admin complet~~ → 4 pages CRUD avec tableaux enrichis UX (matrices pleine page, comparaison entre grilles, simulations, chips, boutons inline)
+- **Restant** : configurer `app:trial:expire` en cron quotidien sur le serveur
 
 ### Phase 2 — Données & Tests
 

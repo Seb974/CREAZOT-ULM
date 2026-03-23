@@ -24,6 +24,8 @@ export default function Form({ client }) {
 
   return (
     <form action={ dispatch }>
+      <input type="hidden" name="clientId" value={ client?.id ?? '' } />
+      <input type="hidden" name="slug" value={ client?.slug ?? '' } />
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
 
         {/* Lastname */}

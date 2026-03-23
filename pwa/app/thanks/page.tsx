@@ -1,46 +1,45 @@
 "use client"
 
 import { isDefined } from "../lib/utils";
+import { getClientBySlug } from "../lib/api";
 import { CircularProgress } from '@mui/material';
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
-interface Query extends URLSearchParams {
-  page?: number|string|undefined;
-  author?: string|undefined;
-  title?: string|undefined;
-  condition?: string|undefined;
-  "condition[]"?: string|string[]|undefined;
-  "order[title]"?: string|undefined;
-}
+export default function Page() {
 
-interface Props {
-  searchParams: Query;
-}
-
-export default function Page({ searchParams }: Props) {
+  const searchParams = useSearchParams();
+  const slug = searchParams.get('slug') || '';
+  const firstname = searchParams.get('firstname') || '';
 
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(false);
-  const name = isDefined(searchParams) && isDefined(searchParams['firstname']) ?  String(searchParams['firstname']).charAt(0).toUpperCase() + String(searchParams['firstname']).slice(1) : '';
+  const name = firstname
+    ? firstname.charAt(0).toUpperCase() + firstname.slice(1)
+    : '';
 
   useEffect(() => {
     const fetchClient = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/clients');
-        if (!response.ok)
-          throw new Error('Erreur réseau : ' + response.status);
-  
-        const data = await response.json();
-        setClient(data['hydra:member'][0]);
+        if (slug) {
+          const resolved = await getClientBySlug(slug);
+          setClient(resolved);
+        } else {
+          const response = await fetch('/clients');
+          if (!response.ok)
+            throw new Error('Erreur réseau : ' + response.status);
+          const data = await response.json();
+          setClient(data['hydra:member']?.[0] ?? data[0] ?? null);
+        }
       } catch (error) {
-        console.error('Erreur lors de la récupération des clients :', error);
+        console.error('Erreur lors de la récupération du client :', error);
       } finally {
         setLoading(false);
       }
     };
     fetchClient();
-  }, []);
+  }, [slug]);
 
   const renderWithImageAlignment = (html: string): string => {
     const parser = new DOMParser();
@@ -56,7 +55,7 @@ export default function Page({ searchParams }: Props) {
             const wrapper = doc.createElement('div');
             wrapper.className = 'img-align-center-wrapper';
             img.classList.add('img-align-center');
-            img.parentNode.insertBefore(wrapper, img);
+            img.parentNode?.insertBefore(wrapper, img);
             wrapper.appendChild(img);
         } else if (align === 'right') {
             img.classList.add('img-align-right');
@@ -68,7 +67,7 @@ export default function Page({ searchParams }: Props) {
     return renderWithVariables(doc.body.innerHTML);
 }
 
-const renderWithVariables = (html) => {
+const renderWithVariables = (html: string) => {
   return html.replace(/{{FIRSTNAME}}/g, name);
 }
 

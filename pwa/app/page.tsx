@@ -1,62 +1,21 @@
-"use client"
-
-import React, { useEffect, useState } from "react";
-import FormLayout from "../components/passenger/FormLayout";
-import Form from "../components/passenger/Form";
-import { isDefined } from "./lib/utils";
-
 export default function Page() {
-
-  const [client, setClient] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchClients = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch('/clients', {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-        });
-  
-        if (!response.ok) {
-          throw new Error('Erreur lors de la récupération des clients');
-        }
-  
-        const data = await response.json();
-        setClient(data[0]);
-      } catch (err) {
-        setError(err.message || 'Erreur inconnue');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchClients();
-  }, []);
-
-  useEffect(() => {
-    // @ts-ignore
-    if (!loading && (!isDefined(client) || !isDefined(client.hasPassengerRegistration) || !client.hasPassengerRegistration)) {
-      window.location.replace('/admin#/');
-    }
-  }, [loading, client]);
-
-  return loading ? 
-    <div className="flex items-center justify-center h-64">
-      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-    </div> 
-    : 
-    // @ts-ignore
-    !isDefined(client) || !client.hasPassengerRegistration ? 
-      <></> 
-      : 
-      // @ts-ignore
-      <FormLayout client={ client }>
-        <Form client={ client }/>
-      </FormLayout>
-
-};
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-gray-100">
+      <div className="text-center max-w-md px-6">
+        <h1 className="text-4xl font-bold text-gray-800 mb-2">Planetair Gestion</h1>
+        <p className="text-lg text-gray-500 mb-8">Votre solution de gestion pour aéroclubs ULM</p>
+        <div className="flex flex-col gap-4">
+          <a
+            href="/admin"
+            className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium shadow-md"
+          >
+            Accéder à votre espace
+          </a>
+        </div>
+        <p className="mt-10 text-sm text-gray-400">
+          Si vous êtes passager, demandez le lien direct à votre aéroclub.
+        </p>
+      </div>
+    </div>
+  );
+}

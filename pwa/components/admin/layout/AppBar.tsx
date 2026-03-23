@@ -9,12 +9,28 @@ import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { useClient } from '../../admin/ClientProvider';
 import GlobalLoader from "../../admin/layout/GlobalLoader";
 import Oidc from "./Oidc";
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef } from "react";
 import Payment from "./Payment";
 import { useSessionContext } from "../../admin/SessionContextProvider";
 import CarnetVol from "./CarnetVol";
 import { clientWithIndividualFlightLogs, clientWithPaymentManagement, clientWithReservationManagement } from "../../../app/lib/client";
-import ClientSelector from '../ClientSelector';
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import { ListItemIcon, ListItemText, MenuItem } from "@mui/material";
+
+const PassengerFormLink = forwardRef<HTMLLIElement>((props, ref) => {
+  const { client } = useClient();
+  if (!client?.slug || !client?.hasPassengerRegistration) return null;
+  return (
+    <MenuItem
+      ref={ref}
+      onClick={() => window.open(`/${client.slug}`, '_blank')}
+      {...props}
+    >
+      <ListItemIcon><OpenInNewIcon fontSize="small" /></ListItemIcon>
+      <ListItemText>Formulaire passager</ListItemText>
+    </MenuItem>
+  );
+});
 
 const CustomAppBar = () => {
 
@@ -79,12 +95,12 @@ const CustomAppBar = () => {
             { isAdmin(user) && <Oidc /> }
             {/* @ts-ignore  */}
             { clientWithIndividualFlightLogs(client) && isDefined(profile) && <CarnetVol/> }
+            <PassengerFormLink />
             <Logout />
           </UserMenu>
         }
       >
         <TitlePortal />
-        <ClientSelector />
         <div className="flex-1">
           <Link to="/">
             <div style={{ position: "relative", width: 50, height: 50 }}>

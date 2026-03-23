@@ -1,4 +1,5 @@
 import { Menu, MenuItemLink, useSidebarState } from "react-admin";
+import ClientSelector from '../ClientSelector';
 import CommentIcon from "@mui/icons-material/Comment";
 import GroupIcon from '@mui/icons-material/Group';
 import FlightIcon from '@mui/icons-material/Flight';
@@ -320,6 +321,9 @@ const CustomMenu = () => {
             />
         </Collapse>
       }
+
+      <div style={{ flexGrow: 1 }} />
+      <ClientSelector />
     </Menu>
   );
 };

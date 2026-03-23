@@ -25,7 +25,21 @@ const DefaultLayout = (props: React.JSX.IntrinsicAttributes & LayoutProps) => {
               maxWidth: '100vw',
               overflowX: 'hidden',
             }
-          }
+          },
+          '& .RaSidebar-fixed': {
+            display: 'flex',
+            flexDirection: 'column',
+            height: 'calc(100vh - 48px)',
+          },
+          '& .MuiDrawer-paper': {
+            display: 'flex',
+            flexDirection: 'column',
+          },
+          '& .RaMenu-open': {
+            display: 'flex',
+            flexDirection: 'column',
+            flex: 1,
+          },
       }}
       />
   );

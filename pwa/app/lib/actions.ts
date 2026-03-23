@@ -49,19 +49,30 @@ export async function createPassenger(prevState: State, formData: FormData) {
     }
 
     const { nom, prenom, email, telephone } = validatedFields.data;
+    const clientId = formData.get('clientId') as string;
+    const slug = formData.get('slug') as string;
     const date = new Date().toISOString().split('T')[0];
+
+    const headers: Record<string, string> = {};
+    if (clientId) {
+        headers['X-Client-Id'] = clientId;
+    }
+
     try {
-        await post('/passagers', {nom, prenom, email, telephone, date})
+        await post('/passagers', {nom, prenom, email, telephone, date}, headers)
         toast.success(`Merci ${prenom}. Bon vol à vous !`, {duration: 3000})
     } catch (error) {
-        const violations = error.response.data.violations || [];
+        const violations = error.response?.data?.violations || [];
         const message = violations.length <= 1 ? 'Une erreur bloque la validation.' : 'Des erreurs bloquent la validation.';
         const errors = violations.reduce((a, v) => ({ ...a, [v.propertyPath]: v.message}), {});
         toast.error(message, {duration: 3000})
         return {message, errors};
     }
 
-    redirect(`/thanks?firstname=${prenom}`!, RedirectType.replace);
+    const redirectPath = slug
+        ? `/${slug}/thanks?firstname=${encodeURIComponent(prenom)}`
+        : `/thanks?firstname=${encodeURIComponent(prenom)}`;
+    redirect(redirectPath, RedirectType.replace);
 }
 
 export const getMetarOrTaf = (icao, request = "metar", decoded = false) => {

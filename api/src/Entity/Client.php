@@ -24,9 +24,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+#[ApiFilter(SearchFilter::class, properties: ['slug' => 'exact'])]
 #[ApiResource(
     uriTemplate: '/clients{._format}',
     operations: [
@@ -79,7 +82,7 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 100, unique: true, nullable: true)]
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?string $slug = null;
 

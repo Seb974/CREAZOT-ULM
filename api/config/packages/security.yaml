@@ -14,6 +14,9 @@ security:
         wix:
             pattern: ^/wix/purchase(/.*)?$
             security: false
+        registration:
+            pattern: ^/api/registration$
+            security: false
         main:
             lazy: true
             provider: app_user_provider
