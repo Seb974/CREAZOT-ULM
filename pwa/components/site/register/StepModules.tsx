@@ -46,6 +46,14 @@ interface StepModulesProps {
   onChange: (values: Partial<RegistrationData["modules"]>) => void;
 }
 
+const FALLBACK_PACKS: ModulePack[] = [
+  { id: -1, name: "Pack Base", description: "Tableau de bord, passagers, réservations de base", isDefault: true },
+  { id: -2, name: "Pack Vol", description: "Carnets de vols, horamètres, statistiques" },
+  { id: -3, name: "Pack Maintenance", description: "Flotte, butées entretien, alertes, changement moteur" },
+  { id: -4, name: "Pack Pilote", description: "Profils, qualifications, certificats médicaux, alertes" },
+  { id: -5, name: "Pack Prépaiements", description: "Bons cadeaux, synchro Wix, PDF" },
+];
+
 function extractId(ref: { id: number } | string | number): number {
   if (typeof ref === "number") return ref;
   if (typeof ref === "object" && ref !== null && "id" in ref) return ref.id;
@@ -71,17 +79,28 @@ export default function StepModules({
   useEffect(() => {
     const base = window.origin;
 
+    const safeFetch = (url: string) =>
+      fetch(url).then((r) => {
+        if (!r.ok) throw new Error(`${r.status}`);
+        return r.json();
+      });
+
     Promise.all([
-      fetch(`${base}/module-packs?pagination=false`).then((r) => r.json()),
-      fetch(`${base}/module-pack-prices?pagination=false`).then((r) => r.json()),
-      fetch(`${base}/pricing-categories?pagination=false`).then((r) => r.json()),
-      fetch(`${base}/pricing-tiers?pagination=false`).then((r) => r.json()),
+      safeFetch(`${base}/module-packs?pagination=false`),
+      safeFetch(`${base}/module-pack-prices?pagination=false`),
+      safeFetch(`${base}/pricing-categories?pagination=false`),
+      safeFetch(`${base}/pricing-tiers?pagination=false`),
     ])
       .then(([packsRes, pricesRes, categoriesRes, tiersRes]) => {
-        const packsData: ModulePack[] = packsRes["hydra:member"] ?? packsRes;
-        const pricesData: ModulePackPrice[] = pricesRes["hydra:member"] ?? pricesRes;
-        const catsData: PricingCategory[] = categoriesRes["hydra:member"] ?? categoriesRes;
-        const tiersData: PricingTier[] = tiersRes["hydra:member"] ?? tiersRes;
+        const toArray = <T,>(res: any): T[] => {
+          const data = res?.["hydra:member"] ?? res;
+          return Array.isArray(data) ? data : [];
+        };
+
+        const packsData = toArray<ModulePack>(packsRes);
+        const pricesData = toArray<ModulePackPrice>(pricesRes);
+        const catsData = toArray<PricingCategory>(categoriesRes);
+        const tiersData = toArray<PricingTier>(tiersRes);
 
         setPacks(packsData);
         setPrices(pricesData);
@@ -93,7 +112,14 @@ export default function StepModules({
           onChange({ packIds: [...selectedPackIds, defaultPack.id] });
         }
       })
-      .catch(() => setError("Impossible de charger les modules"))
+      .catch(() => {
+        setPacks(FALLBACK_PACKS);
+        setError("Données de tarification indisponibles — affichage indicatif");
+        const fb = FALLBACK_PACKS.find((p) => p.isDefault);
+        if (fb && !selectedPackIds.includes(fb.id)) {
+          onChange({ packIds: [...selectedPackIds, fb.id] });
+        }
+      })
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -143,12 +169,11 @@ export default function StepModules({
     );
   }
 
-  if (error) {
-    return <Alert severity="error">{error}</Alert>;
-  }
-
   return (
     <div className="space-y-5">
+      {error && (
+        <Alert severity="warning" sx={{ mb: 1 }}>{error}</Alert>
+      )}
       <h2 className="text-title-xsm font-semibold text-black">
         Sélectionnez vos modules
       </h2>
