@@ -4,7 +4,8 @@ const footerSections = [
   {
     title: "Produit",
     links: [
-      { label: "Fonctionnalités", href: "/features" },
+      { label: "Fonctionnalités", href: "/#features" },
+      { label: "Modules", href: "/#modules" },
       { label: "Tarifs", href: "/pricing" },
     ],
   },
@@ -12,8 +13,7 @@ const footerSections = [
     title: "Support",
     links: [
       { label: "Contact", href: "/contact" },
-      { label: "FAQ", href: "/contact" },
-      { label: "Email", href: "mailto:contact@aviciel.com" },
+      { label: "Email", href: "mailto:contact@creazot.com" },
     ],
   },
   {
@@ -31,8 +31,10 @@ export default function SiteFooter() {
       <div className="max-w-7xl mx-auto px-6 py-16">
         {/* Brand */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white">Aviciel</h2>
-          <p className="mt-2 text-sm text-gray-400">Gestion de bases ULM</p>
+          <h2 className="text-2xl font-bold">
+            C<span className="text-cyan-500">6</span>L
+          </h2>
+          <p className="mt-2 text-sm text-gray-400">Gestion Aéronautique</p>
         </div>
 
         {/* Link columns */}
@@ -61,7 +63,7 @@ export default function SiteFooter() {
         {/* Divider + copyright */}
         <div className="border-t border-gray-800 pt-8">
           <p className="text-sm text-gray-500">
-            &copy; {new Date().getFullYear()} Aviciel &middot; Tous droits réservés
+            &copy; 2026 CREAZOT &middot; Tous droits réservés
           </p>
         </div>
       </div>

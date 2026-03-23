@@ -33,7 +33,7 @@ export default function SiteNavbar() {
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 h-20">
         {/* Logo */}
         <Link href="/" className="text-2xl font-bold text-cyan-700 no-underline hover:opacity-80 transition-opacity">
-          Aviciel
+          C6L
         </Link>
 
         {/* Desktop nav links */}

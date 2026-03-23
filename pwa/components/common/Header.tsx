@@ -12,7 +12,7 @@ export const Header = () => {
   const pathname = usePathname();
     const { session, status } = useSessionContext();
 
-  const hiddenPaths = ["/admin", "/thanks", "/auth", "/oidc", "/register", "/features", "/pricing", "/contact"];
+  const hiddenPaths = ["/admin", "/thanks", "/auth", "/oidc", "/register", "/features", "/pricing", "/contact", "/cgu", "/privacy"];
   if (pathname === "/" || hiddenPaths.some(p => pathname.startsWith(p))) return <></>;
   if (pathname.match(/^\/[a-z0-9-]+$/i) || pathname.match(/^\/[a-z0-9-]+\/thanks/i)) return <></>;
 
