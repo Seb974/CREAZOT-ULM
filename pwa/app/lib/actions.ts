@@ -77,10 +77,9 @@ export async function createPassenger(prevState: State, formData: FormData) {
 
 export const getMetarOrTaf = (icao, request = "metar", decoded = false) => {
 
-  const config = { 
+  const config = {
       method: 'get',
-      url: `https://api.checkwx.com/${ request }/${ icao }${ decoded && '/decoded' }`,
-      headers: { 'X-API-Key': '2643ee8e1e864bfb9a13c98b4b' }
+      url: `${API_DOMAIN}/admin/weather/${ request }/${ icao }`,
   };
   return axios(config)
           .then(function (response) {
