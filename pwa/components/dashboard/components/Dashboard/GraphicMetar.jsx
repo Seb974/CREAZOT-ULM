@@ -1,9 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CircularProgress } from '@mui/material';
 
 export const GraphicMetar = ({ code }) => {
 
-    const containerCode = 'KiVSEp48';
+    const containerCode = useMemo(
+        () => Math.random().toString(36).substring(2, 10),
+        [code]
+    );
     const containerId = `metartaf-${ containerCode }`;
     const containerRef = useRef(null);
 
@@ -40,7 +43,7 @@ export const GraphicMetar = ({ code }) => {
         }
         const timeout = setTimeout(() => setLoading(false), 800);
         return () => clearTimeout(timeout);
-    }, [code]);
+    }, [code, containerCode]);
 
     return (
         <>

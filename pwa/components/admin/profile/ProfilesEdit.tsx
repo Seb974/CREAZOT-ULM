@@ -69,7 +69,28 @@ export const ProfilesEdit = () => {
         return await syncDocuments(docs, session);
     };
 
+  const syncUserClients = async (pilote, clients) => {
+    if (!pilote?.['@id']) return;
+    const userIri = pilote['@id'];
+    const clientIris = (clients || []).map(c => getFormattedValueForBackEnd(c));
+    try {
+      await fetch(userIri, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${session?.accessToken}`,
+          'Content-Type': 'application/ld+json',
+        },
+        body: JSON.stringify({ clients: clientIris }),
+      });
+    } catch (e) {
+      console.error('Erreur lors de la mise à jour des clients du pilote', e);
+    }
+  };
+
   const transform = async ({ qualifications, pilotQualifications, certificatMedical, documents, createdBy, updatedBy, ...data }) => {
+
+    const piloteClients = data.pilote?.clients;
+    await syncUserClients(data.pilote, piloteClients);
 
     const documentIds = isDefinedAndNotVoid(documents) ? await getDocuments(documents) : [];
     const certificatMedicalDocument = isDefined(certificatMedical) ? await getDocument(certificatMedical, 'Certificat Médical') : null;
@@ -133,6 +154,15 @@ export const ProfilesEdit = () => {
                 <SelectInput label="Pilote" validate={required()} readOnly/>
               </ReferenceInput>
               <TextInput source="pilote.email" label="Adresse email" readOnly helperText={`Modifiable uniquement via Administration`}/>
+
+              <ArrayInput source="pilote.clients" label="Clients rattachés">
+                <SimpleFormIterator inline disableReordering>
+                    <ReferenceInput reference="clients" source="@id">
+                        <SelectInput label="Client" optionText="name"/>
+                    </ReferenceInput>
+                </SimpleFormIterator>
+              </ArrayInput>
+
               <DateInput source="birthDate" label="Date de naissance" validate={required()}/>
               <TextInput source="totalFlightHours" label="Total des heures de vol" format={ decimalToTime } parse={ timeToDecimal }/>
               <BooleanInput source="availableByDefault" label="Disponible par défaut" defaultValue={ false }/>

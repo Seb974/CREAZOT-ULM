@@ -23,7 +23,6 @@ export const ClientShow = () => {
                     <TextField source="phone" label="N° de téléphone"/>
                     <TextField source="email" label="Adresse email"/>
                     <TextField source="website" label="Site web"/>
-                    <TextField source="url" label="URL"/>
                     <TextField source="emailParams" label="Serveur d'email SendGrid"/>
                     <TextField source="emailAddressSender" label="Adresse email d'envoi"/>
                     <DateField source="minHours" showDate={ false } showTime label="Heure de démarrage"/>
@@ -47,6 +46,7 @@ export const ClientShow = () => {
                     <BooleanField source="hasGifts" label="Gestion des prépaiements" textAlign="center"/>
                     <BooleanField source="hasExpensesManagement" label="Gestion des dépenses" textAlign="center"/>
                     <BooleanField source="hasGroupUpdate" label="Mise à jour des groupes" textAlign="center"/>
+                    <BooleanField source="hasNotam" label="NOTAMs / SNOWTAMs" textAlign="center"/>
                 </TabbedShowLayout.Tab>  
                 <TabbedShowLayout.Tab label="Dashboard">
                     <FunctionField 

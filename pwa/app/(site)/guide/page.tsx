@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getSiteSettings } from "../../lib/getSiteSettings";
 
 const guideModules = [
   {
@@ -167,7 +168,8 @@ const quickStart = [
   },
 ];
 
-export default function GuidePage() {
+export default async function GuidePage() {
+  const siteSettings = await getSiteSettings();
   return (
     <div className="font-sans">
       {/* ── Hero ── */}
@@ -180,7 +182,7 @@ export default function GuidePage() {
             Guide Utilisateur
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-300">
-            Tout ce qu&apos;il faut savoir pour exploiter C<span className="text-cyan-500">6</span>L
+            Tout ce qu&apos;il faut savoir pour exploiter {siteSettings.name}
             au maximum de ses capacités.
           </p>
         </div>
@@ -352,12 +354,12 @@ export default function GuidePage() {
                 a: "Absolument. Hébergement européen, chiffrement TLS, authentification SSO Keycloak avec MFA, isolation multi-tenant complète.",
               },
               {
-                q: "C6L fonctionne-t-il sur mobile ?",
-                a: "Oui, C6L est une Progressive Web App (PWA). Elle s'installe comme une application native sur iOS et Android.",
+                q: `${siteSettings.name} fonctionne-t-il sur mobile ?`,
+                a: `Oui, ${siteSettings.name} est une Progressive Web App (PWA). Elle s'installe comme une application native sur iOS et Android.`,
               },
               {
                 q: "Comment contacter le support ?",
-                a: "Par email à contact@creazot.com ou via la page Contact. Réponse garantie sous 24h ouvrées.",
+                a: `Par email à ${siteSettings.email} ou via la page Contact. Réponse garantie sous 24h ouvrées.`,
               },
             ].map((faq) => (
               <details

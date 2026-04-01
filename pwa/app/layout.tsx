@@ -9,16 +9,24 @@ import { Layout } from "../components/common/Layout";
 import "../styles/globals.css";
 import { Providers } from "./providers";
 import { auth } from "./auth";
+import { getSiteSettings } from "./lib/getSiteSettings";
 
-export const metadata: Metadata = {
-  title: 'C6L — Gestion Aéronautique',
-  description: 'La plateforme tout-en-un pour les clubs ULM et aéroclubs.',
-  manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'C6L Gestion',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return {
+    title: `${settings.name} — Gestion Aéronautique`,
+    description: 'La plateforme tout-en-un pour les clubs ULM et aéroclubs.',
+    manifest: '/manifest.json',
+    icons: {
+      icon: settings.favicon || '/favicon.ico',
+      apple: settings.appleTouchIcon || '/apple-touch-icon.png',
+    },
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'default',
+      title: `${settings.name} Gestion`,
+    },
+  };
 }
  
 export const viewport: Viewport = {

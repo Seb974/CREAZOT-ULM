@@ -28,6 +28,7 @@ class ModulePackSyncSubscriber implements EventSubscriberInterface
         'hasLandingManagement',
         'hasIndividualFlightLogs',
         'hasGroupUpdate',
+        'hasNotam',
     ];
 
     public function __construct(
@@ -45,6 +46,11 @@ class ModulePackSyncSubscriber implements EventSubscriberInterface
         $method = $event->getRequest()->getMethod();
 
         if (!$entity instanceof Client || $method !== 'PUT') {
+            return;
+        }
+
+        $category = $entity->getPricingCategory();
+        if ($category && $category->getSlug() === 'personnalise') {
             return;
         }
 

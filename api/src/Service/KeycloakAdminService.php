@@ -98,6 +98,39 @@ class KeycloakAdminService
         return $keycloakId;
     }
 
+    /**
+     * Assign a realm-level role to a Keycloak user.
+     */
+    public function assignRealmRole(string $keycloakUserId, string $roleName): void
+    {
+        $token = $this->getAdminToken();
+        $baseUrl = "{$this->keycloakBaseUrl}/admin/realms/{$this->realm}";
+        $headers = [
+            'Authorization' => "Bearer {$token}",
+            'Content-Type' => 'application/json',
+        ];
+
+        $response = $this->httpClient->request('GET', "{$baseUrl}/roles/{$roleName}", [
+            'headers' => $headers,
+        ]);
+
+        if ($response->getStatusCode() !== 200) {
+            throw new \RuntimeException(sprintf('Realm role "%s" not found in Keycloak', $roleName));
+        }
+
+        $role = $response->toArray();
+
+        $this->httpClient->request('POST', "{$baseUrl}/users/{$keycloakUserId}/role-mappings/realm", [
+            'headers' => $headers,
+            'json' => [
+                [
+                    'id' => $role['id'],
+                    'name' => $role['name'],
+                ],
+            ],
+        ]);
+    }
+
     public function deleteUser(string $keycloakId): void
     {
         $token = $this->getAdminToken();

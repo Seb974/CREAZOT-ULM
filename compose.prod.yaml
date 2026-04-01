@@ -52,7 +52,7 @@ services:
       target: keycloak
     environment:
       KC_DB: postgres
-      KC_HTTP_RELATIVE_PATH: /
+      KC_HTTP_RELATIVE_PATH: /oidc
       KEYCLOAK_PRODUCTION: "true"
       KC_DB_URL_HOST: keycloak-database
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-!ChangeMe!}

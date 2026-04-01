@@ -1,41 +1,59 @@
 import Link from "next/link";
 
-const footerLinks = [
-  {
-    title: "Produit",
-    links: [
-      { label: "Fonctionnalités", href: "/#features" },
-      { label: "Modules", href: "/#modules" },
-      { label: "Tarifs", href: "/pricing" },
-    ],
-  },
-  {
-    title: "Support",
-    links: [
-      { label: "Guide utilisateur", href: "/guide" },
-      { label: "Contact", href: "/contact" },
-      { label: "contact@creazot.com", href: "mailto:contact@creazot.com" },
-    ],
-  },
-  {
-    title: "Légal",
-    links: [
-      { label: "CGU", href: "/cgu" },
-      { label: "Confidentialité", href: "/privacy" },
-    ],
-  },
-];
+function AirplaneLogo({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+    >
+      <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+    </svg>
+  );
+}
 
-export default function SiteFooter() {
+interface SiteFooterProps {
+  email?: string;
+  siteName?: string;
+}
+
+export default function SiteFooter({
+  email = "contact@creazot.com",
+  siteName = "C6L",
+}: SiteFooterProps) {
+  const footerLinks = [
+    {
+      title: "Produit",
+      links: [
+        { label: "Fonctionnalités", href: "/#features" },
+        { label: "Modules", href: "/#modules" },
+        { label: "Tarifs", href: "/pricing" },
+      ],
+    },
+    {
+      title: "Support",
+      links: [
+        { label: "Guide utilisateur", href: "/guide" },
+        { label: "Contact", href: "/contact" },
+        { label: email, href: `mailto:${email}` },
+      ],
+    },
+    {
+      title: "Légal",
+      links: [
+        { label: "CGU", href: "/cgu" },
+        { label: "Confidentialité", href: "/privacy" },
+      ],
+    },
+  ];
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="flex flex-col gap-10 md:flex-row md:justify-between md:gap-16">
           <div className="shrink-0">
-            <Link href="/" className="text-2xl font-bold no-underline">
-              <span className="text-white">C</span>
-              <span className="text-cyan-500">6</span>
-              <span className="text-white">L</span>
+            <Link href="/" className="group flex items-center gap-1.5 no-underline">
+              <span className="text-2xl font-bold text-white">{siteName}</span>
+              <AirplaneLogo className="w-[18px] h-[18px] rotate-45 text-cyan-400" />
             </Link>
             <p className="mt-1 text-sm text-gray-400">Gestion Aéronautique</p>
             <Link

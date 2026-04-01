@@ -77,6 +77,13 @@ class RegistrationController extends AbstractController
             return new JsonResponse(['error' => $e->getMessage()], $code);
         }
 
+        // --- c2) Assigner le rôle admin dans Keycloak ---
+        try {
+            $keycloakAdmin->assignRealmRole($keycloakId, 'admin');
+        } catch (\RuntimeException $e) {
+            // Non bloquant : l'utilisateur est créé, le rôle pourra être assigné manuellement
+        }
+
         try {
             // --- d) Créer le User entity ---
             $user = new User();

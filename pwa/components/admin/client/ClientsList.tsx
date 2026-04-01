@@ -24,6 +24,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import { useClient } from '../../admin/ClientProvider';
 import { isDefined } from "../../../app/lib/utils";
+import { useSessionContext } from "../../admin/SessionContextProvider";
 
 
 export interface Props {
@@ -33,11 +34,12 @@ export interface Props {
 }
 
 const ListActions = () => {
-  const { client } = useClient();
+  const { session } = useSessionContext();
+  const isSuperAdmin = session?.user?.roles?.find((r: string) => r === "super_admin");
 
   return (
     <TopToolbar>
-        { !isDefined(client) && <CreateButton/> }
+        { isSuperAdmin && <CreateButton/> }
         <ExportButton/>
     </TopToolbar>
 )};

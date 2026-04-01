@@ -2,11 +2,11 @@ import { ForwardedRef, forwardRef } from "react";
 import { LogoutClasses } from "react-admin";
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import { ListItemIcon, ListItemText, MenuItem } from "@mui/material";
-import { useClient } from '../../admin/ClientProvider';
+import { useSiteSettings } from '../SiteSettingsProvider';
 
 const Oidc = forwardRef((props, ref: ForwardedRef<any>) => {
 
-    const { client } = useClient();
+    const { siteSettings } = useSiteSettings();
 
     return (
         <MenuItem
@@ -15,7 +15,7 @@ const Oidc = forwardRef((props, ref: ForwardedRef<any>) => {
         {...props}
         >
              <a
-                href={`${ client?.url ?? 'https://localhost' }/oidc/`}
+                href={`${ siteSettings?.url ?? 'https://localhost' }/oidc/`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center w-full no-underline text-inherit"

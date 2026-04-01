@@ -14,7 +14,23 @@ const navLinks = [
   { label: "Guide", href: "/guide" },
 ];
 
-export default function SiteNavbar() {
+function AirplaneLogo({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+    >
+      <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+    </svg>
+  );
+}
+
+type SiteNavbarProps = {
+  siteName?: string;
+};
+
+export default function SiteNavbar({ siteName = "C6L" }: SiteNavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -26,15 +42,18 @@ export default function SiteNavbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled ? "bg-white shadow-md" : "bg-transparent"
       }`}
     >
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 h-16">
-        <Link href="/" className="text-2xl font-bold no-underline hover:opacity-80 transition-opacity">
-          <span className={scrolled ? "text-gray-900" : "text-white"}>C</span>
-          <span className="text-cyan-700">6</span>
-          <span className={scrolled ? "text-gray-900" : "text-white"}>L</span>
+        <Link href="/" className="group flex items-center gap-1.5 no-underline hover:opacity-80 transition-opacity">
+          <span className={`text-2xl font-bold ${scrolled ? "text-gray-900" : "text-white"}`}>{siteName}</span>
+          <AirplaneLogo
+            className={`w-[18px] h-[18px] rotate-45 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${
+              scrolled ? "text-cyan-700" : "text-cyan-400"
+            }`}
+          />
         </Link>
 
         <div className="hidden md:flex items-center gap-8">

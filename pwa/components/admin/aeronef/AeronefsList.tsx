@@ -58,6 +58,7 @@ const ListActions = ({ resource, isSmall }) => {
 
   const { filterValues } = useListContext();
   const { session } = useSessionContext();
+  const isSuperAdmin = session?.user?.roles?.find((r: string) => r === "super_admin");
   const params = new URLSearchParams();
 
   Object.entries(filterValues).forEach(([key, value]) => {
@@ -90,7 +91,7 @@ const ListActions = ({ resource, isSmall }) => {
 
   return (
     <TopToolbar>
-        <CreateButton/>
+        { isSuperAdmin && <CreateButton/> }
         <CustomCSVButton onClick={ () => handleExport('csv') } isSmall={isSmall}/>
         <CustomPDFButton onClick={ () => handleExport('pdf') } isSmall={isSmall}/>
     </TopToolbar>

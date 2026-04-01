@@ -20,6 +20,9 @@ class SubscriptionGuardListener
 
     private const ALLOWED_API_PATHS = [
         '/clients',
+        '/users',
+        '/site-settings',
+        '/client_access_requests',
         '/pricing-categories',
         '/module-packs',
         '/pricing-tiers',

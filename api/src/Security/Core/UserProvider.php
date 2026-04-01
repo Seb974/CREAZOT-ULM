@@ -64,9 +64,16 @@ final readonly class UserProvider implements AttributesBasedUserProviderInterfac
 
         if (!empty($attributes['realm_access']['roles'])) {
             $currentRoles = $user->getRoles();
-            $newRoles = in_array('super_admin', $attributes['realm_access']['roles']) || in_array('admin', $attributes['realm_access']['roles'])
-                ? ['ROLE_USER', 'OIDC_USER', 'ROLE_ADMIN', 'OIDC_ADMIN']
-                : ['ROLE_USER', 'OIDC_USER'];
+            $keycloakRoles = $attributes['realm_access']['roles'];
+
+            if (in_array('super_admin', $keycloakRoles)) {
+                $newRoles = ['ROLE_USER', 'OIDC_USER', 'ROLE_ADMIN', 'OIDC_ADMIN', 'ROLE_SUPER_ADMIN'];
+            } elseif (in_array('admin', $keycloakRoles)) {
+                $newRoles = ['ROLE_USER', 'OIDC_USER', 'ROLE_ADMIN', 'OIDC_ADMIN'];
+            } else {
+                $newRoles = ['ROLE_USER', 'OIDC_USER'];
+            }
+
             $user->setRoles(array_unique(array_merge($currentRoles, $newRoles)));
         }
 

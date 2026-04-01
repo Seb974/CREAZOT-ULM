@@ -7,6 +7,13 @@ export const Cameras = ({ client }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isDefinedAndNotVoid(client?.cameras)) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
     const scriptId = "windy-webcam-script";
     const existingScript = document.getElementById(scriptId);
     if (existingScript) {
@@ -26,7 +33,7 @@ export const Cameras = ({ client }) => {
       script.remove();
       clearTimeout(timeout);
     };
-  }, []);
+  }, [client]);
 
   return (
     <div className="w-full">

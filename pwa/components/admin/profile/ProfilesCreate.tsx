@@ -1,4 +1,4 @@
-import { ReferenceInput, Create, ArrayInput, SimpleFormIterator, useCreate, useRedirect, useNotify, DateInput, BooleanInput, required, SelectInput, TabbedForm, NumberInput, TextInput, FileInput, FileField, useRecordContext } from "react-admin";
+import { ReferenceInput, ReferenceArrayInput, AutocompleteArrayInput, Create, ArrayInput, SimpleFormIterator, useCreate, useRedirect, useNotify, DateInput, BooleanInput, required, SelectInput, TabbedForm, NumberInput, TextInput, FileInput, FileField, useRecordContext } from "react-admin";
 import { calculateValidUntil, decimalToTime, getFormattedValueForBackEnd, getValidityDurationMonths, isDefined, isDefinedAndNotVoid, isValidNumber, timeToDecimal } from "../../../app/lib/utils";
 import { certificatMedicalTypes, infiniteCertificateTypes, syncDocument, syncDocuments } from "../../../app/lib/client";
 import { useWatch, useFormContext } from 'react-hook-form';
@@ -72,7 +72,24 @@ export const ProfilesCreate = () => {
       return await syncDocuments(docs, session);
   };
 
-  const onSubmit = async ({ pilotQualifications, certificatMedical, documents, ...data }) => {
+  const syncUserClients = async (piloteIri, clients) => {
+    if (!piloteIri) return;
+    const clientIris = (clients || []).map(c => getFormattedValueForBackEnd(c));
+    try {
+      await fetch(piloteIri, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${session?.accessToken}`,
+          'Content-Type': 'application/ld+json',
+        },
+        body: JSON.stringify({ clients: clientIris }),
+      });
+    } catch (e) {
+      console.error('Erreur lors de la mise à jour des clients du pilote', e);
+    }
+  };
+
+  const onSubmit = async ({ pilotQualifications, certificatMedical, documents, clients, ...data }) => {
     try {
       const documentIds = isDefinedAndNotVoid(documents) ? await getDocuments(documents) : [];
       const certificatMedicalDocument = isDefined(certificatMedical) ? await getDocument(certificatMedical, 'Certificat Médical') : null;
@@ -90,9 +107,11 @@ export const ProfilesCreate = () => {
         })
       );
 
+      const piloteIri = getFormattedValueForBackEnd(data.pilote);
+
       const newProfile = {
           ...data,
-          pilote: getFormattedValueForBackEnd(data.pilote),
+          pilote: piloteIri,
           documents: documentIds,
           pilotQualifications: !isDefinedAndNotVoid(pilotQualifications) ? [] : formattedPilotQualifications,
           certificatMedical: {
@@ -104,6 +123,11 @@ export const ProfilesCreate = () => {
       };
 
       await create('profil_pilotes', {data: newProfile});
+
+      if (isDefinedAndNotVoid(clients)) {
+        await syncUserClients(piloteIri, clients);
+      }
+
       notify('Le profil du pilote a bien été enregistré.', { type: 'info' });
       redirect('list', 'profil_pilotes');
     } catch (error) {
@@ -136,6 +160,11 @@ export const ProfilesCreate = () => {
             <ReferenceInput reference="users" source="pilote" filter={ { "exists[profilPilote]": false }}>
               <SelectInput label="Pilote" validate={required()}/>
             </ReferenceInput>
+
+            <ReferenceArrayInput source="clients" reference="clients">
+              <AutocompleteArrayInput optionText="name" label="Clients rattachés" filterToQuery={(q) => ({ name: q })} fullWidth />
+            </ReferenceArrayInput>
+
             <DateInput source="birthDate" label="Date de naissance" validate={required()}/>
             <TextInput source="totalFlightHours" label="Total des heures de vol" format={ decimalToTime } parse={ timeToDecimal } />
             <BooleanInput source="availableByDefault" label="Disponible par défaut" defaultValue={ false }/>

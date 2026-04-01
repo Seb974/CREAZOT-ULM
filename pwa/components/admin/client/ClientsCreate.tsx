@@ -62,6 +62,7 @@ export const ClientsCreate = () => {
                     useAvailabilityFilter: false,
                     hasExpensesManagement: false,
                     hasGroupUpdate: false,
+                    hasNotam: false,
                     minHours: (new Date()).setHours(0, 0, 0),
                     maxHours: (new Date()).setHours(23, 59, 59)
                 })}
@@ -80,7 +81,6 @@ export const ClientsCreate = () => {
                     <TextInput source="email" label="Adresse email" validate={required()}/>
                     <TextInput source="phone" label="N° de téléphone" validate={required()}/>
                     <TextInput source="website" label="Site web"/>
-                    <TextInput source="url" label="URL"/>
                     <TextInput source="emailServer" label="Serveur d'email"/>
                     <TextInput source="emailAddressSender" label="Adresse email d'envoi"/>
                     <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
@@ -149,6 +149,12 @@ export const ClientsCreate = () => {
                         <Box flex={1}>
                             <BooleanInput source="hasGroupUpdate" label="Mise à jour des groupes" fullWidth/>
                         </Box>
+                    </Box>
+                    <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                        <Box flex={1}>
+                            <BooleanInput source="hasNotam" label="NOTAMs / SNOWTAMs" fullWidth/>
+                        </Box>
+                        <Box flex={1}/>
                     </Box>
                     <Divider sx={{ mt: 2, borderBottomWidth: 2, borderColor: '#666' }} />
                 </TabbedForm.Tab>

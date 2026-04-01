@@ -39,7 +39,8 @@ use App\Entity\TenantAwareTrait;
             filters: [AvailableAeronefFilter::class]
         ),
         new Post(
-            itemUriTemplate: '/aeronefs/{id}{._format}'
+            itemUriTemplate: '/aeronefs/{id}{._format}',
+            security: 'is_granted("ROLE_SUPER_ADMIN")'
         ),
         new Get(
             uriTemplate: '/aeronefs/{id}{._format}'

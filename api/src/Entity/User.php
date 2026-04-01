@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Put;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -45,6 +46,10 @@ use App\Entity\ProfilPilote;
             uriTemplate: '/users/{id}{._format}',
             security: 'is_granted("OIDC_ADMIN") or object === user'
         ),
+        new Put(
+            uriTemplate: '/users/{id}{._format}',
+            security: 'is_granted("OIDC_ADMIN")'
+        ),
     ],
     normalizationContext: [
         AbstractNormalizer::GROUPS => ['User:read'],
@@ -66,7 +71,7 @@ class User implements UserInterface
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\CustomIdGenerator(class: UuidGenerator::class)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read', 'Disponibilite:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read', 'Disponibilite:read', 'ClientAccessRequest:read'])]
     #[ORM\Id]
     private ?Uuid $id = null;
 
@@ -74,14 +79,14 @@ class User implements UserInterface
      * @see https://schema.org/email
      */
     #[ORM\Column(unique: true)]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read', 'CarnetVol:read', 'Disponibilite:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read', 'CarnetVol:read', 'Disponibilite:read', 'ClientAccessRequest:read'])]
     public ?string $email = null;
 
     /**
      * @see https://schema.org/givenName
      */
     #[ApiProperty(types: ['https://schema.org/givenName'])]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read', 'Landing:read', 'CarnetVol:read', 'Disponibilite:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read', 'Landing:read', 'CarnetVol:read', 'Disponibilite:read', 'ClientAccessRequest:read'])]
     #[ORM\Column]
     public ?string $firstName = null;
 
@@ -89,7 +94,7 @@ class User implements UserInterface
      * @see https://schema.org/familyName
      */
     #[ApiProperty(types: ['https://schema.org/familyName'])]
-    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read', 'Landing:read', 'CarnetVol:read', 'Disponibilite:read'])]
+    #[Groups(groups: ['User:read', 'Prestation:read', 'Vol:read', 'Reservation:read', 'Entretien:read', 'Profil_pilote:read', 'Landing:read', 'CarnetVol:read', 'Disponibilite:read', 'ClientAccessRequest:read'])]
     #[ORM\Column]
     public ?string $lastName = null;
 
@@ -108,7 +113,7 @@ class User implements UserInterface
      */
     #[ORM\ManyToMany(targetEntity: Client::class, inversedBy: 'users')]
     #[ORM\JoinTable(name: 'user_client')]
-    #[Groups(groups: ['User:read'])]
+    #[Groups(groups: ['User:read', 'User:write', 'Profil_pilote:read'])]
     private Collection $clients;
 
     public function __construct()

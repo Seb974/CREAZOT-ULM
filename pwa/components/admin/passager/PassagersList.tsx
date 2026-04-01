@@ -10,7 +10,24 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
 import DoneIcon from '@mui/icons-material/Done';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useClient } from '../../admin/ClientProvider';
+
+const darkenHex = (hex: string, factor: number = 0.35): string => {
+  const h = hex.replace('#', '');
+  const r = Math.round(parseInt(h.substring(0, 2), 16) * factor);
+  const g = Math.round(parseInt(h.substring(2, 4), 16) * factor);
+  const b = Math.round(parseInt(h.substring(4, 6), 16) * factor);
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
+const hoverFromHex = (hex: string): string => {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, 0.08)`;
+};
 
 export interface Props {
   data: PagedCollection<Circuit> | null;
@@ -146,9 +163,60 @@ const CustomFilterBar = ({ showMore, isSmall }) => {
       </Form>
   };
 
+const FALLBACK_COLOR = '#1e293b';
+
+const buildDatagridSx = (clientColor?: string) => {
+  const headerBg = clientColor ? darkenHex(clientColor, 0.35) : FALLBACK_COLOR;
+  const hoverBg = clientColor ? hoverFromHex(clientColor) : '#e0f2fe';
+
+  return {
+    borderRadius: '8px',
+    overflow: 'hidden',
+    border: '1px solid #e2e8f0',
+    '& .RaDatagrid-table': {
+      borderCollapse: 'separate',
+      borderSpacing: 0,
+    },
+    '& .RaDatagrid-headerCell': {
+      backgroundColor: headerBg,
+      color: '#f1f5f9',
+      fontWeight: 600,
+      fontSize: '0.78rem',
+      textTransform: 'uppercase' as const,
+      letterSpacing: '0.4px',
+      padding: '14px 16px',
+      borderBottom: 'none',
+      whiteSpace: 'nowrap' as const,
+      '&:first-of-type': { borderTopLeftRadius: '8px' },
+      '&:last-of-type': { borderTopRightRadius: '8px' },
+    },
+    '& .RaDatagrid-rowEven': {
+      backgroundColor: '#ffffff',
+    },
+    '& .RaDatagrid-rowOdd': {
+      backgroundColor: '#f8fafc',
+    },
+    '& .RaDatagrid-row': {
+      transition: 'background-color 0.15s ease',
+      '&:hover': {
+        backgroundColor: `${hoverBg} !important`,
+      },
+    },
+    '& .RaDatagrid-rowCell': {
+      padding: '12px 16px',
+      fontSize: '0.875rem',
+      color: '#334155',
+      borderBottom: '1px solid #f1f5f9',
+    },
+    '& .RaDatagrid-checkbox': {
+      padding: '0 8px',
+    },
+  };
+};
+
 export const PassagersList: NextPage<Props> = ({ data, hubURL, page }) => {
 
-  
+  const { client } = useClient();
   const { session } = useSessionContext();
   const user = session?.user;
   const options = { year: "numeric", month: "numeric", day: "numeric" };
@@ -158,6 +226,7 @@ export const PassagersList: NextPage<Props> = ({ data, hubURL, page }) => {
   
   const [showMore, setShowMore] = useState(false);
   const [filters, setFilters] = useState(defaultFilters);
+  const datagridSx = useMemo(() => buildDatagridSx(client?.color), [client?.color]);
 
   const getConsentIcon = ({ consentAccepted }) => {
     return isDefined(consentAccepted) ? 
@@ -186,11 +255,11 @@ export const PassagersList: NextPage<Props> = ({ data, hubURL, page }) => {
               linkType="show"
             /> 
             : 
-            <Datagrid bulkActionButtons={ isAdmin } sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
+            <Datagrid bulkActionButtons={ isAdmin } sx={datagridSx}>
                 <DateField source="date" label="Date" sortable={ true } />
                 <TextField source="nom" label="Nom" sortable={ true }/>
                 <TextField source="prenom" label="Prénom" sortable={ true }/>
-                <TextField source="telephone" label="Prénom" sortable={ true }/>
+                <TextField source="telephone" label="Téléphone" sortable={ true }/>
                 <EmailField source="email" label="Adresse email"/>
                 <FunctionField 
                     source="consentAccepted"
@@ -198,10 +267,10 @@ export const PassagersList: NextPage<Props> = ({ data, hubURL, page }) => {
                     render={record => getConsentIcon(record) }
                     textAlign="center"
                 />
-                <p className="text-right">
+                <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
                     <ShowButton />
                     <EditButton />
-                </p>
+                </Box>
             </Datagrid>
         }
     </List>

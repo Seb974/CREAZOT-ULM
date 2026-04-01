@@ -35,6 +35,8 @@ import LayersIcon from '@mui/icons-material/Layers';
 import ExtensionIcon from '@mui/icons-material/Extension';
 import PriceChangeIcon from '@mui/icons-material/PriceChange';
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
 
 const CustomMenu = () => {
 
@@ -268,6 +270,24 @@ const CustomMenu = () => {
                   to="/clients"
                   primaryText="Client"
                   leftIcon={<PersonIcon />}
+                  sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+                />
+            }
+            {/* @ts-ignore */}
+            { isDefined(session) && isDefined(user) &&  user.roles.find(r => r === "admin") &&
+              <Menu.Item
+                to="/client_access_requests"
+                primaryText="Demandes d'accès"
+                leftIcon={<AssignmentIndIcon />}
+                sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+              />
+            }
+            {/* @ts-ignore */}
+            { isDefined(session) && isDefined(user) && user.roles.find(r => r === "super_admin") &&
+            <Menu.Item
+                  to="/site-settings"
+                  primaryText="Paramétrage SaaS"
+                  leftIcon={<SettingsApplicationsIcon />}
                   sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
                 />
             }

@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import Reservation from "./Reservation";
 import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { useClient } from '../../admin/ClientProvider';
+import { useSiteSettings } from '../SiteSettingsProvider';
 import GlobalLoader from "../../admin/layout/GlobalLoader";
 import Oidc from "./Oidc";
 import { useEffect, useState, forwardRef } from "react";
@@ -15,7 +16,20 @@ import { useSessionContext } from "../../admin/SessionContextProvider";
 import CarnetVol from "./CarnetVol";
 import { clientWithIndividualFlightLogs, clientWithPaymentManagement, clientWithReservationManagement } from "../../../app/lib/client";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { ListItemIcon, ListItemText, MenuItem } from "@mui/material";
+
+const RequestAccessLink = forwardRef<HTMLLIElement>((props, ref) => {
+  return (
+    <MenuItem ref={ref} {...props}>
+      <Link to="/request-access" className="flex">
+        <ListItemIcon><GroupAddIcon fontSize="small" /></ListItemIcon>
+        <ListItemText>Demander un rattachement</ListItemText>
+      </Link>
+    </MenuItem>
+  );
+});
+RequestAccessLink.displayName = "RequestAccessLink";
 
 const PassengerFormLink = forwardRef<HTMLLIElement>((props, ref) => {
   const { client } = useClient();
@@ -38,12 +52,13 @@ const CustomAppBar = () => {
   const user = session?.user;
   const dataProvider = useDataProvider();
   const { client, loading } = useClient();
+  const { siteSettings } = useSiteSettings();
   const authorizedProfiles = ['pro', 'instructeur', 'secretariat'];
   const [profileLoading, setProfileLoading] = useState(false);
   const [profile, setProfile] = useState(null);
   const [fallback, setFallback] = useState(false);
 
-  const baseUrl = client?.url?.replace(/\/+$/, "") ?? "";
+  const baseUrl = siteSettings?.url?.replace(/\/+$/, "") ?? "";
   const logoPath = client?.logo?.startsWith("/") ? client.logo : `/${client?.logo ?? "images/logo.png"}`;
   const logoSrc = `${baseUrl}${logoPath}`;
 
@@ -95,6 +110,7 @@ const CustomAppBar = () => {
             { isAdmin(user) && <Oidc /> }
             {/* @ts-ignore  */}
             { clientWithIndividualFlightLogs(client) && isDefined(profile) && <CarnetVol/> }
+            <RequestAccessLink />
             <PassengerFormLink />
             <Logout />
           </UserMenu>

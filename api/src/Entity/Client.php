@@ -75,11 +75,11 @@ class Client
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Client:write', 'Client:read'])]
+    #[Groups(groups: ['Client:write', 'Client:read', 'Profil_pilote:read', 'User:read', 'ClientAccessRequest:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ['Client:write', 'Client:read'])]
+    #[Groups(groups: ['Client:write', 'Client:read', 'Profil_pilote:read', 'User:read', 'ClientAccessRequest:read'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 100, unique: true, nullable: true)]
@@ -118,7 +118,7 @@ class Client
 
     #[ORM\Column(length: 7, nullable: true)]
     #[Assert\Regex('/^#[0-9A-Fa-f]{6}$/')]
-    #[Groups(groups: ['Client:write', 'Client:read'])]
+    #[Groups(groups: ['Client:write', 'Client:read', 'Profil_pilote:read', 'User:read', 'ClientAccessRequest:read'])]
     private ?string $color = null;
 
     #[ORM\Column(nullable: true)]
@@ -147,7 +147,7 @@ class Client
     private ?float $opacity = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Client:write', 'Client:read'])]
+    #[Groups(groups: ['Client:write', 'Client:read', 'User:read', 'ClientAccessRequest:read'])]
     private ?bool $active = null;
 
     #[ORM\Column(nullable: true)]
@@ -279,7 +279,7 @@ class Client
     private Collection $modulePacks;
 
     #[ORM\Column(length: 20, nullable: true, options: ['default' => 'trial'])]
-    #[Groups(groups: ['Client:read', 'Client:write'])]
+    #[Groups(groups: ['Client:read', 'Client:write', 'User:read'])]
     private ?string $subscriptionStatus = 'trial';
 
     #[ORM\Column(nullable: true)]
@@ -301,6 +301,26 @@ class Client
     #[ORM\Column(length: 50, nullable: true)]
     #[Groups(groups: ['Client:read', 'Client:write'])]
     private ?string $odooSubscriptionId = null;
+
+    #[ORM\Column(length: 20, nullable: true, options: ['default' => 'monthly'])]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?string $billingCycle = 'monthly';
+
+    #[ORM\Column(nullable: true, options: ['default' => 30.0])]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?float $annualDiscount = 30.0;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?\DateTimeImmutable $nextBillingDate = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?\DateTimeImmutable $lastInvoiceDate = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:read'])]
+    private ?int $odooLastInvoiceId = null;
 
     /**
      * @var Collection<int, Airport>
@@ -335,6 +355,10 @@ class Client
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?bool $hasGroupUpdate = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasNotam = null;
 
     /**
      * @var Collection<int, User>
@@ -1052,6 +1076,18 @@ class Client
         return $this;
     }
 
+
+    public function getHasNotam(): ?bool
+    {
+        return $this->hasNotam;
+    }
+
+    public function setHasNotam(?bool $hasNotam): static
+    {
+        $this->hasNotam = $hasNotam;
+
+        return $this;
+    }
     /**
      * @return Collection<int, User>
      */
@@ -1183,6 +1219,66 @@ class Client
     public function setOdooSubscriptionId(?string $odooSubscriptionId): static
     {
         $this->odooSubscriptionId = $odooSubscriptionId;
+
+        return $this;
+    }
+
+    public function getBillingCycle(): ?string
+    {
+        return $this->billingCycle;
+    }
+
+    public function setBillingCycle(?string $billingCycle): static
+    {
+        $this->billingCycle = $billingCycle;
+
+        return $this;
+    }
+
+    public function getAnnualDiscount(): ?float
+    {
+        return $this->annualDiscount;
+    }
+
+    public function setAnnualDiscount(?float $annualDiscount): static
+    {
+        $this->annualDiscount = $annualDiscount;
+
+        return $this;
+    }
+
+    public function getNextBillingDate(): ?\DateTimeImmutable
+    {
+        return $this->nextBillingDate;
+    }
+
+    public function setNextBillingDate(?\DateTimeImmutable $nextBillingDate): static
+    {
+        $this->nextBillingDate = $nextBillingDate;
+
+        return $this;
+    }
+
+    public function getLastInvoiceDate(): ?\DateTimeImmutable
+    {
+        return $this->lastInvoiceDate;
+    }
+
+    public function setLastInvoiceDate(?\DateTimeImmutable $lastInvoiceDate): static
+    {
+        $this->lastInvoiceDate = $lastInvoiceDate;
+
+        return $this;
+    }
+
+    public function getOdooLastInvoiceId(): ?int
+    {
+        return $this->odooLastInvoiceId;
+    }
+
+    public function setOdooLastInvoiceId(?int $odooLastInvoiceId): static
+    {
+        $this->odooLastInvoiceId = $odooLastInvoiceId;
 
         return $this;
     }

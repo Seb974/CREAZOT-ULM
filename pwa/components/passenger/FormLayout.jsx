@@ -32,10 +32,10 @@ export default function FormLayout({client, children}) {
                             </li>
                         }
                         <li>
-                            <a href={`${ client?.url ?? window.location.origin }/admin`} className="hover:underline me-4 md:me-6 discreet-link">Accès licenciés</a>
+                            <a href={`${ window.location.origin }/admin`} className="hover:underline me-4 md:me-6 discreet-link">Accès licenciés</a>
                         </li>
                         <li>
-                            <a href={`${ client?.url ?? window.location.origin }/oidc/`} className="hover:underline discreet-link">Administration</a>
+                            <a href={`${ window.location.origin }/oidc/`} className="hover:underline discreet-link">Administration</a>
                         </li>
                     </ul>
                 </div>

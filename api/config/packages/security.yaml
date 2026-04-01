@@ -17,9 +17,6 @@ security:
         registration:
             pattern: ^/api/registration$
             security: false
-        pricing_public:
-            pattern: ^/(module-packs|module-pack-prices|pricing-categories|pricing-tiers)
-            security: false
         main:
             lazy: true
             provider: app_user_provider

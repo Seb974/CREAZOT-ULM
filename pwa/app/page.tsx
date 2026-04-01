@@ -1,6 +1,7 @@
 import Link from "next/link";
 import SiteNavbar from "../components/site/SiteNavbar";
 import SiteFooter from "../components/site/SiteFooter";
+import { getSiteSettings } from "./lib/getSiteSettings";
 
 const features = [
   {
@@ -60,20 +61,148 @@ const stats = [
   { value: "100%", label: "Web & Mobile" },
 ];
 
-export default function Page() {
+export default async function Page() {
+  const siteSettings = await getSiteSettings();
   return (
     <div className="flex min-h-screen flex-col font-sans">
       {/* ── Hero Section ── */}
       <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-cyan-900">
-        <SiteNavbar />
+        <SiteNavbar siteName={siteSettings.name} />
 
-        <div className="mx-auto max-w-7xl px-6 pb-24 pt-20 text-center">
+        {/* Aerial vehicles decoration */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <svg
+            className="absolute inset-0 w-full h-full"
+            viewBox="0 0 1440 700"
+            fill="none"
+            preserveAspectRatio="xMidYMid slice"
+          >
+            <defs>
+              <style>{`
+                @keyframes dashFlow {
+                  to { stroke-dashoffset: -120; }
+                }
+                @keyframes floatBalloon {
+                  0%, 100% { transform: translate(0, 0); }
+                  50% { transform: translate(8px, -12px); }
+                }
+              `}</style>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <filter id="glowSoft">
+                <feGaussianBlur stdDeviation="2" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            {/* ── Main flight path (airplane) ── */}
+            <path
+              d="M-50,520 C100,460 280,280 500,220 C720,160 900,130 1150,110 C1300,100 1450,60 1550,40"
+              stroke="rgba(250,204,21,0.22)"
+              strokeWidth="2.5"
+              strokeDasharray="8 14"
+              strokeLinecap="round"
+              style={{ animation: 'dashFlow 16s linear infinite' }}
+            />
+
+            {/* Airplane — FlightRadar style, nose aligned with path tangent */}
+            <g transform="translate(877, 140) rotate(82)" filter="url(#glow)">
+              <path
+                d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"
+                fill="#facc15"
+                opacity="0.85"
+                transform="scale(2.2) translate(-11.5, -12)"
+              />
+            </g>
+
+            {/* ── Hot air balloon — far left margin, floats gently ── */}
+            <g transform="translate(60, 340)" filter="url(#glowSoft)" style={{ animation: 'floatBalloon 8s ease-in-out infinite' }}>
+              {/* Envelope */}
+              <ellipse cx="0" cy="0" rx="28" ry="36" fill="#f97316" opacity="0.65" />
+              <ellipse cx="0" cy="0" rx="28" ry="36" stroke="rgba(251,146,60,0.55)" strokeWidth="1.5" fill="none" />
+              {/* Horizontal bands */}
+              <ellipse cx="0" cy="-12" rx="27" ry="6" stroke="rgba(234,88,12,0.3)" strokeWidth="0.8" fill="none" />
+              <ellipse cx="0" cy="10" rx="26" ry="6" stroke="rgba(234,88,12,0.3)" strokeWidth="0.8" fill="none" />
+              {/* Vertical stripes */}
+              <path d="M-14,-33 C-14,0 -14,33 -14,36" stroke="rgba(255,255,255,0.20)" strokeWidth="1" />
+              <path d="M0,-36 C0,0 0,33 0,36" stroke="rgba(255,255,255,0.20)" strokeWidth="1" />
+              <path d="M14,-33 C14,0 14,33 14,36" stroke="rgba(255,255,255,0.20)" strokeWidth="1" />
+              {/* Skirt */}
+              <path d="M-10,34 L-7,44 L7,44 L10,34" stroke="rgba(251,146,60,0.5)" strokeWidth="1.2" fill="rgba(251,146,60,0.25)" />
+              {/* Cables */}
+              <line x1="-10" y1="34" x2="-8" y2="56" stroke="rgba(255,255,255,0.30)" strokeWidth="0.8" />
+              <line x1="10" y1="34" x2="8" y2="56" stroke="rgba(255,255,255,0.30)" strokeWidth="0.8" />
+              <line x1="-4" y1="44" x2="-4" y2="56" stroke="rgba(255,255,255,0.20)" strokeWidth="0.6" />
+              <line x1="4" y1="44" x2="4" y2="56" stroke="rgba(255,255,255,0.20)" strokeWidth="0.6" />
+              {/* Basket */}
+              <rect x="-8" y="56" width="16" height="9" rx="2" stroke="rgba(255,255,255,0.35)" strokeWidth="1" fill="rgba(139,92,42,0.45)" />
+              {/* Flame glow */}
+              <ellipse cx="0" cy="47" rx="3" ry="4" fill="rgba(250,204,21,0.3)" />
+            </g>
+
+            {/* ── Helicopter — right side with its own trail ── */}
+            <path
+              d="M1500,600 C1380,520 1320,440 1280,380 C1240,320 1200,280 1100,250"
+              stroke="rgba(103,232,249,0.14)"
+              strokeWidth="2"
+              strokeDasharray="6 18"
+              strokeLinecap="round"
+              style={{ animation: 'dashFlow 22s linear infinite' }}
+            />
+
+            <g transform="translate(1280, 378)" filter="url(#glowSoft)">
+              {/* Main rotor disc */}
+              <ellipse cx="0" cy="-10" rx="26" ry="26" stroke="rgba(103,232,249,0.30)" strokeWidth="1" fill="none" strokeDasharray="4 6" />
+              {/* Main rotor blades */}
+              <line x1="-24" y1="-10" x2="24" y2="-10" stroke="rgba(103,232,249,0.55)" strokeWidth="2" strokeLinecap="round" />
+              <line x1="0" y1="-34" x2="0" y2="14" stroke="rgba(103,232,249,0.55)" strokeWidth="2" strokeLinecap="round" />
+              {/* Rotor hub */}
+              <circle cx="0" cy="-10" r="3" fill="#67e8f9" opacity="0.50" />
+              {/* Cabin / fuselage */}
+              <path d="M-8,-4 C-10,2 -8,10 -4,12 L4,12 C8,10 10,2 8,-4 Z" fill="#67e8f9" opacity="0.50" />
+              {/* Windshield */}
+              <path d="M-5,-2 C-5,2 -3,6 0,7 C3,6 5,2 5,-2 Z" fill="rgba(103,232,249,0.25)" />
+              {/* Tail boom */}
+              <line x1="0" y1="12" x2="0" y2="34" stroke="#67e8f9" strokeWidth="2" opacity="0.45" strokeLinecap="round" />
+              {/* Tail rotor */}
+              <line x1="-6" y1="34" x2="6" y2="34" stroke="rgba(103,232,249,0.55)" strokeWidth="1.5" strokeLinecap="round" />
+              <circle cx="0" cy="34" r="1.5" fill="#67e8f9" opacity="0.40" />
+              {/* Tail fin */}
+              <path d="M0,30 L4,34 L0,38" stroke="#67e8f9" strokeWidth="1.2" opacity="0.40" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+              {/* Skids */}
+              <line x1="-10" y1="14" x2="-10" y2="18" stroke="#67e8f9" strokeWidth="1.2" opacity="0.35" strokeLinecap="round" />
+              <line x1="10" y1="14" x2="10" y2="18" stroke="#67e8f9" strokeWidth="1.2" opacity="0.35" strokeLinecap="round" />
+              <line x1="-14" y1="18" x2="-6" y2="18" stroke="#67e8f9" strokeWidth="1.5" opacity="0.40" strokeLinecap="round" />
+              <line x1="6" y1="18" x2="14" y2="18" stroke="#67e8f9" strokeWidth="1.5" opacity="0.40" strokeLinecap="round" />
+            </g>
+
+            {/* Distant small airplane (depth) */}
+            <g transform="translate(1380, 65) rotate(88)">
+              <path
+                d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"
+                fill="#67e8f9"
+                opacity="0.18"
+                transform="scale(1) translate(-11.5, -12)"
+              />
+            </g>
+          </svg>
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-7xl px-6 pb-24 pt-20 text-center">
           <p className="mb-6 inline-block rounded-full bg-cyan-700/20 px-4 py-1 text-sm font-medium uppercase tracking-widest text-cyan-200">
             Version 4.0
           </p>
 
           <h1 className="text-6xl font-bold leading-tight text-white md:text-7xl lg:text-8xl">
-            C&nbsp;<span className="text-cyan-500">6</span>&nbsp;L
+            {siteSettings.name}
           </h1>
           <p className="mt-2 text-3xl font-light text-white md:text-4xl">
             Gestion Aéronautique
@@ -117,7 +246,7 @@ export default function Page() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">
-              Pourquoi C<span className="text-cyan-700">6</span>L
+              Pourquoi {siteSettings.name}
             </h2>
             <div className="mx-auto mt-3 h-1 w-12 rounded-full bg-cyan-500" />
             <p className="mt-4 text-xl font-light text-gray-700">
@@ -205,7 +334,7 @@ export default function Page() {
       </section>
 
       {/* ── Footer ── */}
-      <SiteFooter />
+      <SiteFooter siteName={siteSettings.name} email={siteSettings.email} />
     </div>
   );
 }

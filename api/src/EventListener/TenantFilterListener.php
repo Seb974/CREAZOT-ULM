@@ -23,15 +23,23 @@ class TenantFilterListener
         if (!$event->isMainRequest()) {
             return;
         }
+
         $request = $event->getRequest();
         $clientId = $request->headers->get('X-Client-Id');
+
         if (!$clientId) {
+            $filters = $this->em->getFilters();
+            if ($filters->isEnabled('client_tenant')) {
+                $filters->disable('client_tenant');
+            }
             return;
         }
+
         $client = $this->em->getRepository(Client::class)->find((int) $clientId);
         if (!$client) {
             return;
         }
+
         $filter = $this->em->getFilters()->enable('client_tenant');
         $filter->setParameter('clientId', $client->getId());
     }

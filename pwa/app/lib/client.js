@@ -223,7 +223,12 @@ export const uploadImages = async (data, session, clientId = null) => {
           const formData = new FormData();
           formData.append('file', file);
           formData.append('type', image.type);
-          if (clientId) formData.append('clientId', String(clientId));
+          if (clientId) {
+            const numId = typeof clientId === 'string' && clientId.includes('/')
+              ? clientId.split('/').pop()
+              : String(clientId);
+            formData.append('clientId', numId);
+          }
           if (opacity !== null && opacity !== undefined) {
             formData.append('opacity', opacity);
           }

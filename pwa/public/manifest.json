@@ -1,6 +1,6 @@
 {
-  "name": "Planetair Gestion",
-  "short_name": "Planetair",
+  "name": "C6L Gestion Aéronautique",
+  "short_name": "C6L",
   "description": "Application de gestion pour bases ULM",
   "start_url": "/admin",
   "display": "standalone",

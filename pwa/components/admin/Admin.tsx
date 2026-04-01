@@ -47,6 +47,11 @@ import pricingTierResourceProps from "./pricingTier";
 import modulePackResourceProps from "./modulePack";
 import modulePackPriceResourceProps from "./modulePackPrice";
 import SubscriptionDashboard from "./subscription/SubscriptionDashboard";
+import UserGuard from "./guard/UserGuard";
+import ClientAttachmentRequest from "./guard/ClientAttachmentRequest";
+import clientAccessRequestResourceProps from "./clientAccessRequest";
+import { SiteSettingsList } from "./siteSettings/SiteSettingsList";
+import { SiteSettingsEdit } from "./siteSettings/SiteSettingsEdit";
 
 const getClientHeaders = () => {
   try {
@@ -144,7 +149,8 @@ const AdminWithOIDC = () => {
   }
 
   return (
-      // @ts-ignore
+    <UserGuard>
+      {/* @ts-ignore */}
       <AdminAdapter session={session}>
         <ResourceGuesser name="clients" {...clientResourceProps}/>
         <ResourceGuesser name="prestations" {...prestationResourceProps} />
@@ -174,13 +180,17 @@ const AdminWithOIDC = () => {
         <ResourceGuesser name="pricing-tiers" {...pricingTierResourceProps}/>
         <ResourceGuesser name="module-packs" {...modulePackResourceProps}/>
         <ResourceGuesser name="module-pack-prices" {...modulePackPriceResourceProps}/>
+        <ResourceGuesser name="site-settings" list={SiteSettingsList} edit={SiteSettingsEdit} />
+        <ResourceGuesser name="client_access_requests" {...clientAccessRequestResourceProps}/>
         <CustomRoutes>
           <Route path="/landings" element={<LandingsList />} />
           <Route path="/convert" element={<ReservationCreate />} />
           <Route path="/convert/:id" element={<ReservationCreate />} />
           <Route path="/subscriptions" element={<SubscriptionDashboard />} />
+          <Route path="/request-access" element={<ClientAttachmentRequest />} />
         </CustomRoutes>
       </AdminAdapter>
+    </UserGuard>
   );
 };
 

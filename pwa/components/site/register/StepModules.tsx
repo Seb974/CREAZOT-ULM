@@ -23,12 +23,13 @@ interface ModulePackPrice {
   id: number;
   modulePack: { id: number } | string;
   pricingCategory: { id: number } | string;
-  priceMonthly: number;
+  monthlyPrice: number;
 }
 
 interface PricingCategory {
   id: number;
   name: string;
+  slug?: string;
   isDefault?: boolean;
 }
 
@@ -80,7 +81,7 @@ export default function StepModules({
     const base = window.origin;
 
     const safeFetch = (url: string) =>
-      fetch(url).then((r) => {
+      fetch(url, { headers: { Accept: "application/ld+json" } }).then((r) => {
         if (!r.ok) throw new Error(`${r.status}`);
         return r.json();
       });
@@ -124,7 +125,10 @@ export default function StepModules({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const defaultCategory = categories.find((c) => c.isDefault);
+  const defaultCategory =
+    categories.find((c) => c.isDefault) ||
+    categories.find((c) => c.slug === "public") ||
+    categories[0];
 
   const getPackPrice = (packId: number): number => {
     if (!defaultCategory) return 0;
@@ -133,7 +137,7 @@ export default function StepModules({
         extractId(p.modulePack) === packId &&
         extractId(p.pricingCategory) === defaultCategory.id
     );
-    return mp ? mp.priceMonthly : 0;
+    return mp ? mp.monthlyPrice : 0;
   };
 
   const getAeronefPrice = (): number => {

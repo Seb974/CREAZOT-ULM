@@ -23,6 +23,7 @@ const MODULE_CHOICES = [
   { id: "hasLandingManagement", name: "Gestion atterrissages" },
   { id: "hasIndividualFlightLogs", name: "Carnets de vol individuels" },
   { id: "hasGroupUpdate", name: "Mise à jour groupée" },
+  { id: "hasNotam", name: "NOTAMs / SNOWTAMs" },
 ];
 
 export const ModulePacksCreate = () => (

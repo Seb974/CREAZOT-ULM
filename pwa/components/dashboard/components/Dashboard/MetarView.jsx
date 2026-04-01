@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { EncodedMetarTaf } from './EncodedMetarTaf';
 import { GraphicMetar } from './GraphicMetar';
+import { NotamView } from './NotamView';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import ExploreIcon from '@mui/icons-material/Explore';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
+import AnnouncementIcon from '@mui/icons-material/Announcement';
+import { Tabs, Tab } from '@mui/material';
 import { isDefined, isDefinedAndNotVoid } from '../../../../app/lib/utils';
 import { clientWithMicrotrakTags, getAirportCode } from '../../../../app/lib/client';
 
@@ -11,7 +14,7 @@ export const MetarView = ({ showGraphic, setShowGraphic, switchToMap, hidden, cl
 
     const [selectedCode, setSelectedCode] = useState(null);
     const [meteoStations, setMeteoStations] = useState([]);
-
+    const [activeTab, setActiveTab] = useState(0);
 
     useEffect(() => {
         const clientMeteoStations = getMeteoStations(client);
@@ -19,8 +22,10 @@ export const MetarView = ({ showGraphic, setShowGraphic, switchToMap, hidden, cl
         setMeteoStations(clientMeteoStations);
         setSelectedCode(defaultStation);
     }, [client]);
-    
-    const changeView = e => setShowGraphic(!showGraphic);
+
+    useEffect(() => {
+        setShowGraphic(activeTab === 0);
+    }, [activeTab]);
 
     const getMeteoStations = ({ airports }) => {
         return isDefinedAndNotVoid(airports) ? airports.filter(a => a.meteo && !!a.code) : []
@@ -34,6 +39,9 @@ export const MetarView = ({ showGraphic, setShowGraphic, switchToMap, hidden, cl
         return null;
     }
 
+    const hasNotam = isDefined(client.hasNotam) && client.hasNotam;
+    const hasMicrotrak = clientWithMicrotrakTags(client);
+
     return (
         <div className={`w-full mt-6 overflow-hidden ${ hidden ? 'hidden' : ''}`}>
             <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark h-full min-h-[300px] flex flex-col">
@@ -45,31 +53,45 @@ export const MetarView = ({ showGraphic, setShowGraphic, switchToMap, hidden, cl
                             <select className="border border-gray-300 rounded px-3 py-2 w-full md:w-1/2 text-sm min-h-[42px]" value={selectedCode} onChange={(e) => setSelectedCode(e.target.value)}>
                                 {meteoStations.map((station, i) => (<option key={i} value={getAirportCode(station)}>{ station.nom }</option>))}
                             </select>
-                            { clientWithMicrotrakTags(client) && 
-                                <button onClick={changeView} className="inline-flex items-center justify-center px-3 py-2 text-sm border border-gray-300 text-gray-800 rounded hover:border-red-600 hover:text-red-600 hover:bg-red-50 transition-colors min-h-[42px]">
-                                    {showGraphic ? 
-                                        <><AssignmentIcon className="mr-2 inline" />{"METAR & TAF bruts"}</>
-                                        :
-                                        <><ExploreIcon className="mr-2 inline" />{"METAR graphique"}</>
-                                    }
-                                </button>
-                            }
                         </div>
+
+                        <Tabs
+                            value={activeTab}
+                            onChange={(_, v) => setActiveTab(v)}
+                            variant="scrollable"
+                            scrollButtons="auto"
+                            sx={{
+                                minHeight: 36,
+                                mb: 2,
+                                '& .MuiTab-root': {
+                                    minHeight: 36,
+                                    py: 0.5,
+                                    fontSize: '0.8rem',
+                                    textTransform: 'none',
+                                },
+                                '& .MuiTabs-indicator': {
+                                    backgroundColor: '#dc2626',
+                                },
+                                '& .Mui-selected': {
+                                    color: '#dc2626 !important',
+                                },
+                            }}
+                        >
+                            <Tab icon={<ExploreIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="METAR graphique" />
+                            {hasMicrotrak && <Tab icon={<AssignmentIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="METAR & TAF bruts" />}
+                            {hasNotam && <Tab icon={<AnnouncementIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="NOTAM" />}
+                        </Tabs>
+
                         <div className="flex-grow">
-                            <div className={`transition-all ${ showGraphic ? "" : "hidden"}`}>
-                                <GraphicMetar code={selectedCode}/>
-                            </div>
-                            <div className={`transition-all ${ !showGraphic ? "" : "hidden"}`}>
-                                <EncodedMetarTaf code={selectedCode}/>
-                            </div>
+                            {activeTab === 0 && <GraphicMetar code={selectedCode} />}
+                            {hasMicrotrak && activeTab === 1 && <EncodedMetarTaf code={selectedCode} />}
+                            {hasNotam && activeTab === (hasMicrotrak ? 2 : 1) && <NotamView code={selectedCode} />}
                         </div>
-                        { (clientWithMicrotrakTags(client) || isSmall) && 
+
+                        { (hasMicrotrak || isSmall) && 
                             <div className="mt-4 md:mt-6 text-left md:hidden">
                                 <a href="#" onClick={switchToMap} className="inline-flex items-center text-sm gap-1 px-3 py-1 rounded border border-gray-800 text-gray-800 hover:text-red-600 hover:border-red-600 hover:bg-red-50 transition-all md:hidden">
-                                    { clientWithMicrotrakTags(client) ?
-                                        <><TravelExploreIcon className="mr-2"/>{ "Localisation" }</> :
-                                        <><AssignmentIcon className="mr-2"/>{ "METAR & TAF bruts" }</>
-                                    }
+                                    <TravelExploreIcon className="mr-2"/>{ "Localisation" }
                                 </a>
                             </div>
                         }

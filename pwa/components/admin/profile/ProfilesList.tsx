@@ -1,8 +1,8 @@
-import { Datagrid, List, CreateButton, ExportButton, TopToolbar, EditButton, ShowButton, SimpleList, FunctionField } from "react-admin";
+import { Datagrid, List, CreateButton, ExportButton, TopToolbar, EditButton, ShowButton, SimpleList, FunctionField, useRecordContext } from "react-admin";
 import { decimalToTimeFormatted, getFirstCharToUpperCase, getShipStyle, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { type PagedCollection } from "../../../types/collection";
 import { type Circuit } from "../../../types/Circuit";
-import { useMediaQuery, Theme, Button } from '@mui/material';
+import { useMediaQuery, Theme, Button, Box, Typography } from '@mui/material';
 import ClearIcon from'@mui/icons-material/Clear';
 import DoneIcon from'@mui/icons-material/Done';
 import Chip from '@mui/material/Chip';
@@ -71,6 +71,30 @@ const ListActions = ({ isSmall, resource }) => {
   );
 };
 
+const ClientsExpand = () => {
+  const record = useRecordContext();
+  const clients = record?.pilote?.clients;
+  if (!clients?.length) return <Typography variant="body2" color="text.secondary" sx={{ p: 1 }}>Aucun client rattaché</Typography>;
+  return (
+    <Box sx={{ p: 1, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+      {clients.map((c, i) => (
+        <Chip
+          key={c['@id'] || i}
+          label={c.name}
+          size="small"
+          sx={{
+            backgroundColor: c.color ? `${c.color}20` : '#e0e0e0',
+            color: c.color || '#666',
+            border: `1px solid ${c.color ? `${c.color}55` : '#ccc'}`,
+            fontWeight: 500,
+            fontSize: '0.75rem',
+          }}
+        />
+      ))}
+    </Box>
+  );
+};
+
 export const ProfilesList: NextPage<Props> = ({ data, hubURL, page }) => {
 
   const isSmall = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'));
@@ -93,7 +117,7 @@ export const ProfilesList: NextPage<Props> = ({ data, hubURL, page }) => {
               tertiaryText={record => !isDefined(record?.totalFlightHours) ? "00:00" :  decimalToTimeFormatted(record.totalFlightHours) }
             /> 
             : 
-            <Datagrid sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
+            <Datagrid expand={<ClientsExpand />} sx={{ '& .RaDatagrid-headerCell': {backgroundColor: '#ededed', fontWeight: "lighter"}}}>
                 <FunctionField
                   label="Prénom"
                   source="pilote.firstName"
