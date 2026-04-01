@@ -91,13 +91,10 @@ export const getMetarOrTaf = (icao, request = "metar", decoded = false) => {
 
 };
 
-const AVWX_TOKEN = process.env.NEXT_PUBLIC_AVWX_TOKEN || '';
-
 export const getNotams = (icao: string) => {
   return axios({
     method: 'get',
-    url: `https://avwx.rest/api/notam/${icao}`,
-    headers: { 'Authorization': `BEARER ${AVWX_TOKEN}` }
+    url: `${API_DOMAIN}/admin/weather/notam/${icao}`,
   })
     .then((response) => response.data)
     .catch((error) => {

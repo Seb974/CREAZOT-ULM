@@ -1,5 +1,5 @@
 import { TextInput, SimpleForm, Edit, FileInput, FileField } from "react-admin";
-import { Typography, Divider, Box, Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+import { Typography, Divider, Box, Accordion, AccordionSummary, AccordionDetails, Link } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useSiteSettings } from "../SiteSettingsProvider";
 import { useSessionContext } from "../SessionContextProvider";
@@ -166,6 +166,21 @@ export const SiteSettingsEdit = () => {
                     </Typography>
                     <TextInput source="emailParams" label="Serveur d'email (paramètres)" fullWidth />
                     <TextInput source="emailAddressSender" label="Adresse email d'envoi" fullWidth />
+
+                    <Accordion sx={{ mt: 3, width: "100%" }} defaultExpanded={false}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <Typography>API NOTAM (ICAO)</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                Clé API pour récupérer les NOTAMs depuis le service ICAO.{" "}
+                                <Link href="https://dataservices.icao.int/" target="_blank" rel="noopener">
+                                    Obtenir une clé sur dataservices.icao.int
+                                </Link>
+                            </Typography>
+                            <TextInput source="icaoApiKey" label="Clé API ICAO" fullWidth />
+                        </AccordionDetails>
+                    </Accordion>
 
                     <Accordion sx={{ mt: 3, width: "100%" }} defaultExpanded={false}>
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>

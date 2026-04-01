@@ -309,6 +309,18 @@ class SiteSettings
         return $this;
     }
 
+    public function getIcaoApiKey(): ?string
+    {
+        return $this->icaoApiKey;
+    }
+
+    public function setIcaoApiKey(?string $icaoApiKey): static
+    {
+        $this->icaoApiKey = $icaoApiKey;
+
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
