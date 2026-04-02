@@ -49,6 +49,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 class SiteSettings
 {
+    public const API_KEY_MASK = '••••••••••••';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -147,6 +149,26 @@ class SiteSettings
     {
         $this->updatedAt = new \DateTimeImmutable();
     }
+
+    // --- Masked virtual getters (API read) ---
+
+    #[Groups(groups: ['SiteSettings:read'])]
+    public function getOdooApiKeyMask(): ?string
+    {
+        return ($this->odooApiKey !== null && $this->odooApiKey !== '')
+            ? self::API_KEY_MASK
+            : null;
+    }
+
+    #[Groups(groups: ['SiteSettings:read'])]
+    public function getNotamifyApiKeyMask(): ?string
+    {
+        return ($this->notamifyApiKey !== null && $this->notamifyApiKey !== '')
+            ? self::API_KEY_MASK
+            : null;
+    }
+
+    // --- Standard getters & setters ---
 
     public function getId(): ?int
     {
@@ -338,6 +360,9 @@ class SiteSettings
 
     public function setOdooApiKey(?string $odooApiKey): static
     {
+        if ($odooApiKey === self::API_KEY_MASK) {
+            return $this;
+        }
         $this->odooApiKey = $odooApiKey;
 
         return $this;
@@ -350,6 +375,9 @@ class SiteSettings
 
     public function setNotamifyApiKey(?string $notamifyApiKey): static
     {
+        if ($notamifyApiKey === self::API_KEY_MASK) {
+            return $this;
+        }
         $this->notamifyApiKey = $notamifyApiKey;
 
         return $this;

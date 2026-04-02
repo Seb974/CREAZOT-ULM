@@ -91,7 +91,6 @@ export const ClientsEdit = () => {
                     onSubmit={ onSubmit }
                     syncWithLocation={false} 
                     defaultValues={(record) => ({
-                        ...record,
                         hasPassengerRegistration: false,
                         hasOptions: false, 
                         hasPartners: false,
@@ -109,8 +108,9 @@ export const ClientsEdit = () => {
                         hasExpensesManagement: false,
                         hasGroupUpdate: false,
                         hasNotam: false,
-                        minHours: (new Date()).setHours(0, 0, 0),
-                        maxHours: (new Date()).setHours(23, 59, 59)
+                        minHours: "1970-01-01T00:00:00+00:00",
+                        maxHours: "1970-01-01T23:59:00+00:00",
+                        ...record,
                     })}
                 >   
                     <TabbedForm.Tab label="Informations">

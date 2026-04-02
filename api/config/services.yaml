@@ -97,13 +97,6 @@ services:
             $keycloakAdminUser: '%env(KEYCLOAK_ADMIN_USER)%'
             $keycloakAdminPassword: '%env(KEYCLOAK_ADMIN_PASSWORD)%'
 
-    App\Service\OdooJsonRpcService:
-        arguments:
-            $odooUrl: '%env(ODOO_URL)%'
-            $odooDB: '%env(ODOO_DB)%'
-            $odooLogin: '%env(ODOO_LOGIN)%'
-            $odooApiKey: '%env(ODOO_API_KEY)%'
-
     App\EventListener\SubscriptionGuardListener:
         tags:
             - { name: kernel.event_listener, event: kernel.request, priority: 5 }

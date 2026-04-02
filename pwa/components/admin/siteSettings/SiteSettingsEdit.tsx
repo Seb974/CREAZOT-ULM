@@ -5,8 +5,10 @@ import CloudIcon from "@mui/icons-material/Cloud";
 import { useSiteSettings } from "../SiteSettingsProvider";
 import { useSessionContext } from "../SessionContextProvider";
 import React, { useState } from "react";
+import { useWatch } from "react-hook-form";
 
 const API_DOMAIN = process.env.NEXT_PUBLIC_ENTRYPOINT || "";
+const API_KEY_MASK = "••••••••••••";
 
 const IMAGE_FIELDS = [
     { source: "logo", type: "logo" },
@@ -37,14 +39,35 @@ function getExistingPath(value: unknown): string | undefined {
     return undefined;
 }
 
-const OdooTestButton = () => {
+const ApiKeyInput = ({ source, label, helperText, ...rest }: { source: string; label: string; helperText?: string; fullWidth?: boolean }) => {
     const record = useRecordContext();
+    const maskField = `${source}Mask`;
+    const hasKey = !!record?.[maskField as keyof typeof record];
+
+    return (
+        <TextInput
+            source={source}
+            label={label}
+            format={(v: string | null | undefined) => {
+                if (v != null && v !== "") return v;
+                return hasKey ? API_KEY_MASK : "";
+            }}
+            helperText={hasKey ? "Clé enregistrée. Saisissez une nouvelle valeur pour la remplacer." : helperText}
+            {...rest}
+        />
+    );
+};
+
+const OdooTestButton = () => {
     const { session } = useSessionContext();
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
 
+    const [odooUrl, odooBdd, odooUser, odooApiKey] = useWatch({
+        name: ["odooUrl", "odooBdd", "odooUser", "odooApiKey"],
+    });
+
     const handleTest = async () => {
-        if (!record) return;
         setLoading(true);
         setResult(null);
 
@@ -56,10 +79,10 @@ const OdooTestButton = () => {
                     "Authorization": `Bearer ${session?.accessToken}`,
                 },
                 body: JSON.stringify({
-                    url: record.odooUrl || "",
-                    db: record.odooBdd || "",
-                    user: record.odooUser || "",
-                    apiKey: record.odooApiKey || "",
+                    url: odooUrl || "",
+                    db: odooBdd || "",
+                    user: odooUser || "",
+                    apiKey: odooApiKey || API_KEY_MASK,
                 }),
             });
             const data = await response.json();
@@ -134,6 +157,16 @@ export const SiteSettingsEdit = () => {
                 }
             }
         }
+
+        if (result.notamifyApiKey === API_KEY_MASK || result.notamifyApiKey == null) {
+            delete result.notamifyApiKey;
+        }
+        if (result.odooApiKey === API_KEY_MASK || result.odooApiKey == null) {
+            delete result.odooApiKey;
+        }
+
+        delete result.notamifyApiKeyMask;
+        delete result.odooApiKeyMask;
 
         return result;
     };
@@ -237,7 +270,7 @@ export const SiteSettingsEdit = () => {
                                     Créer un compte sur notamify.com
                                 </Link>
                             </Typography>
-                            <TextInput source="notamifyApiKey" label="Clé API Notamify" fullWidth />
+                            <ApiKeyInput source="notamifyApiKey" label="Clé API Notamify" fullWidth />
                             <Box sx={{ display: "flex", gap: 2, mt: 1.5, flexWrap: "wrap" }}>
                                 <Link
                                     href="https://notamify.com/api-manager"
@@ -273,7 +306,7 @@ export const SiteSettingsEdit = () => {
                                     <TextInput source="odooUser" label="Utilisateur Odoo" fullWidth helperText="Email ou login de l'utilisateur" />
                                 </Box>
                             </Box>
-                            <TextInput source="odooApiKey" label="Clé API Odoo" fullWidth helperText="Clé API ou mot de passe" />
+                            <ApiKeyInput source="odooApiKey" label="Clé API Odoo" fullWidth helperText="Clé API ou mot de passe" />
                             <OdooTestButton />
                         </AccordionDetails>
                     </Accordion>

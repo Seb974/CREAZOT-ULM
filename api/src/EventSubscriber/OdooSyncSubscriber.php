@@ -43,6 +43,15 @@ class OdooSyncSubscriber implements EventSubscriberInterface
             if ($method === 'PUT') {
                 $this->handleUpgradeProrata($entity);
             }
+        } catch (\RuntimeException $e) {
+            if (str_contains($e->getMessage(), 'SiteSettings introuvable') || str_contains($e->getMessage(), 'Configuration Odoo incomplète')) {
+                return;
+            }
+            $this->logger->error('OdooSyncSubscriber: Odoo sync failed', [
+                'client_id' => $entity->getId(),
+                'method' => $method,
+                'error' => $e->getMessage(),
+            ]);
         } catch (\Throwable $e) {
             $this->logger->error('OdooSyncSubscriber: Odoo sync failed', [
                 'client_id' => $entity->getId(),

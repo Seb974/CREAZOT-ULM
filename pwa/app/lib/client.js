@@ -270,8 +270,6 @@ export const sanitizeData = (data, previousData) => {
     const registrationPax = data.hasPassengerRegistration;
     const sanitized = {
         ...data,
-        airports: isDefinedAndNotVoid(data.airports) ? data.airports.map(a => getFormattedValueForBackEnd(a)) : [],
-        cameras: isDefinedAndNotVoid(data.cameras) ? data.cameras.map(c => getFormattedValueForBackEnd(c)) : [],
         thanksTitle: registrationPax && isDefined(data.thanksTitle) ? data.thanksTitle : '',
         thanksMessage: registrationPax && isDefined(data.thanksMessage) ? data.thanksMessage : ''
     };
@@ -280,6 +278,8 @@ export const sanitizeData = (data, previousData) => {
         sanitized.emailServer = data.emailParams;
 
     delete sanitized.emailParams;
+    delete sanitized.airports;
+    delete sanitized.cameras;
 
     return sanitized;
 };

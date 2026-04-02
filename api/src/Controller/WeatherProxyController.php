@@ -6,8 +6,10 @@ use App\Repository\SiteSettingsRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
+#[IsGranted("ROLE_USER")]
 class WeatherProxyController extends AbstractController
 {
     private const NOAA_BASE = 'https://aviationweather.gov/api/data';
@@ -53,7 +55,7 @@ class WeatherProxyController extends AbstractController
     {
         $icao = strtoupper(trim($icao));
 
-        $settings = $this->siteSettingsRepo->findOneBy([], ['id' => 'ASC']);
+        $settings = $this->siteSettingsRepo->findInstance();
         $apiKey = $settings?->getNotamifyApiKey();
 
         if (!$apiKey) {

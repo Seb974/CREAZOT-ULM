@@ -4,23 +4,47 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Repository\SiteSettingsRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class OdooJsonRpcService
 {
-    private string $odooUrl;
+    private ?string $odooUrl = null;
+    private ?string $odooDB = null;
+    private ?string $odooLogin = null;
+    private ?string $odooApiKey = null;
     private ?int $uid = null;
+    private bool $resolved = false;
 
     public function __construct(
         private HttpClientInterface $httpClient,
-        string $odooUrl,
-        private string $odooDB,
-        private string $odooLogin,
-        private string $odooApiKey,
+        private SiteSettingsRepository $siteSettingsRepo,
         private LoggerInterface $logger,
-    ) {
-        $this->odooUrl = rtrim($odooUrl, '/');
+    ) {}
+
+    private function resolveConfig(): void
+    {
+        if ($this->resolved) {
+            return;
+        }
+
+        $settings = $this->siteSettingsRepo->findInstance();
+
+        if ($settings === null) {
+            throw new \RuntimeException('SiteSettings introuvable — impossible de se connecter à Odoo.');
+        }
+
+        $this->odooUrl = $settings->getOdooUrl() ? rtrim($settings->getOdooUrl(), '/') : null;
+        $this->odooDB = $settings->getOdooBdd();
+        $this->odooLogin = $settings->getOdooUser();
+        $this->odooApiKey = $settings->getOdooApiKey();
+
+        if (!$this->odooUrl || !$this->odooDB || !$this->odooLogin || !$this->odooApiKey) {
+            throw new \RuntimeException('Configuration Odoo incomplète dans SiteSettings. Renseignez URL, BDD, Utilisateur et Clé API.');
+        }
+
+        $this->resolved = true;
     }
 
     public function authenticate(): int
@@ -28,6 +52,8 @@ class OdooJsonRpcService
         if ($this->uid !== null) {
             return $this->uid;
         }
+
+        $this->resolveConfig();
 
         $payload = $this->buildPayload('common', 'login', [
             $this->odooDB,
@@ -228,6 +254,49 @@ class OdooJsonRpcService
         ]);
 
         return $productId;
+    }
+
+
+    /**
+     * Teste la connexion Odoo avec des paramètres explicites (sans modifier l'état interne).
+     * @return array{success: bool, message: string, uid?: int, version?: string}
+     */
+    public function testConnection(string $url, string $db, string $user, string $apiKey): array
+    {
+        $url = rtrim($url, '/');
+
+        $authPayload = $this->buildPayload('common', 'authenticate', [$db, $user, $apiKey, []]);
+        $response = $this->httpClient->request('POST', $url . '/jsonrpc', [
+            'json' => $authPayload,
+            'timeout' => 10,
+        ]);
+        $data = $response->toArray(false);
+
+        if (isset($data['error'])) {
+            $msg = $data['error']['data']['message'] ?? $data['error']['message'] ?? 'Erreur inconnue';
+            return ['success' => false, 'message' => 'Authentification échouée : ' . $msg];
+        }
+
+        $uid = $data['result'] ?? null;
+        if (!$uid || $uid === false) {
+            return ['success' => false, 'message' => 'Identifiants incorrects. Vérifiez l'utilisateur et la clé API.'];
+        }
+
+        $versionPayload = $this->buildPayload('common', 'version', []);
+        $versionResponse = $this->httpClient->request('POST', $url . '/jsonrpc', [
+            'json' => $versionPayload,
+            'timeout' => 10,
+        ]);
+        $versionData = $versionResponse->toArray(false);
+        $version = $versionData['result']['server_version'] ?? null;
+
+        $message = sprintf('Connexion réussie ! (UID: %s', $uid);
+        if ($version) {
+            $message .= sprintf(', Odoo %s', $version);
+        }
+        $message .= ')';
+
+        return ['success' => true, 'message' => $message, 'uid' => (int) $uid, 'version' => $version];
     }
 
     private function execute(string $model, string $method, array $args = [], array $kwargs = []): mixed
