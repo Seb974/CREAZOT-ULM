@@ -169,16 +169,16 @@ export const SiteSettingsEdit = () => {
 
                     <Accordion sx={{ mt: 3, width: "100%" }} defaultExpanded={false}>
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography>API NOTAM (ICAO)</Typography>
+                            <Typography>API NOTAM (Notamify)</Typography>
                         </AccordionSummary>
                         <AccordionDetails>
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                Clé API pour récupérer les NOTAMs depuis le service ICAO.{" "}
-                                <Link href="https://dataservices.icao.int/" target="_blank" rel="noopener">
-                                    Obtenir une clé sur dataservices.icao.int
+                                Clé API pour récupérer les NOTAMs depuis Notamify.{" "}
+                                <Link href="https://notamify.com/notam-api" target="_blank" rel="noopener">
+                                    Créer un compte et obtenir une clé sur notamify.com
                                 </Link>
                             </Typography>
-                            <TextInput source="icaoApiKey" label="Clé API ICAO" fullWidth />
+                            <TextInput source="notamifyApiKey" label="Clé API Notamify" fullWidth />
                         </AccordionDetails>
                     </Accordion>
 

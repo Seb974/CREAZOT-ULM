@@ -11,7 +11,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class WeatherProxyController extends AbstractController
 {
     private const NOAA_BASE = 'https://aviationweather.gov/api/data';
-    private const ICAO_NOTAM_URL = 'https://applications.icao.int/dataservices/api/notams-realtime-list';
+    private const NOTAMIFY_BASE = 'https://api.notamify.com/api/v2/notams';
 
     public function __construct(
         private HttpClientInterface $httpClient,
@@ -54,24 +54,35 @@ class WeatherProxyController extends AbstractController
         $icao = strtoupper(trim($icao));
 
         $settings = $this->siteSettingsRepo->findOneBy([], ['id' => 'ASC']);
-        $apiKey = $settings?->getIcaoApiKey();
+        $apiKey = $settings?->getNotamifyApiKey();
 
         if (!$apiKey) {
             return $this->json([
-                'error' => 'Clé API ICAO non configurée. Rendez-vous dans Paramétrage SaaS pour la renseigner.',
+                'error' => 'Clé API Notamify non configurée. Rendez-vous dans Paramétrage SaaS pour la renseigner.',
             ], 422);
         }
 
-        $url = sprintf(
-            '%s?api_key=%s&format=json&criticality=&locations=%s',
-            self::ICAO_NOTAM_URL,
-            urlencode($apiKey),
-            $icao
-        );
-
         try {
-            $response = $this->httpClient->request('GET', $url, ['timeout' => 15]);
+            $response = $this->httpClient->request('GET', self::NOTAMIFY_BASE, [
+                'timeout' => 15,
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Accept' => 'application/json',
+                ],
+                'query' => [
+                    'location' => $icao,
+                    'per_page' => 30,
+                ],
+            ]);
+
+            $statusCode = $response->getStatusCode();
             $content = $response->getContent(false);
+
+            if ($statusCode === 401 || $statusCode === 403) {
+                return $this->json([
+                    'error' => 'Clé API Notamify invalide ou expirée. Vérifiez-la dans Paramétrage SaaS.',
+                ], 422);
+            }
 
             if (empty(trim($content))) {
                 return $this->json([], 200);
@@ -83,20 +94,25 @@ class WeatherProxyController extends AbstractController
                 return $this->json([], 200);
             }
 
-            $normalized = array_map(function (array $item) {
+            $notams = $data['notams'] ?? [];
+
+            $normalized = array_map(function (array $item) use ($icao) {
+                $qcode = $item['qcode'] ?? '';
+                $typeChar = strlen($qcode) >= 2 ? $qcode[1] : null;
+
                 return [
-                    'id'        => $item['id'] ?? $item['key'] ?? null,
-                    'raw'       => $item['all'] ?? $item['message'] ?? null,
-                    'body'      => $item['ItemE'] ?? $item['message'] ?? null,
-                    'type'      => $item['type'] ?? null,
-                    'startDate' => $item['startdate'] ?? $item['effectivStart'] ?? null,
-                    'endDate'   => $item['enddate'] ?? $item['effectiveEnd'] ?? null,
+                    'id'        => $item['notam_number'] ?? $item['id'] ?? null,
+                    'raw'       => $item['icao_message'] ?? $item['message'] ?? null,
+                    'body'      => $item['message'] ?? null,
+                    'type'      => $typeChar,
+                    'startDate' => $item['starts_at'] ?? null,
+                    'endDate'   => $item['ends_at'] ?? null,
                     'location'  => $item['location'] ?? $icao,
                     'qualifiers' => [
-                        'subject' => $item['QCode_2_3'] ?? null,
+                        'subject' => $typeChar,
                     ],
                 ];
-            }, $data);
+            }, $notams);
 
             return $this->json($normalized, 200);
         } catch (\Throwable $e) {

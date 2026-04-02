@@ -115,6 +115,10 @@ class SiteSettings
     #[Groups(groups: ['SiteSettings:write'])]
     private ?string $odooApiKey = null;
 
+    #[ORM\Column(length: 500, nullable: true)]
+    #[Groups(groups: ['SiteSettings:write'])]
+    private ?string $notamifyApiKey = null;
+
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['SiteSettings:read'])]
     private ?\DateTimeImmutable $createdAt = null;
@@ -309,14 +313,14 @@ class SiteSettings
         return $this;
     }
 
-    public function getIcaoApiKey(): ?string
+    public function getNotamifyApiKey(): ?string
     {
-        return $this->icaoApiKey;
+        return $this->notamifyApiKey;
     }
 
-    public function setIcaoApiKey(?string $icaoApiKey): static
+    public function setNotamifyApiKey(?string $notamifyApiKey): static
     {
-        $this->icaoApiKey = $icaoApiKey;
+        $this->notamifyApiKey = $notamifyApiKey;
 
         return $this;
     }
