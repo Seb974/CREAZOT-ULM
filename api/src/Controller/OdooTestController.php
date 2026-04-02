@@ -36,57 +36,29 @@ class OdooTestController extends AbstractController
         $url = rtrim($url, '/');
 
         try {
-            $xmlPayload = $this->buildXmlRpc('authenticate', [
-                ['string', $db],
-                ['string', $user],
-                ['string', $apiKey],
-                ['struct', []],
-            ]);
+            $authResponse = $this->odooJsonRpc($url, 'common', 'authenticate', [$db, $user, $apiKey, []]);
 
-            $response = $this->httpClient->request('POST', $url . '/xmlrpc/2/common', [
-                'headers' => ['Content-Type' => 'text/xml'],
-                'body' => $xmlPayload,
-                'timeout' => 10,
-            ]);
-
-            $content = $response->getContent(false);
-            $statusCode = $response->getStatusCode();
-
-            if ($statusCode !== 200) {
+            if (isset($authResponse['error'])) {
+                $msg = $authResponse['error']['data']['message']
+                    ?? $authResponse['error']['message']
+                    ?? 'Erreur inconnue';
                 return $this->json([
                     'success' => false,
-                    'message' => sprintf('Odoo a répondu avec le code HTTP %d.', $statusCode),
+                    'message' => 'Authentification échouée : ' . $msg,
                 ]);
             }
 
-            if (str_contains($content, '<fault>')) {
-                preg_match('/<string>(.*?)<\/string>/s', $content, $m);
-                $faultMsg = $m[1] ?? 'Erreur inconnue';
-                return $this->json([
-                    'success' => false,
-                    'message' => 'Authentification échouée : ' . html_entity_decode(strip_tags($faultMsg)),
-                ]);
-            }
+            $uid = $authResponse['result'] ?? null;
 
-            preg_match('/<value><int>(\d+)<\/int><\/value>/', $content, $uidMatch);
-            $uid = $uidMatch[1] ?? null;
-
-            if (!$uid || $uid === '0') {
+            if (!$uid || $uid === false) {
                 return $this->json([
                     'success' => false,
                     'message' => 'Identifiants incorrects. Vérifiez l\'utilisateur et la clé API.',
                 ]);
             }
 
-            $versionXml = $this->buildXmlRpc('version', []);
-            $versionResponse = $this->httpClient->request('POST', $url . '/xmlrpc/2/common', [
-                'headers' => ['Content-Type' => 'text/xml'],
-                'body' => $versionXml,
-                'timeout' => 10,
-            ]);
-            $versionContent = $versionResponse->getContent(false);
-            preg_match('/<name>server_version<\/name>\s*<value><string>(.*?)<\/string><\/value>/', $versionContent, $verMatch);
-            $version = $verMatch[1] ?? null;
+            $versionResponse = $this->odooJsonRpc($url, 'common', 'version', []);
+            $version = $versionResponse['result']['server_version'] ?? null;
 
             $message = sprintf('Connexion réussie ! (UID: %s', $uid);
             if ($version) {
@@ -118,33 +90,23 @@ class OdooTestController extends AbstractController
         }
     }
 
-    private function buildXmlRpc(string $method, array $params): string
+    private function odooJsonRpc(string $baseUrl, string $service, string $method, array $args): array
     {
-        $xml = '<?xml version="1.0"?>';
-        $xml .= '<methodCall>';
-        $xml .= '<methodName>' . $method . '</methodName>';
-        $xml .= '<params>';
+        $response = $this->httpClient->request('POST', $baseUrl . '/jsonrpc', [
+            'headers' => ['Content-Type' => 'application/json'],
+            'timeout' => 10,
+            'body' => json_encode([
+                'jsonrpc' => '2.0',
+                'method' => 'call',
+                'id' => random_int(1, 999999),
+                'params' => [
+                    'service' => $service,
+                    'method' => $method,
+                    'args' => $args,
+                ],
+            ]),
+        ]);
 
-        foreach ($params as $param) {
-            $xml .= '<param><value>';
-            $xml .= $this->xmlRpcValue($param[0], $param[1]);
-            $xml .= '</value></param>';
-        }
-
-        $xml .= '</params>';
-        $xml .= '</methodCall>';
-
-        return $xml;
-    }
-
-    private function xmlRpcValue(string $type, mixed $value): string
-    {
-        return match ($type) {
-            'string' => '<string>' . htmlspecialchars((string) $value) . '</string>',
-            'int', 'i4' => '<int>' . (int) $value . '</int>',
-            'boolean' => '<boolean>' . ($value ? '1' : '0') . '</boolean>',
-            'struct' => '<struct></struct>',
-            default => '<string>' . htmlspecialchars((string) $value) . '</string>',
-        };
+        return json_decode($response->getContent(false), true) ?? [];
     }
 }
