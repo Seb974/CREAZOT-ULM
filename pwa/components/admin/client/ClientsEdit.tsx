@@ -108,8 +108,8 @@ export const ClientsEdit = () => {
                         hasExpensesManagement: false,
                         hasGroupUpdate: false,
                         hasNotam: false,
-                        minHours: "1970-01-01T00:00:00+00:00",
-                        maxHours: "1970-01-01T23:59:00+00:00",
+                        minHours: "00:00",
+                        maxHours: "23:59",
                         ...record,
                     })}
                 >   

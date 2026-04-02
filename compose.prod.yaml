@@ -36,6 +36,8 @@ services:
       NEXT_PUBLIC_OIDC_SERVER_URL: ${OIDC_SERVER_URL:-http://localhost:8080/realms/demo}
     volumes:
       - ./api/public/images:/srv/api/public/images:ro
+      - ./api/public/favicon.ico:/srv/app/public/favicon.ico
+      - ./api/public/apple-touch-icon.png:/srv/app/public/apple-touch-icon.png
 
   database:
     environment:
