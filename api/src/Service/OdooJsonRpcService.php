@@ -279,7 +279,7 @@ class OdooJsonRpcService
 
         $uid = $data['result'] ?? null;
         if (!$uid || $uid === false) {
-            return ['success' => false, 'message' => 'Identifiants incorrects. Vérifiez l'utilisateur et la clé API.'];
+            return ["success" => false, "message" => "Identifiants incorrects. Vérifiez l'utilisateur et la clé API."];
         }
 
         $versionPayload = $this->buildPayload('common', 'version', []);
