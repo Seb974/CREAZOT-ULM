@@ -175,10 +175,28 @@ export const SiteSettingsEdit = () => {
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                                 Clé API pour récupérer les NOTAMs depuis Notamify.{" "}
                                 <Link href="https://notamify.com/notam-api" target="_blank" rel="noopener">
-                                    Créer un compte et obtenir une clé sur notamify.com
+                                    Créer un compte sur notamify.com
                                 </Link>
                             </Typography>
                             <TextInput source="notamifyApiKey" label="Clé API Notamify" fullWidth />
+                            <Box sx={{ display: "flex", gap: 2, mt: 1.5, flexWrap: "wrap" }}>
+                                <Link
+                                    href="https://notamify.com/api-manager"
+                                    target="_blank"
+                                    rel="noopener"
+                                    sx={{ fontSize: "0.85rem", display: "flex", alignItems: "center", gap: 0.5 }}
+                                >
+                                    • Consulter les crédits restants
+                                </Link>
+                                <Link
+                                    href="https://notamify.com/api-manager"
+                                    target="_blank"
+                                    rel="noopener"
+                                    sx={{ fontSize: "0.85rem", display: "flex", alignItems: "center", gap: 0.5 }}
+                                >
+                                    • Recharger en crédits
+                                </Link>
+                            </Box>
                         </AccordionDetails>
                     </Accordion>
 
