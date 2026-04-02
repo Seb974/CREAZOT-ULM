@@ -112,6 +112,14 @@ class SiteSettings
     private ?string $odooUrl = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ['SiteSettings:read', 'SiteSettings:write'])]
+    private ?string $odooBdd = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ['SiteSettings:read', 'SiteSettings:write'])]
+    private ?string $odooUser = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(groups: ['SiteSettings:write'])]
     private ?string $odooApiKey = null;
 
@@ -298,6 +306,28 @@ class SiteSettings
     {
         $this->odooUrl = $odooUrl;
 
+        return $this;
+    }
+
+    public function getOdooBdd(): ?string
+    {
+        return $this->odooBdd;
+    }
+
+    public function setOdooBdd(?string $odooBdd): static
+    {
+        $this->odooBdd = $odooBdd;
+        return $this;
+    }
+
+    public function getOdooUser(): ?string
+    {
+        return $this->odooUser;
+    }
+
+    public function setOdooUser(?string $odooUser): static
+    {
+        $this->odooUser = $odooUser;
         return $this;
     }
 

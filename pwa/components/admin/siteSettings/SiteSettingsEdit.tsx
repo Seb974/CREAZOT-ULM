@@ -1,8 +1,12 @@
-import { TextInput, SimpleForm, Edit, FileInput, FileField } from "react-admin";
-import { Typography, Divider, Box, Accordion, AccordionSummary, AccordionDetails, Link } from "@mui/material";
+import { TextInput, SimpleForm, Edit, FileInput, FileField, useRecordContext } from "react-admin";
+import { Typography, Divider, Box, Accordion, AccordionSummary, AccordionDetails, Link, Button, Alert, CircularProgress } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CloudIcon from "@mui/icons-material/Cloud";
 import { useSiteSettings } from "../SiteSettingsProvider";
 import { useSessionContext } from "../SessionContextProvider";
+import React, { useState } from "react";
+
+const API_DOMAIN = process.env.NEXT_PUBLIC_ENTRYPOINT || "";
 
 const IMAGE_FIELDS = [
     { source: "logo", type: "logo" },
@@ -32,6 +36,61 @@ function getExistingPath(value: unknown): string | undefined {
     }
     return undefined;
 }
+
+const OdooTestButton = () => {
+    const record = useRecordContext();
+    const { session } = useSessionContext();
+    const [loading, setLoading] = useState(false);
+    const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
+
+    const handleTest = async () => {
+        if (!record) return;
+        setLoading(true);
+        setResult(null);
+
+        try {
+            const response = await fetch(`${API_DOMAIN}/admin/odoo/test-connection`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${session?.accessToken}`,
+                },
+                body: JSON.stringify({
+                    url: record.odooUrl || "",
+                    db: record.odooBdd || "",
+                    user: record.odooUser || "",
+                    apiKey: record.odooApiKey || "",
+                }),
+            });
+            const data = await response.json();
+            setResult(data);
+        } catch {
+            setResult({ success: false, message: "Erreur réseau lors du test." });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Box sx={{ mt: 1 }}>
+            <Button
+                variant="outlined"
+                color="primary"
+                startIcon={loading ? <CircularProgress size={18} /> : <CloudIcon />}
+                onClick={handleTest}
+                disabled={loading}
+                sx={{ textTransform: "none" }}
+            >
+                {loading ? "Test en cours..." : "Tester la connexion Odoo"}
+            </Button>
+            {result && (
+                <Alert severity={result.success ? "success" : "error"} sx={{ mt: 1.5 }}>
+                    {result.message}
+                </Alert>
+            )}
+        </Box>
+    );
+};
 
 export const SiteSettingsEdit = () => {
     const { updateSiteSettings } = useSiteSettings();
@@ -205,8 +264,17 @@ export const SiteSettingsEdit = () => {
                             <Typography>Intégration Odoo</Typography>
                         </AccordionSummary>
                         <AccordionDetails>
-                            <TextInput source="odooUrl" label="URL Odoo" fullWidth />
-                            <TextInput source="odooApiKey" label="Clé API Odoo" fullWidth />
+                            <TextInput source="odooUrl" label="URL Odoo" fullWidth helperText="Ex: https://votre-instance.odoo.com" />
+                            <Box display="flex" gap={2} width="100%">
+                                <Box flex={1}>
+                                    <TextInput source="odooBdd" label="Base de données" fullWidth helperText="Nom de la base Odoo" />
+                                </Box>
+                                <Box flex={1}>
+                                    <TextInput source="odooUser" label="Utilisateur Odoo" fullWidth helperText="Email ou login de l'utilisateur" />
+                                </Box>
+                            </Box>
+                            <TextInput source="odooApiKey" label="Clé API Odoo" fullWidth helperText="Clé API ou mot de passe" />
+                            <OdooTestButton />
                         </AccordionDetails>
                     </Accordion>
                 </SimpleForm>
