@@ -2,6 +2,7 @@ import { Show, SimpleShowLayout, TextField, NumberField, DateField, FunctionFiel
 import { getShipStyle, isDefined, isNotBlank } from '../../../app/lib/utils';
 import { paymentMode } from '../../../app/lib/client';
 import Chip from '@mui/material/Chip';
+import { SingleDocumentField } from "../shared/OdooDocumentField";
 
 export const ExpenseShow = () => {
 
@@ -57,7 +58,7 @@ export const ExpenseShow = () => {
                     label="Total HT"
                     render={({ totalHT }) => isDefined(totalHT) ? totalHT.toFixed(2) + ' €' : '' }
                 />
-                <FileField source="document.contentUrl" title="document.description" target="_blank" label="Justificatif"/>
+                <SingleDocumentField source="document" label="Justificatif"/>
                 <BooleanField source="relatedToMaintenance" label="Associé à un entretien"/>
             </SimpleShowLayout>
         </Show>

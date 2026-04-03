@@ -5,22 +5,7 @@ import { clientWithMicrotrakTags, syncOdooDocuments } from "../../../app/lib/cli
 import { Link } from "@mui/material";
 import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { useSessionContext } from "../SessionContextProvider";
-
-const MyFileField = ({ source }) => {
-  const record = useRecordContext();
-  if (!record) return null;
-
-  const url = record.odooContentUrl || record[source];
-  const label = record.description || record.title || record.path || "Sans nom";
-
-  return (
-    <Link href={url} target="_blank" rel="noopener noreferrer" underline="always"
-      sx={{ color: "primary.main", fontSize: "0.85rem" }}
-    >
-      {label}
-    </Link>
-  );
-};
+import { MyFileField } from "../shared/OdooDocumentField";
 
 export const AeronefsCreate = () => {
 

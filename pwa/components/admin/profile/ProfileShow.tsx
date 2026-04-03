@@ -2,6 +2,7 @@ import { Show, FunctionField, ArrayField, Datagrid, DateField, TabbedShowLayout,
 import { decimalToTimeFormatted, getShipStyle, isDefined } from '../../../app/lib/utils';
 import { certificatMedicalTypes } from '../../../app/lib/client';
 import Chip from '@mui/material/Chip';
+import { SingleDocumentField, DocumentListField } from "../shared/OdooDocumentField";
 
 export const ProfileShow = () => {
 
@@ -47,10 +48,10 @@ export const ProfileShow = () => {
                                 label="Validité"
                                 render={({validUntil}) => isDefined(validUntil) ? (new Date(validUntil)).toLocaleDateString() : 'Sans limite'}
                             />
-                            <FileField source="document.contentUrl" title="document.description" target="_blank" label="Document"/>
+                            <SingleDocumentField source="document" label="Document"/>
                         </Datagrid>
                     </ArrayField>
-                    <FileField source="documents" src="contentUrl" title="description" target="_blank" label="Autres documents"/>
+                    <DocumentListField source="documents" label="Autres documents"/>
                     <DateField source="createdAt" label="Créé le" showTime/>
                     <FunctionField
                         label="Créé par"
@@ -75,7 +76,7 @@ export const ProfileShow = () => {
                     <DateField source="certificatMedical.validUntil" label="Date de fin de validité"/>
                     <TextField source="certificatMedical.medecin" label="Nom du Médecin"/>
                     <TextField source="certificatMedical.remarques" label="Remarques"/>
-                    <FileField source="certificatMedical.document.contentUrl" title="certificatMedical.document.description" target="_blank" label="Document"/>
+                    <SingleDocumentField source="certificatMedical.document" label="Document"/>
                     <DateField source="certificatMedical.createdAt" label="Créé le" showTime/>
                     <FunctionField
                         label="Créé par"

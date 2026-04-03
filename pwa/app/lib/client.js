@@ -1,5 +1,17 @@
 import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "./utils";
 
+
+const getClientIdHeader = () => {
+    try {
+        const raw = typeof window !== "undefined" && sessionStorage.getItem("client");
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed?.id) return { "X-Client-Id": String(parsed.id) };
+        }
+    } catch (e) {}
+    return {};
+};
+
 export const colors = [
     // Prédéfinies de MUI / React-Admin
     { id: '#1976d2', name: 'Primary' },
@@ -131,7 +143,7 @@ export const createMediaObject = async (file, description = '', session) => {
         const response = await fetch('/media_objects', {
             method: 'POST',
             body: formData,
-            headers: { Authorization: `Bearer ${session?.accessToken}` },
+            headers: { Authorization: `Bearer ${session?.accessToken}`, ...getClientIdHeader() },
         });
         if (!response.ok) {
             const errorText = await response.text();
@@ -218,7 +230,7 @@ export const createOdooDocument = async (file, entityType, entityId, session) =>
         const response = await fetch('/admin/odoo-documents/upload', {
             method: 'POST',
             body: formData,
-            headers: { Authorization: `Bearer ${session?.accessToken}` },
+            headers: { Authorization: `Bearer ${session?.accessToken}`, ...getClientIdHeader() },
         });
         if (!response.ok) {
             const errorText = await response.text();

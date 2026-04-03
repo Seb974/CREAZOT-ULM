@@ -6,6 +6,7 @@ import { Box, Link, Typography } from "@mui/material";
 import { isDefined } from "../../../app/lib/utils";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useEffect, useRef } from "react";
+import { MyFileField } from "../shared/OdooDocumentField";
 
 const TotalsWatcher = () => {
     const record = useRecordContext();
@@ -79,22 +80,6 @@ const TotalsWatcher = () => {
             setValue("totalHT", Number.isFinite(v) ? v : 0, { shouldDirty: true });
         }}
       />
-  );
-};
-
-const MyFileField = ({ source }) => {
-  const record = useRecordContext();
-  if (!record) return null;
-
-  const url = record.odooContentUrl || record[source];
-  const label = record.description || record.title || record.path || "Sans nom";
-
-  return (
-    <Link href={url} target="_blank" rel="noopener noreferrer" underline="always"
-      sx={{ color: "primary.main", fontSize: "0.85rem" }}
-    >
-      {label}
-    </Link>
   );
 };
 

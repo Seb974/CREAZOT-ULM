@@ -1,5 +1,6 @@
 import { Show, SimpleShowLayout, TextField, DateField, NumberField, BooleanField, ArrayField, Datagrid, FunctionField, FileField } from 'react-admin';
 import { isDefined } from '../../../app/lib/utils';
+import { DocumentListField } from "../shared/OdooDocumentField";
 
 export const EntretienShow = () => (
     <Show>
@@ -23,7 +24,7 @@ export const EntretienShow = () => (
                     <FunctionField label="" source="name" render={ record => record?.name ?? '' } />
                 </Datagrid>
             </ArrayField>
-            <FileField source="documents" src="contentUrl" title="description" target="_blank" label="Documents associés"/>
+            <DocumentListField source="documents" label="Documents associés"/>
             <DateField source="createdAt" label="Créé le" showTime/>
             <FunctionField
                 label="Créé par"

@@ -52,6 +52,7 @@ import ClientAttachmentRequest from "./guard/ClientAttachmentRequest";
 import clientAccessRequestResourceProps from "./clientAccessRequest";
 import { SiteSettingsList } from "./siteSettings/SiteSettingsList";
 import { SiteSettingsEdit } from "./siteSettings/SiteSettingsEdit";
+import icaoReferenceResourceProps from "./icaoReference";
 
 const getClientHeaders = () => {
   try {
@@ -181,6 +182,7 @@ const AdminWithOIDC = () => {
         <ResourceGuesser name="module-packs" {...modulePackResourceProps}/>
         <ResourceGuesser name="module-pack-prices" {...modulePackPriceResourceProps}/>
         <ResourceGuesser name="site-settings" list={SiteSettingsList} edit={SiteSettingsEdit} />
+        <ResourceGuesser name="icao_references" {...icaoReferenceResourceProps} />
         <ResourceGuesser name="client_access_requests" {...clientAccessRequestResourceProps}/>
         <CustomRoutes>
           <Route path="/landings" element={<LandingsList />} />

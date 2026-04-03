@@ -37,6 +37,7 @@ import PriceChangeIcon from '@mui/icons-material/PriceChange';
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
+import RadarIcon from '@mui/icons-material/Radar';
 
 const CustomMenu = () => {
 
@@ -281,6 +282,15 @@ const CustomMenu = () => {
                 leftIcon={<AssignmentIndIcon />}
                 sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
               />
+            }
+            {/* @ts-ignore */}
+            { isDefined(session) && isDefined(user) && user.roles.find(r => r === "super_admin") &&
+            <Menu.Item
+                  to="/icao_references"
+                  primaryText="Codes ICAO"
+                  leftIcon={<RadarIcon />}
+                  sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
+                />
             }
             {/* @ts-ignore */}
             { isDefined(session) && isDefined(user) && user.roles.find(r => r === "super_admin") &&

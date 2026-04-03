@@ -49,7 +49,7 @@ class OdooDocumentController extends AbstractController
 
         $docType = self::DOC_TYPE_MAP[$entityType] ?? 'Autre';
 
-        $client = $this->clientGetter->getClient();
+        $client = $this->clientGetter->get();
         if (!$client) {
             return new JsonResponse(['error' => 'Client introuvable'], 403);
         }
@@ -104,7 +104,7 @@ class OdooDocumentController extends AbstractController
     public function download(int $odooDocId): Response
     {
         try {
-            $client = $this->clientGetter->getClient();
+            $client = $this->clientGetter->get();
             if (!$client || !$client->getOdooCustomerId()) {
                 return new JsonResponse(['error' => 'Accès refusé'], 403);
             }
@@ -145,8 +145,8 @@ class OdooDocumentController extends AbstractController
             $mediaObject = $this->em->getRepository(MediaObject::class)->findOneBy(['odooDocumentId' => $odooDocId]);
 
             if ($mediaObject) {
-                $client = $this->clientGetter->getClient();
-                if (!$client || $mediaObject->getClient()?->getId() !== $client->getId()) {
+                $client = $this->clientGetter->get();
+                if (!$client || $mediaObject->get()?->getId() !== $client->getId()) {
                     return new JsonResponse(['error' => 'Accès refusé'], 403);
                 }
 
@@ -168,7 +168,7 @@ class OdooDocumentController extends AbstractController
     public function list(Request $request): JsonResponse
     {
         try {
-            $client = $this->clientGetter->getClient();
+            $client = $this->clientGetter->get();
             if (!$client || !$client->getOdooCustomerId()) {
                 return new JsonResponse([], 200);
             }

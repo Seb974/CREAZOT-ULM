@@ -5,6 +5,7 @@ import { useWatch, useFormContext } from 'react-hook-form';
 import { useSessionContext } from "../SessionContextProvider";
 import { useEffect } from "react";
 import { Link } from "@mui/material";
+import { MyFileField } from "../shared/OdooDocumentField";
 
 const BirthDateWatcher = () => {
   const { setValue } = useFormContext();
@@ -34,22 +35,6 @@ const ValidityDurationMonthsWatcher = () => {
   }, [dateObtention, validityDurationMonths, type, setValue]);
 
   return null;
-};
-
-const MyFileField = ({ source }) => {
-  const record = useRecordContext();
-  if (!record) return null;
-
-  const url = record.odooContentUrl || record[source];
-  const label = record.description || record.title || record.path || "Sans nom";
-
-  return (
-    <Link href={url} target="_blank" rel="noopener noreferrer" underline="always"
-      sx={{ color: "primary.main", fontSize: "0.85rem" }}
-    >
-      {label}
-    </Link>
-  );
 };
 
 export const ProfilesCreate = () => {
