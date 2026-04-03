@@ -2,14 +2,16 @@
 
 namespace App\Controller;
 
+use App\Repository\NotamCacheRepository;
 use App\Repository\SiteSettingsRepository;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-#[IsGranted("ROLE_USER")]
+#[IsGranted('ROLE_USER')]
 class WeatherProxyController extends AbstractController
 {
     private const NOAA_BASE = 'https://aviationweather.gov/api/data';
@@ -18,6 +20,7 @@ class WeatherProxyController extends AbstractController
     public function __construct(
         private HttpClientInterface $httpClient,
         private SiteSettingsRepository $siteSettingsRepo,
+        private LoggerInterface $logger,
     ) {}
 
     #[Route('/admin/weather/{type}/{icao}', name: 'weather_proxy', methods: ['GET'], requirements: ['type' => 'metar|taf'])]
@@ -51,9 +54,15 @@ class WeatherProxyController extends AbstractController
     }
 
     #[Route('/admin/weather/notam/{icao}', name: 'weather_notam_proxy', methods: ['GET'])]
-    public function getNotams(string $icao): JsonResponse
+    public function getNotams(string $icao, NotamCacheRepository $cacheRepo): JsonResponse
     {
         $icao = strtoupper(trim($icao));
+
+        $cached = $cacheRepo->findFresh($icao);
+        if ($cached) {
+            $this->logger->debug('NOTAM cache hit', ['icao' => $icao]);
+            return $this->json($cached->getData(), 200);
+        }
 
         $settings = $this->siteSettingsRepo->findInstance();
         $apiKey = $settings?->getNotamifyApiKey();
@@ -87,12 +96,14 @@ class WeatherProxyController extends AbstractController
             }
 
             if (empty(trim($content))) {
+                $cacheRepo->upsert($icao, []);
                 return $this->json([], 200);
             }
 
             $data = json_decode($content, true);
 
             if (!is_array($data)) {
+                $cacheRepo->upsert($icao, []);
                 return $this->json([], 200);
             }
 
@@ -116,8 +127,19 @@ class WeatherProxyController extends AbstractController
                 ];
             }, $notams);
 
+            $cacheRepo->upsert($icao, $normalized);
+            $this->logger->info('NOTAM cache updated from API', ['icao' => $icao, 'count' => count($normalized)]);
+
             return $this->json($normalized, 200);
         } catch (\Throwable $e) {
+            $this->logger->error('NOTAM API error', ['icao' => $icao, 'error' => $e->getMessage()]);
+
+            $stale = $cacheRepo->find($icao);
+            if ($stale) {
+                $this->logger->warning('Returning stale NOTAM cache due to API error', ['icao' => $icao]);
+                return $this->json($stale->getData(), 200);
+            }
+
             return $this->json(['error' => $e->getMessage()], 502);
         }
     }
