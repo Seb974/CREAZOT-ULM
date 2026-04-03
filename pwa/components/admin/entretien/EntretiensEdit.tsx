@@ -2,7 +2,7 @@ import { ArrayInput, DateInput, Edit, FileInput, SelectInput, SimpleFormIterator
 import { ReferenceInput, SimpleForm, TextInput, NumberInput, BooleanInput } from "react-admin";
 import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { Link } from "@mui/material";
-import { clientWithExpensesManagement, syncDocuments } from "../../../app/lib/client";
+import { clientWithExpensesManagement, syncOdooDocuments } from "../../../app/lib/client";
 import { useSessionContext } from "../SessionContextProvider";
 import { useClient } from "../ClientProvider";
 
@@ -10,7 +10,7 @@ const MyFileField = ({ source }) => {
   const record = useRecordContext();
   if (!record) return null;
 
-  const url = record[source];
+  const url = record.odooContentUrl || record[source];
   const label = record.description || record.title || record.path || "Sans nom";
 
   return (
@@ -27,7 +27,7 @@ const ExpensesInput = ({ client }) => {
     <ArrayInput source="expenses" label="Dépense(s) associée(s)">
       <SimpleFormIterator disableReordering>
           <ReferenceInput reference="expenses" source="@id" filter={{ relatedToMaintenance: true, 'exists[entretien]': false }}>
-              <SelectInput label="Dépense" optionText="name"/>     {/* optionText="libelle" */}
+              <SelectInput label="Dépense" optionText="name"/>
           </ReferenceInput>
       </SimpleFormIterator>
     </ArrayInput>
@@ -38,15 +38,8 @@ export const EntretiensEdit = () => {
   const { client } = useClient();
   const { session } = useSessionContext();
 
-  const getDocuments = async (documents) => {   
-      const docs = documents.map(document => {
-          return isDefined(document?.['@id']) ? document : { ...document, description: document.title };
-      });
-      return await syncDocuments(docs, session);
-  };
-
   const transform = async ({expenses, ...data}) => {
-    const documentIds = isDefinedAndNotVoid(data.documents) ? await getDocuments(data.documents) : [];
+    const documentIds = isDefinedAndNotVoid(data.documents) ? await syncOdooDocuments(data.documents.map(d => d?.['@id'] ? d : {...d, description: d.title}), 'entretien', data.id, session) : [];
 
     data['documents'] = documentIds;
     data['intervenants'] = data['intervenants'].map(intervenant => getFormattedValueForBackEnd(intervenant));

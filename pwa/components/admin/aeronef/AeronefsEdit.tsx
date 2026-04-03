@@ -1,7 +1,7 @@
 import { Edit, SimpleForm, TextInput, NumberInput, BooleanInput, useRecordContext, FileInput } from "react-admin";
 import { useClient } from "../ClientProvider";
 import { Box } from '@mui/material';
-import { clientWithMicrotrakTags, syncDocuments } from "../../../app/lib/client";
+import { clientWithMicrotrakTags, syncOdooDocuments } from "../../../app/lib/client";
 import { Link } from "@mui/material";
 import { useSessionContext } from "../SessionContextProvider";
 import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
@@ -10,7 +10,7 @@ const MyFileField = ({ source }) => {
   const record = useRecordContext();
   if (!record) return null;
 
-  const url = record[source];
+  const url = record.odooContentUrl || record[source];
   const label = record.description || record.title || record.path || "Sans nom";
 
   return (
@@ -27,20 +27,13 @@ export const AeronefsEdit = () => {
   const { client } = useClient();
   const { session } = useSessionContext();
 
-  const getDocuments = async (documents) => {   
-      const docs = documents.map(document => {
-          return isDefined(document?.['@id']) ? document : { ...document, description: document.title };
-      });
-      return await syncDocuments(docs, session);
-  };
-  
   const MicrotrakInput = () => {
     return !clientWithMicrotrakTags(client) ? null : 
       <TextInput source="codeBalise" label="Code Microtrak"/>
   };
 
   const transform = async ({documents, createdBy, updatedBy, ...data}) => {
-      const documentIds = isDefinedAndNotVoid(documents) ? await getDocuments(documents) : [];
+      const documentIds = isDefinedAndNotVoid(documents) ? await syncOdooDocuments(documents.map(d => d?.['@id'] ? d : {...d, description: d.title}), 'aeronef', data.id, session) : [];
       return {
         ...data, 
         documents: documentIds,

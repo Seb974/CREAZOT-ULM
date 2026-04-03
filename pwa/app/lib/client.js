@@ -208,6 +208,57 @@ export const syncDocuments = async (documents, session) => {
   return results;
 };
 
+export const createOdooDocument = async (file, entityType, entityId, session) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('entityType', entityType);
+    if (entityId) formData.append('entityId', String(entityId));
+
+    try {
+        const response = await fetch('/admin/odoo-documents/upload', {
+            method: 'POST',
+            body: formData,
+            headers: { Authorization: `Bearer ${session?.accessToken}` },
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Erreur upload document Odoo: ${errorText}`);
+            return null;
+        }
+        return await response.json();
+    } catch (err) {
+        console.error('Erreur upload document Odoo:', err);
+        return null;
+    }
+};
+
+export const syncOdooDocument = async (document, entityType, entityId, session) => {
+    if (!document) return null;
+
+    if (document.rawFile) {
+        const created = await createOdooDocument(document.rawFile, entityType, entityId, session);
+        return created ? created['@id'] : null;
+    }
+
+    if (document['@id']) return document['@id'];
+
+    return null;
+};
+
+export const syncOdooDocuments = async (documents, entityType, entityId, session) => {
+    if (!documents || documents.length === 0) return [];
+
+    const results = [];
+
+    for (const document of documents) {
+        const doc = document?.['@id'] ? document : { ...document, description: document.title };
+        const mediaId = await syncOdooDocument(doc, entityType, entityId, session);
+        if (mediaId) results.push(mediaId);
+    }
+
+    return results;
+};
+
 export const uploadImages = async (data, session, clientId = null) => {
     const uploadPromises = images.map(async (image) => {
         const value = data[image.name];

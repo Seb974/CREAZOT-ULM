@@ -1,6 +1,6 @@
 import { Box, Link, Typography } from "@mui/material";
 import { Create, SimpleForm, TextInput, NumberInput, SelectInput, DateInput, required, ArrayInput, SimpleFormIterator, FileInput, useRecordContext, BooleanInput } from "react-admin";
-import { paymentMode, syncDocument, tva } from "../../../app/lib/client";
+import { paymentMode, syncOdooDocument, tva } from "../../../app/lib/client";
 import { useSessionContext } from "../SessionContextProvider";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useEffect, useState } from "react";
@@ -10,7 +10,7 @@ const MyFileField = ({ source }) => {
   const record = useRecordContext();
   if (!record) return null;
 
-  const url = record[source];
+  const url = record.odooContentUrl || record[source];
   const label = record.description || record.title || record.path || "Sans nom";
 
   return (
@@ -46,7 +46,7 @@ const TotalsWatcher = () => {
     <NumberInput
       source="totalHT"
       label="Total HT (€)"
-      helperText="Le montant HT est calculé automatiquement. Vous pouvez l’ajuster si nécessaire."
+      helperText="Le montant HT est calculé automatiquement. Vous pouvez l'ajuster si nécessaire."
       onChange={(e: any) => {
         setManualHT(true);
         setValue("totalHT", parseFloat(e.target.value), { shouldValidate: true, shouldDirty: true });
@@ -60,16 +60,11 @@ export const ExpensesCreate = () => {
   const { session } = useSessionContext();
   const defaultDetails = [{ mode: '', amount: '' }];
 
-  const getDocument = async ({ document }, description = '') => {
-      const finalDescription = description.length > 0 ? description : document?.rawFile?.name ?? '';
-      const docWithDescription = document ? {...document, description: finalDescription} : null;
-      return await syncDocument(docWithDescription, session);
-  }
-
   const transform = async data => {
     if (isDefined(data.document)) {
-      const fileName = data?.document?.title || data?.document?.path || "Sans nom";
-      const justificatif = await getDocument(data, fileName);
+      const fileName = data?.document?.description || data?.document?.title || data?.document?.path || "Sans nom";
+      const doc = data.document ? {...data.document, description: fileName} : null;
+      const justificatif = await syncOdooDocument(doc, 'expense', null, session);
       return {... data, document: justificatif};
     }
     return data;

@@ -1,6 +1,6 @@
 import { ReferenceInput, ReferenceArrayInput, AutocompleteArrayInput, Create, ArrayInput, SimpleFormIterator, useCreate, useRedirect, useNotify, DateInput, BooleanInput, required, SelectInput, TabbedForm, NumberInput, TextInput, FileInput, FileField, useRecordContext } from "react-admin";
 import { calculateValidUntil, decimalToTime, getFormattedValueForBackEnd, getValidityDurationMonths, isDefined, isDefinedAndNotVoid, isValidNumber, timeToDecimal } from "../../../app/lib/utils";
-import { certificatMedicalTypes, infiniteCertificateTypes, syncDocument, syncDocuments } from "../../../app/lib/client";
+import { certificatMedicalTypes, infiniteCertificateTypes, syncOdooDocument, syncOdooDocuments } from "../../../app/lib/client";
 import { useWatch, useFormContext } from 'react-hook-form';
 import { useSessionContext } from "../SessionContextProvider";
 import { useEffect } from "react";
@@ -40,7 +40,7 @@ const MyFileField = ({ source }) => {
   const record = useRecordContext();
   if (!record) return null;
 
-  const url = record[source];
+  const url = record.odooContentUrl || record[source];
   const label = record.description || record.title || record.path || "Sans nom";
 
   return (
@@ -62,14 +62,14 @@ export const ProfilesCreate = () => {
   const getDocument = async ({ document }, description = '') => {
       const finalDescription = description.length > 0 ? description : document?.rawFile?.name ?? '';
       const docWithDescription = document ? {...document, description: finalDescription} : null;
-      return await syncDocument(docWithDescription, session);
+      return await syncOdooDocument(docWithDescription, 'profil_pilote', null, session);
   }
 
   const getDocuments = async (documents) => { 
       const docs = documents.map(document => {
           return isDefined(document?.['@id']) ? document : { ...document, description: document.title };
       });
-      return await syncDocuments(docs, session);
+      return await syncOdooDocuments(docs, 'profil_pilote', null, session);
   };
 
   const syncUserClients = async (piloteIri, clients) => {

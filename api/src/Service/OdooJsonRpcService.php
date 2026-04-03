@@ -299,7 +299,129 @@ class OdooJsonRpcService
         return ['success' => true, 'message' => $message, 'uid' => (int) $uid, 'version' => $version];
     }
 
-    private function execute(string $model, string $method, array $args = [], array $kwargs = []): mixed
+    // === DOCUMENT MANAGEMENT ===
+
+    public function getOrCreateFolder(string $name, ?int $parentId = null, ?int $partnerId = null): int
+    {
+        $domain = [['type', '=', 'folder'], ['name', '=', $name]];
+        if ($parentId) {
+            $domain[] = ['folder_id', '=', $parentId];
+        } else {
+            $domain[] = ['folder_id', '=', false];
+        }
+
+        $existing = $this->execute('documents.document', 'search_read', [$domain], ['fields' => ['id'], 'limit' => 1]);
+
+        if (!empty($existing)) {
+            return $existing[0]['id'];
+        }
+
+        $data = ['name' => $name, 'type' => 'folder'];
+        if ($parentId) {
+            $data['folder_id'] = $parentId;
+        }
+        if ($partnerId) {
+            $data['partner_id'] = $partnerId;
+        }
+
+        $result = $this->execute('documents.document', 'create', [$data]);
+        $folderId = is_array($result) ? $result[0] : (int) $result;
+
+        $this->logger->info('Odoo folder created', ['folder_id' => $folderId, 'name' => $name]);
+
+        return $folderId;
+    }
+
+    public function getOrCreateTag(string $name): int
+    {
+        $existing = $this->execute('documents.tag', 'search_read', [[['name', '=', $name]]], ['fields' => ['id'], 'limit' => 1]);
+
+        if (!empty($existing)) {
+            return $existing[0]['id'];
+        }
+
+        $result = $this->execute('documents.tag', 'create', [['name' => $name]]);
+        $tagId = is_array($result) ? $result[0] : (int) $result;
+
+        $this->logger->info('Odoo tag created', ['tag_id' => $tagId, 'name' => $name]);
+
+        return $tagId;
+    }
+
+    public function ensureClientFolder(int $partnerId, string $clientName): int
+    {
+        $rootFolderId = $this->getOrCreateFolder('CREAZOT-ULM');
+        return $this->getOrCreateFolder($clientName, $rootFolderId, $partnerId);
+    }
+
+    public function uploadDocument(int $partnerId, string $clientName, string $fileName, string $base64Data, string $mimetype, string $docType): int
+    {
+        $folderId = $this->ensureClientFolder($partnerId, $clientName);
+        $tagId = $this->getOrCreateTag($docType);
+
+        $data = [
+            'name' => $fileName,
+            'folder_id' => $folderId,
+            'partner_id' => $partnerId,
+            'tag_ids' => [[6, 0, [$tagId]]],
+            'datas' => $base64Data,
+            'mimetype' => $mimetype,
+        ];
+
+        $result = $this->execute('documents.document', 'create', [$data]);
+        $docId = is_array($result) ? $result[0] : (int) $result;
+
+        $this->logger->info('Odoo document uploaded', [
+            'document_id' => $docId,
+            'partner_id' => $partnerId,
+            'name' => $fileName,
+            'type' => $docType,
+        ]);
+
+        return $docId;
+    }
+
+    public function listDocuments(int $partnerId, ?string $docType = null): array
+    {
+        $domain = [['partner_id', '=', $partnerId], ['type', '!=', 'folder']];
+
+        if ($docType) {
+            $tagId = $this->execute('documents.tag', 'search', [[['name', '=', $docType]]], ['limit' => 1]);
+            if (!empty($tagId)) {
+                $domain[] = ['tag_ids', 'in', $tagId];
+            }
+        }
+
+        return $this->execute(
+            'documents.document',
+            'search_read',
+            [$domain],
+            ['fields' => ['id', 'name', 'mimetype', 'file_size', 'create_date', 'tag_ids', 'checksum'], 'order' => 'create_date desc']
+        );
+    }
+
+    public function getDocumentContent(int $documentId): ?array
+    {
+        $result = $this->execute(
+            'documents.document',
+            'read',
+            [[$documentId]],
+            ['fields' => ['name', 'datas', 'mimetype', 'file_size']]
+        );
+
+        return $result[0] ?? null;
+    }
+
+    public function deleteDocument(int $documentId): bool
+    {
+        $result = $this->execute('documents.document', 'unlink', [[$documentId]]);
+
+        $this->logger->info('Odoo document deleted', ['document_id' => $documentId]);
+
+        return (bool) $result;
+    }
+
+    public function execute(string $model, string $method, array $args = [], array $kwargs = []): mixed
     {
         $uid = $this->authenticate();
 

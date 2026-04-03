@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useWatch, useFormContext } from 'react-hook-form';
 import { getFormattedValueForBackEnd, isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
 import { Link } from "@mui/material";
-import { clientWithExpensesManagement, syncDocuments } from "../../../app/lib/client";
+import { clientWithExpensesManagement, syncOdooDocuments } from "../../../app/lib/client";
 import { useSessionContext } from "../SessionContextProvider";
 import { useClient } from "../ClientProvider";
 
@@ -12,7 +12,7 @@ const MyFileField = ({ source }) => {
   const record = useRecordContext();
   if (!record) return null;
 
-  const url = record[source];
+  const url = record.odooContentUrl || record[source];
   const label = record.description || record.title || record.path || "Sans nom";
 
   return (
@@ -77,15 +77,8 @@ export const EntretiensCreate = () => {
   const [selectedAeronef, setSelectedAeronef] = useState(null);
   const [isChangementMoteur, setIsChangementMoteur] = useState(null);
 
-  const getDocuments = async (documents) => {   
-      const docs = documents.map(document => {
-          return isDefined(document?.['@id']) ? document : { ...document, description: document.title };
-      });
-      return await syncDocuments(docs, session);
-  };
-
   const transform = async ({expenses, ...data}) => {
-      const documentIds = isDefinedAndNotVoid(data.documents) ? await getDocuments(data.documents) : [];
+      const documentIds = isDefinedAndNotVoid(data.documents) ? await syncOdooDocuments(data.documents.map(d => d?.['@id'] ? d : {...d, description: d.title}), 'entretien', null, session) : [];
       data['documents'] = documentIds;
       data['intervenants'] = data['intervenants'].map(intervenant => getFormattedValueForBackEnd(intervenant));
       if (clientWithExpensesManagement(client) && isDefinedAndNotVoid(expenses)) {

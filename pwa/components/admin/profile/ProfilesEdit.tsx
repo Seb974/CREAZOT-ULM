@@ -1,6 +1,6 @@
 import { Edit, ReferenceInput, ArrayInput, SimpleFormIterator, SelectInput, required, DateInput, TabbedForm, NumberInput, TextInput, FileInput, FileField, useRecordContext, BooleanInput } from "react-admin";
 import { calculateValidUntil, decimalToTime, getFormattedValueForBackEnd, getValidityDurationMonths, isDefined, isDefinedAndNotVoid, isValidNumber, timeToDecimal } from "../../../app/lib/utils";
-import { certificatMedicalTypes, infiniteCertificateTypes, syncDocument, syncDocuments } from "../../../app/lib/client";
+import { certificatMedicalTypes, infiniteCertificateTypes, syncOdooDocument, syncOdooDocuments } from "../../../app/lib/client";
 import { useWatch, useFormContext } from 'react-hook-form';
 import { useEffect } from "react";
 import { Link } from "@mui/material";
@@ -40,7 +40,7 @@ const MyFileField = ({ source }) => {
   const record = useRecordContext();
   if (!record) return null;
 
-  const url = record[source];
+  const url = record.odooContentUrl || record[source];
   const label = record.description || record.title || record.path || "Sans nom";
 
   return (
@@ -56,17 +56,17 @@ export const ProfilesEdit = () => {
 
   const { session } = useSessionContext();
 
-  const getDocument = async ({ document }, description = '') => {
+  const getDocument = async ({ document }, description = '', entityId = null) => {
         const finalDescription = description.length > 0 ? description : document?.rawFile?.name ?? '';
         const docWithDescription = document ? {...document, description: finalDescription} : null;
-        return await syncDocument(docWithDescription, session);
+        return await syncOdooDocument(docWithDescription, 'profil_pilote', entityId, session);
     }
   
-    const getDocuments = async (documents) => {   
+    const getDocuments = async (documents, entityId = null) => {   
         const docs = documents.map(document => {
             return isDefined(document?.['@id']) ? document : { ...document, description: document.title };
         });
-        return await syncDocuments(docs, session);
+        return await syncOdooDocuments(docs, 'profil_pilote', entityId, session);
     };
 
   const syncUserClients = async (pilote, clients) => {
@@ -92,11 +92,11 @@ export const ProfilesEdit = () => {
     const piloteClients = data.pilote?.clients;
     await syncUserClients(data.pilote, piloteClients);
 
-    const documentIds = isDefinedAndNotVoid(documents) ? await getDocuments(documents) : [];
-    const certificatMedicalDocument = isDefined(certificatMedical) ? await getDocument(certificatMedical, 'Certificat Médical') : null;
+    const documentIds = isDefinedAndNotVoid(documents) ? await getDocuments(documents, data.id) : [];
+    const certificatMedicalDocument = isDefined(certificatMedical) ? await getDocument(certificatMedical, 'Certificat Médical', data.id) : null;
     const formattedPilotQualifications = await Promise.all(
         pilotQualifications.map(async (q) => {
-          const qualificationDocument = isDefined(q.qualification) ? await getDocument(q, q.qualification?.nom ?? '') : null;
+          const qualificationDocument = isDefined(q.qualification) ? await getDocument(q, q.qualification?.nom ?? '', data.id) : null;
           return {
             ...q,
             qualification: getFormattedValueForBackEnd(q.qualification),

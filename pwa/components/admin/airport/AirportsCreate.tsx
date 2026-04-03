@@ -1,7 +1,7 @@
 import { SimpleForm, TextInput,  BooleanInput, FileInput, useRecordContext, required, useRedirect, useNotify, useDataProvider } from "react-admin";
 import { Create } from "react-admin";
 import { isDefined, isDefinedAndNotVoid } from "../../../app/lib/utils";
-import { syncDocuments } from "../../../app/lib/client";
+import { syncOdooDocuments } from "../../../app/lib/client";
 import { useSessionContext } from "../SessionContextProvider";
 import { Box, Link } from "@mui/material";
 import { useClient } from "../ClientProvider";
@@ -10,7 +10,7 @@ const MyFileField = ({ source }) => {
   const record = useRecordContext();
   if (!record) return null;
 
-  const url = record[source];
+  const url = record.odooContentUrl || record[source];
   const label = record.description || record.title || record.path || "Sans nom";
 
   return (
@@ -31,15 +31,8 @@ export const AirportsCreate = () => {
     const redirect = useRedirect();
     const notify = useNotify();
 
-    const getDocuments = async (documents) => { 
-        const docs = documents.map(document => {
-            return isDefined(document?.['@id']) ? document : { ...document, description: document.title };
-        });
-        return await syncDocuments(docs, session);
-    };
-
     const transform = async ({documents, ...data}) => {
-        const documentIds = isDefinedAndNotVoid(documents) ? await getDocuments(documents) : [];
+        const documentIds = isDefinedAndNotVoid(documents) ? await syncOdooDocuments(documents.map(d => d?.['@id'] ? d : {...d, description: d.title}), 'airport', null, session) : [];
         return {...data, documents: documentIds};
     };
 

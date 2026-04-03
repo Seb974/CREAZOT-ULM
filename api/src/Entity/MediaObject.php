@@ -103,6 +103,9 @@ class MediaObject implements TenantAwareInterface
     #[Groups(['media_object:read'])]
     private ?Entretien $entretien = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $odooDocumentId = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -176,5 +179,25 @@ class MediaObject implements TenantAwareInterface
         $this->entretien = $entretien;
 
         return $this;
+    }
+
+    public function getOdooDocumentId(): ?int
+    {
+        return $this->odooDocumentId;
+    }
+
+    public function setOdooDocumentId(?int $odooDocumentId): static
+    {
+        $this->odooDocumentId = $odooDocumentId;
+        return $this;
+    }
+
+    #[Groups(['media_object:read', 'CertificatMedical:read', 'PilotQualification:read', 'Profil_pilote:read', 'Aeronef:read', 'Airport:read', 'Entretien:read', 'Expense:read'])]
+    public function getOdooContentUrl(): ?string
+    {
+        if ($this->odooDocumentId !== null) {
+            return '/admin/odoo-documents/' . $this->odooDocumentId . '/download';
+        }
+        return null;
     }
 }
