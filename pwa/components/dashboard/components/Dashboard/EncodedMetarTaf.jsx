@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { getMetarOrTaf } from '../../../../app/lib/actions' 
+import { getMetarOrTaf } from '../../../../app/lib/actions'
+import { useSessionContext } from '../../../admin/SessionContextProvider' 
 import { isDefined } from '../../../../app/lib/utils';
 import { CircularProgress, Alert } from '@mui/material';
 import FlightIcon from '@mui/icons-material/Flight';
 import CloudOffIcon from '@mui/icons-material/CloudOff';
 
 export const EncodedMetarTaf = ({ code }) => {
+
+    const { session } = useSessionContext();
 
     const [metar, setMetar] = useState(null);
     const [taf, setTaf] = useState(null);
@@ -29,8 +32,8 @@ export const EncodedMetarTaf = ({ code }) => {
 
     const fetchData = async () => {
         const [metarRes, tafRes] = await Promise.all([
-            getMetarOrTaf(code, 'metar', true).catch(() => null),
-            getMetarOrTaf(code, 'taf', true).catch(() => null)
+            getMetarOrTaf(code, 'metar', true, session).catch(() => null),
+            getMetarOrTaf(code, 'taf', true, session).catch(() => null)
         ]);
 
         const m = metarRes?.data?.[0] || null;

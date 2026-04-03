@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getNotams } from '../../../../app/lib/actions';
+import { useSessionContext } from '../../../admin/SessionContextProvider';
 import { CircularProgress, Chip, Box, Typography, Alert } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import FlightIcon from '@mui/icons-material/Flight';
@@ -31,6 +32,7 @@ const formatDate = (dateStr) => {
 };
 
 export const NotamView = ({ code }) => {
+    const { session } = useSessionContext();
     const [notams, setNotams] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -39,7 +41,7 @@ export const NotamView = ({ code }) => {
         if (!code) return;
         setLoading(true);
         setError(null);
-        getNotams(code)
+        getNotams(code, session)
             .then((data) => {
                 const list = Array.isArray(data) ? data : (data?.data || []);
                 setNotams(list);

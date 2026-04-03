@@ -75,11 +75,12 @@ export async function createPassenger(prevState: State, formData: FormData) {
     redirect(redirectPath, RedirectType.replace);
 }
 
-export const getMetarOrTaf = (icao, request = "metar", decoded = false) => {
+export const getMetarOrTaf = (icao, request = "metar", decoded = false, session = null) => {
 
   const config = {
       method: 'get',
       url: `${API_DOMAIN}/admin/weather/${ request }/${ icao }`,
+      headers: session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {},
   };
   return axios(config)
           .then(function (response) {
@@ -91,10 +92,11 @@ export const getMetarOrTaf = (icao, request = "metar", decoded = false) => {
 
 };
 
-export const getNotams = (icao: string) => {
+export const getNotams = (icao: string, session: any = null) => {
   return axios({
     method: 'get',
     url: `${API_DOMAIN}/admin/weather/notam/${icao}`,
+    headers: session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {},
   })
     .then((response) => response.data)
     .catch((error) => {
