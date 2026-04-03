@@ -59,19 +59,19 @@ class PilotQualification
     private ?ProfilPilote $profil = null;
 
     #[ORM\ManyToOne]
-    #[Groups(groups: ['PilotQualification:write', 'PilotQualification:read', 'Profil_pilote:write', 'Profil_pilote:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['PilotQualification:write', 'PilotQualification:read', 'Profil_pilote:write', 'Profil_pilote:read', 'Profil_pilote:list', 'Prestation:read', 'Reservation:read'])]
     private ?Qualification $qualification = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['PilotQualification:write', 'PilotQualification:read', 'Profil_pilote:write', 'Profil_pilote:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['PilotQualification:write', 'PilotQualification:read', 'Profil_pilote:write', 'Profil_pilote:read', 'Profil_pilote:list', 'Prestation:read', 'Reservation:read'])]
     private ?\DateTimeImmutable $dateObtention = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['PilotQualification:write', 'PilotQualification:read', 'Profil_pilote:write', 'Profil_pilote:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['PilotQualification:write', 'PilotQualification:read', 'Profil_pilote:write', 'Profil_pilote:read', 'Profil_pilote:list', 'Prestation:read', 'Reservation:read'])]
     private ?\DateTimeImmutable $validUntil = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['PilotQualification:write', 'PilotQualification:read', 'Profil_pilote:write', 'Profil_pilote:read', 'Prestation:read', 'Reservation:read'])]
+    #[Groups(groups: ['PilotQualification:write', 'PilotQualification:read', 'Profil_pilote:write', 'Profil_pilote:read', 'Profil_pilote:list', 'Prestation:read', 'Reservation:read'])]
     private ?bool $isAlertSent = null;
 
     #[ORM\ManyToOne]

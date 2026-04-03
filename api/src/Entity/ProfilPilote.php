@@ -27,6 +27,10 @@ use App\Entity\User;
         new GetCollection(
             paginationClientItemsPerPage: true,
             name: 'profil_pilotes_list',
+            normalizationContext: [
+                AbstractNormalizer::GROUPS => ['Profil_pilote:list'],
+                AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
+            ],
             filters: [
                 'app.filter.profile.pilote',
                 'app.filter.profile.email',
@@ -63,11 +67,11 @@ class ProfilPilote
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'CarnetVol:read', 'Disponibilite:read'])]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'Profil_pilote:list', 'CarnetVol:read', 'Disponibilite:read'])]
     private ?int $id = null;
 
     #[ORM\OneToOne(inversedBy: 'profilPilote', cascade: ['persist'])]
-    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'CarnetVol:read', 'Disponibilite:read'])]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'Profil_pilote:list', 'CarnetVol:read', 'Disponibilite:read'])]
     private ?User $pilote = null;
 
     /**
@@ -81,7 +85,7 @@ class ProfilPilote
      * @var Collection<int, PilotQualification>
      */
     #[ORM\OneToMany(targetEntity: PilotQualification::class, mappedBy: 'profil', cascade: ['persist', 'remove'])]
-    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'Profil_pilote:list'])]
     private Collection $pilotQualifications;
 
     #[ORM\Column(nullable: true)]
@@ -89,7 +93,7 @@ class ProfilPilote
     private ?\DateTimeImmutable $birthDate = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'CarnetVol:read'])]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'Profil_pilote:list', 'CarnetVol:read'])]
     private ?float $totalFlightHours = null;
 
     #[ORM\OneToOne(mappedBy: 'profil', cascade: ['persist', 'remove'])]
@@ -124,10 +128,10 @@ class ProfilPilote
     private Collection $documents;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'Disponibilite:read'])]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'Profil_pilote:list', 'Disponibilite:read'])]
     private ?bool $availableByDefault = null;
 
-    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read'])]
+    #[Groups(groups: ['Profil_pilote:write', 'Profil_pilote:read', 'Profil_pilote:list'])]
     public function getAvailableCertificate(): ?bool
     {
         if (!\is_null($this->certificatMedical)) {
