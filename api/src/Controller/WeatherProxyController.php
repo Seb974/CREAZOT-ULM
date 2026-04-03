@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\IcaoReferenceRepository;
 use App\Repository\NotamCacheRepository;
 use App\Repository\SiteSettingsRepository;
 use Psr\Log\LoggerInterface;
@@ -54,9 +55,17 @@ class WeatherProxyController extends AbstractController
     }
 
     #[Route('/admin/weather/notam/{icao}', name: 'weather_notam_proxy', methods: ['GET'])]
-    public function getNotams(string $icao, NotamCacheRepository $cacheRepo): JsonResponse
-    {
+    public function getNotams(
+        string $icao,
+        NotamCacheRepository $cacheRepo,
+        IcaoReferenceRepository $icaoRepo,
+    ): JsonResponse {
         $icao = strtoupper(trim($icao));
+
+        if (!$icaoRepo->isValid($icao)) {
+            $this->logger->debug('NOTAM skipped: not a known ICAO', ['code' => $icao]);
+            return $this->json([], 200);
+        }
 
         $cached = $cacheRepo->findFresh($icao);
         if ($cached) {
