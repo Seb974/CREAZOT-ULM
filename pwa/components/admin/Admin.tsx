@@ -57,6 +57,7 @@ import icaoReferenceResourceProps from "./icaoReference";
 import countryCodeResourceProps from "./countryCode";
 import taxRateResourceProps from "./taxRate";
 import flightRuleResourceProps from "./flightRule";
+import conversationThreadResourceProps from "./conversationThread";
 
 const getClientHeaders = () => {
   try {
@@ -190,6 +191,7 @@ const AdminWithOIDC = () => {
         <ResourceGuesser name="country_codes" {...countryCodeResourceProps} />
         <ResourceGuesser name="tax_rates" {...taxRateResourceProps} />
         <ResourceGuesser name="flight_rules" {...flightRuleResourceProps} />
+        <ResourceGuesser name="conversation_threads" {...conversationThreadResourceProps}/>
         <ResourceGuesser name="client_access_requests" {...clientAccessRequestResourceProps}/>
         <CustomRoutes>
           <Route path="/landings" element={<LandingsList />} />

@@ -43,6 +43,7 @@ import RadarIcon from '@mui/icons-material/Radar';
 import FlagIcon from "@mui/icons-material/Flag";
 import PercentIcon from "@mui/icons-material/Percent";
 import GavelIcon from "@mui/icons-material/Gavel";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
 
 const CustomMenu = () => {
 
@@ -78,6 +79,14 @@ const CustomMenu = () => {
           to="/reservations"
           primaryText="Réservations"
           leftIcon={<EditCalendarIcon />}
+        />
+      }
+      {/* @ts-ignore */}
+      { (isDefined(client) && isDefined(client.hasAiReservationAssistant) && client.hasAiReservationAssistant) && isAdmin &&
+        <Menu.Item
+          to="/conversation_threads"
+          primaryText="Assistant IA"
+          leftIcon={<SmartToyIcon />}
         />
       }
       {/* @ts-ignore */}
