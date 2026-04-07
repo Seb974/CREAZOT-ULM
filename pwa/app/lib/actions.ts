@@ -75,32 +75,86 @@ export async function createPassenger(prevState: State, formData: FormData) {
     redirect(redirectPath, RedirectType.replace);
 }
 
-export const getMetarOrTaf = (icao, request = "metar", decoded = false, session = null) => {
-
-  const config = {
-      method: 'get',
-      url: `${API_DOMAIN}/admin/weather/${ request }/${ icao }`,
-      headers: session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {},
-  };
-  return axios(config)
-          .then(function (response) {
-            return response.data;
-          })
-          .catch(function (error) {
-            console.error(error);
-          });
-
+export const getMetarOrTaf = (icao: string, request = "metar", decoded = false, session: any = null) => {
+  return axios({
+    method: 'get',
+    url: `${API_DOMAIN}/admin/weather/${request}/${icao}`,
+    headers: {
+      ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
+    },
+    timeout: 15000,
+  })
+    .then((response) => response.data)
+    .catch((error) => {
+      console.error(`${request.toUpperCase()} fetch error:`, error);
+      return { results: 0, data: [] };
+    });
 };
 
 export const getNotams = (icao: string, session: any = null) => {
   return axios({
     method: 'get',
     url: `${API_DOMAIN}/admin/weather/notam/${icao}`,
-    headers: session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {},
+    headers: {
+      ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
+    },
+    timeout: 20000,
   })
     .then((response) => response.data)
     .catch((error) => {
       console.error('NOTAM fetch error:', error);
       return [];
     });
+};
+
+export const analyzeNotamAi = (notamRaw: string, icao: string, session: any = null) => {
+  return axios({
+    method: 'post',
+    url: `${API_DOMAIN}/admin/ai/notam`,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
+    },
+    data: { notam: notamRaw, icao },
+    timeout: 30000,
+  }).then((r) => r.data);
+};
+
+export const briefMeteoAi = (metarRaw: string, tafRaw: string, icao: string, session: any = null) => {
+  return axios({
+    method: 'post',
+    url: `${API_DOMAIN}/admin/ai/meteo-brief`,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
+    },
+    data: { metar: metarRaw, taf: tafRaw, icao },
+    timeout: 30000,
+  }).then((r) => r.data);
+};
+
+export const getScoreOps = (icao: string, session: any = null, clientId: number = null) => {
+  return axios({
+    method: 'get',
+    url: `${API_DOMAIN}/admin/score-ops/${icao}`,
+    headers: {
+      ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
+      ...(clientId ? { 'X-Client-Id': String(clientId) } : {}),
+    },
+    timeout: 60000,
+  }).then((r) => r.data);
+};
+
+export const saveScoreOps = (icao: string, data: any, session: any = null, clientId: number = null) => {
+  return axios({
+    method: 'post',
+    url: `${API_DOMAIN}/admin/score-ops/${icao}/save`,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
+      ...(clientId ? { 'X-Client-Id': String(clientId) } : {}),
+    },
+    data,
+    timeout: 15000,
+  }).then((r) => r.data);
 };

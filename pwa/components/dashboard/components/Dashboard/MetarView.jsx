@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { EncodedMetarTaf } from './EncodedMetarTaf';
 import { GraphicMetar } from './GraphicMetar';
 import { NotamView } from './NotamView';
+import { ScoreOpsView } from './ScoreOpsView';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import ExploreIcon from '@mui/icons-material/Explore';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import AnnouncementIcon from '@mui/icons-material/Announcement';
+import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import { Tabs, Tab } from '@mui/material';
 import { isDefined, isDefinedAndNotVoid } from '../../../../app/lib/utils';
 import { clientWithMicrotrakTags, getAirportCode } from '../../../../app/lib/client';
@@ -42,6 +44,22 @@ export const MetarView = ({ showGraphic, setShowGraphic, switchToMap, hidden, cl
     const hasNotam = isDefined(client.hasNotam) && client.hasNotam;
     const hasMicrotrak = clientWithMicrotrakTags(client);
 
+    const buildTabs = () => {
+        const tabs = [];
+        tabs.push({ key: 'graphic', label: 'METAR graphique', icon: <ExploreIcon sx={{ fontSize: 18 }} /> });
+        if (hasMicrotrak) {
+            tabs.push({ key: 'encoded', label: 'METAR & TAF bruts', icon: <AssignmentIcon sx={{ fontSize: 18 }} /> });
+        }
+        if (hasNotam) {
+            tabs.push({ key: 'notam', label: 'NOTAM', icon: <AnnouncementIcon sx={{ fontSize: 18 }} /> });
+        }
+        tabs.push({ key: 'scoreops', label: 'Avis de KIMI', icon: <FlightTakeoffIcon sx={{ fontSize: 18 }} /> });
+        return tabs;
+    };
+
+    const tabs = buildTabs();
+    const activeKey = tabs[activeTab]?.key || 'graphic';
+
     return (
         <div className={`w-full mt-6 overflow-hidden ${ hidden ? 'hidden' : ''}`}>
             <div className="rounded-sm border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark h-full min-h-[300px] flex flex-col">
@@ -77,15 +95,16 @@ export const MetarView = ({ showGraphic, setShowGraphic, switchToMap, hidden, cl
                                 },
                             }}
                         >
-                            <Tab icon={<ExploreIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="METAR graphique" />
-                            {hasMicrotrak && <Tab icon={<AssignmentIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="METAR & TAF bruts" />}
-                            {hasNotam && <Tab icon={<AnnouncementIcon sx={{ fontSize: 18 }} />} iconPosition="start" label="NOTAM" />}
+                            {tabs.map((tab) => (
+                                <Tab key={tab.key} icon={tab.icon} iconPosition="start" label={tab.label} />
+                            ))}
                         </Tabs>
 
                         <div className="flex-grow">
-                            {activeTab === 0 && <GraphicMetar code={selectedCode} />}
-                            {hasMicrotrak && activeTab === 1 && <EncodedMetarTaf code={selectedCode} />}
-                            {hasNotam && activeTab === (hasMicrotrak ? 2 : 1) && <NotamView code={selectedCode} />}
+                            {activeKey === 'graphic' && <GraphicMetar code={selectedCode} />}
+                            {activeKey === 'encoded' && <EncodedMetarTaf code={selectedCode} />}
+                            {activeKey === 'notam' && <NotamView code={selectedCode} />}
+                            {activeKey === 'scoreops' && <ScoreOpsView code={selectedCode} />}
                         </div>
 
                         { (hasMicrotrak || isSmall) && 

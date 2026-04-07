@@ -22,6 +22,9 @@ class NotamCache
     #[ORM\Column(type: Types::JSON)]
     private array $data = [];
 
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $aiAnalysis = null;
+
     public function getIcao(): string
     {
         return $this->icao;
@@ -52,6 +55,17 @@ class NotamCache
     public function setData(array $data): static
     {
         $this->data = $data;
+        return $this;
+    }
+
+    public function getAiAnalysis(): ?array
+    {
+        return $this->aiAnalysis;
+    }
+
+    public function setAiAnalysis(?array $aiAnalysis): static
+    {
+        $this->aiAnalysis = $aiAnalysis;
         return $this;
     }
 

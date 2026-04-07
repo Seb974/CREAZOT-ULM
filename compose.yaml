@@ -1,8 +1,6 @@
 services:        
   php:
     image: ${PHP_DOCKER_IMAGE}
-    depends_on:
-      - database
     restart: unless-stopped
     environment:
       APP_ENV: dev

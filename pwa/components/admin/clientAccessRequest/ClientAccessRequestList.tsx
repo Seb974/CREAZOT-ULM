@@ -25,10 +25,10 @@ export const ClientAccessRequestList = () => {
   const handleAction = async (record: any, newStatus: 'approved' | 'rejected') => {
     try {
       const res = await fetch(record['@id'], {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${session?.accessToken}`,
-          'Content-Type': 'application/ld+json',
+          'Content-Type': 'application/merge-patch+json',
         },
         body: JSON.stringify({
           status: newStatus,
@@ -41,6 +41,8 @@ export const ClientAccessRequestList = () => {
 
       if (newStatus === 'approved') {
         const userIri = record.requestedBy?.['@id'] || getFormattedValueForBackEnd(record.requestedBy);
+        const clientIri = record.client?.['@id'] || getFormattedValueForBackEnd(record.client);
+
         if (userIri) {
           const userRes = await fetch(userIri, {
             headers: {
@@ -50,18 +52,31 @@ export const ClientAccessRequestList = () => {
           });
           const userData = await userRes.json();
           const existingClients = (userData.clients || []).map((c: any) => c['@id'] || c);
-          const clientIri = record.client?.['@id'] || getFormattedValueForBackEnd(record.client);
 
           if (!existingClients.includes(clientIri)) {
             await fetch(userIri, {
-              method: 'PUT',
+              method: 'PATCH',
               headers: {
                 'Authorization': `Bearer ${session?.accessToken}`,
-                'Content-Type': 'application/ld+json',
+                'Content-Type': 'application/merge-patch+json',
               },
               body: JSON.stringify({ clients: [...existingClients, clientIri] }),
             });
           }
+
+          await fetch('/user_client_roles', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${session?.accessToken}`,
+              'Content-Type': 'application/ld+json',
+              'Accept': 'application/ld+json',
+            },
+            body: JSON.stringify({
+              user: userIri,
+              client: clientIri,
+              role: 'pilot',
+            }),
+          });
         }
       }
 

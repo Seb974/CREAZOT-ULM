@@ -51,6 +51,11 @@ export const ClientsEdit = () => {
         const previousData = cachedClient ? JSON.parse(cachedClient) : null;
 
         const sanitizedData = sanitizeData(data, previousData);
+
+        if (sanitizedData.countryCode && typeof sanitizedData.countryCode === 'object') {
+            sanitizedData.countryCode = sanitizedData.countryCode['@id'] || null;
+        }
+
         const images = await uploadImages(sanitizedData, session, data.id);
         // @ts-ignore
         const updatedClient = { ...sanitizedData, ...Object.fromEntries(images.map(img => [img.name, img.path || null])) };
@@ -137,6 +142,14 @@ export const ClientsEdit = () => {
                                 <TimeInput source="maxHours" label="Heure de fin"/>
                             </Box>
                         </Box>
+                        <ReferenceInput source="countryCode.@id" reference="country_codes" sort={{ field: "code", order: "ASC" }}>
+                            <AutocompleteInput
+                                optionText={(record: any) => record ? `${record.code} - ${record.label}` : ""}
+                                label="Code pays (TVA)"
+                                fullWidth
+                                helperText="Détermine les taux de TVA applicables"
+                            />
+                        </ReferenceInput>
                         <BooleanInput source="active" label="Utilisateur actif" />    
                     </TabbedForm.Tab>
                     <TabbedForm.Tab label="Options">

@@ -1,134 +1,130 @@
 import { ArrayInput, BooleanInput, DateInput, Edit, FileInput, NumberInput, SelectInput, SimpleFormIterator, useRecordContext } from "react-admin";
 import { SimpleForm, TextInput } from "react-admin";
 import { useSessionContext } from "../SessionContextProvider";
-import { paymentMode, syncOdooDocument, tva } from "../../../app/lib/client";
-import { Box, Link, Typography } from "@mui/material";
+import { paymentMode, syncOdooDocument } from "../../../app/lib/client";
+import { Box, Typography } from "@mui/material";
 import { isDefined } from "../../../app/lib/utils";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useEffect, useRef } from "react";
 import { MyFileField } from "../shared/OdooDocumentField";
+import TvaSelectInput from "./TvaSelectInput";
 
 const TotalsWatcher = () => {
-    const record = useRecordContext();
-    const { setValue, getValues, control } = useFormContext();
-    const details = useWatch({ name: "details", control }) || [];
-    const tvaRaw = useWatch({ name: "tva", control }) ?? 0;
-    const tvaRate = parseFloat(String(tvaRaw)) || 0;
+  const record = useRecordContext();
+  const { setValue, getValues, control } = useFormContext();
+  const details = useWatch({ name: "details", control }) || [];
+  const tvaRaw = useWatch({ name: "tva", control }) ?? 0;
+  const tvaRate = parseFloat(String(tvaRaw)) || 0;
 
-    const initializedRef = useRef(false);
-    const manualEditedRef = useRef(false);
-    const skipNextAutoRecalcRef = useRef(false);
+  const initializedRef = useRef(false);
+  const manualEditedRef = useRef(false);
+  const skipNextAutoRecalcRef = useRef(false);
 
-    useEffect(() => {
-      if (!record || initializedRef.current) return;
+  useEffect(() => {
+    if (!record || initializedRef.current) return;
 
-      const t = setTimeout(() => {
-        const current = getValues();
-        let copiedSomething = false;
+    const t = setTimeout(() => {
+      const current = getValues();
+      let copiedSomething = false;
 
-        if ((current.totalHT === undefined || current.totalHT === null || current.totalHT === "") && record.totalHT !== undefined) {
-          setValue("totalHT", record.totalHT, { shouldDirty: false, shouldValidate: false });
-          copiedSomething = true;
-        }
-
-        if ((current.totalTTC === undefined || current.totalTTC === null || current.totalTTC === "") && record.totalTTC !== undefined) {
-          setValue("totalTTC", record.totalTTC, { shouldDirty: false, shouldValidate: false });
-          copiedSomething = true;
-        }
-
-        skipNextAutoRecalcRef.current = copiedSomething;
-        initializedRef.current = true;
-      }, 0);
-
-      return () => clearTimeout(t);
-    }, [record, getValues, setValue]);
-
-    useEffect(() => {
-      if (!initializedRef.current) return;
-      if (manualEditedRef.current) return;
-
-      if (skipNextAutoRecalcRef.current) {
-        skipNextAutoRecalcRef.current = false;
-        return;
+      if ((current.totalHT === undefined || current.totalHT === null || current.totalHT === "") && record.totalHT !== undefined) {
+        setValue("totalHT", record.totalHT, { shouldDirty: false, shouldValidate: false });
+        copiedSomething = true;
       }
 
-      const totalTTC = details
-        .map((d: any) => parseFloat(d?.amount ?? 0) || 0)
-        .reduce((acc: number, val: number) => acc + val, 0);
-
-      const totalHT = tvaRate > 0 ? parseFloat((totalTTC / (1 + tvaRate)).toFixed(2)) : totalTTC;
-
-      const prevTotalTTC = getValues("totalTTC");
-      const prevTotalHT = getValues("totalHT");
-
-      if (prevTotalTTC !== totalTTC) {
-        setValue("totalTTC", totalTTC, { shouldDirty: true });
+      if ((current.totalTTC === undefined || current.totalTTC === null || current.totalTTC === "") && record.totalTTC !== undefined) {
+        setValue("totalTTC", record.totalTTC, { shouldDirty: false, shouldValidate: false });
+        copiedSomething = true;
       }
-      if (prevTotalHT !== totalHT) {
-        setValue("totalHT", totalHT, { shouldDirty: true });
-      }
-    }, [details, tvaRate, setValue, getValues]);
 
-    return (
-      <NumberInput
-        source="totalHT"
-        label="Total HT (€)"
-        helperText="Le montant HT est recalculé si vous changez les paiements ou la TVA. Vous pouvez le modifier manuellement (arrête le recalcul)."
-        onChange={(e: any) => {
-            manualEditedRef.current = true;
-            const v = parseFloat(e?.target?.value);
-            setValue("totalHT", Number.isFinite(v) ? v : 0, { shouldDirty: true });
-        }}
-      />
+      skipNextAutoRecalcRef.current = copiedSomething;
+      initializedRef.current = true;
+    }, 0);
+
+    return () => clearTimeout(t);
+  }, [record, getValues, setValue]);
+
+  useEffect(() => {
+    if (!initializedRef.current) return;
+    if (manualEditedRef.current) return;
+
+    if (skipNextAutoRecalcRef.current) {
+      skipNextAutoRecalcRef.current = false;
+      return;
+    }
+
+    const totalTTC = details
+      .map((d: any) => parseFloat(d?.amount ?? 0) || 0)
+      .reduce((acc: number, val: number) => acc + val, 0);
+
+    const totalHT = tvaRate > 0 ? parseFloat((totalTTC / (1 + tvaRate)).toFixed(2)) : totalTTC;
+
+    const prevTotalTTC = getValues("totalTTC");
+    const prevTotalHT = getValues("totalHT");
+
+    if (prevTotalTTC !== totalTTC) {
+      setValue("totalTTC", totalTTC, { shouldDirty: true });
+    }
+    if (prevTotalHT !== totalHT) {
+      setValue("totalHT", totalHT, { shouldDirty: true });
+    }
+  }, [details, tvaRate, setValue, getValues]);
+
+  return (
+    <NumberInput
+      source="totalHT"
+      label="Total HT (€)"
+      helperText="Le montant HT est recalculé si vous changez les paiements ou la TVA. Vous pouvez le modifier manuellement (arrête le recalcul)."
+      onChange={(e: any) => {
+        manualEditedRef.current = true;
+        const v = parseFloat(e?.target?.value);
+        setValue("totalHT", Number.isFinite(v) ? v : 0, { shouldDirty: true });
+      }}
+    />
   );
 };
 
 export const ExpensesEdit = () => {
-
-const { session } = useSessionContext();
+  const { session } = useSessionContext();
   const defaultDetails = [{ mode: '', amount: '' }];
 
-  const transform = async data => {
+  const transform = async (data: any) => {
     if (isDefined(data.document)) {
       const fileName = data?.document?.description || data?.document?.title || data?.document?.path || "Sans nom";
-      const doc = data.document ? {...data.document, description: fileName} : null;
+      const doc = data.document ? { ...data.document, description: fileName } : null;
       const justificatif = await syncOdooDocument(doc, 'expense', data.id, session);
-      return {... data, document: justificatif};
+      return { ...data, document: justificatif };
     }
     return data;
   };
 
   return (
-  <Edit transform={transform} redirect="list">
+    <Edit transform={transform} redirect="list">
       <SimpleForm>
-        <DateInput source="date" defaultValue={ new Date() } label="Date" />
+        <DateInput source="date" defaultValue={new Date()} label="Date" />
         <TextInput source="beneficiaire" label="Bénéficiaire" />
-        <TextInput source="libelle" label="Libellé"/>
+        <TextInput source="libelle" label="Libellé" />
         <Typography className="mt-4" variant="h6" gutterBottom>Modes de paiement</Typography>
-        <ArrayInput source="details" label="" defaultValue={ defaultDetails }>
-            <SimpleFormIterator inline disableAdd={false} disableRemove={true}>
-                <SelectInput
-                    source="mode"
-                    label="Mode"
-                    choices={ paymentMode }
-                />
-                <NumberInput source="amount" label="Montant (€)" />
-            </SimpleFormIterator>
+        <ArrayInput source="details" label="" defaultValue={defaultDetails}>
+          <SimpleFormIterator inline disableAdd={false} disableRemove={true}>
+            <SelectInput source="mode" label="Mode" choices={paymentMode} />
+            <NumberInput source="amount" label="Montant (€)" />
+          </SimpleFormIterator>
         </ArrayInput>
-        <NumberInput source="totalTTC" label="Total TTC (€)" readOnly/>
-        <SelectInput source="tva" label="TVA appliquée" choices={ tva } />
+        <NumberInput source="totalTTC" label="Total TTC (€)" readOnly />
+        <TvaSelectInput />
         <TotalsWatcher />
         <Box display="flex" gap={2} flexWrap="nowrap" width="100%" sx={{ marginTop: '1.5em', marginBottom: '2em' }}>
-            <Box flex={1}>
-                <BooleanInput source="relatedToMaintenance" label="Spécifique à un entretien" fullWidth
-                  helperText="Si coché, cette dépense pourra être rattachée à un entretien"
-                />
-            </Box>
+          <Box flex={1}>
+            <BooleanInput source="relatedToMaintenance" label="Spécifique à un entretien" fullWidth
+              helperText="Si coché, cette dépense pourra être rattachée à un entretien"
+            />
+          </Box>
         </Box>
-        <FileInput source="document" multiple={ false } label="Justificatif">
-            <MyFileField source="contentUrl"/>
+        <FileInput source="document" multiple={false} label="Justificatif">
+          <MyFileField source="contentUrl" />
         </FileInput>
       </SimpleForm>
-  </Edit>
-  )
+    </Edit>
+  );
 };

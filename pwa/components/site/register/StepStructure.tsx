@@ -1,9 +1,16 @@
 "use client";
 
-import { TextField, IconButton } from "@mui/material";
+import { TextField, IconButton, MenuItem, CircularProgress } from "@mui/material";
+import { useState, useEffect } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import type { RegistrationData } from "./RegisterStepper";
+
+interface CountryCodeOption {
+  id: number;
+  code: string;
+  label: string;
+}
 
 interface StepStructureProps {
   data: RegistrationData["club"];
@@ -21,6 +28,21 @@ const fieldSx = {
 
 export default function StepStructure({ data, onChange }: StepStructureProps) {
   const clampAeronefs = (n: number) => Math.max(1, Math.min(50, n));
+  const [countryCodes, setCountryCodes] = useState<CountryCodeOption[]>([]);
+  const [loadingCountries, setLoadingCountries] = useState(true);
+
+  useEffect(() => {
+    fetch("/country_codes?order[code]=asc&itemsPerPage=100", {
+      headers: { Accept: "application/ld+json" },
+    })
+      .then((r) => r.json())
+      .then((json) => {
+        const items = json["hydra:member"] || [];
+        setCountryCodes(items.map((c: any) => ({ id: c.id, code: c.code, label: c.label })));
+      })
+      .catch(() => {})
+      .finally(() => setLoadingCountries(false));
+  }, []);
 
   return (
     <div className="space-y-5">
@@ -47,6 +69,30 @@ export default function StepStructure({ data, onChange }: StepStructureProps) {
         variant="outlined"
         sx={fieldSx}
       />
+
+      <TextField
+        select
+        label="Pays"
+        value={data.countryCode}
+        onChange={(e) => onChange({ countryCode: e.target.value })}
+        required
+        fullWidth
+        variant="outlined"
+        sx={fieldSx}
+        disabled={loadingCountries}
+        InputProps={{
+          endAdornment: loadingCountries ? <CircularProgress size={20} /> : undefined,
+        }}
+      >
+        <MenuItem value="">
+          <em>Sélectionnez un pays</em>
+        </MenuItem>
+        {countryCodes.map((cc) => (
+          <MenuItem key={cc.code} value={cc.code}>
+            {cc.code} — {cc.label}
+          </MenuItem>
+        ))}
+      </TextField>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <TextField

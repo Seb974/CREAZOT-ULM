@@ -9,9 +9,16 @@ use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
 use App\Entity\ProfilPilote;
 use Doctrine\ORM\QueryBuilder;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class ProfilPiloteListExtension implements QueryCollectionExtensionInterface
 {
+    public function __construct(
+        private Security $security,
+        private RequestStack $requestStack,
+    ) {}
+
     public function applyToCollection(
         QueryBuilder $queryBuilder,
         QueryNameGeneratorInterface $queryNameGenerator,
@@ -38,5 +45,18 @@ class ProfilPiloteListExtension implements QueryCollectionExtensionInterface
             ->addSelect('pq')
             ->leftJoin('pq.qualification', 'qual')
             ->addSelect('qual');
+
+        if ($this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            return;
+        }
+
+        $request = $this->requestStack->getCurrentRequest();
+        $clientId = $request?->headers->get('X-Client-Id');
+
+        if ($clientId) {
+            $queryBuilder
+                ->andWhere('clients.id = :filterClientId')
+                ->setParameter('filterClientId', (int) $clientId);
+        }
     }
 }

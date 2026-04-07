@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Client;
+use App\Entity\CountryCode;
 use App\Entity\User;
+use App\Entity\UserClientRole;
 use App\Repository\ModulePackRepository;
 use App\Repository\PricingCategoryRepository;
 use App\Repository\UserRepository;
@@ -56,6 +58,7 @@ class RegistrationController extends AbstractController
         $city = trim($club['city']);
         $phone = $club['phone'] ?? null;
         $clubEmail = $club['email'] ?? null;
+        $countryCodeValue = trim($club['countryCode'] ?? '');
 
         $packIds = $modules['packIds'] ?? [];
         $nbAeronefs = $modules['nbAeronefs'] ?? 1;
@@ -77,11 +80,11 @@ class RegistrationController extends AbstractController
             return new JsonResponse(['error' => $e->getMessage()], $code);
         }
 
-        // --- c2) Assigner le rôle admin dans Keycloak ---
+        // --- c2) Assigner le rôle admin dans Keycloak (backward compat) ---
         try {
             $keycloakAdmin->assignRealmRole($keycloakId, 'admin');
         } catch (\RuntimeException $e) {
-            // Non bloquant : l'utilisateur est créé, le rôle pourra être assigné manuellement
+            // Non bloquant
         }
 
         try {
@@ -92,7 +95,7 @@ class RegistrationController extends AbstractController
             $user->firstName = $firstName;
             $user->lastName = $lastName;
             $user->setKeycloakId($keycloakId);
-            $user->setRoles(['OIDC_ADMIN']);
+            $user->setRoles(['OIDC_USER']);
 
             // --- e) Créer le Client entity ---
             $client = new Client();
@@ -105,6 +108,13 @@ class RegistrationController extends AbstractController
             $client->setTrialEndsAt(new \DateTimeImmutable('+30 days'));
             $client->setActive(true);
             $client->setMaxAeronefs($nbAeronefs);
+
+            if ($countryCodeValue !== '') {
+                $countryCodeEntity = $em->getRepository(CountryCode::class)->findOneBy(['code' => strtoupper($countryCodeValue)]);
+                if ($countryCodeEntity) {
+                    $client->setCountryCode($countryCodeEntity);
+                }
+            }
 
             $defaultCategory = $pricingCategoryRepository->findOneBy(['isDefault' => true]);
             if ($defaultCategory) {
@@ -124,23 +134,28 @@ class RegistrationController extends AbstractController
                 }
             }
 
-            // --- g) Associer User ↔ Client ---
+            // --- g) Associer User ↔ Client (ManyToMany for backward compat) ---
             $user->addClient($client);
+
+            // --- g2) Créer le rôle contextuel admin pour ce client ---
+            $ucr = new UserClientRole();
+            $ucr->setUser($user);
+            $ucr->setClient($client);
+            $ucr->setRole(UserClientRole::ROLE_ADMIN);
 
             // --- h) Persister ---
             $em->persist($client);
             $em->persist($user);
+            $em->persist($ucr);
             $em->flush();
 
             // --- i) Recalculer la tarification ---
             $pricingCalculator->recalculateForClient($client);
 
         } catch (\Throwable $e) {
-            // Rollback Keycloak si la persistence échoue
             try {
                 $keycloakAdmin->deleteUser($keycloakId);
             } catch (\Throwable) {
-                // Best effort cleanup
             }
 
             return new JsonResponse(

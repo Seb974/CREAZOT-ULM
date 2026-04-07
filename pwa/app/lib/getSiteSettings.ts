@@ -17,8 +17,8 @@ export interface SiteSettingsData {
 }
 
 const defaults: SiteSettingsData = {
-  name: "C6L",
-  url: "https://c6l.creazot.com",
+  name: "Logic-Ciel",
+  url: "https://logic-ciel.com",
   email: "contact@creazot.com",
 };
 

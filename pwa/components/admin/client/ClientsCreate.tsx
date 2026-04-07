@@ -1,4 +1,4 @@
-import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, TabbedForm, required, useRedirect, useNotify, TimeInput } from "react-admin";
+import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, TabbedForm, required, useRedirect, useNotify, TimeInput, ReferenceInput, AutocompleteInput } from "react-admin";
 import { Create } from "react-admin";
 import { colors, objectToFormData, timezones, fileInputSX, sanitizeData } from "../../../app/lib/client";
 import { Typography, Divider, Box } from '@mui/material';
@@ -91,6 +91,14 @@ export const ClientsCreate = () => {
                             <TimeInput source="maxHours" label="Heure de fin"/>
                         </Box>
                     </Box>
+                    <ReferenceInput source="countryCode" reference="country_codes" sort={{ field: "code", order: "ASC" }}>
+                        <AutocompleteInput
+                            optionText={(record: any) => record ? `${record.code} - ${record.label}` : ""}
+                            label="Code pays (TVA)"
+                            fullWidth
+                            helperText="Détermine les taux de TVA applicables"
+                        />
+                    </ReferenceInput>
                     <BooleanInput source="active" label="Utilisateur actif" />
                 </TabbedForm.Tab>
                 <TabbedForm.Tab label="Options">

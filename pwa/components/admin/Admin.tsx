@@ -18,6 +18,7 @@ import volResourceProps from "./vol/";
 import i18nProvider from "./i18nProvider";
 import Dashboard from "../dashboard/components/Dashboard/Dashboard";
 import entretienResourceProps from "./entretien";
+import { MembersList } from "./members/MembersList";
 import aeronefResourceProps from "./aeronef";
 import passagerResourceProps from "./passager";
 import userResourceProps from "./user";
@@ -53,6 +54,9 @@ import clientAccessRequestResourceProps from "./clientAccessRequest";
 import { SiteSettingsList } from "./siteSettings/SiteSettingsList";
 import { SiteSettingsEdit } from "./siteSettings/SiteSettingsEdit";
 import icaoReferenceResourceProps from "./icaoReference";
+import countryCodeResourceProps from "./countryCode";
+import taxRateResourceProps from "./taxRate";
+import flightRuleResourceProps from "./flightRule";
 
 const getClientHeaders = () => {
   try {
@@ -183,6 +187,9 @@ const AdminWithOIDC = () => {
         <ResourceGuesser name="module-pack-prices" {...modulePackPriceResourceProps}/>
         <ResourceGuesser name="site-settings" list={SiteSettingsList} edit={SiteSettingsEdit} />
         <ResourceGuesser name="icao_references" {...icaoReferenceResourceProps} />
+        <ResourceGuesser name="country_codes" {...countryCodeResourceProps} />
+        <ResourceGuesser name="tax_rates" {...taxRateResourceProps} />
+        <ResourceGuesser name="flight_rules" {...flightRuleResourceProps} />
         <ResourceGuesser name="client_access_requests" {...clientAccessRequestResourceProps}/>
         <CustomRoutes>
           <Route path="/landings" element={<LandingsList />} />
@@ -190,6 +197,7 @@ const AdminWithOIDC = () => {
           <Route path="/convert/:id" element={<ReservationCreate />} />
           <Route path="/subscriptions" element={<SubscriptionDashboard />} />
           <Route path="/request-access" element={<ClientAttachmentRequest />} />
+          <Route path="/members" element={<MembersList />} />
         </CustomRoutes>
       </AdminAdapter>
     </UserGuard>

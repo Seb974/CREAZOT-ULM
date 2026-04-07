@@ -38,12 +38,12 @@ class InitSiteSettingsCommand extends Command
 
         $settings = new SiteSettings();
         $settings->setName('C6L');
-        $settings->setUrl('https://c6l.creazot.com');
+        $settings->setUrl('https://logic-ciel.com');
 
         $this->em->persist($settings);
         $this->em->flush();
 
-        $io->success('SiteSettings créé avec succès (name="C6L", url="https://c6l.creazot.com").');
+        $io->success('SiteSettings créé avec succès (name="Logic-Ciel", url="https://logic-ciel.com").');
 
         return Command::SUCCESS;
     }

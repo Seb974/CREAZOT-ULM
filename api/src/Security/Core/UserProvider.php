@@ -41,6 +41,10 @@ final readonly class UserProvider implements AttributesBasedUserProviderInterfac
 
     /**
      * Create or update User on login.
+     *
+     * Keycloak roles mapping:
+     *   - super_admin → ROLE_SUPER_ADMIN + ROLE_ADMIN + OIDC_ADMIN (global)
+     *   - admin/pilot  → ROLE_USER only (per-client role via UserClientRole + ClientRoleListener)
      */
     public function loadUserByIdentifier(string $identifier, array $attributes = []): UserInterface
     {
@@ -63,18 +67,15 @@ final readonly class UserProvider implements AttributesBasedUserProviderInterfac
         $user->lastName  = $attributes['family_name'] ?? $user->lastName;
 
         if (!empty($attributes['realm_access']['roles'])) {
-            $currentRoles = $user->getRoles();
             $keycloakRoles = $attributes['realm_access']['roles'];
 
             if (in_array('super_admin', $keycloakRoles)) {
                 $newRoles = ['ROLE_USER', 'OIDC_USER', 'ROLE_ADMIN', 'OIDC_ADMIN', 'ROLE_SUPER_ADMIN'];
-            } elseif (in_array('admin', $keycloakRoles)) {
-                $newRoles = ['ROLE_USER', 'OIDC_USER', 'ROLE_ADMIN', 'OIDC_ADMIN'];
             } else {
                 $newRoles = ['ROLE_USER', 'OIDC_USER'];
             }
 
-            $user->setRoles(array_unique(array_merge($currentRoles, $newRoles)));
+            $user->setRoles($newRoles);
         }
 
         if (empty($user->getProfilPilote())) {

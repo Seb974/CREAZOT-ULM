@@ -64,7 +64,7 @@ class SiteSettings
     #[ORM\Column(length: 255)]
     #[Assert\Url]
     #[Groups(groups: ['SiteSettings:read', 'SiteSettings:write'])]
-    private string $url = 'https://c6l.creazot.com';
+    private string $url = 'https://logic-ciel.com';
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(groups: ['SiteSettings:read', 'SiteSettings:write'])]
@@ -129,6 +129,10 @@ class SiteSettings
     #[Groups(groups: ['SiteSettings:write'])]
     private ?string $notamifyApiKey = null;
 
+    #[ORM\Column(length: 500, nullable: true)]
+    #[Groups(groups: ['SiteSettings:write'])]
+    private ?string $kimiApiKey = null;
+
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['SiteSettings:read'])]
     private ?\DateTimeImmutable $createdAt = null;
@@ -164,6 +168,14 @@ class SiteSettings
     public function getNotamifyApiKeyMask(): ?string
     {
         return ($this->notamifyApiKey !== null && $this->notamifyApiKey !== '')
+            ? self::API_KEY_MASK
+            : null;
+    }
+
+    #[Groups(groups: ['SiteSettings:read'])]
+    public function getKimiApiKeyMask(): ?string
+    {
+        return ($this->kimiApiKey !== null && $this->kimiApiKey !== '')
             ? self::API_KEY_MASK
             : null;
     }
@@ -380,6 +392,20 @@ class SiteSettings
         }
         $this->notamifyApiKey = $notamifyApiKey;
 
+        return $this;
+    }
+
+    public function getKimiApiKey(): ?string
+    {
+        return $this->kimiApiKey;
+    }
+
+    public function setKimiApiKey(?string $kimiApiKey): static
+    {
+        if ($kimiApiKey === self::API_KEY_MASK) {
+            return $this;
+        }
+        $this->kimiApiKey = $kimiApiKey;
         return $this;
     }
 

@@ -141,4 +141,52 @@ class KeycloakAdminService
             ],
         ]);
     }
+
+    /**
+     * Remove a realm-level role from a Keycloak user.
+     */
+    public function removeRealmRole(string $keycloakUserId, string $roleName): void
+    {
+        $token = $this->getAdminToken();
+        $baseUrl = "{$this->keycloakBaseUrl}/admin/realms/{$this->realm}";
+        $headers = [
+            'Authorization' => "Bearer {$token}",
+            'Content-Type' => 'application/json',
+        ];
+
+        $response = $this->httpClient->request('GET', "{$baseUrl}/roles/{$roleName}", [
+            'headers' => $headers,
+        ]);
+
+        if ($response->getStatusCode() !== 200) {
+            return;
+        }
+
+        $role = $response->toArray();
+
+        $this->httpClient->request('DELETE', "{$baseUrl}/users/{$keycloakUserId}/role-mappings/realm", [
+            'headers' => $headers,
+            'json' => [
+                [
+                    'id' => $role['id'],
+                    'name' => $role['name'],
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Get realm roles assigned to a Keycloak user.
+     */
+    public function getUserRealmRoles(string $keycloakUserId): array
+    {
+        $token = $this->getAdminToken();
+
+        $response = $this->httpClient->request('GET',
+            "{$this->keycloakBaseUrl}/admin/realms/{$this->realm}/users/{$keycloakUserId}/role-mappings/realm",
+            ['headers' => ['Authorization' => "Bearer {$token}"]]
+        );
+
+        return $response->getStatusCode() === 200 ? $response->toArray() : [];
+    }
 }

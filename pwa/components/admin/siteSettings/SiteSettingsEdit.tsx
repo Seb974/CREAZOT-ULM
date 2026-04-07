@@ -294,6 +294,21 @@ export const SiteSettingsEdit = () => {
 
                     <Accordion sx={{ mt: 3, width: "100%" }} defaultExpanded={false}>
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <Typography>IA - Kimi K2.5 (Moonshot AI)</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                Clé API pour les fonctionnalités IA : analyse NOTAMs, briefing météo, chatbot.{" "}
+                                <Link href="https://platform.kimi.ai/console/api-keys" target="_blank" rel="noopener">
+                                    Obtenir une clé sur platform.kimi.ai
+                                </Link>
+                            </Typography>
+                            <TextInput source="kimiApiKey" label="Clé API Kimi (Moonshot)" fullWidth />
+                        </AccordionDetails>
+                    </Accordion>
+
+                    <Accordion sx={{ mt: 3, width: "100%" }} defaultExpanded={false}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                             <Typography>Intégration Odoo</Typography>
                         </AccordionSummary>
                         <AccordionDetails>

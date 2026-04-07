@@ -10,6 +10,7 @@ use App\Repository\ClientRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
+use App\Entity\CountryCode;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -29,7 +30,7 @@ use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-#[ApiFilter(SearchFilter::class, properties: ['slug' => 'exact'])]
+#[ApiFilter(SearchFilter::class, properties: ['slug' => 'exact', 'id' => 'exact'])]
 #[ApiResource(
     uriTemplate: '/clients{._format}',
     operations: [
@@ -359,6 +360,11 @@ class Client
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?bool $hasNotam = null;
+
+    #[ORM\ManyToOne(targetEntity: CountryCode::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?CountryCode $countryCode = null;
 
     /**
      * @var Collection<int, User>
@@ -1088,6 +1094,19 @@ class Client
 
         return $this;
     }
+
+    public function getCountryCode(): ?CountryCode
+    {
+        return $this->countryCode;
+    }
+
+    public function setCountryCode(?CountryCode $countryCode): static
+    {
+        $this->countryCode = $countryCode;
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, User>
      */

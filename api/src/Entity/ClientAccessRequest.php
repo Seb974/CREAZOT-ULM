@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Patch;
 use App\Repository\ClientAccessRequestRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -37,7 +38,7 @@ use App\Entity\TenantAwareInterface;
             uriTemplate: '/client_access_requests/{id}{._format}',
             security: 'is_granted("OIDC_ADMIN") or object.getRequestedBy() === user',
         ),
-        new Put(
+        new Patch(
             uriTemplate: '/client_access_requests/{id}{._format}',
             security: 'is_granted("OIDC_ADMIN")',
         ),

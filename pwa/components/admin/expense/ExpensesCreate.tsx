@@ -1,17 +1,17 @@
-import { Box, Link, Typography } from "@mui/material";
-import { Create, SimpleForm, TextInput, NumberInput, SelectInput, DateInput, required, ArrayInput, SimpleFormIterator, FileInput, useRecordContext, BooleanInput } from "react-admin";
-import { paymentMode, syncOdooDocument, tva } from "../../../app/lib/client";
+import { Box, Typography } from "@mui/material";
+import { Create, SimpleForm, TextInput, NumberInput, SelectInput, DateInput, required, ArrayInput, SimpleFormIterator, FileInput, BooleanInput } from "react-admin";
+import { paymentMode, syncOdooDocument } from "../../../app/lib/client";
 import { useSessionContext } from "../SessionContextProvider";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { isDefined } from "../../../app/lib/utils";
 import { MyFileField } from "../shared/OdooDocumentField";
+import TvaSelectInput from "./TvaSelectInput";
 
 const TotalsWatcher = () => {
   const { setValue } = useFormContext();
   const details = useWatch({ name: "details" }) || [];
   const tvaRate = parseFloat(useWatch({ name: "tva" }) || 0);
-
   const [manualHT, setManualHT] = useState<boolean>(false);
 
   useEffect(() => {
@@ -41,16 +41,15 @@ const TotalsWatcher = () => {
 };
 
 export const ExpensesCreate = () => {
-
   const { session } = useSessionContext();
   const defaultDetails = [{ mode: '', amount: '' }];
 
-  const transform = async data => {
+  const transform = async (data: any) => {
     if (isDefined(data.document)) {
       const fileName = data?.document?.description || data?.document?.title || data?.document?.path || "Sans nom";
-      const doc = data.document ? {...data.document, description: fileName} : null;
+      const doc = data.document ? { ...data.document, description: fileName } : null;
       const justificatif = await syncOdooDocument(doc, 'expense', null, session);
-      return {... data, document: justificatif};
+      return { ...data, document: justificatif };
     }
     return data;
   };
@@ -58,34 +57,30 @@ export const ExpensesCreate = () => {
   return (
     <Create transform={transform} redirect="list">
       <SimpleForm>
-        <DateInput source="date" defaultValue={ new Date() } label="Date" validate={required()}/>
-        <TextInput source="beneficiaire" label="Bénéficiaire" validate={required()}/>
-        <TextInput source="libelle" label="Libellé"/>
+        <DateInput source="date" defaultValue={new Date()} label="Date" validate={required()} />
+        <TextInput source="beneficiaire" label="Bénéficiaire" validate={required()} />
+        <TextInput source="libelle" label="Libellé" />
         <Typography className="mt-4" variant="h6" gutterBottom>Modes de paiement</Typography>
-        <ArrayInput source="details" label="" defaultValue={ defaultDetails }>
-            <SimpleFormIterator inline disableAdd={false} disableRemove={true}>
-                <SelectInput
-                    source="mode"
-                    label="Mode"
-                    choices={ paymentMode }
-                />
-                <NumberInput source="amount" label="Montant (€)" validate={required()}/>
-            </SimpleFormIterator>
+        <ArrayInput source="details" label="" defaultValue={defaultDetails}>
+          <SimpleFormIterator inline disableAdd={false} disableRemove={true}>
+            <SelectInput source="mode" label="Mode" choices={paymentMode} />
+            <NumberInput source="amount" label="Montant (€)" validate={required()} />
+          </SimpleFormIterator>
         </ArrayInput>
-        <NumberInput source="totalTTC" label="Total TTC (€)" readOnly/>
-        <SelectInput source="tva" label="TVA appliquée" choices={ tva } defaultValue={ tva[0].id }/>
+        <NumberInput source="totalTTC" label="Total TTC (€)" readOnly />
+        <TvaSelectInput isCreate />
         <TotalsWatcher />
         <Box display="flex" gap={2} flexWrap="nowrap" width="100%" sx={{ marginTop: '2em', marginBottom: '2em' }}>
-            <Box flex={1}>
-                <BooleanInput source="relatedToMaintenance" label="Spécifique à un entretien" fullWidth
-                  helperText="Si coché, cette dépense pourra être rattachée à un entretien" defaultValue={ false }
-                />
-            </Box>
+          <Box flex={1}>
+            <BooleanInput source="relatedToMaintenance" label="Spécifique à un entretien" fullWidth
+              helperText="Si coché, cette dépense pourra être rattachée à un entretien" defaultValue={false}
+            />
+          </Box>
         </Box>
-        <FileInput source="document" multiple={ false } label="Justificatif">
-            <MyFileField source="contentUrl"/>
+        <FileInput source="document" multiple={false} label="Justificatif">
+          <MyFileField source="contentUrl" />
         </FileInput>
       </SimpleForm>
     </Create>
-  )
+  );
 };

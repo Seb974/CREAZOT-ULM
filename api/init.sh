@@ -8,16 +8,18 @@ cp -ru /srv/assets/default-images/. /srv/api/public/images/
 
 echo "✅ Copie des images terminée."
 
-# 💡 Facultatif : attendre que la base PostgreSQL soit prête (décommenter si utile)
+# 💡 Attente que PostgreSQL soit disponible
 echo "⏳ Attente que PostgreSQL soit disponible..."
-until pg_isready -h database -p 5432 -U $POSTGRES_USER > /dev/null 2>&1; do
+DB_HOST=$(echo "$DATABASE_URL" | sed -E 's|.*@([^:/]+).*|\1|')
+DB_PORT=$(echo "$DATABASE_URL" | sed -E 's|.*:([0-9]+)/.*|\1|')
+until pg_isready -h "$DB_HOST" -p "$DB_PORT" > /dev/null 2>&1; do
   sleep 1
 done
 echo "✅ PostgreSQL est prêt."
 
 # ⚙️ Exécuter les migrations
 echo "📦 Lancement des migrations Doctrine..."
-php bin/console doctrine:migrations:migrate --no-interaction
+php bin/console doctrine:migrations:migrate --no-interaction || echo "WARNING: Migrations had issues, continuing startup..."
 
 # 🌱 Initialiser les données si la base est vide
 echo "🌱 Initialisation des données de référence..."

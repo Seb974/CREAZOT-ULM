@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Patch;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -47,6 +48,10 @@ use App\Entity\ProfilPilote;
             security: 'is_granted("OIDC_ADMIN") or object === user'
         ),
         new Put(
+            uriTemplate: '/users/{id}{._format}',
+            security: 'is_granted("OIDC_ADMIN")'
+        ),
+        new Patch(
             uriTemplate: '/users/{id}{._format}',
             security: 'is_granted("OIDC_ADMIN")'
         ),

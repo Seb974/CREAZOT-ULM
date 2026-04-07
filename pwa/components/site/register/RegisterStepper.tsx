@@ -22,6 +22,7 @@ export interface RegistrationData {
     phone: string;
     email: string;
     nbAeronefs: number;
+    countryCode: string;
   };
   modules: {
     packIds: number[];
@@ -39,7 +40,7 @@ export interface RegistrationData {
 const STEPS = ["Structure", "Modules", "Compte"];
 
 const initialData: RegistrationData = {
-  club: { name: "", city: "", phone: "", email: "", nbAeronefs: 1 },
+  club: { name: "", city: "", phone: "", email: "", nbAeronefs: 1, countryCode: "" },
   modules: { packIds: [] },
   user: {
     firstName: "",
@@ -70,7 +71,7 @@ export default function RegisterStepper() {
   const validateStep = (step: number): boolean => {
     switch (step) {
       case 0:
-        return data.club.name.trim() !== "" && data.club.city.trim() !== "";
+        return data.club.name.trim() !== "" && data.club.city.trim() !== "" && data.club.countryCode.trim() !== "";
       case 1:
         return data.modules.packIds.length > 0;
       case 2: {
@@ -119,6 +120,7 @@ export default function RegisterStepper() {
             city: data.club.city,
             phone: data.club.phone,
             email: data.club.email,
+            countryCode: data.club.countryCode,
           },
           modules: {
             packIds: data.modules.packIds,
