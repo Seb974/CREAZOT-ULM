@@ -29,6 +29,7 @@ class ModulePackSyncSubscriber implements EventSubscriberInterface
         'hasIndividualFlightLogs',
         'hasGroupUpdate',
         'hasNotam',
+        'hasAiReservationAssistant',
     ];
 
     public function __construct(

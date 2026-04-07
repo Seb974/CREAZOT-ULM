@@ -361,6 +361,27 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?bool $hasNotam = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ["Client:write", "Client:read"])]
+    private ?bool $hasAiReservationAssistant = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ["Client:write", "Client:read"])]
+    private ?string $aiReservationEmail = null;
+
+    #[ORM\Column(length: 500, nullable: true)]
+    #[Groups(groups: ["Client:write"])]
+    private ?string $aiReservationImapDsn = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ["Client:write"])]
+    private ?string $aiReservationImapUser = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ["Client:write"])]
+    private ?string $aiReservationImapPassword = null;
+
+
     #[ORM\ManyToOne(targetEntity: CountryCode::class)]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(groups: ['Client:write', 'Client:read'])]
@@ -1301,4 +1322,60 @@ class Client
 
         return $this;
     }
+
+    public function isHasAiReservationAssistant(): ?bool
+    {
+        return $this->hasAiReservationAssistant;
+    }
+
+    public function setHasAiReservationAssistant(?bool $v): static
+    {
+        $this->hasAiReservationAssistant = $v;
+        return $this;
+    }
+
+    public function getAiReservationEmail(): ?string
+    {
+        return $this->aiReservationEmail;
+    }
+
+    public function setAiReservationEmail(?string $v): static
+    {
+        $this->aiReservationEmail = $v;
+        return $this;
+    }
+
+    public function getAiReservationImapDsn(): ?string
+    {
+        return $this->aiReservationImapDsn;
+    }
+
+    public function setAiReservationImapDsn(?string $v): static
+    {
+        $this->aiReservationImapDsn = $v;
+        return $this;
+    }
+
+    public function getAiReservationImapUser(): ?string
+    {
+        return $this->aiReservationImapUser;
+    }
+
+    public function setAiReservationImapUser(?string $v): static
+    {
+        $this->aiReservationImapUser = $v;
+        return $this;
+    }
+
+    public function getAiReservationImapPassword(): ?string
+    {
+        return $this->aiReservationImapPassword;
+    }
+
+    public function setAiReservationImapPassword(?string $v): static
+    {
+        $this->aiReservationImapPassword = $v;
+        return $this;
+    }
+
 }
