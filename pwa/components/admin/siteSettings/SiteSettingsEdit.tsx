@@ -164,63 +164,6 @@ const VapiTestButton = () => {
     );
 };
 
-const VapiSetupButton = () => {
-    const { session } = useSessionContext();
-    const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<{ success?: boolean; error?: string; message?: string; assistant_id?: string } | null>(null);
-    const record = useRecordContext();
-
-    const handleSetup = async () => {
-        setLoading(true);
-        setResult(null);
-        try {
-            const response = await fetch(`${API_DOMAIN}/admin/vapi/setup-assistant`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${session?.accessToken}`,
-                },
-                body: JSON.stringify({ client_id: 1 }),
-            });
-            const data = await response.json();
-            setResult(data);
-        } catch {
-            setResult({ error: "Erreur réseau." });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <Box sx={{ mt: 2 }}>
-            <Button
-                variant="contained"
-                color="secondary"
-                startIcon={loading ? <CircularProgress size={18} /> : <SmartToyIcon />}
-                onClick={handleSetup}
-                disabled={loading}
-                sx={{ textTransform: "none" }}
-            >
-                {loading ? "Configuration..." : (record?.vapiAssistantId ? "Mettre à jour l'assistant Vapi" : "Créer l'assistant Vapi")}
-            </Button>
-            {result && (
-                <Alert
-                    severity={result.success ? "success" : "error"}
-                    icon={result.success ? <CheckCircleIcon /> : undefined}
-                    sx={{ mt: 1.5 }}
-                >
-                    {result.message || result.error}
-                    {result.assistant_id && (
-                        <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
-                            ID : {result.assistant_id}
-                        </Typography>
-                    )}
-                </Alert>
-            )}
-        </Box>
-    );
-};
-
 export const SiteSettingsEdit = () => {
     const { updateSiteSettings } = useSiteSettings();
     const { session } = useSessionContext();
@@ -448,16 +391,14 @@ export const SiteSettingsEdit = () => {
                         </AccordionSummary>
                         <AccordionDetails>
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                Assistant vocal IA pour la gestion des réservations par téléphone.{" "}
+                                Clé API SaaS partagée pour les assistants vocaux de réservation.
+                                Chaque client avec le module "Assistant Vocal" activé aura son propre assistant.{" "}
                                 <Link href="https://dashboard.vapi.ai" target="_blank" rel="noopener">
                                     Dashboard Vapi.ai
                                 </Link>
                             </Typography>
                             <ApiKeyInput source="vapiApiKey" label="Clé API privée Vapi" fullWidth />
-                            <TextInput source="vapiAssistantId" label="ID de l'assistant Vapi" fullWidth disabled
-                                helperText="Rempli automatiquement lors de la configuration de l'assistant." />
                             <VapiTestButton />
-                            <VapiSetupButton />
                         </AccordionDetails>
                     </Accordion>
                 </SimpleForm>

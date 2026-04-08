@@ -1,9 +1,12 @@
-import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, SimpleFormIterator, ArrayInput, TabbedForm, useRedirect, useNotify, TimeInput, ReferenceInput, AutocompleteInput, ReferenceArrayInput, CheckboxGroupInput, DateTimeInput, NumberField, DateInput } from "react-admin";
+import { TextInput, FileInput, FileField, NumberInput, BooleanInput, SelectInput, SimpleFormIterator, ArrayInput, TabbedForm, useRedirect, useNotify, TimeInput, ReferenceInput, AutocompleteInput, ReferenceArrayInput, CheckboxGroupInput, DateTimeInput, NumberField, DateInput, useRecordContext } from "react-admin";
 import { Edit } from "react-admin";
 import { useFormContext, useWatch } from "react-hook-form";
 import { timezones, fileInputSX, uploadImages, sanitizeData } from "../../../app/lib/client";
-import { Typography, Divider, Box, Accordion, AccordionSummary, AccordionDetails, Alert, AlertTitle } from '@mui/material';
+import { Typography, Divider, Box, Accordion, AccordionSummary, AccordionDetails, Alert, AlertTitle, Button, CircularProgress } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import PhoneIcon from '@mui/icons-material/Phone';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { useState } from 'react';
 import { ColorPreview } from './ColorPreview';
 import { ThanksOptions } from './ThanksOptions';
 import { useClient } from '../../admin/ClientProvider';
@@ -36,6 +39,75 @@ const BillingInfoAlert = () => {
             <strong>Annuel</strong> : une seule facture par an avec {annualDiscount}% de remise. Engagement ferme, pas de remboursement anticipé.<br />
             Les factures sont envoyées automatiquement par email. En cas d'impayé, le compte est suspendu après 30 jours.
         </Alert>
+    );
+};
+
+const API_DOMAIN = process.env.NEXT_PUBLIC_ENTRYPOINT || "";
+
+const VapiClientSetup = () => {
+    const { session } = useSessionContext();
+    const record = useRecordContext();
+    const [loading, setLoading] = useState(false);
+    const [result, setResult] = useState<{ success?: boolean; error?: string; message?: string; assistant_id?: string } | null>(null);
+
+    const hasVoiceAssistant = useWatch({ name: "hasVoiceAssistant" });
+    const vapiAssistantId = useWatch({ name: "vapiAssistantId" });
+    const clientId = record?.id;
+
+    if (!hasVoiceAssistant) return null;
+
+    const handleSetup = async () => {
+        setLoading(true);
+        setResult(null);
+        try {
+            const response = await fetch(`${API_DOMAIN}/admin/vapi/setup-assistant/${clientId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${session?.accessToken}`,
+                },
+            });
+            const data = await response.json();
+            setResult(data);
+        } catch {
+            setResult({ error: "Erreur réseau." });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Accordion sx={{ mt: 2, width: "100%" }} defaultExpanded={!!vapiAssistantId}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <PhoneIcon sx={{ mr: 1 }} />
+                <Typography>Assistant Vocal (Vapi)</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Assistant vocal IA dédié à ce club pour la gestion des réservations par téléphone.
+                </Typography>
+                {vapiAssistantId && (
+                    <Alert severity="success" icon={<CheckCircleIcon />} sx={{ mb: 2 }}>
+                        Assistant configuré — ID : <code>{vapiAssistantId}</code>
+                    </Alert>
+                )}
+                <Button
+                    variant="contained"
+                    color="secondary"
+                    startIcon={loading ? <CircularProgress size={18} /> : <PhoneIcon />}
+                    onClick={handleSetup}
+                    disabled={loading}
+                    sx={{ textTransform: "none" }}
+                >
+                    {loading ? "Configuration..." : (vapiAssistantId ? "Mettre à jour l'assistant" : "Créer l'assistant vocal")}
+                </Button>
+                {result && (
+                    <Alert severity={result.success ? "success" : "error"} sx={{ mt: 1.5 }}>
+                        {result.message || result.error}
+                    </Alert>
+                )}
+            </AccordionDetails>
+        </Accordion>
     );
 };
 
@@ -214,8 +286,17 @@ export const ClientsEdit = () => {
                             <Box flex={1}>
                                 <BooleanInput source="hasNotam" label="NOTAMs / SNOWTAMs" fullWidth/>
                             </Box>
+                            <Box flex={1}>
+                                <BooleanInput source="hasAiReservationAssistant" label="Assistant IA (email)" fullWidth/>
+                            </Box>
+                        </Box>
+                        <Box display="flex" gap={2} flexWrap="nowrap" width="100%">
+                            <Box flex={1}>
+                                <BooleanInput source="hasVoiceAssistant" label="Assistant Vocal (téléphone)" fullWidth/>
+                            </Box>
                             <Box flex={1}/>
                         </Box>
+                        <VapiClientSetup />
                         <Divider sx={{ mt: 2, borderBottomWidth: 2, borderColor: '#666' }} />
                     </TabbedForm.Tab>
                     <TabbedForm.Tab label="Dashboard">

@@ -30,6 +30,7 @@ class ModulePackSyncSubscriber implements EventSubscriberInterface
         'hasGroupUpdate',
         'hasNotam',
         'hasAiReservationAssistant',
+        'hasVoiceAssistant',
     ];
 
     public function __construct(

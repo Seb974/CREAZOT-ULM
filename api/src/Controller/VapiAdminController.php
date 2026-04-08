@@ -6,7 +6,6 @@ namespace App\Controller;
 
 use App\Entity\Client;
 use App\Service\VapiService;
-use App\Repository\SiteSettingsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,29 +20,28 @@ class VapiAdminController extends AbstractController
 {
     public function __construct(
         private VapiService $vapiService,
-        private SiteSettingsRepository $settingsRepo,
         private EntityManagerInterface $em,
         private LoggerInterface $logger,
     ) {}
 
-    #[Route('/setup-assistant', name: 'vapi_setup_assistant', methods: ['POST'])]
-    public function setupAssistant(Request $request): JsonResponse
+    #[Route('/setup-assistant/{clientId}', name: 'vapi_setup_assistant', methods: ['POST'])]
+    public function setupAssistant(int $clientId, Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        $clientId = (int) ($data['client_id'] ?? 0);
-
         $client = $this->em->getRepository(Client::class)->find($clientId);
         if (!$client) {
             return new JsonResponse(['error' => 'Client non trouvé'], 404);
         }
 
+        if (!$client->isHasVoiceAssistant()) {
+            return new JsonResponse(['error' => 'Le module Assistant Vocal n\'est pas activé pour ce client.'], 403);
+        }
+
         $serverUrl = $request->getSchemeAndHttpHost() . '/webhook/vapi';
-        $settings = $this->settingsRepo->findInstance();
-        $existingAssistantId = $settings?->getVapiAssistantId();
+        $existingAssistantId = $client->getVapiAssistantId();
 
         try {
             if ($existingAssistantId) {
-                $result = $this->vapiService->updateAssistant(
+                $this->vapiService->updateAssistant(
                     $existingAssistantId,
                     $client->getName() ?? 'Club',
                     $serverUrl,
@@ -64,8 +62,8 @@ class VapiAdminController extends AbstractController
             );
 
             $newAssistantId = $result['id'] ?? null;
-            if ($newAssistantId && $settings) {
-                $settings->setVapiAssistantId($newAssistantId);
+            if ($newAssistantId) {
+                $client->setVapiAssistantId($newAssistantId);
                 $this->em->flush();
             }
 
@@ -97,6 +95,39 @@ class VapiAdminController extends AbstractController
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    #[Route('/assistant-status/{clientId}', name: 'vapi_assistant_status', methods: ['GET'])]
+    public function assistantStatus(int $clientId): JsonResponse
+    {
+        $client = $this->em->getRepository(Client::class)->find($clientId);
+        if (!$client) {
+            return new JsonResponse(['error' => 'Client non trouvé'], 404);
+        }
+
+        $assistantId = $client->getVapiAssistantId();
+        if (!$assistantId) {
+            return new JsonResponse([
+                'configured' => false,
+                'message' => 'Aucun assistant configuré pour ce client.',
+            ]);
+        }
+
+        try {
+            $assistant = $this->vapiService->getAssistant($assistantId);
+            return new JsonResponse([
+                'configured' => true,
+                'assistant_id' => $assistantId,
+                'assistant_name' => $assistant['name'] ?? null,
+                'created_at' => $assistant['createdAt'] ?? null,
+            ]);
+        } catch (\Throwable $e) {
+            return new JsonResponse([
+                'configured' => true,
+                'assistant_id' => $assistantId,
+                'error' => 'Assistant introuvable sur Vapi : ' . $e->getMessage(),
+            ]);
         }
     }
 

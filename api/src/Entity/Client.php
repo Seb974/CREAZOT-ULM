@@ -365,6 +365,14 @@ class Client
     #[Groups(groups: ["Client:write", "Client:read"])]
     private ?bool $hasAiReservationAssistant = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasVoiceAssistant = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?string $vapiAssistantId = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(groups: ["Client:write", "Client:read"])]
     private ?string $aiReservationEmail = null;
@@ -1375,6 +1383,28 @@ class Client
     public function setAiReservationImapPassword(?string $v): static
     {
         $this->aiReservationImapPassword = $v;
+        return $this;
+    }
+
+    public function isHasVoiceAssistant(): ?bool
+    {
+        return $this->hasVoiceAssistant;
+    }
+
+    public function setHasVoiceAssistant(?bool $v): static
+    {
+        $this->hasVoiceAssistant = $v;
+        return $this;
+    }
+
+    public function getVapiAssistantId(): ?string
+    {
+        return $this->vapiAssistantId;
+    }
+
+    public function setVapiAssistantId(?string $vapiAssistantId): static
+    {
+        $this->vapiAssistantId = $vapiAssistantId;
         return $this;
     }
 

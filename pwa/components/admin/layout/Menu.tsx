@@ -82,7 +82,7 @@ const CustomMenu = () => {
         />
       }
       {/* @ts-ignore */}
-      { (isDefined(client) && isDefined(client.hasAiReservationAssistant) && client.hasAiReservationAssistant) && isAdmin &&
+      { (isDefined(client) && (client.hasAiReservationAssistant || client.hasVoiceAssistant)) && isAdmin &&
         <Menu.Item
           to="/conversation_threads"
           primaryText="Assistant IA"

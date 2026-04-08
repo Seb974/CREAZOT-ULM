@@ -137,10 +137,6 @@ class SiteSettings
     #[Groups(groups: ["SiteSettings:write"])]
     private ?string $vapiApiKey = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(groups: ["SiteSettings:write", "SiteSettings:read"])]
-    private ?string $vapiAssistantId = null;
-
 
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['SiteSettings:read'])]
@@ -462,17 +458,6 @@ class SiteSettings
         return ($this->vapiApiKey !== null && $this->vapiApiKey !== "")
             ? self::API_KEY_MASK
             : null;
-    }
-
-    public function getVapiAssistantId(): ?string
-    {
-        return $this->vapiAssistantId;
-    }
-
-    public function setVapiAssistantId(?string $vapiAssistantId): static
-    {
-        $this->vapiAssistantId = $vapiAssistantId;
-        return $this;
     }
 
 }
