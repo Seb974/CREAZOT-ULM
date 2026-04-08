@@ -79,7 +79,7 @@ const formatAnalysis = (text) => {
     });
 };
 
-const NotamCard = ({ notam, index, icao, session }) => {
+const NotamCard = ({ notam, index, icao, session, hasAI = false }) => {
     const [aiResult, setAiResult] = useState(null);
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState(null);
@@ -136,7 +136,7 @@ const NotamCard = ({ notam, index, icao, session }) => {
                 <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
                     {id}
                 </Typography>
-                <Chip
+                {hasAI && <Chip
                     icon={<AutoAwesomeIcon sx={{ fontSize: 14 }} />}
                     label="Interpréter"
                     size="small"
@@ -150,7 +150,7 @@ const NotamCard = ({ notam, index, icao, session }) => {
                         fontSize: '0.7rem',
                         '&:hover': { backgroundColor: '#e1bee7' },
                     }}
-                />
+                />}
             </Box>
             <Typography
                 variant="body2"
@@ -276,7 +276,7 @@ const NotamCard = ({ notam, index, icao, session }) => {
     );
 };
 
-export const NotamView = ({ code }) => {
+export const NotamView = ({ code, hasAI = false }) => {
     const { session } = useSessionContext();
     const [notams, setNotams] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -321,7 +321,7 @@ export const NotamView = ({ code }) => {
                 {notams.length} NOTAM{notams.length > 1 ? 's' : ''} actif{notams.length > 1 ? 's' : ''} pour <strong>{code}</strong>
             </Typography>
             {notams.map((notam, i) => (
-                <NotamCard key={notam.id || notam.number || i} notam={notam} index={i} icao={code} session={session} />
+                <NotamCard key={notam.id || notam.number || i} notam={notam} index={i} icao={code} session={session} hasAI={hasAI} />
             ))}
         </Box>
     );

@@ -43,6 +43,7 @@ export const MetarView = ({ showGraphic, setShowGraphic, switchToMap, hidden, cl
 
     const hasNotam = isDefined(client.hasNotam) && client.hasNotam;
     const hasMicrotrak = clientWithMicrotrakTags(client);
+    const hasAI = isDefined(client.hasAI) && client.hasAI;
 
     const buildTabs = () => {
         const tabs = [];
@@ -53,7 +54,9 @@ export const MetarView = ({ showGraphic, setShowGraphic, switchToMap, hidden, cl
         if (hasNotam) {
             tabs.push({ key: 'notam', label: 'NOTAM', icon: <AnnouncementIcon sx={{ fontSize: 18 }} /> });
         }
-        tabs.push({ key: 'scoreops', label: 'Avis de KIMI', icon: <FlightTakeoffIcon sx={{ fontSize: 18 }} /> });
+        if (hasAI) {
+            tabs.push({ key: 'scoreops', label: 'Avis de KIMI', icon: <FlightTakeoffIcon sx={{ fontSize: 18 }} /> });
+        }
         return tabs;
     };
 
@@ -102,8 +105,8 @@ export const MetarView = ({ showGraphic, setShowGraphic, switchToMap, hidden, cl
 
                         <div className="flex-grow">
                             {activeKey === 'graphic' && <GraphicMetar code={selectedCode} />}
-                            {activeKey === 'encoded' && <EncodedMetarTaf code={selectedCode} />}
-                            {activeKey === 'notam' && <NotamView code={selectedCode} />}
+                            {activeKey === 'encoded' && <EncodedMetarTaf code={selectedCode} hasAI={hasAI} />}
+                            {activeKey === 'notam' && <NotamView code={selectedCode} hasAI={hasAI} />}
                             {activeKey === 'scoreops' && <ScoreOpsView code={selectedCode} />}
                         </div>
 

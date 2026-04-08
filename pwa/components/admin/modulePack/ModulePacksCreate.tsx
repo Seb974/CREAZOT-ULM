@@ -24,6 +24,9 @@ const MODULE_CHOICES = [
   { id: "hasIndividualFlightLogs", name: "Carnets de vol individuels" },
   { id: "hasGroupUpdate", name: "Mise à jour groupée" },
   { id: "hasNotam", name: "NOTAMs / SNOWTAMs" },
+  { id: "hasAI", name: "Fonctions IA (Briefing, NOTAM, Kimi)" },
+  { id: "hasAiReservationAssistant", name: "Assistant IA réservation (email)" },
+  { id: "hasVoiceAssistant", name: "Assistant vocal (téléphone)" },
 ];
 
 export const ModulePacksCreate = () => (

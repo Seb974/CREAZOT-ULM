@@ -11,7 +11,7 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import CloseIcon from '@mui/icons-material/Close';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 
-export const EncodedMetarTaf = ({ code }) => {
+export const EncodedMetarTaf = ({ code, hasAI = false }) => {
 
     const { session } = useSessionContext();
 
@@ -146,7 +146,7 @@ export const EncodedMetarTaf = ({ code }) => {
 
     return (
         <>
-            {hasData && (
+            {hasData && hasAI && (
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
                     <Chip
                         icon={<AutoAwesomeIcon sx={{ fontSize: 16 }} />}

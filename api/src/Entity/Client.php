@@ -362,6 +362,10 @@ class Client
     private ?bool $hasNotam = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasAI = null;
+
+    #[ORM\Column(nullable: true)]
     #[Groups(groups: ["Client:write", "Client:read"])]
     private ?bool $hasAiReservationAssistant = null;
 
@@ -1383,6 +1387,17 @@ class Client
     public function setAiReservationImapPassword(?string $v): static
     {
         $this->aiReservationImapPassword = $v;
+        return $this;
+    }
+
+    public function isHasAI(): ?bool
+    {
+        return $this->hasAI;
+    }
+
+    public function setHasAI(?bool $v): static
+    {
+        $this->hasAI = $v;
         return $this;
     }
 
