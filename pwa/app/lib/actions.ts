@@ -115,7 +115,7 @@ export const analyzeNotamAi = (notamRaw: string, icao: string, session: any = nu
       'Content-Type': 'application/json',
       ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
     },
-    data: { notam: notamRaw, icao },
+    data: { raw: notamRaw, icao },
     timeout: 30000,
   }).then((r) => r.data);
 };

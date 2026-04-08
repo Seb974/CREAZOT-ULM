@@ -56,7 +56,6 @@ class FlightRule implements TenantAwareInterface
     #[Groups(['FlightRule:read', 'FlightRule:write'])]
     private ?string $name = null;
 
-    // --- Wind thresholds (knots) ---
     #[ORM\Column(options: ['default' => 18])]
     #[Groups(['FlightRule:read', 'FlightRule:write'])]
     private int $limiteWindKts = 18;
@@ -73,7 +72,6 @@ class FlightRule implements TenantAwareInterface
     #[Groups(['FlightRule:read', 'FlightRule:write'])]
     private int $maxGustKts = 35;
 
-    // --- Crosswind thresholds (knots) ---
     #[ORM\Column(options: ['default' => 10])]
     #[Groups(['FlightRule:read', 'FlightRule:write'])]
     private int $limiteCrosswindKts = 10;
@@ -82,7 +80,6 @@ class FlightRule implements TenantAwareInterface
     #[Groups(['FlightRule:read', 'FlightRule:write'])]
     private int $maxCrosswindKts = 15;
 
-    // --- Visibility thresholds (meters) ---
     #[ORM\Column(options: ['default' => 5000])]
     #[Groups(['FlightRule:read', 'FlightRule:write'])]
     private int $limiteVisibilityM = 5000;
@@ -91,7 +88,6 @@ class FlightRule implements TenantAwareInterface
     #[Groups(['FlightRule:read', 'FlightRule:write'])]
     private int $minVisibilityM = 3000;
 
-    // --- Ceiling thresholds (feet AGL) ---
     #[ORM\Column(options: ['default' => 1500])]
     #[Groups(['FlightRule:read', 'FlightRule:write'])]
     private int $limiteCeilingFt = 1500;
@@ -100,21 +96,22 @@ class FlightRule implements TenantAwareInterface
     #[Groups(['FlightRule:read', 'FlightRule:write'])]
     private int $minCeilingFt = 500;
 
-    // --- Runway QFU (kept for backward compat, removed from form) ---
     #[ORM\Column(nullable: true)]
     #[Groups(['FlightRule:read', 'FlightRule:write'])]
     private ?int $runwayQfu = null;
 
-    // --- Day/Night margins (minutes) ---
-    #[ORM\Column(options: ['default' => 30])]
+    #[ORM\Column(options: ['default' => 0])]
     #[Groups(['FlightRule:read', 'FlightRule:write'])]
-    private int $dayMarginMinutes = 30;
+    private int $dayMarginMinutes = 0;
 
-    #[ORM\Column(options: ['default' => 30])]
+    #[ORM\Column(options: ['default' => 0])]
     #[Groups(['FlightRule:read', 'FlightRule:write'])]
-    private int $nightMarginMinutes = 30;
+    private int $nightMarginMinutes = 0;
 
-    // --- NOTAM strategy: ai, block, warn, ignore ---
+    #[ORM\Column(options: ['default' => 60])]
+    #[Groups(['FlightRule:read', 'FlightRule:write'])]
+    private int $minFlightDurationMinutes = 60;
+
     #[ORM\Column(length: 10, options: ['default' => 'ai'])]
     #[Groups(['FlightRule:read', 'FlightRule:write'])]
     private string $notamStrategy = 'ai';
@@ -175,6 +172,8 @@ class FlightRule implements TenantAwareInterface
     public function setDayMarginMinutes(int $v): static { $this->dayMarginMinutes = $v; return $this; }
     public function getNightMarginMinutes(): int { return $this->nightMarginMinutes; }
     public function setNightMarginMinutes(int $v): static { $this->nightMarginMinutes = $v; return $this; }
+    public function getMinFlightDurationMinutes(): int { return $this->minFlightDurationMinutes; }
+    public function setMinFlightDurationMinutes(int $v): static { $this->minFlightDurationMinutes = $v; return $this; }
     public function getNotamStrategy(): string { return $this->notamStrategy; }
     public function setNotamStrategy(string $v): static { $this->notamStrategy = $v; return $this; }
     public function getNotes(): ?string { return $this->notes; }

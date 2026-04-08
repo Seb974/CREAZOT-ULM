@@ -8,7 +8,6 @@ use App\Entity\Client;
 use App\Entity\FlightRule;
 use App\Entity\PreFlightAnalysis;
 use App\Entity\User;
-use App\Repository\IcaoReferenceRepository;
 use App\Repository\NotamCacheRepository;
 use App\Repository\SiteSettingsRepository;
 use App\Service\KimiAiService;
@@ -59,8 +58,9 @@ class ScoreOpsController extends AbstractController
         }
 
         $metar = $this->fetchMetar($icao);
-        $notams = $this->fetchNotams($icao);
-        $taf = $this->fetchTaf($icao);
+        $allNotams = $this->fetchNotams($icao);
+        $notams = $this->filterActiveNotams($allNotams);
+        $tafData = $this->fetchTafFull($icao);
 
         if (empty($metar)) {
             return new JsonResponse([
@@ -73,13 +73,14 @@ class ScoreOpsController extends AbstractController
             'lat' => $client->getLat(),
             'lng' => $client->getLng(),
             'timezone' => $client->getTimezone() ?? 'UTC',
+            'taf_fcsts' => $tafData['fcsts'] ?? null,
         ];
 
         if ($rule->getNotamStrategy() === 'ai' && !empty($notams)) {
             $cachedNotam = $this->notamCacheRepo->findFresh($icao);
             $cachedAi = $cachedNotam?->getAiAnalysis();
 
-            if ($cachedAi !== null) {
+            if ($cachedAi !== null && !isset($cachedAi['error'])) {
                 $this->logger->debug('ScoreOps NOTAM AI cache hit', ['icao' => $icao]);
                 $context['notam_analysis'] = $cachedAi;
             } else {
@@ -106,12 +107,46 @@ class ScoreOpsController extends AbstractController
             'checks' => $evaluation['checks'],
             'conditions' => $evaluation['conditions'],
             'metar_raw' => $metar['raw_text'] ?? null,
-            'taf_raw' => $taf['raw_text'] ?? null,
+            'taf_raw' => $tafData['raw_text'] ?? null,
             'notam_count' => count($notams),
+            'notam_total' => count($allNotams),
             'rule_name' => $rule->getName(),
             'icao' => $icao,
             'disclaimer' => "Cet outil fournit une aide à la décision basée sur les paramètres définis par l'exploitant. Le commandant de bord reste seul décisionnaire.",
         ]);
+    }
+
+    /**
+     * Filter NOTAMs to keep only those active right now.
+     */
+    private function filterActiveNotams(array $notams): array
+    {
+        $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+
+        return array_values(array_filter($notams, function (array $notam) use ($now) {
+            $start = $notam['startDate'] ?? null;
+            $end = $notam['endDate'] ?? null;
+
+            if ($start !== null) {
+                try {
+                    $startDt = new \DateTimeImmutable($start);
+                    if ($now < $startDt) {
+                        return false;
+                    }
+                } catch (\Throwable) {}
+            }
+
+            if ($end !== null) {
+                try {
+                    $endDt = new \DateTimeImmutable($end);
+                    if ($now > $endDt) {
+                        return false;
+                    }
+                } catch (\Throwable) {}
+            }
+
+            return true;
+        }));
     }
 
     #[Route('/admin/score-ops/{icao}/save', name: 'score_ops_save', methods: ['POST'])]
@@ -158,7 +193,9 @@ class ScoreOpsController extends AbstractController
                         'degrees' => $data[0]['wdir'] ?? 0,
                     ],
                     'visibility' => [
-                        'meters_float' => isset($data[0]['visib']) && is_numeric($data[0]['visib']) ? (float) $data[0]['visib'] * 1609.34 : 9999,
+                        'meters_float' => isset($data[0]['visib']) && is_numeric($data[0]['visib'])
+                            ? (float) $data[0]['visib'] * 1609.34
+                            : 9999,
                     ],
                     'clouds' => array_map(fn($c) => [
                         'code' => $c['cover'] ?? '',
@@ -174,14 +211,17 @@ class ScoreOpsController extends AbstractController
         return [];
     }
 
-    private function fetchTaf(string $icao): array
+    private function fetchTafFull(string $icao): array
     {
         try {
             $url = 'https://aviationweather.gov/api/data/taf?ids=' . $icao . '&format=json';
             $response = $this->httpClient->request('GET', $url, ['timeout' => 10]);
             $data = $response->toArray(false);
             if (!empty($data) && is_array($data) && isset($data[0])) {
-                return ['raw_text' => $data[0]['rawTAF'] ?? ''];
+                return [
+                    'raw_text' => $data[0]['rawTAF'] ?? '',
+                    'fcsts' => $data[0]['fcsts'] ?? [],
+                ];
             }
         } catch (\Throwable $e) {
             $this->logger->error('ScoreOps TAF fetch error', ['icao' => $icao, 'error' => $e->getMessage()]);
@@ -189,9 +229,6 @@ class ScoreOpsController extends AbstractController
         return [];
     }
 
-    /**
-     * BD cache first, then Notamify API if stale/absent.
-     */
     private function fetchNotams(string $icao): array
     {
         $cached = $this->notamCacheRepo->findFresh($icao);
@@ -206,7 +243,6 @@ class ScoreOpsController extends AbstractController
         if (!$apiKey) {
             $stale = $this->notamCacheRepo->find(strtoupper(trim($icao)));
             if ($stale) {
-                $this->logger->debug('ScoreOps NOTAM stale cache (no API key)', ['icao' => $icao]);
                 return $stale->getData();
             }
             return [];
@@ -251,7 +287,6 @@ class ScoreOpsController extends AbstractController
             }, $notams);
 
             $this->notamCacheRepo->upsert($icao, $normalized);
-            $this->logger->info('ScoreOps NOTAM cache updated from API', ['icao' => $icao, 'count' => count($normalized)]);
 
             return $normalized;
         } catch (\Throwable $e) {

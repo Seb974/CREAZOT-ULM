@@ -74,17 +74,22 @@ export const FlightRuleForm = ({ onSubmit }: { onSubmit?: any }) => (
         <Divider sx={{ width: '100%', my: 2 }} />
         <SectionTitle title="Jour / Nuit aéronautique" />
         <Alert severity="info" sx={{ mb: 2, width: '100%' }}>
-            Définit la fenêtre de vol autorisée autour de l'aube et du crépuscule civils.
-            La marge s'applique <strong>avant</strong> l'aube et <strong>après</strong> le crépuscule.
+            La fenêtre de vol autorisée va de l'<strong>aube civile</strong> au <strong>crépuscule civil</strong>.
+            Les marges <strong>réduisent</strong> cette fenêtre pour plus de sécurité (0 = pas de marge supplémentaire).
+            La durée minimale de vol empêche un GO si le temps restant est insuffisant pour compléter un vol.
         </Alert>
         <Box display="flex" gap={2} flexWrap="wrap" width="100%" mb={1}>
-            <Box flex={1} minWidth={200}>
-                <NumberInput source="dayMarginMinutes" label="Marge avant aube (min)" fullWidth min={0}
-                    helperText="Minutes avant le lever civil autorisées" defaultValue={30} />
+            <Box flex={1} minWidth={180}>
+                <NumberInput source="dayMarginMinutes" label="Marge après aube (min)" fullWidth min={0}
+                    helperText="Délai supplémentaire après l'aube civile avant d'autoriser le vol" defaultValue={0} />
             </Box>
-            <Box flex={1} minWidth={200}>
-                <NumberInput source="nightMarginMinutes" label="Marge après crépuscule (min)" fullWidth min={0}
-                    helperText="Minutes après le coucher civil autorisées" defaultValue={30} />
+            <Box flex={1} minWidth={180}>
+                <NumberInput source="nightMarginMinutes" label="Marge avant crépuscule (min)" fullWidth min={0}
+                    helperText="Anticipation avant le crépuscule civil pour atterrir" defaultValue={0} />
+            </Box>
+            <Box flex={1} minWidth={180}>
+                <NumberInput source="minFlightDurationMinutes" label="Durée min. de vol (min)" fullWidth min={15}
+                    helperText="Temps minimum nécessaire pour un vol (défaut 60 min)" defaultValue={60} />
             </Box>
         </Box>
 
@@ -97,7 +102,7 @@ export const FlightRuleForm = ({ onSubmit }: { onSubmit?: any }) => (
                 { id: 'warn', name: 'Avertissement — NOTAM actif = SELON EXPÉRIENCE' },
                 { id: 'ignore', name: 'Ignoré — les NOTAM ne sont pas pris en compte' },
             ]}
-            helperText="L'analyse IA distingue les NOTAM qui bloquent réellement le vol (fermeture piste, restriction espace) des informatifs (changement fréquence, etc.)."
+            helperText="L'analyse IA ne classe comme bloquant que les fermetures de piste/aérodrome et les interdictions d'espace aérien (PROHIBITED). Tout le reste est informatif."
         />
 
         <Divider sx={{ width: '100%', my: 2 }} />

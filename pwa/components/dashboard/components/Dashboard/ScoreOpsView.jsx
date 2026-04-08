@@ -16,9 +16,11 @@ import ArticleIcon from '@mui/icons-material/Article';
 import SaveIcon from '@mui/icons-material/Save';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import CloseIcon from '@mui/icons-material/Close';
 import BlockIcon from '@mui/icons-material/Block';
 import InfoIcon from '@mui/icons-material/Info';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import { useSession } from 'next-auth/react';
 import { useClient } from '../../../admin/ClientProvider';
 import { getScoreOps, saveScoreOps } from '../../../../app/lib/actions';
@@ -33,7 +35,7 @@ const STATUS_CONFIG = {
         gradient: 'linear-gradient(135deg, #43a047 0%, #2e7d32 100%)',
     },
     limite: {
-        label: 'SELON EXPÉRIENCE',
+        label: 'VIGILANCE',
         color: '#e65100',
         bgColor: '#fff3e0',
         borderColor: '#ff9800',
@@ -60,6 +62,7 @@ const CHECK_ICONS = {
     'NOTAM actifs': ArticleIcon,
     'NOTAM': ArticleIcon,
     'Jour aéronautique': WbSunnyIcon,
+    'Tendance TAF': TrendingDownIcon,
 };
 
 const StatusBadge = ({ status }) => {
@@ -86,6 +89,7 @@ const StatusBadge = ({ status }) => {
 const NotamDialog = ({ open, onClose, check }) => {
     const details = check?.notam_details;
     const blocking = details?.blocking || [];
+    const attention = details?.attention || [];
     const informational = details?.informational || [];
     const cfg = STATUS_CONFIG[check?.status] || STATUS_CONFIG.go;
 
@@ -142,6 +146,30 @@ const NotamDialog = ({ open, onClose, check }) => {
                     </Box>
                 )}
 
+                {attention.length > 0 && (
+                    <Box mb={2}>
+                        <Box display="flex" alignItems="center" gap={0.5} mb={1}>
+                            <ReportProblemIcon sx={{ color: '#e65100', fontSize: 18 }} />
+                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#e65100' }}>
+                                NOTAM vigilance ({attention.length})
+                            </Typography>
+                        </Box>
+                        {attention.map((a, i) => (
+                            <Box key={i} sx={{
+                                p: 1.5, mb: 1, borderRadius: 1,
+                                backgroundColor: '#fff3e0', border: '1px solid #ffe0b2',
+                            }}>
+                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#e65100', fontSize: '0.8rem' }}>
+                                    {a.id}
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: '#bf360c', fontSize: '0.75rem', mt: 0.5 }}>
+                                    {a.reason}
+                                </Typography>
+                            </Box>
+                        ))}
+                    </Box>
+                )}
+
                 {informational.length > 0 && (
                     <Box>
                         <Box display="flex" alignItems="center" gap={0.5} mb={1}>
@@ -166,7 +194,7 @@ const NotamDialog = ({ open, onClose, check }) => {
                     </Box>
                 )}
 
-                {blocking.length === 0 && informational.length === 0 && (
+                {blocking.length === 0 && attention.length === 0 && informational.length === 0 && (
                     <Typography variant="body2" color="text.secondary">
                         Aucun détail NOTAM disponible.
                     </Typography>
@@ -186,11 +214,18 @@ const CheckItem = ({ check, onNotamClick }) => {
     const hasDetails = isNotam && check.notam_details;
 
     const blockingCount = check.notam_details?.blocking?.length || 0;
-    const notamSecondary = hasDetails && blockingCount > 0
-        ? `${blockingCount} bloquant${blockingCount > 1 ? 's' : ''} — cliquez pour détails`
-        : hasDetails
-            ? 'Aucun bloquant — cliquez pour détails'
-            : check.detail;
+    const attentionCount = check.notam_details?.attention?.length || 0;
+
+    let notamSecondary = check.detail;
+    if (hasDetails) {
+        if (blockingCount > 0) {
+            notamSecondary = `${blockingCount} bloquant${blockingCount > 1 ? 's' : ''} — cliquez pour détails`;
+        } else if (attentionCount > 0) {
+            notamSecondary = `${attentionCount} vigilance — cliquez pour détails`;
+        } else {
+            notamSecondary = 'Aucun bloquant — cliquez pour détails';
+        }
+    }
 
     return (
         <ListItem
@@ -379,7 +414,7 @@ export const ScoreOpsView = ({ code }) => {
                             color={saved ? "success" : "primary"}
                             sx={{ fontSize: '0.75rem' }}
                         >
-                            {saved ? 'Enregistré' : 'Sauvegarder l\'analyse'}
+                            {saved ? 'Enregistré' : "Sauvegarder l'analyse"}
                         </Button>
                     </Box>
 

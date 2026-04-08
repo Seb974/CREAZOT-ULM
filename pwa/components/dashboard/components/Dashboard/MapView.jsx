@@ -56,6 +56,24 @@ const MapEffect = ({ isSmall, hidden, fullScreen }) => {
   return null;
 }
 
+const ResizeHandler = () => {
+  const map = useMap();
+
+  useEffect(() => {
+    const container = map.getContainer();
+    if (!container) return;
+
+    const observer = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [map]);
+
+  return null;
+};
+
 const MapView = ({ isSmall, switchToMetar, hidden, client, setShowFullMap, selectedBalise, setSelectedBalise, fullScreen = false }) => {
 
     const mapRef = useRef(null);
@@ -120,6 +138,7 @@ const MapView = ({ isSmall, switchToMetar, hidden, client, setShowFullMap, selec
                 <MapContainer center={ [client.lat, client.lng] } zoom={ client.zoom + (isSmall ? 0 : 1) } whenCreated={map => (mapRef.current = map)} style={{ height: '100%', width: '100%'}}>      {/*  minHeight: '420px'  */}
                     <ForceResize hidden={ hidden } fullScreen={ fullScreen }/>
                     <MapEffect isSmall={ isSmall } hidden={ hidden } fullScreen={ fullScreen } />
+                    <ResizeHandler />
                     { selectedBalise === 'none' ? <AutoCenter position={{lat: client.lat, lng: client.lng}} zoom={ client.zoom + (isSmall ? 0 : 1) }/> :
                       selectedBalise !== 'all' && positions.length === 1 && <AutoCenter position={ positions[0] } /> 
                     }

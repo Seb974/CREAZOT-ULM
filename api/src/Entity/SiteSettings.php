@@ -133,6 +133,15 @@ class SiteSettings
     #[Groups(groups: ['SiteSettings:write'])]
     private ?string $kimiApiKey = null;
 
+    #[ORM\Column(length: 500, nullable: true)]
+    #[Groups(groups: ["SiteSettings:write"])]
+    private ?string $vapiApiKey = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(groups: ["SiteSettings:write", "SiteSettings:read"])]
+    private ?string $vapiAssistantId = null;
+
+
     #[ORM\Column(nullable: true)]
     #[Groups(groups: ['SiteSettings:read'])]
     private ?\DateTimeImmutable $createdAt = null;
@@ -432,4 +441,38 @@ class SiteSettings
 
         return $this;
     }
+
+    public function getVapiApiKey(): ?string
+    {
+        return $this->vapiApiKey;
+    }
+
+    public function setVapiApiKey(?string $vapiApiKey): static
+    {
+        if ($vapiApiKey === self::API_KEY_MASK) {
+            return $this;
+        }
+        $this->vapiApiKey = $vapiApiKey;
+        return $this;
+    }
+
+    #[Groups(groups: ["SiteSettings:read"])]
+    public function getVapiApiKeyMask(): ?string
+    {
+        return ($this->vapiApiKey !== null && $this->vapiApiKey !== "")
+            ? self::API_KEY_MASK
+            : null;
+    }
+
+    public function getVapiAssistantId(): ?string
+    {
+        return $this->vapiAssistantId;
+    }
+
+    public function setVapiAssistantId(?string $vapiAssistantId): static
+    {
+        $this->vapiAssistantId = $vapiAssistantId;
+        return $this;
+    }
+
 }

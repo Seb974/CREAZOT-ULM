@@ -17,6 +17,9 @@ security:
         registration:
             pattern: ^/api/registration$
             security: false
+        vapi_webhook:
+            pattern: ^/webhook/vapi$
+            security: false
         main:
             lazy: true
             provider: app_user_provider

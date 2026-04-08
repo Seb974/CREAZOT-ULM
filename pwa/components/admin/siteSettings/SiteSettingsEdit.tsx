@@ -2,6 +2,9 @@ import { TextInput, SimpleForm, Edit, FileInput, FileField, useRecordContext } f
 import { Typography, Divider, Box, Accordion, AccordionSummary, AccordionDetails, Link, Button, Alert, CircularProgress } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloudIcon from "@mui/icons-material/Cloud";
+import PhoneIcon from "@mui/icons-material/Phone";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useSiteSettings } from "../SiteSettingsProvider";
 import { useSessionContext } from "../SessionContextProvider";
 import React, { useState } from "react";
@@ -115,6 +118,109 @@ const OdooTestButton = () => {
     );
 };
 
+const VapiTestButton = () => {
+    const { session } = useSessionContext();
+    const [loading, setLoading] = useState(false);
+    const [result, setResult] = useState<{ success: boolean; message: string; assistants_count?: number } | null>(null);
+
+    const handleTest = async () => {
+        setLoading(true);
+        setResult(null);
+        try {
+            const response = await fetch(`${API_DOMAIN}/admin/vapi/test-connection`, {
+                method: "GET",
+                headers: { "Authorization": `Bearer ${session?.accessToken}` },
+            });
+            const data = await response.json();
+            setResult(data);
+        } catch {
+            setResult({ success: false, message: "Erreur réseau lors du test." });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Box sx={{ mt: 1 }}>
+            <Button
+                variant="outlined"
+                color="primary"
+                startIcon={loading ? <CircularProgress size={18} /> : <PhoneIcon />}
+                onClick={handleTest}
+                disabled={loading}
+                sx={{ textTransform: "none" }}
+            >
+                {loading ? "Test en cours..." : "Tester la connexion Vapi"}
+            </Button>
+            {result && (
+                <Alert severity={result.success ? "success" : "error"} sx={{ mt: 1.5 }}>
+                    {result.message}
+                    {result.success && result.assistants_count !== undefined && (
+                        <> ({result.assistants_count} assistant(s) configuré(s))</>
+                    )}
+                </Alert>
+            )}
+        </Box>
+    );
+};
+
+const VapiSetupButton = () => {
+    const { session } = useSessionContext();
+    const [loading, setLoading] = useState(false);
+    const [result, setResult] = useState<{ success?: boolean; error?: string; message?: string; assistant_id?: string } | null>(null);
+    const record = useRecordContext();
+
+    const handleSetup = async () => {
+        setLoading(true);
+        setResult(null);
+        try {
+            const response = await fetch(`${API_DOMAIN}/admin/vapi/setup-assistant`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${session?.accessToken}`,
+                },
+                body: JSON.stringify({ client_id: 1 }),
+            });
+            const data = await response.json();
+            setResult(data);
+        } catch {
+            setResult({ error: "Erreur réseau." });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Box sx={{ mt: 2 }}>
+            <Button
+                variant="contained"
+                color="secondary"
+                startIcon={loading ? <CircularProgress size={18} /> : <SmartToyIcon />}
+                onClick={handleSetup}
+                disabled={loading}
+                sx={{ textTransform: "none" }}
+            >
+                {loading ? "Configuration..." : (record?.vapiAssistantId ? "Mettre à jour l'assistant Vapi" : "Créer l'assistant Vapi")}
+            </Button>
+            {result && (
+                <Alert
+                    severity={result.success ? "success" : "error"}
+                    icon={result.success ? <CheckCircleIcon /> : undefined}
+                    sx={{ mt: 1.5 }}
+                >
+                    {result.message || result.error}
+                    {result.assistant_id && (
+                        <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
+                            ID : {result.assistant_id}
+                        </Typography>
+                    )}
+                </Alert>
+            )}
+        </Box>
+    );
+};
+
 export const SiteSettingsEdit = () => {
     const { updateSiteSettings } = useSiteSettings();
     const { session } = useSessionContext();
@@ -164,9 +270,17 @@ export const SiteSettingsEdit = () => {
         if (result.odooApiKey === API_KEY_MASK || result.odooApiKey == null) {
             delete result.odooApiKey;
         }
+        if (result.kimiApiKey === API_KEY_MASK || result.kimiApiKey == null) {
+            delete result.kimiApiKey;
+        }
+        if (result.vapiApiKey === API_KEY_MASK || result.vapiApiKey == null) {
+            delete result.vapiApiKey;
+        }
 
         delete result.notamifyApiKeyMask;
         delete result.odooApiKeyMask;
+        delete result.kimiApiKeyMask;
+        delete result.vapiApiKeyMask;
 
         return result;
     };
@@ -294,21 +408,6 @@ export const SiteSettingsEdit = () => {
 
                     <Accordion sx={{ mt: 3, width: "100%" }} defaultExpanded={false}>
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography>IA - Kimi K2.5 (Moonshot AI)</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                Clé API pour les fonctionnalités IA : analyse NOTAMs, briefing météo, chatbot.{" "}
-                                <Link href="https://platform.kimi.ai/console/api-keys" target="_blank" rel="noopener">
-                                    Obtenir une clé sur platform.kimi.ai
-                                </Link>
-                            </Typography>
-                            <TextInput source="kimiApiKey" label="Clé API Kimi (Moonshot)" fullWidth />
-                        </AccordionDetails>
-                    </Accordion>
-
-                    <Accordion sx={{ mt: 3, width: "100%" }} defaultExpanded={false}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                             <Typography>Intégration Odoo</Typography>
                         </AccordionSummary>
                         <AccordionDetails>
@@ -323,6 +422,42 @@ export const SiteSettingsEdit = () => {
                             </Box>
                             <ApiKeyInput source="odooApiKey" label="Clé API Odoo" fullWidth helperText="Clé API ou mot de passe" />
                             <OdooTestButton />
+                        </AccordionDetails>
+                    </Accordion>
+
+                    <Accordion sx={{ mt: 3, width: "100%" }} defaultExpanded={false}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <SmartToyIcon sx={{ mr: 1 }} />
+                            <Typography>IA — Kimi K2.5 (Moonshot AI)</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                Clé API pour les fonctions IA : briefing météo, résumé NOTAM, chatbot embarqué.{" "}
+                                <Link href="https://platform.moonshot.cn" target="_blank" rel="noopener">
+                                    Gérer votre compte Moonshot
+                                </Link>
+                            </Typography>
+                            <ApiKeyInput source="kimiApiKey" label="Clé API Kimi K2.5" fullWidth />
+                        </AccordionDetails>
+                    </Accordion>
+
+                    <Accordion sx={{ mt: 3, width: "100%" }} defaultExpanded={false}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <PhoneIcon sx={{ mr: 1 }} />
+                            <Typography>Assistant vocal — Vapi.ai</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                Assistant vocal IA pour la gestion des réservations par téléphone.{" "}
+                                <Link href="https://dashboard.vapi.ai" target="_blank" rel="noopener">
+                                    Dashboard Vapi.ai
+                                </Link>
+                            </Typography>
+                            <ApiKeyInput source="vapiApiKey" label="Clé API privée Vapi" fullWidth />
+                            <TextInput source="vapiAssistantId" label="ID de l'assistant Vapi" fullWidth disabled
+                                helperText="Rempli automatiquement lors de la configuration de l'assistant." />
+                            <VapiTestButton />
+                            <VapiSetupButton />
                         </AccordionDetails>
                     </Accordion>
                 </SimpleForm>
