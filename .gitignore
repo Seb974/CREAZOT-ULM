@@ -14,3 +14,8 @@
 /app/
 /components/
 /types/
+###> Fichiers secrets ###
+api/.env
+**/.env.local
+**/.env.*.local
+###< Fichiers secrets ###
