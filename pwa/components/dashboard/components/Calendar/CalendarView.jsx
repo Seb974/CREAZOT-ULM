@@ -73,7 +73,7 @@ export const CalendarView = ({ events, setEvents, setSelection, setSlot, setVisi
     fetchAndBuildEvents(() => isStale);
   
     return () => isStale = true;
-  }, [dates, view]);
+  }, [dates, view, client?.id]);
 
   const fetchAndBuildEvents = async (isStaleFn = () => false) => {
     if (!dates) {

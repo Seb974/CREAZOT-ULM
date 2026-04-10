@@ -44,6 +44,7 @@ import FlagIcon from "@mui/icons-material/Flag";
 import PercentIcon from "@mui/icons-material/Percent";
 import GavelIcon from "@mui/icons-material/Gavel";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 const CustomMenu = () => {
 
@@ -53,6 +54,7 @@ const CustomMenu = () => {
   const [superAdminOpen, setSuperAdminOpen] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [tarificationOpen, setTarificationOpen] = useState(false);
+  const [parametresOpen, setParametresOpen] = useState(false);
   const [openSidebar] = useSidebarState();
 
   const handleSuperAdminClick = e => {
@@ -68,6 +70,11 @@ const CustomMenu = () => {
   const handleTarificationClick = e => {
     e.preventDefault();
     setTarificationOpen(!tarificationOpen);
+  };
+
+  const handleParametresClick = e => {
+    e.preventDefault();
+    setParametresOpen(!parametresOpen);
   };
 
   return (
@@ -232,7 +239,7 @@ const CustomMenu = () => {
                 sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
               />
             }
-            { isAdmin &&
+            { isAdmin && isDefined(client) && client.hasCams &&
               <Menu.Item
                 to="/cameras"
                 primaryText="Caméras"
@@ -240,7 +247,7 @@ const CustomMenu = () => {
                 sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
               />
             }
-            { isAdmin &&
+            { isAdmin && isDefined(client) && client.hasAI &&
               <Menu.Item
                 to="/flight_rules"
                 primaryText="Règles de vol"
@@ -256,31 +263,6 @@ const CustomMenu = () => {
                 leftIcon={<StoreIcon />}
                 sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
               />
-            }
-            {/* @ts-ignore */}
-            { isSuperAdmin && (isDefined(client) && isDefined(client.hasOriginContact) && client.hasOriginContact) && 
-              <Menu.Item
-                    to="/contacts"
-                    primaryText="Contacts"
-                    leftIcon={<PermPhoneMsgIcon />}
-                    sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
-                  />
-            }
-            { isSuperAdmin &&
-            <Menu.Item
-                  to="/natures"
-                  primaryText="Natures"
-                  leftIcon={<CommentIcon />}
-                  sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
-                />
-            }
-            { isSuperAdmin &&
-            <Menu.Item
-                  to="/qualifications"
-                  primaryText="Qualifications"
-                  leftIcon={<AdminPanelSettingsIcon />}
-                  sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
-                />
             }
             { isSuperAdmin &&
             <Menu.Item
@@ -306,37 +288,66 @@ const CustomMenu = () => {
                 sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
               />
             }
+            {/* @ts-ignore */}
             { isSuperAdmin &&
-            <Menu.Item
-                  to="/country_codes"
-                  primaryText="Codes pays"
-                  leftIcon={<FlagIcon />}
-                  sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
-                />
-            }
-            { isSuperAdmin &&
-            <Menu.Item
-                  to="/tax_rates"
-                  primaryText="Taux de TVA"
-                  leftIcon={<PercentIcon />}
-                  sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
-                />
-            }
-            { isSuperAdmin &&
-            <Menu.Item
-                  to="/icao_references"
-                  primaryText="Codes ICAO"
-                  leftIcon={<RadarIcon />}
-                  sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
-                />
-            }
-            { isSuperAdmin &&
-            <Menu.Item
-                  to="/site-settings"
-                  primaryText="Paramétrage SaaS"
-                  leftIcon={<SettingsApplicationsIcon />}
-                  sx={{ pl: 3, backgroundColor: '#EFF2F5' }}
-                />
+              <>
+                <MenuItemLink
+                    to="#"
+                    onClick={ handleParametresClick }
+                    primaryText="Paramètres"
+                    leftIcon={<SettingsIcon className="h-[24px] w-[24px]"/>}
+                    dense={ !openSidebar }
+                    sx={{ cursor: 'pointer', pl: 3, backgroundColor: parametresOpen ? '#E4E7EB' : '#EFF2F5' }}
+                >
+                </MenuItemLink>
+                <Collapse in={ parametresOpen } timeout="auto" unmountOnExit>
+                    <Menu.Item
+                      to="/natures"
+                      primaryText="Natures"
+                      leftIcon={<CommentIcon />}
+                      sx={{ pl: 2, backgroundColor: '#E4E7EB' }}
+                    />
+                    {/* @ts-ignore */}
+                    { isDefined(client) && isDefined(client.hasOriginContact) && client.hasOriginContact &&
+                      <Menu.Item
+                        to="/contacts"
+                        primaryText="Contacts"
+                        leftIcon={<PermPhoneMsgIcon />}
+                        sx={{ pl: 2, backgroundColor: '#E4E7EB' }}
+                      />
+                    }
+                    <Menu.Item
+                      to="/qualifications"
+                      primaryText="Qualifications"
+                      leftIcon={<AdminPanelSettingsIcon />}
+                      sx={{ pl: 2, backgroundColor: '#E4E7EB' }}
+                    />
+                    <Menu.Item
+                      to="/country_codes"
+                      primaryText="Codes pays"
+                      leftIcon={<FlagIcon />}
+                      sx={{ pl: 2, backgroundColor: '#E4E7EB' }}
+                    />
+                    <Menu.Item
+                      to="/tax_rates"
+                      primaryText="Taux de TVA"
+                      leftIcon={<PercentIcon />}
+                      sx={{ pl: 2, backgroundColor: '#E4E7EB' }}
+                    />
+                    <Menu.Item
+                      to="/icao_references"
+                      primaryText="Codes ICAO"
+                      leftIcon={<RadarIcon />}
+                      sx={{ pl: 2, backgroundColor: '#E4E7EB' }}
+                    />
+                    <Menu.Item
+                      to="/site-settings"
+                      primaryText="Paramétrage SaaS"
+                      leftIcon={<SettingsApplicationsIcon />}
+                      sx={{ pl: 2, backgroundColor: '#E4E7EB' }}
+                    />
+                </Collapse>
+              </>
             }
         </Collapse>
       }
