@@ -373,6 +373,10 @@ class Client
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?bool $hasVoiceAssistant = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(groups: ['Client:write', 'Client:read'])]
+    private ?bool $hasCams = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(groups: ['Client:write', 'Client:read'])]
     private ?string $vapiAssistantId = null;
@@ -1409,6 +1413,17 @@ class Client
     public function setHasVoiceAssistant(?bool $v): static
     {
         $this->hasVoiceAssistant = $v;
+        return $this;
+    }
+
+    public function isHasCams(): ?bool
+    {
+        return $this->hasCams;
+    }
+
+    public function setHasCams(?bool $v): static
+    {
+        $this->hasCams = $v;
         return $this;
     }
 

@@ -47,9 +47,11 @@ use App\Entity\TenantAwareTrait;
         ),
         new Put(
             uriTemplate: '/aeronefs/{id}{._format}',
+            security: 'is_granted("OIDC_ADMIN")'
         ),
         new Delete(
             uriTemplate: '/aeronefs/{id}{._format}',
+            security: 'is_granted("OIDC_ADMIN")'
         ),
     ],
     normalizationContext: [

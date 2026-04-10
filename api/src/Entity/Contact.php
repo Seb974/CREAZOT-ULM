@@ -26,16 +26,19 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
             paginationClientItemsPerPage: true
         ),
         new Post(
-            itemUriTemplate: '/contacts/{id}{._format}'
+            itemUriTemplate: '/contacts/{id}{._format}',
+            security: 'is_granted("OIDC_ADMIN")'
         ),
         new Get(
             uriTemplate: '/contacts/{id}{._format}'
         ),
         new Put(
             uriTemplate: '/contacts/{id}{._format}',
+            security: 'is_granted("OIDC_ADMIN")'
         ),
         new Delete(
             uriTemplate: '/contacts/{id}{._format}',
+            security: 'is_granted("OIDC_ADMIN")'
         ),
     ],
     normalizationContext: [

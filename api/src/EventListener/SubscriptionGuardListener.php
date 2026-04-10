@@ -27,6 +27,7 @@ class SubscriptionGuardListener
         '/module-packs',
         '/pricing-tiers',
         '/module-pack-prices',
+        '/user_client_roles',
     ];
 
     public function __construct(

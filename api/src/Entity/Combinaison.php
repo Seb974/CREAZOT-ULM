@@ -30,16 +30,19 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
             ],
         ),
         new Post(
-            itemUriTemplate: '/combinaisons/{id}{._format}'
+            itemUriTemplate: '/combinaisons/{id}{._format}',
+            security: 'is_granted("OIDC_ADMIN")'
         ),
         new Get(
             uriTemplate: '/combinaisons/{id}{._format}'
         ),
         new Put(
             uriTemplate: '/combinaisons/{id}{._format}',
+            security: 'is_granted("OIDC_ADMIN")'
         ),
         new Delete(
             uriTemplate: '/combinaisons/{id}{._format}',
+            security: 'is_granted("OIDC_ADMIN")'
         ),
     ],
     normalizationContext: [

@@ -23,10 +23,10 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 #[ApiResource(
     operations: [
         new GetCollection(),
-        new Post(),
+        new Post(security: 'is_granted("OIDC_ADMIN")'),
         new Get(),
-        new Put(),
-        new Delete(),
+        new Put(security: 'is_granted("OIDC_ADMIN")'),
+        new Delete(security: 'is_granted("OIDC_ADMIN")'),
     ],
     normalizationContext: [
         AbstractNormalizer::GROUPS => ['Airport:read'],
